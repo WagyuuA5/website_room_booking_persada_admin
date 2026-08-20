@@ -1,0 +1,167 @@
+@page "/rooms"
+@layout booking_room_admin.Components.Layout.BookingManagementLayout
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
+
+<div class="room-management">
+    <div class="rm-breadcrumb">ADMINISTRASI</div>
+    <div class="rm-header">
+        <div>
+            <h1 class="rm-title">Manajemen Ruangan</h1>
+            <p class="rm-subtitle">Kelola data ruangan, fasilitas, dan kapasitas.</p>
+        </div>
+        <button class="btn-primary-pill btn-yellow" @onclick="OpenAddRoom">
+            <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
+            <span>Tambah Ruangan</span>
+        </button>
+    </div>
+
+    <div class="rm-toolbar">
+        <div class="rm-search">
+            <img src="icon/search.svg" alt="Cari" class="rm-search-icon" />
+            <input type="text" placeholder="Cari nama ruangan..." @bind="searchQuery" @bind:event="oninput" />
+        </div>
+        <select class="rm-select" @bind="selectedFloor">
+            <option value="">Semua Lantai</option>
+            @foreach (var floor in floors)
+            {
+                <option value="@floor">@floor</option>
+            }
+        </select>
+        <select class="rm-select" @bind="selectedType">
+            <option value="">Semua Tipe</option>
+            @foreach (var type in roomTypes)
+            {
+                <option value="@type">@type</option>
+            }
+        </select>
+    </div>
+
+    <div class="rm-grid">
+        @foreach (var room in filteredRooms)
+        {
+            <div class="rm-card" @onclick="() => OpenDetail(room)">
+                <div class="rm-card-header">
+                    <div class="rm-card-icon">
+                        <img src="icon/icon_1_admin.svg" alt="Ruangan" />
+                    </div>
+                    <span class="rm-card-status @(room.Status == "active" ? "status-active" : "status-maintenance")">
+                        @(room.Status == "active" ? "Aktif" : "Perawatan")
+                    </span>
+                </div>
+                <h3 class="rm-card-name">@room.Name</h3>
+                <p class="rm-card-desc">@room.Description</p>
+                <div class="rm-card-meta">
+                    <span class="rm-card-meta-item">
+                        <img src="icon/people.svg" alt="Kapasitas" class="rm-meta-icon" />
+                        @room.Capacity Orang
+                    </span>
+                    <span class="rm-card-meta-item">
+                        <img src="icon/icon_6_admin.svg" alt="Lantai" class="rm-meta-icon" />
+                        @room.Floor
+                    </span>
+                </div>
+                <div class="rm-card-footer">
+                    <div class="rm-card-tags">
+                        @foreach (var tag in room.Facilities.Take(3))
+                        {
+                            <span class="rm-tag">@tag</span>
+                        }
+                    </div>
+                    <span class="rm-card-bookings">@room.TotalBookings booking</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <AddRoomPopup IsOpen="@showAddRoom" IsOpenChanged="@((bool v) => showAddRoom = v)" OnRoomCreated="OnRoomCreated" />
+    <EditRoomPopup IsOpen="@showEditRoom" IsOpenChanged="@((bool v) => showEditRoom = v)" Room="@editingRoom" OnRoomUpdated="OnRoomUpdated" />
+    <RoomDetailPopup IsOpen="@showDetail" IsOpenChanged="@((bool v) => showDetail = v)" Room="@selectedRoom" OnEdit="OpenEditRoom" />
+</div>
+
+@code {
+    private bool showAddRoom = false;
+    private bool showEditRoom = false;
+    private bool showDetail = false;
+
+    private string searchQuery = "";
+    private string selectedFloor = "";
+    private string selectedType = "";
+
+    private List<string> floors = new() { "Lantai 1", "Lantai 2", "Lantai 3", "Lantai 4", "Lantai 14" };
+    private List<string> roomTypes = new() { "Rapat", "Diskusi", "Presentasi", "Eksekutif" };
+
+    private List<Room> allRooms = new();
+    private Room? selectedRoom = null;
+    private Room? editingRoom = null;
+
+    private List<Room> filteredRooms => FilterRooms();
+
+    protected override void OnInitialized()
+    {
+        LayoutTitleService.Title = "Manajemen Ruangan";
+        LayoutTitleService.Subtitle = "Kelola data ruangan, fasilitas, dan kapasitas.";
+        allRooms = new List<Room>
+        {
+            new Room { Id = 1, Name = "Ruang Dirantara", Description = "Ruang rapat utama dengan projector 4K dan sistem video konferensi.", Capacity = 20, Floor = "Lantai 3", Type = "Rapat", Status = "active", TotalBookings = 124, Facilities = new List<string>{ "WiFi", "Proyektor", "Video Konferensi", "AC" } },
+            new Room { Id = 2, Name = "Ruang Rapat A", Description = "Ruang diskusi tim dengan whiteboard dan display HD.", Capacity = 10, Floor = "Lantai 2", Type = "Diskusi", Status = "active", TotalBookings = 89, Facilities = new List<string>{ "WiFi", "Whiteboard", "Display" } },
+            new Room { Id = 3, Name = "Ruang Boardroom", Description = "Ruang eksekutif privat untuk pertemuan dewan dan klien penting.", Capacity = 12, Floor = "Lantai 14", Type = "Eksekutif", Status = "maintenance", TotalBookings = 45, Facilities = new List<string>{ "WiFi", "Video Konferensi", "Katering", "AC" } },
+            new Room { Id = 4, Name = "Ruang Training", Description = "Ruang pelatihan dengan setup kursi theater dan sound system.", Capacity = 40, Floor = "Lantai 1", Type = "Presentasi", Status = "active", TotalBookings = 67, Facilities = new List<string>{ "WiFi", "Proyektor", "Sound System", "AC" } },
+            new Room { Id = 5, Name = "Ruang Diskusi C", Description = "Ruang brainstorming kecil dengan sofa dan lighting fleksibel.", Capacity = 6, Floor = "Lantai 2", Type = "Diskusi", Status = "active", TotalBookings = 34, Facilities = new List<string>{ "WiFi", "Whiteboard" } },
+            new Room { Id = 6, Name = "Ruang Rapat Direksi", Description = "Ruang rapat direksi dengan meja konferensi premium dan sistem dokumentasi.", Capacity = 16, Floor = "Lantai 14", Type = "Eksekutif", Status = "active", TotalBookings = 28, Facilities = new List<string>{ "WiFi", "Video Konferensi", "Katering", "Proyektor", "AC" } }
+        };
+    }
+
+    private List<Room> FilterRooms()
+    {
+        var query = allRooms.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var q = searchQuery.ToLowerInvariant();
+            query = query.Where(r => r.Name.ToLowerInvariant().Contains(q) || r.Description.ToLowerInvariant().Contains(q));
+        }
+
+        if (!string.IsNullOrWhiteSpace(selectedFloor))
+        {
+            query = query.Where(r => r.Floor == selectedFloor);
+        }
+
+        if (!string.IsNullOrWhiteSpace(selectedType))
+        {
+            query = query.Where(r => r.Type == selectedType);
+        }
+
+        return query.ToList();
+    }
+
+    private void OpenAddRoom()
+    {
+        showAddRoom = true;
+    }
+
+    private void OpenDetail(Room room)
+    {
+        selectedRoom = room;
+        showDetail = true;
+    }
+
+    private void OpenEditRoom(Room room)
+    {
+        editingRoom = room;
+        showEditRoom = true;
+    }
+
+    private void OnRoomCreated(Room room)
+    {
+        allRooms.Add(room);
+        showAddRoom = false;
+    }
+
+    private void OnRoomUpdated(Room room)
+    {
+        showEditRoom = false;
+        editingRoom = null;
+    }
+}

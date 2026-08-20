@@ -1,4 +1,4 @@
-@page "/admin"
+@page "/dashboard"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using ApexCharts
 @inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
@@ -8,14 +8,14 @@
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_1_admin.svg" alt="Ruangan" /></div>
             <div class="stat-info">
-                <span class="stat-label">Total Rooms<br>Active</span>
+                <span class="stat-label">Total Ruangan<br>Aktif</span>
                 <span class="stat-value">32</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_2_admin.svg" alt="Pengguna" /></div>
             <div class="stat-info">
-                <span class="stat-label">Total Registered<br>Users</span>
+                <span class="stat-label">Total Pengguna<br>Terdaftar</span>
                 <span class="stat-value">124</span>
                 <span class="stat-trend up">+8%</span>
             </div>
@@ -23,16 +23,16 @@
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_4_admin.svg" alt="Booking" /></div>
             <div class="stat-info">
-                <span class="stat-label">Total<br>Booking Users</span>
-                <span class="stat-value">86</span>
+                <span class="stat-label">Total Pengguna<br>Booking</span>
+                <span class="stat-value">72</span>
                 <span class="stat-trend up">+4%</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_3_admin.svg" alt="Utilisasi" /></div>
             <div class="stat-info">
-                <span class="stat-label">Utilization<br>Average</span>
-                <span class="stat-value">72%</span>
+                <span class="stat-label">Rata-rata<br>Utilisasi</span>
+                <span class="stat-value">86%</span>
                 <span class="stat-trend up">+6%</span>
             </div>
         </div>
@@ -42,40 +42,40 @@
         <div class="request-card">
             <div class="request-icon"><img src="icon/coffee.svg" alt="Fasilitas" /></div>
             <div class="request-info">
-                <span class="request-label">Facility Requests</span>
+                <span class="request-label">Permintaan Fasilitas</span>
                 <div class="request-meta">
                     <span class="request-number">8</span>
-                    <span class="request-status">PENDING</span>
+                    <span class="request-status">MENUNGGU</span>
                 </div>
             </div>
         </div>
         <div class="request-card">
             <div class="request-icon"><img src="icon/icon_9_admin.svg" alt="Akun" /></div>
             <div class="request-info">
-                <span class="request-label">Account Deletion</span>
+                <span class="request-label">Penghapusan Akun</span>
                 <div class="request-meta">
                     <span class="request-number">4</span>
-                    <span class="request-status">PENDING</span>
+                    <span class="request-status">MENUNGGU</span>
                 </div>
             </div>
         </div>
         <div class="request-card">
             <div class="request-icon"><img src="icon/icon_10_admin.svg" alt="IT" /></div>
             <div class="request-info">
-                <span class="request-label">IT Support Tickets</span>
+                <span class="request-label">Tiket Dukungan IT</span>
                 <div class="request-meta">
                     <span class="request-number">11</span>
-                    <span class="request-status">PENDING</span>
+                    <span class="request-status">MENUNGGU</span>
                 </div>
             </div>
         </div>
         <div class="request-card">
             <div class="request-icon"><img src="icon/icon_11_admin.svg" alt="Bug" /></div>
             <div class="request-info">
-                <span class="request-label">Bug Reports</span>
+                <span class="request-label">Laporan Bug</span>
                 <div class="request-meta">
                     <span class="request-number">6</span>
-                    <span class="request-status">PENDING</span>
+                    <span class="request-status">MENUNGGU</span>
                 </div>
             </div>
         </div>
@@ -84,7 +84,7 @@
     <div class="charts-row">
         <div class="chart-card wide">
             <div class="chart-header">
-                <h3>Booking Trends</h3>
+                <h3>Tren Booking</h3>
             </div>
             <ApexChart TItem="TrendPoint" Options="_trendOptions" Height="260">
                 <ApexPointSeries TItem="TrendPoint"
@@ -97,7 +97,7 @@
         </div>
         <div class="chart-card">
             <div class="chart-header">
-                <h3>Most Frequently Used Room</h3>
+                <h3>Ruangan Paling Sering Digunakan</h3>
             </div>
             <ApexChart TItem="RoomUsagePoint" Options="_donutOptions" Height="260">
                 <ApexPointSeries TItem="RoomUsagePoint"
@@ -113,48 +113,48 @@
     <div class="tables-row">
         <div class="table-card">
             <div class="table-header">
-                <h3>Recent Requests</h3>
-                <a href="#" class="table-link">LIHAT SEMUA REQUESTS HUB &gt;</a>
+                <h3>Permintaan Terbaru</h3>
+                <a href="#" class="table-link">LIHAT SEMUA PERMINTAAN HUB &gt;</a>
             </div>
             <div class="table-wrapper">
                 <table class="modern-table">
                     <thead>
                         <tr>
                             <th>JENIS PERMINTAAN</th>
-                            <th>REQUESTER</th>
+                            <th>PEMOHON</th>
                             <th>RINGKASAN</th>
                             <th>STATUS</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><span class="td-primary">Facility</span></td>
+                            <td><span class="td-primary">Permintaan Fasilitas</span></td>
                             <td><span class="td-primary">Rina Kartika</span></td>
                             <td>Peminjaman ruang meeting lt 3</td>
                             <td><span class="badge badge-pending">Baru</span></td>
                         </tr>
                         <tr>
-                            <td><span class="td-primary">Bug</span></td>
+                            <td><span class="td-primary">Laporan Bug</span></td>
                             <td><span class="td-primary">Dimas Prasetyo</span></td>
                             <td>Error 500 saat submit form booking</td>
                             <td><span class="badge badge-progress">Dikerjakan</span></td>
                         </tr>
                         <tr>
-                            <td><span class="td-primary">Account</span></td>
+                            <td><span class="td-primary">Penghapusan Akun</span></td>
                             <td><span class="td-primary">Sari Wulandari</span></td>
                             <td>Penghapusan akun karyawan resign</td>
                             <td><span class="badge badge-progress">Dikerjakan</span></td>
                         </tr>
                         <tr>
-                            <td><span class="td-primary">IT</span></td>
+                            <td><span class="td-primary">Tiket Dukungan IT</span></td>
                             <td><span class="td-primary">Budi Santoso</span></td>
                             <td>Reset password email korporat</td>
                             <td><span class="badge badge-confirmed">Selesai</span></td>
                         </tr>
                         <tr>
-                            <td><span class="td-primary">Facility</span></td>
+                            <td><span class="td-primary">Permintaan Fasilitas</span></td>
                             <td><span class="td-primary">Andi Saputra</span></td>
-                            <td>Request catering rapat direksi</td>
+                            <td>Permintaan katering rapat direksi</td>
                             <td><span class="badge badge-pending">Baru</span></td>
                         </tr>
                     </tbody>
@@ -163,14 +163,14 @@
         </div>
         <div class="table-card">
             <div class="table-header">
-                <h3>History Bookings</h3>
-                <a href="#" class="table-link">ALL</a>
+                <h3>Riwayat Booking</h3>
+                <a href="#" class="table-link">SEMUA</a>
             </div>
             <div class="table-wrapper">
                 <table class="modern-table">
                     <thead>
                         <tr>
-                            <th>USER</th>
+                            <th>PENGGUNA</th>
                             <th>RUANGAN</th>
                             <th>JADWAL</th>
                             <th>STATUS</th>
@@ -217,7 +217,7 @@
     protected override void OnInitialized()
     {
         LayoutTitleService.Title = "Dashboard Admin";
-        LayoutTitleService.Subtitle = "Performance summary of the company wide room booking system.";
+        LayoutTitleService.Subtitle = "Ringkasan performa sistem pemesanan ruangan perusahaan.";
 
         _trendData = new List<TrendPoint>
         {
@@ -255,9 +255,9 @@
 
         _donutData = new List<RoomUsagePoint>
         {
-            new("Room (A)", 35),
-            new("Room (B)", 25),
-            new("Room (C)", 20)
+            new("Ruangan A", 35),
+            new("Ruangan B", 25),
+            new("Ruangan C", 20)
         };
 
         _donutOptions = new ApexChartOptions<RoomUsagePoint>

@@ -1,0 +1,125 @@
+@using booking_room_admin.Components.Models
+
+<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
+    <div class="popup-card maintenance-card" @onclick:stopPropagation="true">
+        <div class="m-header">
+            <div>
+                <h2 class="m-title">Jadwalkan Perawatan</h2>
+                <p class="m-subtitle">@Room?.Name</p>
+            </div>
+            <button class="popup-close" @onclick="Close">&times;</button>
+        </div>
+
+        @if (step == 1)
+        {
+            <div class="m-body">
+                <div class="m-section-title">Kategori Perawatan</div>
+                <div class="m-category-grid">
+                    @foreach (var cat in categories)
+                    {
+                        <button class="m-category-btn @(selectedCategory == cat ? "selected" : "")" @onclick="() => selectedCategory = cat">
+                            <span class="m-category-emoji">@GetCategoryEmoji(cat)</span>
+                            <span>@cat</span>
+                        </button>
+                    }
+                </div>
+            </div>
+            <div class="m-footer">
+                <button class="btn-outline-pill" @onclick="Close">Batal</button>
+                <button class="btn-primary-pill btn-yellow" disabled="@string.IsNullOrEmpty(selectedCategory)" @onclick="NextStep">Lanjut</button>
+            </div>
+        }
+        else if (step == 2)
+        {
+            <div class="m-body">
+                <div class="m-section-title">Prioritas & Durasi</div>
+                <div class="m-field">
+                    <label class="m-label">Prioritas</label>
+                    <div class="m-priority-group">
+                        @foreach (var prio in priorities)
+                        {
+                            <button class="m-priority-btn @(selectedPriority == prio ? "selected" : "")" @onclick="() => selectedPriority = prio">@prio</button>
+                        }
+                    </div>
+                </div>
+                <div class="m-field">
+                    <label class="m-label">Durasi Perawatan</label>
+                    <select class="m-input" @bind="selectedDuration">
+                        <option value="20">20 Menit</option>
+                        <option value="30">30 Menit</option>
+                        <option value="60">1 Jam</option>
+                    </select>
+                </div>
+            </div>
+            <div class="m-footer">
+                <button class="btn-outline-pill" @onclick="PrevStep">Kembali</button>
+                <button class="btn-primary-pill btn-yellow" @onclick="ConfirmMaintenance">Konfirmasi</button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<Room> OnMaintenanceScheduled { get; set; }
+    [Parameter] public Room? Room { get; set; }
+
+    private int step = 1;
+    private string selectedCategory = string.Empty;
+    private string selectedPriority = "Sedang";
+    private string selectedDuration = "30";
+
+    private List<string> categories = new() { "Listrik", "AC", "Proyektor", "Plumbing", "Internet", "Lainnya" };
+    private List<string> priorities = new() { "Rendah", "Sedang", "Tinggi" };
+
+    private void NextStep()
+    {
+        step = 2;
+    }
+
+    private void PrevStep()
+    {
+        step = 1;
+    }
+
+    private void ConfirmMaintenance()
+    {
+        if (Room == null) return;
+
+        Room.Status = "maintenance";
+        Room.MaintenanceEnd = DateTime.UtcNow.AddMinutes(int.Parse(selectedDuration));
+
+        OnMaintenanceScheduled.InvokeAsync(Room);
+        Close();
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        Reset();
+    }
+
+    private void Reset()
+    {
+        step = 1;
+        selectedCategory = string.Empty;
+        selectedPriority = "Sedang";
+        selectedDuration = "30";
+    }
+
+    private string GetCategoryEmoji(string category)
+    {
+        return category.ToLowerInvariant() switch
+        {
+            "listrik" => "⚡",
+            "ac" => "❄️",
+            "proyektor" => "📽️",
+            "plumbing" => "🚿",
+            "internet" => "📶",
+            "lainnya" => "🔧",
+            _ => "🔧"
+        };
+    }
+}
