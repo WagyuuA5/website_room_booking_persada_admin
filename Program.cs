@@ -1,5 +1,6 @@
 using ApexCharts;
 using booking_room_admin.Components;
+using booking_room_admin.Components.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddApexCharts();
+builder.Services.AddScoped<LayoutTitleService>();
 
 var app = builder.Build();
 

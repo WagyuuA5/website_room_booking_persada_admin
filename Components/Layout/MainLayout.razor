@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
+@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 @using booking_room_admin.Components.Shared
 
 <div class="admin-layout">
@@ -10,16 +11,22 @@
     <div class="admin-main">
         <header class="admin-topbar">
             <div class="topbar-left">
-                <h1 class="page-title">Dashboard Admin</h1>
-                <p class="page-subtitle">Ringkasan performa sistem pemesanan ruangan perusahaan.</p>
+                @if (!string.IsNullOrWhiteSpace(LayoutTitleService.Title))
+                {
+                    <h1 class="page-title">@LayoutTitleService.Title</h1>
+                    @if (!string.IsNullOrWhiteSpace(LayoutTitleService.Subtitle))
+                    {
+                        <p class="page-subtitle">@LayoutTitleService.Subtitle</p>
+                    }
+                }
             </div>
             <div class="topbar-right">
                 <div class="date-filter" @onclick="ToggleDatePicker">
-                    <img src="icon/icon_6_admin.png" alt="Kalender" class="icon-sm" />
+                    <img src="icon/icon_6_admin.svg" alt="Kalender" class="icon-sm" />
                     <span>@dateRangeLabel</span>
                 </div>
                 <div class="topbar-icon-btn notification-btn" @onclick="ToggleNotification">
-                    <img src="icon/icon_7_admin.png" alt="Notifikasi" class="icon-md" />
+                    <img src="icon/icon_7_admin.svg" alt="Notifikasi" class="icon-md" />
                     <span class="notification-badge">@unreadCount</span>
                 </div>
                 <div class="admin-avatar">
@@ -48,6 +55,12 @@
     private bool showNotification = false;
     private string dateRangeLabel = "20 Ags 2026 — 20 Sep 2026";
     private int unreadCount = 3;
+
+    protected override void OnInitialized()
+    {
+        LayoutTitleService.Title = "Dashboard Admin";
+        LayoutTitleService.Subtitle = "Ringkasan performa sistem pemesanan ruangan perusahaan.";
+    }
 
     private void ToggleDatePicker()
     {

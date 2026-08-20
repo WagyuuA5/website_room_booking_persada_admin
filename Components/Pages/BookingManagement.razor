@@ -2,6 +2,7 @@
 @layout booking_room_admin.Components.Layout.BookingManagementLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
+@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
 <div class="booking-management">
     <div class="bm-header">
@@ -134,6 +135,7 @@
 
     protected override void OnInitialized()
     {
+        LayoutTitleService.Title = "Manajemen Booking";
         allBookings = new List<Booking>
         {
             new Booking

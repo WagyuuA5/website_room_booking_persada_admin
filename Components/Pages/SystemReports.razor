@@ -3,6 +3,7 @@
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Shared.ReportTabs
 @using ApexCharts
+@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
 <div class="system-reports">
     <div class="sr-breadcrumb">Administrasi &gt; Laporan Sistem</div>
@@ -115,6 +116,11 @@
 </div>
 
 @code {
+    protected override void OnInitialized()
+    {
+        LayoutTitleService.Title = "Laporan Sistem";
+    }
+
     private string selectedTab = "booking";
     private string filterRoom = "";
     private string filterDivision = "";

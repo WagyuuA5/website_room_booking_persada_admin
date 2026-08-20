@@ -1,31 +1,33 @@
 @page "/admin"
+@layout booking_room_admin.Components.Layout.MainLayout
 @using ApexCharts
+@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
 <div class="dashboard">
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon"><img src="icon/icon_1_admin.png" alt="Ruangan" /></div>
+            <div class="stat-icon"><img src="icon/icon_1_admin.svg" alt="Ruangan" /></div>
             <div class="stat-info">
                 <span class="stat-label">Total Ruangan Aktif</span>
                 <span class="stat-value">32</span>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon"><img src="icon/icon_2_admin.png" alt="Pengguna" /></div>
+            <div class="stat-icon"><img src="icon/icon_2_admin.svg" alt="Pengguna" /></div>
             <div class="stat-info">
                 <span class="stat-label">Total Pengguna Terdaftar</span>
                 <span class="stat-value">124</span>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon"><img src="icon/icon_4_admin.png" alt="Booking" /></div>
+            <div class="stat-icon"><img src="icon/icon_4_admin.svg" alt="Booking" /></div>
             <div class="stat-info">
                 <span class="stat-label">Total Pengguna Booking</span>
                 <span class="stat-value">72</span>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon"><img src="icon/icon_3_admin.png" alt="Utilisasi" /></div>
+            <div class="stat-icon"><img src="icon/icon_3_admin.svg" alt="Utilisasi" /></div>
             <div class="stat-info">
                 <span class="stat-label">Rata-rata Utilisasi</span>
                 <span class="stat-value">86%</span>
@@ -35,28 +37,28 @@
 
     <div class="requests-grid">
         <div class="request-card">
-            <div class="request-icon"><img src="icon/facilityrquest_dhsb_admin.png" alt="Fasilitas" /></div>
+            <div class="request-icon"><img src="icon/coffee.svg" alt="Fasilitas" /></div>
             <div class="request-info">
                 <span class="request-label">Permintaan Fasilitas</span>
                 <span class="request-badge pending">Menunggu</span>
             </div>
         </div>
         <div class="request-card">
-            <div class="request-icon"><img src="icon/icon_8_admin.png" alt="Akun" /></div>
+            <div class="request-icon"><img src="icon/icon_9_admin.svg" alt="Akun" /></div>
             <div class="request-info">
                 <span class="request-label">Penghapusan Akun</span>
                 <span class="request-badge pending">Menunggu</span>
             </div>
         </div>
         <div class="request-card">
-            <div class="request-icon"><img src="icon/icon_9_admin.png" alt="IT" /></div>
+            <div class="request-icon"><img src="icon/icon_10_admin.svg" alt="IT" /></div>
             <div class="request-info">
                 <span class="request-label">Tiket Dukungan IT</span>
                 <span class="request-badge pending">Menunggu</span>
             </div>
         </div>
         <div class="request-card">
-            <div class="request-icon"><img src="icon/icon_10_admin.png" alt="Bug" /></div>
+            <div class="request-icon"><img src="icon/icon_11_admin.svg" alt="Bug" /></div>
             <div class="request-info">
                 <span class="request-label">Laporan Bug</span>
                 <span class="request-badge pending">Menunggu</span>
@@ -67,7 +69,7 @@
     <div class="charts-row">
         <div class="chart-card wide">
             <div class="chart-header">
-                <img src="icon/icon_5_admin.png" alt="Tren" class="chart-icon" />
+                <img src="icon/icon_5_admin.svg" alt="Tren" class="chart-icon" />
                 <h3>Tren Booking</h3>
             </div>
             <ApexChart TItem="TrendPoint" Options="_trendOptions" Height="320">
@@ -193,6 +195,9 @@
 
     protected override void OnInitialized()
     {
+        LayoutTitleService.Title = "Dashboard Admin";
+        LayoutTitleService.Subtitle = "Ringkasan performa sistem pemesanan ruangan perusahaan.";
+
         _trendData = new List<TrendPoint>
         {
             new("Mei", 18),

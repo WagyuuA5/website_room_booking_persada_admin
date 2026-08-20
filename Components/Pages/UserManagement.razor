@@ -2,6 +2,7 @@
 @layout booking_room_admin.Components.Layout.BookingManagementLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
+@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
 <div class="user-management">
     <div class="um-breadcrumb">ADMINISTRASI</div>
@@ -149,6 +150,7 @@
 
     protected override void OnInitialized()
     {
+        LayoutTitleService.Title = "Manajemen User";
         allUsers = new List<User>
         {
             new User { Id = 1, FullName = "Ahmad Fauzi", Email = "ahmad.fauzi@persada.co.id", Department = "Eksekutif", TotalBookings = 12, Status = "active", Initials = "AF", EmployeeId = "EMP001", Phone = "+62 812 3456 7890", Role = "Admin Sistem" },
