@@ -350,3 +350,154 @@ h1:focus {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.75; }
 }
+
+/* Global bold typography standards */
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.page-subtitle {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin: 0.25rem 0 0;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.1;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.table-card h3,
+.chart-card h3,
+.tab-chart-header h3,
+.tab-breakdown-title,
+.tab-table-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.modern-table th,
+.tab-table th {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.td-primary {
+    font-weight: 500;
+    color: #111827;
+}
+
+.td-secondary {
+    font-weight: 400;
+    color: #6b7280;
+}
+
+.badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.badge-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-progress {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-confirmed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-approved {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.btn-primary-pill,
+.btn-outline-pill {
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 0.6rem 1.25rem;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-primary-pill {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.btn-primary-pill.btn-yellow {
+    background: #fbbf24;
+    color: #111827;
+}
+
+.btn-outline-pill {
+    background: #ffffff;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.btn-outline-pill:hover {
+    background: #f9fafb;
+}
+
+.popup-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.popup-subtitle {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin: 0.25rem 0 0;
+}
+
+.form-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
