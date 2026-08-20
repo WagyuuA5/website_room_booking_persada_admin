@@ -4,6 +4,9 @@
 @using booking_room_admin.Components.Shared
 
 <div class="admin-layout">
+    <div class="admin-topbar-black">
+        <span>dashboard admin</span>
+    </div>
     <aside class="admin-sidebar">
         <NavMenu />
     </aside>
@@ -53,7 +56,7 @@
 @code {
     private bool showDatePicker = false;
     private bool showNotification = false;
-    private string dateRangeLabel = "20 Ags 2026 — 20 Sep 2026";
+    private string dateRangeLabel = "01 Okt - 31 Okt 2026";
     private int unreadCount = 3;
 
     protected override void OnInitialized()

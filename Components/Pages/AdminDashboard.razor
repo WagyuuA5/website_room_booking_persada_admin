@@ -8,29 +8,32 @@
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_1_admin.svg" alt="Ruangan" /></div>
             <div class="stat-info">
-                <span class="stat-label">Total Ruangan Aktif</span>
+                <span class="stat-label">Total Rooms<br>Active</span>
                 <span class="stat-value">32</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_2_admin.svg" alt="Pengguna" /></div>
             <div class="stat-info">
-                <span class="stat-label">Total Pengguna Terdaftar</span>
+                <span class="stat-label">Total Registered<br>Users</span>
                 <span class="stat-value">124</span>
+                <span class="stat-trend up">+8%</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_4_admin.svg" alt="Booking" /></div>
             <div class="stat-info">
-                <span class="stat-label">Total Pengguna Booking</span>
-                <span class="stat-value">72</span>
+                <span class="stat-label">Total<br>Booking Users</span>
+                <span class="stat-value">86</span>
+                <span class="stat-trend up">+4%</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_3_admin.svg" alt="Utilisasi" /></div>
             <div class="stat-info">
-                <span class="stat-label">Rata-rata Utilisasi</span>
-                <span class="stat-value">86%</span>
+                <span class="stat-label">Utilization<br>Average</span>
+                <span class="stat-value">72%</span>
+                <span class="stat-trend up">+6%</span>
             </div>
         </div>
     </div>
@@ -39,29 +42,41 @@
         <div class="request-card">
             <div class="request-icon"><img src="icon/coffee.svg" alt="Fasilitas" /></div>
             <div class="request-info">
-                <span class="request-label">Permintaan Fasilitas</span>
-                <span class="request-badge pending">Menunggu</span>
+                <span class="request-label">Facility Requests</span>
+                <div class="request-meta">
+                    <span class="request-number">8</span>
+                    <span class="request-status">PENDING</span>
+                </div>
             </div>
         </div>
         <div class="request-card">
             <div class="request-icon"><img src="icon/icon_9_admin.svg" alt="Akun" /></div>
             <div class="request-info">
-                <span class="request-label">Penghapusan Akun</span>
-                <span class="request-badge pending">Menunggu</span>
+                <span class="request-label">Account Deletion</span>
+                <div class="request-meta">
+                    <span class="request-number">4</span>
+                    <span class="request-status">PENDING</span>
+                </div>
             </div>
         </div>
         <div class="request-card">
             <div class="request-icon"><img src="icon/icon_10_admin.svg" alt="IT" /></div>
             <div class="request-info">
-                <span class="request-label">Tiket Dukungan IT</span>
-                <span class="request-badge pending">Menunggu</span>
+                <span class="request-label">IT Support Tickets</span>
+                <div class="request-meta">
+                    <span class="request-number">11</span>
+                    <span class="request-status">PENDING</span>
+                </div>
             </div>
         </div>
         <div class="request-card">
             <div class="request-icon"><img src="icon/icon_11_admin.svg" alt="Bug" /></div>
             <div class="request-info">
-                <span class="request-label">Laporan Bug</span>
-                <span class="request-badge pending">Menunggu</span>
+                <span class="request-label">Bug Reports</span>
+                <div class="request-meta">
+                    <span class="request-number">6</span>
+                    <span class="request-status">PENDING</span>
+                </div>
             </div>
         </div>
     </div>
@@ -69,10 +84,9 @@
     <div class="charts-row">
         <div class="chart-card wide">
             <div class="chart-header">
-                <img src="icon/icon_5_admin.svg" alt="Tren" class="chart-icon" />
-                <h3>Tren Booking</h3>
+                <h3>Booking Trends</h3>
             </div>
-            <ApexChart TItem="TrendPoint" Options="_trendOptions" Height="320">
+            <ApexChart TItem="TrendPoint" Options="_trendOptions" Height="260">
                 <ApexPointSeries TItem="TrendPoint"
                                  Items="_trendData"
                                  Name="Booking"
@@ -83,9 +97,9 @@
         </div>
         <div class="chart-card">
             <div class="chart-header">
-                <h3>Ruangan Paling Sering Digunakan</h3>
+                <h3>Most Frequently Used Room</h3>
             </div>
-            <ApexChart TItem="RoomUsagePoint" Options="_donutOptions" Height="320">
+            <ApexChart TItem="RoomUsagePoint" Options="_donutOptions" Height="260">
                 <ApexPointSeries TItem="RoomUsagePoint"
                                  Items="_donutData"
                                  Name="Ruangan"
@@ -99,43 +113,49 @@
     <div class="tables-row">
         <div class="table-card">
             <div class="table-header">
-                <h3>Permintaan Terbaru</h3>
-                <a href="requests" class="table-link">Lihat Semua di Pusat Permintaan</a>
+                <h3>Recent Requests</h3>
+                <a href="#" class="table-link">LIHAT SEMUA REQUESTS HUB &gt;</a>
             </div>
             <div class="table-wrapper">
                 <table class="modern-table">
                     <thead>
                         <tr>
-                            <th>Jenis Permintaan</th>
-                            <th>Pemohon</th>
-                            <th>Ringkasan</th>
-                            <th>Status</th>
+                            <th>JENIS PERMINTAAN</th>
+                            <th>REQUESTER</th>
+                            <th>RINGKASAN</th>
+                            <th>STATUS</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><span class="td-primary">Permintaan Fasilitas</span></td>
-                            <td><span class="td-primary">Ahmad Fauzi</span><span class="td-secondary">Staff Marketing</span></td>
-                            <td>Proyektor ruang rapat tidak terdeteksi</td>
-                            <td><span class="badge badge-pending">Menunggu</span></td>
+                            <td><span class="td-primary">Facility</span></td>
+                            <td><span class="td-primary">Rina Kartika</span></td>
+                            <td>Peminjaman ruang meeting lt 3</td>
+                            <td><span class="badge badge-pending">Baru</span></td>
                         </tr>
                         <tr>
-                            <td><span class="td-primary">Penghapusan Akun</span></td>
-                            <td><span class="td-primary">Siti Nurhaliza</span><span class="td-secondary">Kepala Keuangan</span></td>
-                            <td>Permintaan nonaktifkan akun setelah resign</td>
-                            <td><span class="badge badge-confirmed">Dikonfirmasi</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="td-primary">Tiket Dukungan IT</span></td>
-                            <td><span class="td-primary">Budi Santoso</span><span class="td-secondary">HRD</span></td>
-                            <td>Akses booking terblokir sejak pagi</td>
+                            <td><span class="td-primary">Bug</span></td>
+                            <td><span class="td-primary">Dimas Prasetyo</span></td>
+                            <td>Error 500 saat submit form booking</td>
                             <td><span class="badge badge-progress">Dikerjakan</span></td>
                         </tr>
                         <tr>
-                            <td><span class="td-primary">Laporan Bug</span></td>
-                            <td><span class="td-primary">Dewi Kartika</span><span class="td-secondary">IT Support</span></td>
-                            <td>Jadwal bentrok meskipun ruang kosong</td>
-                            <td><span class="badge badge-forwarded">Diteruskan</span></td>
+                            <td><span class="td-primary">Account</span></td>
+                            <td><span class="td-primary">Sari Wulandari</span></td>
+                            <td>Penghapusan akun karyawan resign</td>
+                            <td><span class="badge badge-progress">Dikerjakan</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="td-primary">IT</span></td>
+                            <td><span class="td-primary">Budi Santoso</span></td>
+                            <td>Reset password email korporat</td>
+                            <td><span class="badge badge-confirmed">Selesai</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="td-primary">Facility</span></td>
+                            <td><span class="td-primary">Andi Saputra</span></td>
+                            <td>Request catering rapat direksi</td>
+                            <td><span class="badge badge-pending">Baru</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -143,16 +163,17 @@
         </div>
         <div class="table-card">
             <div class="table-header">
-                <h3>Riwayat Booking</h3>
+                <h3>History Bookings</h3>
+                <a href="#" class="table-link">ALL</a>
             </div>
             <div class="table-wrapper">
                 <table class="modern-table">
                     <thead>
                         <tr>
-                            <th>Pengguna</th>
-                            <th>Ruangan</th>
-                            <th>Jadwal</th>
-                            <th>Status</th>
+                            <th>USER</th>
+                            <th>RUANGAN</th>
+                            <th>JADWAL</th>
+                            <th>STATUS</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -196,7 +217,7 @@
     protected override void OnInitialized()
     {
         LayoutTitleService.Title = "Dashboard Admin";
-        LayoutTitleService.Subtitle = "Ringkasan performa sistem pemesanan ruangan perusahaan.";
+        LayoutTitleService.Subtitle = "Performance summary of the company wide room booking system.";
 
         _trendData = new List<TrendPoint>
         {
@@ -205,9 +226,7 @@
             new("Jul", 35),
             new("Ags", 28),
             new("Sep", 42),
-            new("Okt", 38),
-            new("Nov", 45),
-            new("Des", 52)
+            new("Okt", 38)
         };
 
         _trendOptions = new ApexChartOptions<TrendPoint>
@@ -219,30 +238,26 @@
                 {
                     Enabled = true,
                     Easing = Easing.Easeinout,
-                    Speed = 1200,
-                    AnimateGradually = new AnimateGradually { Enabled = true, Delay = 150 }
+                    Speed = 800
                 },
                 Toolbar = new Toolbar { Show = false },
                 Zoom = new Zoom { Enabled = false }
             },
-            Stroke = new Stroke { Curve = Curve.Smooth, Width = 3 },
-            Fill = new Fill { Opacity = 0.35, Type = FillType.Gradient, Gradient = new FillGradient { ShadeIntensity = 1, OpacityFrom = 0.7, OpacityTo = 0.1, Stops = new List<double> { 0, 90, 100 } } },
+            Stroke = new Stroke { Curve = Curve.Smooth, Width = 2 },
+            Fill = new Fill { Opacity = 0.15, Type = FillType.Solid },
             DataLabels = new DataLabels { Enabled = false },
-            Markers = new Markers { Size = 4, Hover = new MarkersHover { Size = 6 } },
-            Xaxis = new XAxis { Categories = _trendData.Select(d => d.Bulan).ToList() },
-            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } } },
-            Grid = new Grid { BorderColor = "#e5e7eb", StrokeDashArray = 4 },
-            Tooltip = new Tooltip { X = new TooltipX { Format = "dd MMM yyyy" } },
+            Markers = new Markers { Size = 3, Hover = new MarkersHover { Size = 5 } },
+            Xaxis = new XAxis { Categories = _trendData.Select(d => d.Bulan).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "11px", Colors = new List<string> { "#8A97A6" } } } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "11px", Colors = new List<string> { "#8A97A6" } } } } },
+            Grid = new Grid { BorderColor = "#E8EDF2", StrokeDashArray = 4 },
             Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 }
         };
 
         _donutData = new List<RoomUsagePoint>
         {
-            new("Ruangan A", 35),
-            new("Ruangan B", 25),
-            new("Ruangan C", 20),
-            new("Ruangan D", 12),
-            new("Ruangan E", 8)
+            new("Room (A)", 35),
+            new("Room (B)", 25),
+            new("Room (C)", 20)
         };
 
         _donutOptions = new ApexChartOptions<RoomUsagePoint>
@@ -254,8 +269,7 @@
                 {
                     Enabled = true,
                     Easing = Easing.Easeinout,
-                    Speed = 1000,
-                    AnimateGradually = new AnimateGradually { Enabled = true, Delay = 200 }
+                    Speed = 800
                 }
             },
             PlotOptions = new PlotOptions
@@ -264,19 +278,24 @@
                 {
                     Donut = new PlotOptionsDonut
                     {
-                        Size = "70%",
+                        Size = "65%",
                         Labels = new DonutLabels
                         {
                             Show = true,
-                            Name = new DonutLabelName { Show = true, FontSize = "14px", FontWeight = "600" },
-                            Value = new DonutLabelValue { Show = true, FontSize = "28px", FontWeight = "800", Color = "#111827" },
+                            Value = new DonutLabelValue
+                            {
+                                Show = true,
+                                FontSize = "24px",
+                                FontWeight = "700",
+                                Color = "#1F3B5B"
+                            },
                             Total = new DonutLabelTotal
                             {
                                 Show = true,
-                                Label = "Total",
-                                FontSize = "12px",
+                                Label = "TOTAL",
+                                FontSize = "10px",
                                 FontWeight = "600",
-                                Color = "#6b7280",
+                                Color = "#8A97A6",
                                 ShowAlways = true
                             }
                         }
@@ -287,10 +306,10 @@
             Legend = new Legend
             {
                 Position = LegendPosition.Bottom,
-                FontSize = "13px",
+                FontSize = "11px",
                 FontWeight = "500",
-                Markers = new LegendMarkers { Width = 10, Height = 10, Radius = 2 },
-                ItemMargin = new LegendItemMargin { Horizontal = 10, Vertical = 5 }
+                Markers = new LegendMarkers { Width = 8, Height = 8, Radius = 2 },
+                ItemMargin = new LegendItemMargin { Horizontal = 8, Vertical = 4 }
             },
             Stroke = new Stroke { Width = 0 },
             Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 }
