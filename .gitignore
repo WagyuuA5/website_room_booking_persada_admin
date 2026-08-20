@@ -1,11 +1,161 @@
-﻿bin/
+﻿# =============================================================================
+# .gitignore untuk proyek Blazor/.NET
+# Berdasarkan template standar GitHub untuk dotnet, Blazor, dan lingkungan
+# pengembangan Visual Studio / VS Code.
+# =============================================================================
+
+# ---------------------------
+# 1. Build & output binary
+# ---------------------------
+bin/
 obj/
-*.user
+out/
+build/
+dist/
+publish/
+
+# ---------------------------
+# 2. File konfigurasi sensitif / kredensial
+# ---------------------------
+.env
+.env.*
+.env.local
+.env.*.local
+secrets.json
+appsettings.*.json        # kecuali appsettings.json dan appsettings.Development.json yang sering di-commit
+!appsettings.json
+!appsettings.Development.json
+
+# ---------------------------
+# 3. Dependensi & package manager
+# ---------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+packages/
+*.nupkg
+*.snupkg
+project.lock.json
+project.assets.json
+packages.lock.json
+
+# ---------------------------
+# 4. Visual Studio / Rider
+# ---------------------------
+.vs/
+.idea/
 *.suo
+*.user
 *.userprefs
-*.dll
-*.pdb
-*.exe
-*.cache
-*.db
+*.sln.docstates
+*.userosscache
+*.vcxproj.user
+*.csproj.user
+
+# ---------------------------
+# 5. VS Code
+# ---------------------------
+.vscode/
+*.code-workspace
+
+# ---------------------------
+# 6. File hasil testing & coverage
+# ---------------------------
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+lcov.info
+htmlcov/
+report/
+
+# ---------------------------
+# 7. Logs & cache
+# ---------------------------
+*.log
+logs/
+*.tmp
+*.temp
+.cache/
+.ionide/
+.fake/
+
+# ---------------------------
+# 8. File sistem / OS
+# ---------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ---------------------------
+# 9. Database lokal / file data sementara
+# ---------------------------
+*.mdf
+*.ldf
 *.sqlite
+*.db
+*.sdf
+*.bak
+*.seed
+
+# ---------------------------
+# 10. File publish / profiling
+# ---------------------------
+*.Publish.xml
+*.pubxml
+*.publishsettings
+profiling/
+*.psess
+*.vsp
+*.vspx
+
+# ---------------------------
+# 11. File browser/editor sampah
+# ---------------------------
+*~
+*.swp
+*.swo
+*.orig
+*.rej
+
+# ---------------------------
+# 12. NuGet
+# ---------------------------
+*.nupkg
+*.snupkg
+.nuget/
+nuget.config   # bisa di-commit jika memang disengaja, tapi biasanya di-ignore untuk konfigurasi lokal
+
+# ---------------------------
+# 13. Blazor / ASP.NET spesifik
+# ---------------------------
+*.blazor.json
+bundle/
+_compressed/
+compressed/
+staticwebassets/
+wwwroot/_framework/
+wwwroot/_content/
+*.razor.css   # file scoped CSS komponen bisa di-commit jika diinginkan, tapi biasanya di-generate otomatis
+# Jika ingin mengabaikan semua razor.css generated:
+# *.razor.css
+
+# ---------------------------
+# 14. Paket zip/archive yang tidak perlu
+# ---------------------------
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ---------------------------
+# 15. File Microsoft Office / dokumen sementara
+# ---------------------------
+~$*
+*.tmp
