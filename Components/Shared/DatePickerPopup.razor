@@ -1,0 +1,120 @@
+<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
+    <div class="popup-card date-picker-popup" @onclick:stopPropagation="true">
+        <div class="popup-header">
+            <h4>Pilih Tanggal</h4>
+        </div>
+        <div class="popup-body">
+            <div class="date-picker-nav">
+                <button class="date-nav-btn" @onclick="PreviousMonth">&lt;</button>
+                <span class="date-nav-label">@GetMonthLabel() @CurrentYear</span>
+                <button class="date-nav-btn" @onclick="NextMonth">&gt;</button>
+            </div>
+            <div class="calendar-grid">
+                @foreach (var day in DayHeaders)
+                {
+                    <div class="calendar-day header">@day</div>
+                }
+                @foreach (var date in CalendarDays)
+                {
+                    <div class="calendar-day @date.CssClass" @onclick="() => SelectDate(date)">
+                        @date.Day
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="popup-footer">
+            <button class="btn btn-secondary" @onclick="Close">Batal</button>
+            <button class="btn btn-primary" @onclick="ApplyDate">Pilih Tanggal</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<DateTime?> OnDateSelected { get; set; }
+
+    private DateTime CurrentMonth = DateTime.Today;
+    private DateTime? SelectedDate;
+    private List<string> DayHeaders = new() { "Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab" };
+
+    private string[] MonthNames = new[]
+    {
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    };
+
+    private int CurrentYear => CurrentMonth.Year;
+
+    private string GetMonthLabel() => MonthNames[CurrentMonth.Month - 1];
+
+    private List<CalendarDay> CalendarDays
+    {
+        get
+        {
+            var days = new List<CalendarDay>();
+            var firstDay = new DateTime(CurrentMonth.Year, CurrentMonth.Month, 1);
+            var startDayOfWeek = ((int)firstDay.DayOfWeek + 6) % 7;
+            var daysInMonth = DateTime.DaysInMonth(CurrentMonth.Year, CurrentMonth.Month);
+
+            for (int i = 0; i < startDayOfWeek; i++)
+            {
+                days.Add(new CalendarDay { Day = 0, CssClass = "empty" });
+            }
+
+            for (int d = 1; d <= daysInMonth; d++)
+            {
+                var date = new DateTime(CurrentMonth.Year, CurrentMonth.Month, d);
+                var css = "clickable";
+                if (SelectedDate.HasValue && date == SelectedDate.Value.Date)
+                {
+                    css += " selected";
+                }
+                if (date == DateTime.Today)
+                {
+                    css += " today";
+                }
+                days.Add(new CalendarDay { Day = d, Date = date, CssClass = css });
+            }
+
+            return days;
+        }
+    }
+
+    private void PreviousMonth()
+    {
+        CurrentMonth = CurrentMonth.AddMonths(-1);
+    }
+
+    private void NextMonth()
+    {
+        CurrentMonth = CurrentMonth.AddMonths(1);
+    }
+
+    private void SelectDate(CalendarDay day)
+    {
+        if (day.Date.HasValue)
+        {
+            SelectedDate = day.Date.Value;
+        }
+    }
+
+    private void ApplyDate()
+    {
+        OnDateSelected.InvokeAsync(SelectedDate);
+        Close();
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+    }
+
+    private class CalendarDay
+    {
+        public int Day { get; set; }
+        public DateTime? Date { get; set; }
+        public string CssClass { get; set; } = "";
+    }
+}

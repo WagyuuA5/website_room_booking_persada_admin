@@ -1,0 +1,71 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@using booking_room_admin.Components.Shared
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <NavMenu />
+    </aside>
+
+    <div class="admin-main">
+        <header class="admin-topbar">
+            <div class="topbar-left">
+                <h1 class="page-title">Dashboard Admin</h1>
+                <p class="page-subtitle">Ringkasan performa sistem pemesanan ruangan perusahaan.</p>
+            </div>
+            <div class="topbar-right">
+                <div class="date-filter" @onclick="ToggleDatePicker">
+                    <img src="icon/icon_6_admin.png" alt="Kalender" class="icon-sm" />
+                    <span>@dateRangeLabel</span>
+                </div>
+                <div class="topbar-icon-btn notification-btn" @onclick="ToggleNotification">
+                    <img src="icon/icon_7_admin.png" alt="Notifikasi" class="icon-md" />
+                    <span class="notification-badge">@unreadCount</span>
+                </div>
+                <div class="admin-avatar">
+                    <span>WA</span>
+                </div>
+            </div>
+        </header>
+
+        <article class="admin-content">
+            @Body
+        </article>
+    </div>
+</div>
+
+<DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => showDatePicker = v)" OnDateSelected="OnDateSelected" />
+<NotificationPopup IsOpen="@showNotification" IsOpenChanged="@((bool v) => showNotification = v)" />
+
+<div id="blazor-error-ui" data-nosnippet>
+    Terjadi kesalahan tak terduga.
+    <a href="." class="reload">Muat Ulang</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    private bool showDatePicker = false;
+    private bool showNotification = false;
+    private string dateRangeLabel = "20 Ags 2026 — 20 Sep 2026";
+    private int unreadCount = 3;
+
+    private void ToggleDatePicker()
+    {
+        showDatePicker = !showDatePicker;
+        if (showDatePicker) showNotification = false;
+    }
+
+    private void ToggleNotification()
+    {
+        showNotification = !showNotification;
+        if (showNotification) showDatePicker = false;
+    }
+
+    private void OnDateSelected(DateTime? date)
+    {
+        if (date.HasValue)
+        {
+            dateRangeLabel = date.Value.ToString("dd MMM yyyy");
+        }
+    }
+}

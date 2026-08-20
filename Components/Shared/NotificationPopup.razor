@@ -1,0 +1,78 @@
+<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
+    <div class="popup-card notification-popup" @onclick:stopPropagation="true">
+        <div class="popup-header">
+            <h4>Notifikasi</h4>
+        </div>
+        <div class="popup-tabs">
+            <button class="tab-btn @(ActiveTab == "all" ? "active" : "")" @onclick='() => SetTab("all")'>Semua</button>
+            <button class="tab-btn @(ActiveTab == "unread" ? "active" : "")" @onclick='() => SetTab("unread")'>Belum Dibaca</button>
+            <button class="tab-btn @(ActiveTab == "system" ? "active" : "")" @onclick='() => SetTab("system")'>Sistem</button>
+        </div>
+        <div class="popup-actions">
+            <button class="text-btn" @onclick="MarkAllRead">Tandai Semua Dibaca</button>
+        </div>
+        <div class="popup-body">
+            @foreach (var item in FilteredNotifications)
+            {
+                <div class="notification-item @(item.IsRead ? "read" : "unread")">
+                    <div class="notification-icon">@item.Icon</div>
+                    <div class="notification-content">
+                        <div class="notification-title">@item.Title</div>
+                        <div class="notification-text">@item.Message</div>
+                        <div class="notification-time">@item.TimeAgo</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private string ActiveTab = "all";
+
+    private List<NotificationItem> AllNotifications = new()
+    {
+        new NotificationItem { Title = "Persetujuan Ruang Rapat Utama", Message = "Permintaan booking ruang rapat utama telah disetujui.", TimeAgo = "2 menit lalu", IsRead = false, Icon = "📋" },
+        new NotificationItem { Title = "Pembaruan Kata Sandi Berhasil", Message = "Kata sandi akun Anda berhasil diperbarui.", TimeAgo = "15 menit lalu", IsRead = false, Icon = "🔒" },
+        new NotificationItem { Title = "Laporan Mingguan Siap", Message = "Laporan penggunaan ruangan minggu ini sudah tersedia.", TimeAgo = "1 jam lalu", IsRead = true, Icon = "📊" },
+        new NotificationItem { Title = "Beban Trafik Tinggi", Message = "Sistem menerima permintaan booking di luar jam sibuk.", TimeAgo = "2 jam lalu", IsRead = true, Icon = "⚡" }
+    };
+
+    private IEnumerable<NotificationItem> FilteredNotifications => ActiveTab switch
+    {
+        "unread" => AllNotifications.Where(n => !n.IsRead),
+        "system" => AllNotifications.Where(n => n.Title.Contains("Sistem") || n.Title.Contains("Trafik")),
+        _ => AllNotifications
+    };
+
+    private void SetTab(string tab)
+    {
+        ActiveTab = tab;
+    }
+
+    private void MarkAllRead()
+    {
+        foreach (var item in AllNotifications)
+        {
+            item.IsRead = true;
+        }
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+    }
+
+    private class NotificationItem
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public string TimeAgo { get; set; } = string.Empty;
+        public bool IsRead { get; set; }
+        public string Icon { get; set; } = string.Empty;
+    }
+}
