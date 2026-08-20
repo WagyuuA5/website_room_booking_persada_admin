@@ -1,0 +1,156 @@
+@using booking_room_admin.Components.Models
+
+<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
+    <div class="popup-card add-user-card" @onclick:stopPropagation="true">
+        <div class="au-header">
+            <div>
+                <h2 class="au-title">Tambah Akun User Baru</h2>
+                <p class="au-subtitle">Buat akun manual untuk karyawan saat pendaftaran standar tidak tersedia.</p>
+            </div>
+            <button class="popup-close" @onclick="Close">&times;</button>
+        </div>
+
+        <div class="au-body">
+            <div class="au-section">
+                <div class="au-section-title">Informasi Pribadi</div>
+                <div class="au-photo-upload">
+                    <div class="au-photo-circle">
+                        <span>@(string.IsNullOrWhiteSpace(form.FullName) ? "?" : GetInitials(form.FullName))</span>
+                    </div>
+                    <button class="au-photo-btn" @onclick="UploadPhoto">UNGGAH FOTO</button>
+                </div>
+                <div class="au-row">
+                    <div class="au-field">
+                        <label class="au-label">Nama Lengkap</label>
+                        <input type="text" class="au-input" placeholder="cth. Jane Doe" @bind="form.FullName" />
+                    </div>
+                    <div class="au-field">
+                        <label class="au-label">ID Karyawan</label>
+                        <input type="text" class="au-input" placeholder="ID Karyawan" @bind="form.EmployeeId" />
+                    </div>
+                </div>
+                <div class="au-field">
+                    <label class="au-label">Alamat Email</label>
+                    <input type="email" class="au-input" placeholder="email@perusahaan.com" @bind="form.Email" />
+                </div>
+            </div>
+
+            <div class="au-section">
+                <div class="au-section-title">Detail Organisasi</div>
+                <div class="au-field">
+                    <label class="au-label">Departemen</label>
+                    <button class="au-input au-dept-btn" @onclick="() => OnSelectDepartment.InvokeAsync()">
+                        @(string.IsNullOrWhiteSpace(form.Department) ? "Pilih Departemen" : form.Department)
+                        <img src="icon/calendar.svg" alt="Pilih" class="au-dept-icon" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="au-section">
+                <div class="au-section-title">Keamanan</div>
+                <div class="au-field">
+                    <label class="au-label">Kata Sandi Sementara</label>
+                    <p class="au-field-desc">Buat kata sandi sementara yang aman untuk pengguna.</p>
+                    <div class="au-password-row">
+                        <input type="password" class="au-input au-password-input" @bind="form.TemporaryPassword" />
+                        <button class="btn-outline-pill btn-small" @onclick="GeneratePassword">Buat Otomatis</button>
+                    </div>
+                </div>
+                <label class="au-checkbox-label">
+                    <input type="checkbox" @bind="form.ForcePasswordChange" />
+                    <span class="au-checkbox-text">Wajibkan ganti kata sandi saat login pertama</span>
+                </label>
+                <p class="au-checkbox-desc">Pengguna akan diminta membuat kata sandi permanen segera saat pertama kali mengakses. Ini adalah kebijakan keamanan wajib.</p>
+                <div class="au-notice">
+                    <strong>Pemberitahuan Keamanan:</strong> Kredensial sementara akan kedaluwarsa dalam 24 jam demi keamanan.
+                </div>
+            </div>
+        </div>
+
+        <div class="au-footer">
+            <button class="btn-outline-pill" @onclick="Close">Batal</button>
+            <button class="btn-primary-pill btn-yellow" disabled="@(!IsFormValid())" @onclick="CreateAccount">
+                <img src="icon/people.svg" alt="Buat" class="btn-icon" />
+                Buat Akun
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<User> OnUserCreated { get; set; }
+    [Parameter] public EventCallback OnSelectDepartment { get; set; }
+
+    private AddUserForm form = new();
+
+    private bool IsFormValid()
+    {
+        return !string.IsNullOrWhiteSpace(form.FullName) &&
+               !string.IsNullOrWhiteSpace(form.Email) &&
+               !string.IsNullOrWhiteSpace(form.Department);
+    }
+
+    private void GeneratePassword()
+    {
+        form.TemporaryPassword = GenerateRandomPassword(12);
+    }
+
+    private void UploadPhoto()
+    {
+        // placeholder
+    }
+
+    private async Task CreateAccount()
+    {
+        if (!IsFormValid()) return;
+
+        var user = new User
+        {
+            FullName = form.FullName,
+            Email = form.Email,
+            Department = form.Department,
+            EmployeeId = form.EmployeeId,
+            Status = "active",
+            Initials = GetInitials(form.FullName),
+            TotalBookings = 0,
+            Phone = string.Empty,
+            Role = "User"
+        };
+
+        await OnUserCreated.InvokeAsync(user);
+        Close();
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        form = new AddUserForm();
+    }
+
+    private string GenerateRandomPassword(int length)
+    {
+        const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%";
+        var random = new Random();
+        return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+    private string GetInitials(string name)
+    {
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) return (parts[0][0].ToString() + parts[1][0].ToString()).ToUpperInvariant();
+        return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant();
+    }
+
+    private class AddUserForm
+    {
+        public string FullName { get; set; } = string.Empty;
+        public string EmployeeId { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;
+        public string TemporaryPassword { get; set; } = string.Empty;
+        public bool ForcePasswordChange { get; set; } = true;
+    }
+}

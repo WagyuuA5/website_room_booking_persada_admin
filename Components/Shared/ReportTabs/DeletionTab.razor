@@ -1,0 +1,159 @@
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@using ApexCharts
+
+<div class="tab-content">
+    <StatsRow Stats="_stats" />
+
+    <div class="tab-charts">
+        <div class="tab-chart-card">
+            <div class="tab-chart-header">
+                <h3>Tren Permintaan Penghapusan Mingguan</h3>
+            </div>
+            <ApexChart TItem="ChartPoint" Options="_chartOptions" Height="280">
+                <ApexPointSeries TItem="ChartPoint"
+                                 Items="_chartData"
+                                 Name="Permintaan"
+                                 SeriesType="SeriesType.Line"
+                                 XValue="e => e.Label"
+                                 YValue="e => e.Value" />
+            </ApexChart>
+        </div>
+        <div class="tab-breakdown">
+            <h3 class="tab-breakdown-title">Permintaan per Departemen</h3>
+            <div class="tab-breakdown-list">
+                @foreach (var item in _breakdown)
+                {
+                    <div class="tab-breakdown-item">
+                        <div class="tab-breakdown-info">
+                            <span class="tab-breakdown-name">@item.Name</span>
+                            <span class="tab-breakdown-value">@item.Value</span>
+                        </div>
+                        <div class="tab-breakdown-bar">
+                            <div class="tab-breakdown-fill" style="width: @($"{item.Percent}%")"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-table-section">
+        <div class="tab-table-header">
+            <h3>Permintaan Penghapusan Akun</h3>
+            <a href="#" class="tab-table-link">Lihat Semua</a>
+        </div>
+        <div class="tab-table-wrapper">
+            <table class="tab-table">
+                <thead>
+                    <tr>
+                        <th>ID Permintaan</th>
+                        <th>Pengguna</th>
+                        <th>Departemen</th>
+                        <th>Alasan</th>
+                        <th>Penyetuju</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in _tableData)
+                    {
+                        <tr>
+                            <td><span class="td-primary">@row.Id</span></td>
+                            <td><span class="td-primary">@row.Name</span></td>
+                            <td>@row.Department</td>
+                            <td>@row.Reason</td>
+                            <td>@row.Approver</td>
+                            <td><span class="badge @GetStatusClass(row.Status)">@GetStatusLabel(row.Status)</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<StatItem> _stats = new()
+    {
+        new StatItem { Label = "Total Permintaan", Value = "142", Icon = "icon/icon_1_admin.svg" },
+        new StatItem { Label = "Disetujui", Value = "118", Icon = "icon/check.svg" },
+        new StatItem { Label = "Ditolak", Value = "15", Icon = "icon/x.svg" },
+        new StatItem { Label = "Menunggu Peninjauan", Value = "09", Icon = "icon/clock.svg" }
+    };
+
+    private List<ChartPoint> _chartData = new()
+    {
+        new("Sen", 8), new("Sel", 12), new("Rab", 6), new("Kam", 15), new("Jum", 10), new("Sab", 4), new("Min", 3)
+    };
+
+    private ApexChartOptions<ChartPoint> _chartOptions = new();
+
+    protected override void OnInitialized()
+    {
+        _chartOptions = new ApexChartOptions<ChartPoint>
+        {
+            Chart = new Chart { Type = ChartType.Line, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false } },
+            Stroke = new Stroke { Curve = Curve.Smooth, Width = 3 },
+            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } } },
+            Grid = new Grid { BorderColor = "#e5e7eb", StrokeDashArray = 4 },
+            Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 }
+        };
+    }
+
+    private List<BreakdownItem> _breakdown = new()
+    {
+        new BreakdownItem { Name = "Divisi IT", Value = 42 },
+        new BreakdownItem { Name = "Divisi HR", Value = 28 },
+        new BreakdownItem { Name = "Keuangan", Value = 15 },
+        new BreakdownItem { Name = "Pemasaran", Value = 12 }
+    };
+
+    private List<TableRow> _tableData = new()
+    {
+        new TableRow { Id = "AD-001", Name = "Budi Santoso", Department = "HRD", Reason = "Pengunduran Diri", Approver = "Siti Nurhaliza", Status = "approved" },
+        new TableRow { Id = "AD-002", Name = "Maya Putri", Department = "Marketing", Reason = "Kontrak Berakhir", Approver = "Ahmad Fauzi", Status = "pending" },
+        new TableRow { Id = "AD-003", Name = "Rizky Hidayat", Department = "Pengadaan", Reason = "Akun Duplikat", Approver = "Dewi Kartika", Status = "rejected" }
+    };
+
+    private string GetStatusClass(string status) => status switch
+    {
+        "approved" => "badge-approved",
+        "pending" => "badge-pending",
+        "rejected" => "badge-rejected",
+        _ => "badge-pending"
+    };
+
+    private string GetStatusLabel(string status) => status switch
+    {
+        "approved" => "Disetujui",
+        "pending" => "Menunggu",
+        "rejected" => "Ditolak",
+        _ => status
+    };
+
+    public class ChartPoint
+    {
+        public string Label { get; set; } = string.Empty;
+        public int Value { get; set; }
+        public ChartPoint(string label, int value) => (Label, Value) = (label, value);
+    }
+
+    private class BreakdownItem
+    {
+        public string Name { get; set; } = string.Empty;
+        public int Value { get; set; }
+        public int Percent { get; set; }
+    }
+
+    private class TableRow
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;
+        public string Reason { get; set; } = string.Empty;
+        public string Approver { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    }
+}

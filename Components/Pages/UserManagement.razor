@@ -1,0 +1,291 @@
+@page "/users"
+@layout booking_room_admin.Components.Layout.BookingManagementLayout
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+
+<div class="user-management">
+    <div class="um-breadcrumb">ADMINISTRASI</div>
+    <div class="um-header">
+        <div>
+            <h1 class="um-title">Manajemen User</h1>
+            <p class="um-subtitle">Kelola hak akses dan profil untuk seluruh pengguna sistem booking.</p>
+        </div>
+        <div class="um-header-actions">
+            <button class="btn-outline-pill" @onclick="ImportCSV">
+                <img src="icon/icon_17_admin.svg" alt="Impor" class="btn-icon" />
+                <span>Impor CSV</span>
+            </button>
+            <button class="btn-primary-pill btn-yellow" @onclick="OpenAddUser">
+                <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
+                <span>Tambah User</span>
+            </button>
+        </div>
+    </div>
+
+    @if (selectedUsers.Count > 0)
+    {
+        <div class="um-bulk-bar">
+            <div class="um-bulk-info">
+                <span class="um-bulk-badge">@selectedUsers.Count</span>
+                <span class="um-bulk-text">user dipilih</span>
+            </div>
+            <div class="um-bulk-actions">
+                <button class="btn-text" @onclick="ClearSelection">Batal</button>
+                <button class="btn-outline-pill btn-danger" @onclick="BulkDeactivate">Nonaktifkan yang Dipilih</button>
+            </div>
+        </div>
+    }
+
+    <div class="um-toolbar">
+        <div class="um-search">
+            <img src="icon/search.svg" alt="Cari" class="um-search-icon" />
+            <input type="text" placeholder="Cari nama, email, atau ID pengguna..." @bind="searchQuery" @bind:event="oninput" />
+        </div>
+        <select class="um-select" @bind="selectedDepartment">
+            <option value="">Semua Departemen</option>
+            @foreach (var dept in departments)
+            {
+                <option value="@dept">@dept</option>
+            }
+        </select>
+        <button class="btn-outline-pill" @onclick="ExportUsers">
+            <img src="icon/icon_17_admin.svg" alt="Ekspor" class="btn-icon" />
+            <span>Ekspor</span>
+        </button>
+    </div>
+
+    <div class="um-table-wrapper">
+        <table class="um-table">
+            <thead>
+                <tr>
+                    <th class="um-checkbox-cell">
+                        <input type="checkbox" @bind="selectAll" @bind:event="onchange" />
+                    </th>
+                    <th>PENGGUNA</th>
+                    <th>DEPARTEMEN</th>
+                    <th>TOTAL BOOKING</th>
+                    <th>STATUS</th>
+                    <th>AKSI</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in filteredUsers)
+                {
+                    <tr class="@(selectedUsers.Contains(user) ? "selected" : "")">
+                        <td class="um-checkbox-cell">
+                            <input type="checkbox" checked="@selectedUsers.Contains(user)" @onchange="() => ToggleUser(user)" />
+                        </td>
+                        <td>
+                            <div class="um-user-cell">
+                                <div class="um-user-avatar">@user.Initials</div>
+                                <div class="um-user-info">
+                                    <span class="um-user-name">@user.FullName</span>
+                                    <span class="um-user-email">@user.Email</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@user.Department</td>
+                        <td>@user.TotalBookings</td>
+                        <td>
+                            <span class="um-status-pill @(user.Status == "active" ? "pill-success" : "pill-gray")">
+                                <span class="um-status-dot"></span>
+                                @(user.Status == "active" ? "Aktif" : "Tidak Aktif")
+                            </span>
+                        </td>
+                        <td>
+                            <div class="um-action-btns">
+                                <button class="um-action-btn" @onclick:stopPropagation="true" @onclick="() => EditUser(user)">
+                                    <img src="icon/icon_14_admin.svg" alt="Ubah" />
+                                </button>
+                                <button class="um-action-btn delete" @onclick:stopPropagation="true" @onclick="() => DeleteUser(user)">
+                                    <img src="icon/x.svg" alt="Hapus" />
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="um-footer">
+        <span class="um-footer-text">Menampilkan 1 sampai @filteredUsers.Count dari @totalUsers pengguna</span>
+        <div class="um-pagination">
+            <button class="um-page-btn" disabled>&lsaquo;</button>
+            <button class="um-page-btn active">1</button>
+            <button class="um-page-btn">2</button>
+            <button class="um-page-btn">3</button>
+            <button class="um-page-btn">&rsaquo;</button>
+        </div>
+    </div>
+
+    <AddUserPopup IsOpen="@showAddUser" IsOpenChanged="@((bool v) => showAddUser = v)" OnUserCreated="OnUserCreated" OnSelectDepartment="@(() => OpenSelectDepartment(null))" />
+    <SelectDepartmentPopup IsOpen="@showSelectDepartment" IsOpenChanged="@((bool v) => showSelectDepartment = v)" OnDepartmentSelected="OnDepartmentSelected" />
+    <EditUserPopup IsOpen="@showEditUser" IsOpenChanged="@((bool v) => showEditUser = v)" User="@editingUser" OnUserUpdated="OnUserUpdated" OnResetPassword="OpenResetPassword" />
+    <ResetPasswordPopup IsOpen="@showResetPassword" IsOpenChanged="@((bool v) => showResetPassword = v)" User="@editingUser" OnPasswordUpdated="OnPasswordUpdated" />
+    <DeleteUserPopup IsOpen="@showDeleteUser" IsOpenChanged="@((bool v) => showDeleteUser = v)" User="@deletingUser" OnUserDeleted="OnUserDeleted" OnUserDeactivated="OnUserDeactivated" />
+</div>
+
+@code {
+    private bool showAddUser = false;
+    private bool showSelectDepartment = false;
+    private bool showEditUser = false;
+    private bool showResetPassword = false;
+    private bool showDeleteUser = false;
+
+    private string searchQuery = "";
+    private string selectedDepartment = "";
+    private bool selectAll = false;
+
+    private List<string> departments = new() { "Eksekutif", "Produk", "HRD", "Engineering", "Marketing", "Pengadaan", "Keuangan", "Operasional" };
+    private List<User> allUsers = new();
+    private HashSet<User> selectedUsers = new();
+    private User? editingUser = null;
+    private User? deletingUser = null;
+    private string? pendingDepartmentTarget = null;
+
+    private List<User> filteredUsers => FilterUsers();
+    private int totalUsers => allUsers.Count;
+
+    protected override void OnInitialized()
+    {
+        allUsers = new List<User>
+        {
+            new User { Id = 1, FullName = "Ahmad Fauzi", Email = "ahmad.fauzi@persada.co.id", Department = "Eksekutif", TotalBookings = 12, Status = "active", Initials = "AF", EmployeeId = "EMP001", Phone = "+62 812 3456 7890", Role = "Admin Sistem" },
+            new User { Id = 2, FullName = "Siti Nurhaliza", Email = "siti.n@persada.co.id", Department = "Produk", TotalBookings = 8, Status = "active", Initials = "SN", EmployeeId = "EMP002", Phone = "+62 813 2345 6789", Role = "User" },
+            new User { Id = 3, FullName = "Budi Santoso", Email = "budi.s@persada.co.id", Department = "HRD", TotalBookings = 5, Status = "inactive", Initials = "BS", EmployeeId = "EMP003", Phone = "+62 814 3456 7890", Role = "User" },
+            new User { Id = 4, FullName = "Dewi Kartika", Email = "dewi.k@persada.co.id", Department = "Engineering", TotalBookings = 15, Status = "active", Initials = "DK", EmployeeId = "EMP004", Phone = "+62 815 4567 8901", Role = "User" },
+            new User { Id = 5, FullName = "Rizky Hidayat", Email = "rizky.h@persada.co.id", Department = "Pengadaan", TotalBookings = 3, Status = "active", Initials = "RH", EmployeeId = "EMP005", Phone = "+62 816 5678 9012", Role = "User" },
+            new User { Id = 6, FullName = "Maya Putri", Email = "maya.p@persada.co.id", Department = "Marketing", TotalBookings = 7, Status = "active", Initials = "MP", EmployeeId = "EMP006", Phone = "+62 817 6789 0123", Role = "User" }
+        };
+    }
+
+    private List<User> FilterUsers()
+    {
+        var query = allUsers.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var q = searchQuery.ToLowerInvariant();
+            query = query.Where(u => u.FullName.ToLowerInvariant().Contains(q) || u.Email.ToLowerInvariant().Contains(q) || u.EmployeeId.ToLowerInvariant().Contains(q));
+        }
+
+        if (!string.IsNullOrWhiteSpace(selectedDepartment))
+        {
+            query = query.Where(u => u.Department == selectedDepartment);
+        }
+
+        return query.ToList();
+    }
+
+    private void ToggleUser(User user)
+    {
+        if (selectedUsers.Contains(user))
+        {
+            selectedUsers.Remove(user);
+        }
+        else
+        {
+            selectedUsers.Add(user);
+        }
+        selectAll = selectedUsers.Count == filteredUsers.Count && filteredUsers.Count > 0;
+    }
+
+    private void ClearSelection()
+    {
+        selectedUsers.Clear();
+        selectAll = false;
+    }
+
+    private void BulkDeactivate()
+    {
+        foreach (var user in selectedUsers)
+        {
+            user.Status = "inactive";
+        }
+        selectedUsers.Clear();
+        selectAll = false;
+    }
+
+    private void OpenAddUser()
+    {
+        showAddUser = true;
+    }
+
+    private void OpenSelectDepartment(string? currentDept)
+    {
+        pendingDepartmentTarget = currentDept;
+        showSelectDepartment = true;
+    }
+
+    private void OnDepartmentSelected(string dept)
+    {
+        if (pendingDepartmentTarget == "add_user")
+        {
+            // handled by AddUserPopup via callback
+        }
+        // For edit user, the EditUserPopup will handle this through its own callback
+        showSelectDepartment = false;
+        pendingDepartmentTarget = null;
+    }
+
+    private void EditUser(User user)
+    {
+        editingUser = user;
+        showEditUser = true;
+    }
+
+    private void DeleteUser(User user)
+    {
+        deletingUser = user;
+        showDeleteUser = true;
+    }
+
+    private void OpenResetPassword(User user)
+    {
+        editingUser = user;
+        showResetPassword = true;
+    }
+
+    private void OnUserCreated(User user)
+    {
+        allUsers.Add(user);
+        showAddUser = false;
+    }
+
+    private void OnUserUpdated(User user)
+    {
+        showEditUser = false;
+        editingUser = null;
+    }
+
+    private void OnPasswordUpdated(User user)
+    {
+        showResetPassword = false;
+        editingUser = null;
+    }
+
+    private void OnUserDeleted(User user)
+    {
+        allUsers.Remove(user);
+        showDeleteUser = false;
+        deletingUser = null;
+    }
+
+    private void OnUserDeactivated(User user)
+    {
+        user.Status = "inactive";
+        showDeleteUser = false;
+        deletingUser = null;
+    }
+
+    private void ImportCSV()
+    {
+        // placeholder
+    }
+
+    private void ExportUsers()
+    {
+        // placeholder
+    }
+}

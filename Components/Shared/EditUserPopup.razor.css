@@ -1,0 +1,233 @@
+.edit-user-card {
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.eu-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.eu-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.eu-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0.25rem 0 0;
+}
+
+.eu-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1rem 0;
+}
+
+.eu-identity {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.eu-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: #3730a3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.eu-identity-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.eu-identity-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.eu-identity-meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.eu-employee-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: #f3f4f6;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.eu-role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: #dbeafe;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.eu-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.eu-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.eu-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.eu-status-indicator {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #059669;
+}
+
+.eu-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.eu-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.eu-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+}
+
+.eu-input {
+    padding: 0.65rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+    outline: none;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    width: 100%;
+}
+
+.eu-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.eu-dept-btn {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.eu-dept-icon {
+    width: 1rem;
+    height: 1rem;
+    margin-left: auto;
+}
+
+.eu-status-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.eu-status-btn {
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    border: 2px solid #e5e7eb;
+    background: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.eu-status-btn:hover {
+    border-color: #facc15;
+    background: #fffbeb;
+}
+
+.eu-status-btn.active {
+    border-color: #facc15;
+    background: #fffbeb;
+    color: #111827;
+    box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.3);
+}
+
+.eu-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.eu-checkbox-label input {
+    margin-top: 0.15rem;
+}
+
+.eu-checkbox-text {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.eu-footer {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}

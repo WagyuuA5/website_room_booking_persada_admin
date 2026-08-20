@@ -1,0 +1,24 @@
+@using booking_room_admin.Components.Models
+
+<div class="stats-row">
+    @foreach (var stat in Stats)
+    {
+        <div class="stat-card">
+            <div class="stat-icon">
+                <img src="@stat.Icon" alt="@stat.Label" class="stat-icon-img" />
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">@stat.Label</span>
+                <span class="stat-value">@stat.Value</span>
+                @if (!string.IsNullOrEmpty(stat.Subtitle))
+                {
+                    <span class="stat-subtitle">@stat.Subtitle</span>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<StatItem> Stats { get; set; } = new();
+}

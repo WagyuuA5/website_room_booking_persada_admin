@@ -1,0 +1,160 @@
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@using ApexCharts
+
+<div class="tab-content">
+    <StatsRow Stats="_stats" />
+
+    <div class="tab-charts">
+        <div class="tab-chart-card">
+            <div class="tab-chart-header">
+                <h3>Volume Permintaan Mingguan</h3>
+            </div>
+            <ApexChart TItem="ChartPoint" Options="_chartOptions" Height="280">
+                <ApexPointSeries TItem="ChartPoint"
+                                 Items="_chartData"
+                                 Name="Permintaan"
+                                 SeriesType="SeriesType.Bar"
+                                 XValue="e => e.Label"
+                                 YValue="e => e.Value" />
+            </ApexChart>
+        </div>
+        <div class="tab-breakdown">
+            <h3 class="tab-breakdown-title">Permintaan per Kategori</h3>
+            <div class="tab-breakdown-list">
+                @foreach (var item in _breakdown)
+                {
+                    <div class="tab-breakdown-item">
+                        <div class="tab-breakdown-info">
+                            <span class="tab-breakdown-name">@item.Name</span>
+                            <span class="tab-breakdown-value">@item.Value%</span>
+                        </div>
+                        <div class="tab-breakdown-bar">
+                            <div class="tab-breakdown-fill" style="width: @($"{item.Value}%")"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-table-section">
+        <div class="tab-table-header">
+            <h3>Log Permintaan Fasilitas</h3>
+            <a href="#" class="tab-table-link">Lihat Semua</a>
+        </div>
+        <div class="tab-table-wrapper">
+            <table class="tab-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Pemohon</th>
+                        <th>Departemen</th>
+                        <th>Jenis Barang</th>
+                        <th>Ditugaskan ke</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in _tableData)
+                    {
+                        <tr>
+                            <td><span class="td-primary">@row.Id</span></td>
+                            <td><span class="td-primary">@row.Name</span></td>
+                            <td>@row.Department</td>
+                            <td>@row.Type</td>
+                            <td>@row.Assigned</td>
+                            <td><span class="badge @GetStatusClass(row.Status)">@GetStatusLabel(row.Status)</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<StatItem> _stats = new()
+    {
+        new StatItem { Label = "Total Permintaan", Value = "482", Icon = "icon/icon_1_admin.svg" },
+        new StatItem { Label = "Jenis Teratas (Katering)", Value = "45%", Icon = "icon/coffee.svg" },
+        new StatItem { Label = "Rata-rata Penyelesaian", Value = "1.4j", Icon = "icon/clock.svg" },
+        new StatItem { Label = "Belum Ditugaskan", Value = "12", Subtitle = "Prioritas Tinggi", Icon = "icon/icon_10_admin.svg" }
+    };
+
+    private List<ChartPoint> _chartData = new()
+    {
+        new("Sen", 32), new("Sel", 45), new("Rab", 28), new("Kam", 55), new("Jum", 62), new("Sab", 18), new("Min", 12)
+    };
+
+    private ApexChartOptions<ChartPoint> _chartOptions = new();
+
+    protected override void OnInitialized()
+    {
+        _chartOptions = new ApexChartOptions<ChartPoint>
+        {
+            Chart = new Chart { Type = ChartType.Bar, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false } },
+            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "55%", BorderRadius = 4 } },
+            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } } },
+            Grid = new Grid { BorderColor = "#e5e7eb", StrokeDashArray = 4 },
+            Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 }
+        };
+    }
+
+    private List<BreakdownItem> _breakdown = new()
+    {
+        new BreakdownItem { Name = "Katering", Value = 45 },
+        new BreakdownItem { Name = "Peralatan AV", Value = 28 },
+        new BreakdownItem { Name = "Furnitur", Value = 18 },
+        new BreakdownItem { Name = "Lainnya", Value = 9 }
+    };
+
+    private List<TableRow> _tableData = new()
+    {
+        new TableRow { Id = "FR-001", Name = "Ahmad Fauzi", Department = "Eksekutif", Type = "Katering (Kotak Makan Siang)", Assigned = "Budi Santoso", Status = "processing" },
+        new TableRow { Id = "FR-002", Name = "Siti Nurhaliza", Department = "Produk", Type = "AV (Pemasangan Proyektor)", Assigned = "Dewi Kartika", Status = "new" },
+        new TableRow { Id = "FR-003", Name = "Rizky Hidayat", Department = "Pengadaan", Type = "Furnitur (Kursi Tambahan)", Assigned = "Belum Ditugaskan", Status = "completed" }
+    };
+
+    private string GetStatusClass(string status) => status switch
+    {
+        "processing" => "badge-progress",
+        "new" => "badge-pending",
+        "completed" => "badge-approved",
+        "forwarded" => "badge-forwarded",
+        _ => "badge-pending"
+    };
+
+    private string GetStatusLabel(string status) => status switch
+    {
+        "processing" => "Diproses",
+        "new" => "Baru",
+        "completed" => "Selesai",
+        "forwarded" => "Diteruskan",
+        _ => status
+    };
+
+    public class ChartPoint
+    {
+        public string Label { get; set; } = string.Empty;
+        public int Value { get; set; }
+        public ChartPoint(string label, int value) => (Label, Value) = (label, value);
+    }
+
+    private class BreakdownItem
+    {
+        public string Name { get; set; } = string.Empty;
+        public int Value { get; set; }
+    }
+
+    private class TableRow
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public string Assigned { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    }
+}

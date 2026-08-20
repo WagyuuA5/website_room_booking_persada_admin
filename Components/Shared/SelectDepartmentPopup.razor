@@ -1,0 +1,83 @@
+<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
+    <div class="popup-card select-dept-card" @onclick:stopPropagation="true">
+        <div class="sd-header">
+            <div>
+                <h2 class="sd-title">Pilih Departemen</h2>
+                <p class="sd-subtitle">PT PERSADA - Manajemen Personalia</p>
+            </div>
+            <button class="popup-close" @onclick="Close">&times;</button>
+        </div>
+
+        <div class="sd-search">
+            <img src="icon/search.svg" alt="Cari" class="sd-search-icon" />
+            <input type="text" placeholder="Cari departemen..." @bind="searchQuery" @bind:event="oninput" />
+        </div>
+
+        <div class="sd-list">
+            @foreach (var dept in FilteredDepartments)
+            {
+                <button class="sd-item @(selectedDepartment == dept.Name ? "selected" : "")" @onclick="() => Select(dept.Name)">
+                    <div class="sd-item-icon">@dept.Icon</div>
+                    <div class="sd-item-info">
+                        <div class="sd-item-name">@dept.Name</div>
+                        <div class="sd-item-desc">@dept.Description</div>
+                    </div>
+                </button>
+            }
+        </div>
+
+        <div class="sd-footer">
+            <button class="btn-primary-pill btn-yellow" @onclick="Close">Batal</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<string> OnDepartmentSelected { get; set; }
+
+    private string searchQuery = "";
+    private string selectedDepartment = "";
+
+    private List<DepartmentItem> allDepartments = new()
+    {
+        new DepartmentItem { Name = "Sumber Daya Manusia", Description = "Rekrutmen & Hubungan Karyawan", Icon = "👥" },
+        new DepartmentItem { Name = "Operasional", Description = "Manajemen Lapangan & Logistik", Icon = "⚙️" },
+        new DepartmentItem { Name = "Keuangan", Description = "Akuntansi & Penggajian", Icon = "💰" },
+        new DepartmentItem { Name = "IT & Digital", Description = "Infrastruktur & Dukungan", Icon = "💻" },
+        new DepartmentItem { Name = "Pemasaran & Penjualan", Description = "Pengembangan Bisnis", Icon = "📈" },
+        new DepartmentItem { Name = "Pengadaan", Description = "Manajemen Vendor & Aset", Icon = "📦" },
+        new DepartmentItem { Name = "Umum", Description = "Fasilitas & Administrasi", Icon = "🏢" }
+    };
+
+    private IEnumerable<DepartmentItem> FilteredDepartments
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery)) return allDepartments;
+            var q = searchQuery.ToLowerInvariant();
+            return allDepartments.Where(d => d.Name.ToLowerInvariant().Contains(q) || d.Description.ToLowerInvariant().Contains(q));
+        }
+    }
+
+    private void Select(string dept)
+    {
+        selectedDepartment = dept;
+        OnDepartmentSelected.InvokeAsync(dept);
+        Close();
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+    }
+
+    private class DepartmentItem
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+    }
+}

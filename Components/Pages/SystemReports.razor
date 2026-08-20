@@ -1,0 +1,152 @@
+@page "/reports"
+@layout booking_room_admin.Components.Layout.BookingManagementLayout
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Shared.ReportTabs
+@using ApexCharts
+
+<div class="system-reports">
+    <div class="sr-breadcrumb">Administrasi &gt; Laporan Sistem</div>
+    <div class="sr-header">
+        <div class="sr-header-left">
+            <input type="text" class="sr-search" placeholder="Cari..." />
+        </div>
+        <div class="sr-header-right">
+            <div class="sr-header-icon-btn">
+                <img src="icon/icon_7_admin.svg" alt="Notifikasi" class="sr-header-icon" />
+                <span class="sr-header-badge">3</span>
+            </div>
+            <div class="sr-header-icon-btn">
+                <img src="icon/icon_6_admin.svg" alt="Kalender" class="sr-header-icon" />
+            </div>
+            <div class="sr-header-icon-btn">
+                <img src="icon/icon_14_admin.svg" alt="Pengaturan" class="sr-header-icon" />
+            </div>
+            <div class="sr-avatar">WA</div>
+        </div>
+    </div>
+
+    <div class="sr-title-section">
+        <h1 class="sr-title">LAPORAN SISTEM</h1>
+        <p class="sr-subtitle">Wawasan menyeluruh tentang utilisasi ruangan, permintaan fasilitas, dan dukungan IT.</p>
+    </div>
+
+    <div class="sr-toolbar">
+        <div class="sr-date-filter">
+            <img src="icon/calendar.svg" alt="Kalender" class="sr-date-icon" />
+            <span>01 Okt - 31 Okt 2026</span>
+        </div>
+        <button class="btn-primary-pill btn-yellow">
+            <img src="icon/icon_17_admin.svg" alt="Ekspor" class="btn-icon" />
+            Ekspor Laporan
+            <img src="icon/calendar.svg" alt="Dropdown" class="btn-icon" />
+        </button>
+    </div>
+
+    <div class="sr-tabs">
+        @foreach (var tab in reportTabs)
+        {
+            <button class="sr-tab @(selectedTab == tab.Key ? "active" : "")" @onclick="() => SelectTab(tab.Key)">
+                @tab.Label
+            </button>
+        }
+    </div>
+
+    <div class="sr-filters">
+        <select class="sr-filter-select" @bind="filterRoom">
+            <option value="">Semua Ruangan</option>
+            @foreach (var r in filterRooms)
+            {
+                <option value="@r">@r</option>
+            }
+        </select>
+        <select class="sr-filter-select" @bind="filterDivision">
+            <option value="">Semua Divisi</option>
+            @foreach (var d in filterDivisions)
+            {
+                <option value="@d">@d</option>
+            }
+        </select>
+        <select class="sr-filter-select" @bind="filterFloor">
+            <option value="">Semua Lantai</option>
+            @foreach (var f in filterFloors)
+            {
+                <option value="@f">@f</option>
+            }
+        </select>
+        <select class="sr-filter-select" @bind="filterRoomType">
+            <option value="">Semua Tipe Ruangan</option>
+            @foreach (var rt in filterRoomTypes)
+            {
+                <option value="@rt">@rt</option>
+            }
+        </select>
+        <select class="sr-filter-select" @bind="filterRequestType">
+            <option value="">Jenis Permintaan: Semua</option>
+            @foreach (var rt in filterRequestTypes)
+            {
+                <option value="@rt">@rt</option>
+            }
+        </select>
+    </div>
+
+    <div class="sr-content">
+        @switch (selectedTab)
+        {
+            case "booking":
+                <BookingTab />
+                break;
+            case "facility":
+                <FacilityTab />
+                break;
+            case "deletion":
+                <DeletionTab />
+                break;
+            case "it_support":
+                <ITSupportTab />
+                break;
+            case "bug":
+                <BugTab />
+                break;
+            case "all":
+                <AllTab />
+                break;
+        }
+    </div>
+</div>
+
+@code {
+    private string selectedTab = "booking";
+    private string filterRoom = "";
+    private string filterDivision = "";
+    private string filterFloor = "";
+    private string filterRoomType = "";
+    private string filterRequestType = "";
+
+    private List<string> filterRooms = new() { "Ruang Dirantara", "Ruang Rapat A", "Ruang Rapat B", "Ruang Diskusi", "Ruang Rapat Utama" };
+    private List<string> filterDivisions = new() { "Eksekutif", "Produk", "HRD", "Engineering", "Marketing", "Pengadaan", "Keuangan", "Operasional" };
+    private List<string> filterFloors = new() { "Lantai 1", "Lantai 2", "Lantai 3", "Lantai 4", "Lantai 14" };
+    private List<string> filterRoomTypes = new() { "Rapat", "Diskusi", "Presentasi", "Eksekutif" };
+    private List<string> filterRequestTypes = new() { "Booking", "Fasilitas", "Akun", "IT", "Bug" };
+
+    private List<ReportTab> reportTabs = new()
+    {
+        new("booking", "Booking Ruangan"),
+        new("facility", "Permintaan Fasilitas"),
+        new("deletion", "Penghapusan Akun"),
+        new("it_support", "Dukungan IT"),
+        new("bug", "Laporan Bug"),
+        new("all", "Semua")
+    };
+
+    private void SelectTab(string key)
+    {
+        selectedTab = key;
+    }
+
+    private class ReportTab
+    {
+        public string Key { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+        public ReportTab(string key, string label) => (Key, Label) = (key, label);
+    }
+}

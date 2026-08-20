@@ -1,0 +1,47 @@
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 1.5rem;
+    gap: 1rem;
+}
+
+.empty-icon {
+    position: relative;
+    width: 4rem;
+    height: 4rem;
+    color: #9ca3af;
+}
+
+.empty-icon svg:first-child {
+    width: 4rem;
+    height: 4rem;
+}
+
+.empty-search-icon {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #ef4444;
+}
+
+.empty-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111827;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.empty-desc {
+    font-size: 0.875rem;
+    color: #6b7280;
+    max-width: 400px;
+    line-height: 1.5;
+    margin: 0;
+}

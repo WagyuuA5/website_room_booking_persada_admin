@@ -1,0 +1,128 @@
+.select-dept-card {
+    max-width: 400px;
+    max-height: 80vh;
+}
+
+.sd-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.sd-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.sd-subtitle {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin: 0.25rem 0 0;
+}
+
+.sd-search {
+    position: relative;
+    margin-top: 1rem;
+}
+
+.sd-search input {
+    width: 100%;
+    padding: 0.65rem 1rem 0.65rem 2.5rem;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+    outline: none;
+}
+
+.sd-search input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.sd-search-icon {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.1rem;
+    height: 1.1rem;
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+.sd-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.sd-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid transparent;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+    text-align: left;
+}
+
+.sd-item:hover {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+}
+
+.sd-item.selected {
+    background: #fffbeb;
+    border-color: #facc15;
+}
+
+.sd-item-icon {
+    font-size: 1.25rem;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.sd-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.sd-item-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.sd-item-desc {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.sd-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}

@@ -1,0 +1,184 @@
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@using ApexCharts
+
+<div class="tab-content">
+    <StatsRow Stats="_stats" />
+
+    <div class="tab-charts">
+        <div class="tab-chart-card">
+            <div class="tab-chart-header">
+                <h3>Volume Permintaan per Jenis</h3>
+            </div>
+            <ApexChart TItem="ChartPoint" Options="_chartOptions" Height="280">
+                <ApexPointSeries TItem="ChartPoint"
+                                 Items="_bookingData"
+                                 Name="Booking"
+                                 SeriesType="SeriesType.Bar"
+                                 XValue="e => e.Label"
+                                 YValue="e => e.Value" />
+                <ApexPointSeries TItem="ChartPoint"
+                                 Items="_facilityData"
+                                 Name="Fasilitas"
+                                 SeriesType="SeriesType.Bar"
+                                 XValue="e => e.Label"
+                                 YValue="e => e.Value" />
+                <ApexPointSeries TItem="ChartPoint"
+                                 Items="_itData"
+                                 Name="IT & Bug"
+                                 SeriesType="SeriesType.Bar"
+                                 XValue="e => e.Label"
+                                 YValue="e => e.Value" />
+            </ApexChart>
+        </div>
+        <div class="tab-breakdown">
+            <h3 class="tab-breakdown-title">Ringkasan Permintaan Teratas</h3>
+            <div class="tab-breakdown-list">
+                @foreach (var item in _breakdown)
+                {
+                    <div class="tab-breakdown-item">
+                        <div class="tab-breakdown-info">
+                            <span class="tab-breakdown-name">@item.Name</span>
+                            <span class="tab-breakdown-value">@item.Value</span>
+                        </div>
+                        <div class="tab-breakdown-bar">
+                            <div class="tab-breakdown-fill" style="width: @($"{item.Percent}%")"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-table-section">
+        <div class="tab-table-header">
+            <h3>Entri Sistem Terbaru</h3>
+            <a href="#" class="tab-table-link">Lihat Semua</a>
+        </div>
+        <div class="tab-table-wrapper">
+            <table class="tab-table">
+                <thead>
+                    <tr>
+                        <th>ID Entri</th>
+                        <th>Pengguna</th>
+                        <th>Departemen</th>
+                        <th>Detail Permintaan</th>
+                        <th>Tanggal & Waktu</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in _tableData)
+                    {
+                        <tr>
+                            <td><span class="td-primary">@row.Id</span></td>
+                            <td><span class="td-primary">@row.Name</span></td>
+                            <td>@row.Department</td>
+                            <td>@row.Detail</td>
+                            <td>@row.DateTime</td>
+                            <td><span class="badge @GetStatusClass(row.Status)">@GetStatusLabel(row.Status)</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<StatItem> _stats = new()
+    {
+        new StatItem { Label = "Total Permintaan Sistem", Value = "4.821", Icon = "icon/icon_1_admin.svg" },
+        new StatItem { Label = "Selesai Bulan Ini", Value = "3.102", Icon = "icon/check.svg" },
+        new StatItem { Label = "Belum Ditugaskan", Value = "142", Icon = "icon/icon_10_admin.svg" },
+        new StatItem { Label = "Rata-rata Waktu Penyelesaian", Value = "4.2j", Icon = "icon/clock.svg" }
+    };
+
+    private List<ChartPoint> _bookingData = new()
+    {
+        new("Sen", 45), new("Sel", 52), new("Rab", 38), new("Kam", 65), new("Jum", 72), new("Sab", 28), new("Min", 18)
+    };
+
+    private List<ChartPoint> _facilityData = new()
+    {
+        new("Sen", 20), new("Sel", 28), new("Rab", 15), new("Kam", 30), new("Jum", 25), new("Sab", 12), new("Min", 8)
+    };
+
+    private List<ChartPoint> _itData = new()
+    {
+        new("Sen", 10), new("Sel", 15), new("Rab", 8), new("Kam", 18), new("Jum", 12), new("Sab", 6), new("Min", 4)
+    };
+
+    private ApexChartOptions<ChartPoint> _chartOptions = new();
+
+    protected override void OnInitialized()
+    {
+        _chartOptions = new ApexChartOptions<ChartPoint>
+        {
+            Chart = new Chart { Type = ChartType.Bar, Stacked = true, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false } },
+            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "55%", BorderRadius = 4 } },
+            Xaxis = new XAxis { Categories = _bookingData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } } },
+            Grid = new Grid { BorderColor = "#e5e7eb", StrokeDashArray = 4 },
+            Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 },
+            Legend = new Legend { Position = LegendPosition.Top, FontSize = "12px", FontWeight = "600" }
+        };
+    }
+
+    private List<BreakdownItem> _breakdown = new()
+    {
+        new BreakdownItem { Name = "Booking Ruangan", Value = "1.248", Percent = 60 },
+        new BreakdownItem { Name = "Fasilitas/Katering", Value = "842", Percent = 40 },
+        new BreakdownItem { Name = "Dukungan IT", Value = "412", Percent = 30 },
+        new BreakdownItem { Name = "Laporan Bug", Value = "156", Percent = 15 }
+    };
+
+    private List<TableRow> _tableData = new()
+    {
+        new TableRow { Id = "SYS-001", Name = "Ahmad Fauzi", Department = "Eksekutif", Detail = "Booking Ruang Rapat B", DateTime = "15 Okt 2026, 09:00", Status = "pending" },
+        new TableRow { Id = "SYS-002", Name = "Siti Nurhaliza", Department = "Produk", Detail = "Permintaan Katering (Ruang A)", DateTime = "15 Okt 2026, 10:30", Status = "confirmed" },
+        new TableRow { Id = "SYS-003", Name = "Budi Santoso", Department = "HRD", Detail = "Kendala Proyektor (Ruang Training)", DateTime = "14 Okt 2026, 14:00", Status = "in_progress" }
+    };
+
+    private string GetStatusClass(string status) => status switch
+    {
+        "confirmed" => "badge-approved",
+        "pending" => "badge-pending",
+        "in_progress" => "badge-progress",
+        "completed" => "badge-approved",
+        _ => "badge-pending"
+    };
+
+    private string GetStatusLabel(string status) => status switch
+    {
+        "confirmed" => "Dikonfirmasi",
+        "pending" => "Menunggu",
+        "in_progress" => "Dikerjakan",
+        "completed" => "Selesai",
+        _ => status
+    };
+
+    public class ChartPoint
+    {
+        public string Label { get; set; } = string.Empty;
+        public int Value { get; set; }
+        public ChartPoint(string label, int value) => (Label, Value) = (label, value);
+    }
+
+    private class BreakdownItem
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+        public int Percent { get; set; }
+    }
+
+    private class TableRow
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;
+        public string Detail { get; set; } = string.Empty;
+        public string DateTime { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    }
+}
