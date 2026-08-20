@@ -1,0 +1,366 @@
+@page "/booking-management"
+@layout booking_room_admin.Components.Layout.BookingManagementLayout
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+
+<div class="booking-management">
+    <div class="bm-header">
+        <div class="bm-title-group">
+            <span class="bm-title-bullet"></span>
+            <h1 class="bm-title">Manajemen Booking</h1>
+        </div>
+        <button class="btn-primary bm-create-btn" @onclick="OpenManualBooking">
+            <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
+            <span>Buat Booking Manual</span>
+        </button>
+    </div>
+
+    <div class="bm-toolbar">
+        <div class="bm-search">
+            <img src="icon/search.svg" alt="Cari" class="bm-search-icon" />
+            <input type="text" placeholder="Cari berdasarkan nama, divisi, atau ruangan..." @bind="searchQuery" @bind:event="oninput" />
+        </div>
+        <div class="bm-date-filter" @onclick="ToggleDatePicker">
+            <img src="icon/calendar.svg" alt="Kalender" class="bm-filter-icon" />
+            <span>@selectedDateLabel</span>
+        </div>
+    </div>
+
+    <div class="bm-tabs">
+        @foreach (var tab in statusTabs)
+        {
+            <button class="bm-tab @(selectedStatus == tab.Key ? "active" : "")" @onclick="() => SelectStatus(tab.Key)">
+                <span>@tab.Label</span>
+                <span class="bm-tab-badge">@tab.Count</span>
+            </button>
+        }
+    </div>
+
+    <div class="bm-booking-list">
+        @foreach (var group in groupedBookings)
+        {
+            <div class="bm-date-group">
+                <div class="bm-date-label">@group.Date.ToString("dd MMMM yyyy").ToUpper()</div>
+                @foreach (var booking in group.Bookings)
+                {
+                    <div class="bm-card @GetCardAccentClass(booking)" @onclick="() => OpenDetail(booking)">
+                        <div class="bm-card-accent"></div>
+                        <div class="bm-card-time">
+                            <span class="bm-time-start">@booking.StartTime</span>
+                            <span class="bm-time-sep">—</span>
+                            <span class="bm-time-end">@booking.EndTime</span>
+                            <span class="bm-time-duration">@booking.Duration</span>
+                        </div>
+                        <div class="bm-card-info">
+                            <div class="bm-card-title-row">
+                                <span class="bm-card-title">@booking.Title</span>
+                                @if (booking.IsRecurring)
+                                {
+                                    <span class="bm-recurring-badge">
+                                        <img src="icon/repeat.svg" alt="Berulang" class="bm-recurring-icon" />
+                                        Berulang
+                                    </span>
+                                }
+                            </div>
+                            <div class="bm-card-meta">
+                                <span class="bm-card-room">@booking.Room</span>
+                                <span class="bm-card-sep">•</span>
+                                <span class="bm-card-participants">@booking.ParticipantsCount peserta</span>
+                            </div>
+                        </div>
+                        <div class="bm-card-user">
+                            <div class="bm-user-avatar">@booking.RequesterInitials</div>
+                            <div class="bm-user-info">
+                                <span class="bm-user-name">@booking.RequesterName</span>
+                                <span class="bm-user-division">@booking.RequesterDivision</span>
+                            </div>
+                        </div>
+                        <div class="bm-card-actions">
+                            <span class="bm-status-badge @GetStatusClass(booking.Status)">@GetStatusLabel(booking.Status)</span>
+                            <div class="bm-action-btns">
+                                <button class="bm-action-btn reject" @onclick:stopPropagation="true" @onclick="() => RejectBooking(booking)">
+                                    <img src="icon/x.svg" alt="Tolak" />
+                                </button>
+                                <button class="bm-action-btn approve" @onclick:stopPropagation="true" @onclick="() => ApproveBooking(booking)">
+                                    <img src="icon/check.svg" alt="Setujui" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="bm-footer">
+        <span class="bm-footer-text">Menampilkan 1–@filteredBookings.Count dari @totalBookings booking</span>
+        <div class="bm-pagination">
+            <button class="bm-page-btn" disabled>&lsaquo;</button>
+            <button class="bm-page-btn active">1</button>
+            <button class="bm-page-btn">2</button>
+            <button class="bm-page-btn">&rsaquo;</button>
+        </div>
+    </div>
+
+    <DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => showDatePicker = v)" OnDateSelected="OnDateSelected" />
+    <BookingDetailPopup IsOpen="@showDetail" IsOpenChanged="@((bool v) => showDetail = v)" Booking="@selectedBooking" OnApprove="ApproveBooking" OnReject="RejectBooking" />
+    <ManualBookingPopup IsOpen="@showManual" IsOpenChanged="@((bool v) => showManual = v)" OnBookingCreated="OnBookingCreated" />
+    <NotificationPopup IsOpen="@showNotification" IsOpenChanged="@((bool v) => showNotification = v)" />
+</div>
+
+@code {
+    private bool showDatePicker = false;
+    private bool showDetail = false;
+    private bool showManual = false;
+    private bool showNotification = false;
+
+    private string searchQuery = "";
+    private string selectedDateLabel = "12 Okt 2026";
+    private string selectedStatus = "all";
+
+    private List<StatusTab> statusTabs = new()
+    {
+        new("all", "Semua", 42),
+        new("pending", "Menunggu", 8),
+        new("approved", "Disetujui", 28),
+        new("rejected_system", "Ditolak Sistem", 4),
+        new("rejected_admin", "Ditolak Admin", 2)
+    };
+
+    private List<Booking> allBookings = new();
+    private List<Booking> filteredBookings => FilterBookings();
+    private Booking? selectedBooking = null;
+    private int totalBookings => allBookings.Count;
+
+    protected override void OnInitialized()
+    {
+        allBookings = new List<Booking>
+        {
+            new Booking
+            {
+                Id = 1,
+                Title = "Sesi Strategi Q3",
+                Room = "Ruang Dirantara",
+                Date = new DateTime(2026, 10, 15),
+                StartTime = "09:00",
+                EndTime = "11:00",
+                Duration = "2 Jam",
+                RequesterName = "Ahmad Fauzi",
+                RequesterDivision = "Eksekutif",
+                RequesterInitials = "AF",
+                ParticipantsCount = 8,
+                Status = "pending",
+                IsRecurring = false,
+                AccentColor = "warning"
+            },
+            new Booking
+            {
+                Id = 2,
+                Title = "Review Produk Mingguan",
+                Room = "Ruang Rapat A",
+                Date = new DateTime(2026, 10, 15),
+                StartTime = "13:00",
+                EndTime = "14:30",
+                Duration = "1 Jam 30 Menit",
+                RequesterName = "Siti Nurhaliza",
+                RequesterDivision = "Produk",
+                RequesterInitials = "SN",
+                ParticipantsCount = 12,
+                Status = "approved",
+                IsRecurring = true,
+                AccentColor = "info"
+            },
+            new Booking
+            {
+                Id = 3,
+                Title = "Onboarding Karyawan Baru",
+                Room = "Ruang Diskusi",
+                Date = new DateTime(2026, 10, 16),
+                StartTime = "10:00",
+                EndTime = "12:00",
+                Duration = "2 Jam",
+                RequesterName = "Budi Santoso",
+                RequesterDivision = "HRD",
+                RequesterInitials = "BS",
+                ParticipantsCount = 6,
+                Status = "pending",
+                IsRecurring = false,
+                AccentColor = "danger"
+            },
+            new Booking
+            {
+                Id = 4,
+                Title = "Sprint Planning",
+                Room = "Ruang Rapat B",
+                Date = new DateTime(2026, 10, 16),
+                StartTime = "14:00",
+                EndTime = "16:00",
+                Duration = "2 Jam",
+                RequesterName = "Dewi Kartika",
+                RequesterDivision = "Engineering",
+                RequesterInitials = "DK",
+                ParticipantsCount = 10,
+                Status = "approved",
+                IsRecurring = true,
+                AccentColor = "info"
+            },
+            new Booking
+            {
+                Id = 5,
+                Title = "Evaluasi Vendor",
+                Room = "Ruang Rapat Utama",
+                Date = new DateTime(2026, 10, 17),
+                StartTime = "09:30",
+                EndTime = "11:30",
+                Duration = "2 Jam",
+                RequesterName = "Rizky Hidayat",
+                RequesterDivision = "Pengadaan",
+                RequesterInitials = "RH",
+                ParticipantsCount = 15,
+                Status = "rejected_system",
+                IsRecurring = false,
+                AccentColor = "warning"
+            },
+            new Booking
+            {
+                Id = 6,
+                Title = "Workshop Digital Marketing",
+                Room = "Ruang Dirantara",
+                Date = new DateTime(2026, 10, 17),
+                StartTime = "13:00",
+                EndTime = "15:00",
+                Duration = "2 Jam",
+                RequesterName = "Maya Putri",
+                RequesterDivision = "Marketing",
+                RequesterInitials = "MP",
+                ParticipantsCount = 20,
+                Status = "rejected_admin",
+                IsRecurring = false,
+                AccentColor = "danger"
+            }
+        };
+    }
+
+    private List<BookingGroup> groupedBookings => filteredBookings
+        .OrderBy(b => b.Date)
+        .ThenBy(b => b.StartTime)
+        .GroupBy(b => b.Date)
+        .Select(g => new BookingGroup
+        {
+            Date = g.Key,
+            Bookings = g.ToList()
+        })
+        .ToList();
+
+    private List<Booking> FilterBookings()
+    {
+        var query = allBookings.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var q = searchQuery.ToLowerInvariant();
+            query = query.Where(b =>
+                b.RequesterName.ToLowerInvariant().Contains(q) ||
+                b.RequesterDivision.ToLowerInvariant().Contains(q) ||
+                b.Room.ToLowerInvariant().Contains(q) ||
+                b.Title.ToLowerInvariant().Contains(q));
+        }
+
+        if (selectedStatus != "all")
+        {
+            query = query.Where(b => b.Status == selectedStatus);
+        }
+
+        return query.ToList();
+    }
+
+    private string GetCardAccentClass(Booking b) => b.AccentColor switch
+    {
+        "warning" => "accent-warning",
+        "danger" => "accent-danger",
+        "info" => "accent-info",
+        _ => "accent-warning"
+    };
+
+    private string GetStatusClass(string status) => status switch
+    {
+        "pending" => "status-pending",
+        "approved" => "status-approved",
+        "rejected_system" => "status-rejected-system",
+        "rejected_admin" => "status-rejected-admin",
+        _ => "status-pending"
+    };
+
+    private string GetStatusLabel(string status) => status switch
+    {
+        "pending" => "Menunggu",
+        "approved" => "Disetujui",
+        "rejected_system" => "Ditolak Sistem",
+        "rejected_admin" => "Ditolak Admin",
+        _ => status
+    };
+
+    private void SelectStatus(string key)
+    {
+        selectedStatus = key;
+    }
+
+    private void ToggleDatePicker()
+    {
+        showDatePicker = !showDatePicker;
+    }
+
+    private void OnDateSelected(DateTime? date)
+    {
+        if (date.HasValue)
+        {
+            selectedDateLabel = date.Value.ToString("dd MMM yyyy");
+        }
+        showDatePicker = false;
+    }
+
+    private void OpenDetail(Booking booking)
+    {
+        selectedBooking = booking;
+        showDetail = true;
+    }
+
+    private void OpenManualBooking()
+    {
+        showManual = true;
+    }
+
+    private void ApproveBooking(Booking booking)
+    {
+        booking.Status = "approved";
+        showDetail = false;
+        selectedBooking = null;
+    }
+
+    private void RejectBooking(Booking booking)
+    {
+        booking.Status = "rejected_admin";
+        showDetail = false;
+        selectedBooking = null;
+    }
+
+    private void OnBookingCreated(Booking booking)
+    {
+        allBookings.Add(booking);
+        showManual = false;
+    }
+
+    private class StatusTab
+    {
+        public string Key { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+        public int Count { get; set; }
+        public StatusTab(string key, string label, int count) => (Key, Label, Count) = (key, label, count);
+    }
+
+    private class BookingGroup
+    {
+        public DateTime Date { get; set; }
+        public List<Booking> Bookings { get; set; } = new();
+    }
+}

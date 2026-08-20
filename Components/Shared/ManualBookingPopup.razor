@@ -1,0 +1,305 @@
+@using booking_room_admin.Components.Models
+<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
+    <div class="popup-card manual-booking-card" @onclick:stopPropagation="true">
+        <div class="mb-header">
+            <div>
+                <h2 class="mb-title">Booking Manual</h2>
+                <p class="mb-subtitle">Jadwalkan sumber daya atau ruangan baru</p>
+            </div>
+            <button class="popup-close" @onclick="Close">&times;</button>
+        </div>
+
+        <div class="mb-body">
+            <div class="mb-row">
+                <div class="mb-field">
+                    <label class="mb-label">Nama Pemesan (Nama Lengkap)</label>
+                    <input type="text" class="mb-input" placeholder="Masukkan nama lengkap" @bind="form.FullName" />
+                </div>
+                <div class="mb-field">
+                    <label class="mb-label">Divisi</label>
+                    <select class="mb-input" @bind="form.Division">
+                        <option value="">Pilih divisi</option>
+                        @foreach (var div in divisions)
+                        {
+                            <option value="@div">@div</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-field">
+                <label class="mb-label">Pilih Ruangan</label>
+                <div class="mb-room-grid">
+                    @foreach (var room in availableRooms)
+                    {
+                        <button class="mb-room-card @(form.SelectedRoomId == room.Id ? "selected" : "") @(room.IsBooked ? "booked" : "")" @onclick="() => SelectRoom(room)" disabled="@room.IsBooked">
+                            <span class="mb-room-status @(room.IsBooked ? "status-booked" : "status-available")">@(room.IsBooked ? "Dipesan" : "Tersedia")</span>
+                            <div class="mb-room-icon">🏢</div>
+                            <div class="mb-room-name">@room.Name</div>
+                            <div class="mb-room-cap">Kapasitas: @room.Capacity Orang</div>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="mb-row">
+                <div class="mb-field">
+                    <label class="mb-label">Tanggal</label>
+                    <input type="date" class="mb-input" @bind="form.Date" />
+                </div>
+                <div class="mb-field">
+                    <label class="mb-label">Waktu (Mulai - Selesai)</label>
+                    <div class="mb-time-group">
+                        <input type="time" class="mb-input mb-time-input" @bind="form.StartTime" />
+                        <span class="mb-time-sep">—</span>
+                        <input type="time" class="mb-input mb-time-input" @bind="form.EndTime" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-field">
+                <label class="mb-label">Undang Peserta</label>
+                <div class="mb-attendees">
+                    <div class="mb-attendee-search">
+                        <input type="text" class="mb-input" placeholder="Undang kolega..." @bind="attendeeQuery" @bind:event="oninput" @onkeyup="SearchAttendees" />
+                    </div>
+                    <div class="mb-capacity">
+                        <div class="mb-capacity-bar">
+                            <div class="mb-capacity-fill" style="width: @($"{Math.Min(100, (double)form.Attendees.Count / (selectedRoom?.Capacity ?? 12) * 100)}%")"></div>
+                        </div>
+                        <span class="mb-capacity-text">@form.Attendees.Count dari @(selectedRoom?.Capacity ?? 12) Kapasitas Ruangan</span>
+                    </div>
+                    @if (attendeeSuggestions.Any())
+                    {
+                        <div class="mb-attendee-dropdown">
+                            @foreach (var suggestion in attendeeSuggestions.Take(5))
+                            {
+                                <div class="mb-attendee-option" @onclick="() => AddAttendee(suggestion)">
+                                    <div class="mb-attendee-avatar">@suggestion.Initials</div>
+                                    <div>
+                                        <div class="mb-attendee-name">@suggestion.Name</div>
+                                        <div class="mb-attendee-div">@suggestion.Division</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    <div class="mb-attendee-chips">
+                        @foreach (var att in form.Attendees)
+                        {
+                            <span class="mb-chip">
+                                @att.Name
+                                <button class="mb-chip-remove" @onclick="() => RemoveAttendee(att)">&times;</button>
+                            </span>
+                        }
+                        @if (conflictAttendees.Any())
+                        {
+                            <span class="mb-chip mb-chip-conflict">
+                                ⚠ Potensi bentrok jadwal
+                                <button class="mb-chip-remove" @onclick="ClearConflicts">&times;</button>
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-field">
+                <label class="mb-toggle">
+                    <input type="checkbox" @bind="form.InviteExternal" />
+                    <span class="mb-toggle-slider"></span>
+                    <span class="mb-toggle-label">Undang tamu eksternal</span>
+                </label>
+                @if (form.InviteExternal)
+                {
+                    <input type="email" class="mb-input mt-3" placeholder="Email Tamu (cth. tamu@perusahaan.com)" @bind="form.GuestEmail" />
+                }
+            </div>
+
+            <div class="mb-field">
+                <label class="mb-label">Catatan / Permintaan Khusus</label>
+                <textarea class="mb-textarea" placeholder="Kebutuhan peralatan, katering, dsb." rows="3" @bind="form.Notes"></textarea>
+            </div>
+        </div>
+
+        <div class="mb-footer">
+            <button class="btn-outline-pill" @onclick="Close">Batal</button>
+            <button class="btn-primary-pill btn-yellow" @onclick="ConfirmBooking">
+                <img src="icon/check.svg" alt="Konfirmasi" class="btn-icon" />
+                Konfirmasi Booking
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<Booking> OnBookingCreated { get; set; }
+
+    private ManualBookingForm form = new();
+    private string attendeeQuery = "";
+    private List<AttendeeSuggestion> attendeeSuggestions = new();
+    private List<AttendeeSuggestion> conflictAttendees = new();
+
+    private List<string> divisions = new() { "Eksekutif", "Produk", "HRD", "Engineering", "Marketing", "Pengadaan", "Keuangan", "Operasional" };
+
+    private List<RoomOption> availableRooms = new()
+    {
+        new RoomOption { Id = 1, Name = "Ruang Dirantara", Capacity = 12, IsBooked = false },
+        new RoomOption { Id = 2, Name = "Ruang Rapat A", Capacity = 8, IsBooked = true },
+        new RoomOption { Id = 3, Name = "Ruang Diskusi", Capacity = 6, IsBooked = false }
+    };
+
+    private RoomOption? selectedRoom => availableRooms.FirstOrDefault(r => r.Id == form.SelectedRoomId);
+
+    private void SelectRoom(RoomOption room)
+    {
+        if (room.IsBooked) return;
+        form.SelectedRoomId = room.Id;
+    }
+
+    private void SearchAttendees()
+    {
+        if (string.IsNullOrWhiteSpace(attendeeQuery))
+        {
+            attendeeSuggestions.Clear();
+            return;
+        }
+        var q = attendeeQuery.ToLowerInvariant();
+        attendeeSuggestions = FakeAttendees
+            .Where(a => a.Name.ToLowerInvariant().Contains(q) && !form.Attendees.Any(f => f.Id == a.Id))
+            .ToList();
+    }
+
+    private void AddAttendee(AttendeeSuggestion suggestion)
+    {
+        form.Attendees.Add(suggestion);
+        attendeeSuggestions.Remove(suggestion);
+        attendeeQuery = string.Empty;
+        DetectConflicts();
+    }
+
+    private void RemoveAttendee(AttendeeSuggestion suggestion)
+    {
+        form.Attendees.Remove(suggestion);
+        DetectConflicts();
+    }
+
+    private void DetectConflicts()
+    {
+        conflictAttendees.Clear();
+        foreach (var att in form.Attendees)
+        {
+            if (att.HasConflict)
+            {
+                conflictAttendees.Add(att);
+            }
+        }
+    }
+
+    private void ClearConflicts()
+    {
+        conflictAttendees.Clear();
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        form = new ManualBookingForm();
+        attendeeQuery = string.Empty;
+        attendeeSuggestions.Clear();
+        conflictAttendees.Clear();
+    }
+
+    private async Task ConfirmBooking()
+    {
+        if (selectedRoom == null || string.IsNullOrWhiteSpace(form.FullName) || string.IsNullOrWhiteSpace(form.Division) || !form.Date.HasValue || !form.StartTime.HasValue || !form.EndTime.HasValue)
+        {
+            return;
+        }
+
+        var booking = new Booking
+        {
+            Id = new Random().Next(1000, 9999),
+            Title = string.IsNullOrWhiteSpace(form.Notes) ? "Booking Manual" : form.Notes.Substring(0, Math.Min(30, form.Notes.Length)),
+            Room = selectedRoom.Name,
+            Date = form.Date.Value,
+            StartTime = form.StartTime.Value.ToString("HH:mm"),
+            EndTime = form.EndTime.Value.ToString("HH:mm"),
+            Duration = CalculateDuration(form.StartTime.Value, form.EndTime.Value),
+            RequesterName = form.FullName,
+            RequesterDivision = form.Division,
+            RequesterInitials = GetInitials(form.FullName),
+            ParticipantsCount = form.Attendees.Count,
+            Status = "pending",
+            IsRecurring = false,
+            AccentColor = "warning"
+        };
+
+        await OnBookingCreated.InvokeAsync(booking);
+        Close();
+    }
+
+    private string CalculateDuration(TimeOnly start, TimeOnly end)
+    {
+        var diff = end.ToTimeSpan() - start.ToTimeSpan();
+        if (diff > TimeSpan.Zero)
+        {
+            var hours = (int)diff.TotalHours;
+            var minutes = diff.Minutes;
+            if (hours > 0 && minutes > 0) return $"{hours} Jam {minutes} Menit";
+            if (hours > 0) return $"{hours} Jam";
+            return $"{minutes} Menit";
+        }
+        return "—";
+    }
+
+    private string GetInitials(string name)
+    {
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) return (parts[0][0].ToString() + parts[1][0].ToString()).ToUpperInvariant();
+        return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant();
+    }
+
+    private class ManualBookingForm
+    {
+        public string FullName { get; set; } = string.Empty;
+        public string Division { get; set; } = string.Empty;
+        public int SelectedRoomId { get; set; }
+        public DateTime? Date { get; set; } = DateTime.Today;
+        public TimeOnly? StartTime { get; set; } = new TimeOnly(9, 0);
+        public TimeOnly? EndTime { get; set; } = new TimeOnly(10, 0);
+        public bool InviteExternal { get; set; }
+        public string GuestEmail { get; set; } = string.Empty;
+        public string Notes { get; set; } = string.Empty;
+        public List<AttendeeSuggestion> Attendees { get; set; } = new();
+    }
+
+    private class RoomOption
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public int Capacity { get; set; }
+        public bool IsBooked { get; set; }
+    }
+
+    private class AttendeeSuggestion
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Division { get; set; } = string.Empty;
+        public string Initials { get; set; } = string.Empty;
+        public bool HasConflict { get; set; }
+    }
+
+    private List<AttendeeSuggestion> FakeAttendees => new()
+    {
+        new AttendeeSuggestion { Id = 1, Name = "Ahmad Fauzi", Division = "Eksekutif", Initials = "AF", HasConflict = false },
+        new AttendeeSuggestion { Id = 2, Name = "Siti Nurhaliza", Division = "Produk", Initials = "SN", HasConflict = true },
+        new AttendeeSuggestion { Id = 3, Name = "Budi Santoso", Division = "HRD", Initials = "BS", HasConflict = false },
+        new AttendeeSuggestion { Id = 4, Name = "Dewi Kartika", Division = "Engineering", Initials = "DK", HasConflict = false },
+        new AttendeeSuggestion { Id = 5, Name = "Rizky Hidayat", Division = "Pengadaan", Initials = "RH", HasConflict = true },
+        new AttendeeSuggestion { Id = 6, Name = "Maya Putri", Division = "Marketing", Initials = "MP", HasConflict = false }
+    };
+}

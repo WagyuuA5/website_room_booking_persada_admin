@@ -53,13 +53,6 @@
     line-height: 1.2;
 }
 
-.page-subtitle {
-    font-size: 0.9375rem;
-    color: #6b7280;
-    margin: 0;
-    font-weight: 400;
-}
-
 .topbar-right {
     display: flex;
     align-items: center;
@@ -72,11 +65,18 @@
     gap: 0.5rem;
     background: #f3f4f6;
     padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
+    border-radius: 999px;
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
     color: #374151;
     border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.date-filter:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .topbar-icon-btn {
@@ -87,9 +87,15 @@
     justify-content: center;
     width: 2.5rem;
     height: 2.5rem;
-    border-radius: 0.5rem;
+    border-radius: 999px;
     background: #f3f4f6;
     border: 1px solid #e5e7eb;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.topbar-icon-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .notification-badge {
@@ -106,6 +112,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    animation: pulse-badge 2s infinite;
 }
 
 .admin-avatar {
@@ -158,10 +165,15 @@
     }
 
     .page-title {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
     }
 
     .admin-content {
         padding: 1rem;
     }
+}
+
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
 }
