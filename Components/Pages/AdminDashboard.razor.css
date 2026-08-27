@@ -307,3 +307,11 @@
 .data-table-container table { border-collapse: collapse; width: 100%; }
 .data-table-container tr:not(:last-child) { border-bottom: 1px solid #f1f5f9; }
 .table-card .data-table-container { border-radius: 12px; overflow: hidden; }
+
+.summary-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+.summary-card { background: white; border: 1px solid #E8EDF2; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.summary-card-header { display: flex; align-items: center; justify-content: space-between; }
+.summary-icon-title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; color: #475569; }
+.summary-counter { background: #EF4444; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.summary-card-body h2 { font-size: 32px; font-weight: 700; color: #1E293B; margin: 0; line-height: 1; }
+.summary-status { font-size: 11px; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; margin-top: 4px; }

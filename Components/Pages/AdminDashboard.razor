@@ -45,66 +45,85 @@
     <div class="section-header">
         <h3 class="section-title">Requests Overview</h3>
     </div>
-    <div class="requests-overview">
-        <div class="request-category">
-            <div class="category-header">
-                <span class="category-icon">🏢</span>
-                <span class="category-label">Permintaan Fasilitas</span>
-                <span class="category-count">8</span>
+    <div class="summary-cards-grid">
+        <div class="summary-card">
+            <div class="summary-card-header">
+                <div class="summary-icon-title">
+                    <div class="icon-badge" style="background:#FCE7F3;color:#BE185D;">
+                        <img src="icon/coffee.svg" alt="Fasilitas" />
+                    </div>
+                    <span>Permintaan Fasilitas</span>
+                </div>
+                @if (facilityRequests.Count > 0)
+                {
+                    <span class="summary-counter">@facilityRequests.Count</span>
+                }
             </div>
-            @foreach (var req in facilityRequests.Take(2))
-            {
-                <ActionCard BorderColor="@req.Color" IconBgColor="@req.IconBg" IconFallback="@req.Icon"
-                    Title="@req.Title" ReferenceId="@req.Id" Subtitle="@req.Subtitle" SubtitleColor="@req.SubColor"
-                    ActionLabel="Proses" OnActionClick="() => { }" />
-            }
-            <a href="/facility-requests" class="view-all-link">Lihat Semua →</a>
+            <div class="summary-card-body">
+                <h2>@facilityRequests.Count</h2>
+                <span class="summary-status">PENDING</span>
+            </div>
         </div>
-        <div class="request-category">
-            <div class="category-header">
-                <span class="category-icon">👤</span>
-                <span class="category-label">Penghapusan Akun</span>
-                <span class="category-count">4</span>
+
+        <div class="summary-card">
+            <div class="summary-card-header">
+                <div class="summary-icon-title">
+                    <div class="icon-badge" style="background:#FEF3C7;color:#D97706;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="23" y2="12"/><line x1="23" y1="8" x2="19" y2="12"/></svg>
+                    </div>
+                    <span>Penghapusan Akun</span>
+                </div>
+                @if (accountRequests.Count > 0)
+                {
+                    <span class="summary-counter">@accountRequests.Count</span>
+                }
             </div>
-            @foreach (var req in accountRequests.Take(2))
-            {
-                <ActionCard BorderColor="@req.Color" IconBgColor="@req.IconBg" IconFallback="@req.Icon"
-                    Title="@req.Title" ReferenceId="@req.Id" Subtitle="@req.Subtitle" SubtitleColor="@req.SubColor"
-                    ActionLabel="Tinjau" OnActionClick="() => { }" />
-            }
-            <a href="/users" class="view-all-link">Lihat Semua →</a>
+            <div class="summary-card-body">
+                <h2>@accountRequests.Count</h2>
+                <span class="summary-status">PENDING</span>
+            </div>
         </div>
-        <div class="request-category">
-            <div class="category-header">
-                <span class="category-icon">🔧</span>
-                <span class="category-label">Tiket IT Support</span>
-                <span class="category-count">11</span>
+
+        <div class="summary-card">
+            <div class="summary-card-header">
+                <div class="summary-icon-title">
+                    <div class="icon-badge" style="background:#DBEAFE;color:#1D4ED8;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    </div>
+                    <span>Tiket IT Support</span>
+                </div>
+                @if (itRequests.Count > 0)
+                {
+                    <span class="summary-counter">@itRequests.Count</span>
+                }
             </div>
-            @foreach (var req in itRequests.Take(2))
-            {
-                <ActionCard BorderColor="@req.Color" IconBgColor="@req.IconBg" IconFallback="@req.Icon"
-                    Title="@req.Title" ReferenceId="@req.Id" Subtitle="@req.Subtitle" SubtitleColor="@req.SubColor"
-                    ActionLabel="Perbaiki" OnActionClick="() => { }" />
-            }
-            <a href="#" class="view-all-link">Lihat Semua →</a>
+            <div class="summary-card-body">
+                <h2>@itRequests.Count</h2>
+                <span class="summary-status">PENDING</span>
+            </div>
         </div>
-        <div class="request-category">
-            <div class="category-header">
-                <span class="category-icon">🐛</span>
-                <span class="category-label">Laporan Bug</span>
-                <span class="category-count">6</span>
+
+        <div class="summary-card">
+            <div class="summary-card-header">
+                <div class="summary-icon-title">
+                    <div class="icon-badge" style="background:#FEE2E2;color:#B91C1C;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v22"/><path d="m5 10 3 3-3 3"/><path d="m19 10-3 3 3 3"/><path d="M2 14h20"/><path d="M2 10h20"/><path d="M8 2h8"/></svg>
+                    </div>
+                    <span>Laporan Bug</span>
+                </div>
+                @if (bugRequests.Count > 0)
+                {
+                    <span class="summary-counter">@bugRequests.Count</span>
+                }
             </div>
-            @foreach (var req in bugRequests.Take(2))
-            {
-                <ActionCard BorderColor="@req.Color" IconBgColor="@req.IconBg" IconFallback="@req.Icon"
-                    Title="@req.Title" ReferenceId="@req.Id" Subtitle="@req.Subtitle" SubtitleColor="@req.SubColor"
-                    ActionLabel="Investigasi" OnActionClick="() => { }" />
-            }
-            <a href="#" class="view-all-link">Lihat Semua →</a>
+            <div class="summary-card-body">
+                <h2>@bugRequests.Count</h2>
+                <span class="summary-status">PENDING</span>
+            </div>
         </div>
     </div>
 
-    @* ── Bagian 3: Charts ── *@
+    @* -- Bagian 3: Charts ── *@
     <div class="charts-row">
         <div class="chart-card">
             <div class="chart-header">
@@ -113,7 +132,7 @@
                     <button class="chart-export-btn" title="Export">📥</button>
                 </div>
             </div>
-            <ApexChart TItem="TrendPoint" Options="_trendOptions" Height="260">
+            <ApexChart TItem="TrendPoint" Options="_trendOptions" Height="@("250px")">
                 <ApexPointSeries TItem="TrendPoint"
                                  Items="_trendData"
                                  Name="Booking"
@@ -129,7 +148,7 @@
                     <button class="chart-export-btn" title="Export">📥</button>
                 </div>
             </div>
-            <ApexChart TItem="RoomUsagePoint" Options="_donutOptions" Height="260">
+            <ApexChart TItem="RoomUsagePoint" Options="_donutOptions" Height="@("250px")">
                 <ApexPointSeries TItem="RoomUsagePoint"
                                  Items="_donutData"
                                  Name="Ruangan"
@@ -256,7 +275,7 @@
         };
         _trendOptions = new()
         {
-            Chart = new Chart { Type = ChartType.Area, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false }, Zoom = new Zoom { Enabled = false } },
+            Chart = new Chart { Type = ChartType.Area, Height = "260px", Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false }, Zoom = new Zoom { Enabled = false } },
             Stroke = new Stroke { Curve = Curve.Smooth, Width = 2 },
             Fill = new Fill { Opacity = 0.15, Type = FillType.Solid },
             DataLabels = new DataLabels { Enabled = false },
@@ -271,7 +290,7 @@
         _donutData = new() { new("Ruangan A", 35), new("Ruangan B", 25), new("Ruangan C", 20) };
         _donutOptions = new()
         {
-            Chart = new Chart { Type = ChartType.Donut, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 } },
+            Chart = new Chart { Type = ChartType.Donut, Height = "200px", Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 } },
             PlotOptions = new PlotOptions { Pie = new PlotOptionsPie { Donut = new PlotOptionsDonut { Size = "65%", Labels = new DonutLabels { Show = true, Value = new DonutLabelValue { Show = true, FontSize = "24px", FontWeight = "700", Color = "#1F3B5B" }, Total = new DonutLabelTotal { Show = true, Label = "TOTAL", FontSize = "10px", FontWeight = "600", Color = "#8A97A6", ShowAlways = true } } } } },
             DataLabels = new DataLabels { Enabled = false },
             Legend = new Legend { Position = LegendPosition.Bottom, FontSize = "11px", FontWeight = "500", Markers = new LegendMarkers { Width = 8, Height = 8, Radius = 2 }, ItemMargin = new LegendItemMargin { Horizontal = 8, Vertical = 4 } },
@@ -328,3 +347,7 @@
 
     public record HistoryBooking(string UserName, string Initials, string AvatarColor, string Department, string Room, string Schedule, string Status);
 }
+
+
+
+

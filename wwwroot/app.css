@@ -507,3 +507,234 @@ h1:focus {
 /* Global Icon Limits */
 button svg, .icon-badge svg, .btn-icon, .bm-action-btn img { max-width: 18px; max-height: 18px; flex-shrink: 0; }
 .btn-primary-pill, .btn-outline-pill { width: fit-content; }
+
+.admin-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid #E8EDF2;
+    padding: 0.6rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: 1px solid #E8EDF2;
+    border-radius: 8px;
+    width: 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #64748B;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.sidebar-toggle:hover {
+    background: #F1F5F9;
+    color: #1F3B5B;
+    border-color: #CBD5E1;
+}
+
+.topbar-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.page-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1F3B5B;
+    margin: 0;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.page-subtitle {
+    font-size: 0.7rem;
+    color: #8A97A6;
+    margin: 0;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-shrink: 0;
+}
+
+.topbar-search {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #F8FAFC;
+    border: 1px solid #E8EDF2;
+    border-radius: 8px;
+    padding: 0.35rem 0.75rem;
+    width: 220px;
+    transition: all 0.2s ease;
+}
+
+.topbar-search:focus-within {
+    border-color: #2563EB;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background: #fff;
+}
+
+.search-icon {
+    width: 0.85rem;
+    height: 0.85rem;
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+.topbar-search input {
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 0.75rem;
+    color: #374151;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+}
+
+.topbar-search input::placeholder {
+    color: #9CA3AF;
+}
+
+.date-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #ffffff;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #1F3B5B;
+    border: 1px solid #E8EDF2;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+}
+
+.date-filter:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+}
+
+.topbar-icon-btn {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #E8EDF2;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.topbar-icon-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    background: #EF4444;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse-badge 2s infinite;
+}
+
+.admin-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 10px;
+    transition: background 0.2s ease;
+}
+
+.admin-profile-btn:hover {
+    background: #F1F5F9;
+}
+
+.admin-avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: #152F4A;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.72rem;
+    flex-shrink: 0;
+}
+
+.admin-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.admin-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #1F3B5B;
+    white-space: nowrap;
+}
+
+.admin-role {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #8A97A6;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+
+
+.icon-sm { width: 0.9rem; height: 0.9rem; object-fit: contain; }
+.icon-md { width: 1.1rem; height: 1.1rem; object-fit: contain; }
+
+.admin-layout svg:not(.apexcharts-svg) { max-width: 24px; max-height: 24px; }
+.apexcharts-canvas svg { max-width: none !important; max-height: none !important; }

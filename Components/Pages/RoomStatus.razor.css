@@ -492,3 +492,4 @@
     padding: 0.4rem 0.75rem;
     font-size: 0.8rem;
 }
+.rs-card-inactive { border: 2px dashed #CBD5E1; background: #F8FAFC; opacity: 0.8; }

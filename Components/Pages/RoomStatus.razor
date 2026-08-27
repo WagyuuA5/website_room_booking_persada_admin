@@ -43,7 +43,7 @@
     <div class="rs-grid">
         @foreach (var room in filteredRooms)
         {
-            <div class="rs-card">
+            <div class="rs-card @(room.Status == "inactive" ? "rs-card-inactive" : "")">
                 <div class="rs-card-photo-container">
                     <div class="rs-card-photo">
                         <!-- Placeholder photo -->
@@ -83,11 +83,11 @@
                     <div class="rs-card-badge-top-right">
                         @if (room.Id % 3 == 0)
                         {
-                            <StatusBadge Text="3 in Queue" Type="StatusBadge.BadgeType.Indigo" />
+                            <StatusBadge Text="3 Dalam Antrian" Type="StatusBadge.BadgeType.Indigo" />
                         }
                         else if (room.Id % 2 == 0 && room.Status == "active")
                         {
-                            <StatusBadge Text="Just Finished" Type="StatusBadge.BadgeType.Green" />
+                            <StatusBadge Text="Baru Selesai" Type="StatusBadge.BadgeType.Green" />
                         }
                     </div>
                 </div>
@@ -215,7 +215,7 @@
         else
         {
             room.Status = "maintenance";
-            // Default 30 min if toggled directly
+            // Default 30 Menit if toggled directly
             room.MaintenanceEnd = DateTime.UtcNow.AddMinutes(30);
         }
         await RoomService.UpdateRoomAsync(room);
@@ -236,3 +236,6 @@
         selectedRoomForMaintenance = null;
     }
 }
+
+
+
