@@ -170,6 +170,8 @@
 }
 
 .bm-tab-badge {
+    background: #E8EDF2;
+    color: #475569;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -183,6 +185,10 @@
 }
 
 .bm-tab.active .bm-tab-badge {
+    background: #1F3B5B;
+    color: #fff;
+    background: #E8EDF2;
+    color: #475569;
     background: rgba(255,255,255,0.2);
     color: #ffffff;
 }
@@ -550,3 +556,17 @@
         -webkit-overflow-scrolling: touch;
     }
 }
+
+.bm-tab.active.pending { border-bottom-color: #F59E0B; color: #D97706; }
+.bm-tab.active.pending .bm-tab-badge { background: #F59E0B; color: #fff; }
+.bm-tab.active.approved { border-bottom-color: #10B981; color: #059669; }
+.bm-tab.active.approved .bm-tab-badge { background: #10B981; color: #fff; }
+.bm-tab.active.rejected_system { border-bottom-color: #EF4444; color: #DC2626; }
+.bm-tab.active.rejected_system .bm-tab-badge { background: #EF4444; color: #fff; }
+.bm-tab.active.rejected_admin { border-bottom-color: #EF4444; color: #DC2626; }
+.bm-tab.active.rejected_admin .bm-tab-badge { background: #EF4444; color: #fff; }
+
+.bm-card { align-items: center; }
+.bm-card > * { display: flex; align-items: center; }
+.bm-card-info, .bm-card-user { flex-direction: column; align-items: flex-start; justify-content: center; }
+.bm-card-actions { justify-content: flex-end; }

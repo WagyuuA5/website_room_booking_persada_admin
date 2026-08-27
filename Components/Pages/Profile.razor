@@ -1,7 +1,8 @@
 @page "/profile"
 @layout booking_room_admin.Components.Layout.MainLayout
-@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
+
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Profil Saya" PageSubtitle="Kelola informasi akun Anda." />
 <div class="profile-page">
     <div class="profile-card">
         <div class="profile-header-banner"></div>
@@ -52,7 +53,5 @@
 @code {
     protected override void OnInitialized()
     {
-        LayoutTitleService.Title = "Profil Saya";
-        LayoutTitleService.Subtitle = "Kelola informasi akun Anda.";
     }
 }

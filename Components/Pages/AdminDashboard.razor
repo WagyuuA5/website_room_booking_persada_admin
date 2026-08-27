@@ -2,8 +2,9 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using ApexCharts
 @using booking_room_admin.Components.Shared
-@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
+
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Dashboard Admin" PageSubtitle="Ringkasan performa sistem pemesanan ruangan perusahaan." />
 <div class="dashboard">
     @* ── Bagian 1: Ringkasan Statistik ── *@
     <div class="stats-grid">
@@ -216,8 +217,6 @@
 
     protected override void OnInitialized()
     {
-        LayoutTitleService.Title = "Dashboard Admin";
-        LayoutTitleService.Subtitle = "Ringkasan performa sistem pemesanan ruangan perusahaan.";
 
         InitRequestOverview();
         InitCharts();

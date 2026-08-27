@@ -2,9 +2,10 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
-@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 @inject booking_room_admin.Components.Services.IRoomService RoomService
 
+
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Status Ruangan" PageSubtitle="Pantau status operasional dan maintenance ruangan." />
 <div class="room-status">
     <div class="rs-breadcrumb">ADMINISTRASI</div>
     <div class="rs-header">
@@ -154,8 +155,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        LayoutTitleService.Title = "Status Ruangan";
-        LayoutTitleService.Subtitle = "Pantau dan kelola ketersediaan ruangan secara real-time.";
 
         await LoadRooms();
 

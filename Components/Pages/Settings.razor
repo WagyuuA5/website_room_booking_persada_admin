@@ -1,8 +1,9 @@
 @page "/settings"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
-@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
+
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Pengaturan Sistem" PageSubtitle="Konfigurasi preferensi dan kebijakan aplikasi." />
 <div class="settings-page">
     @* Security *@
     <div class="settings-section">
@@ -207,8 +208,6 @@
 
     protected override void OnInitialized()
     {
-        LayoutTitleService.Title = "Pengaturan";
-        LayoutTitleService.Subtitle = "Kelola konfigurasi sistem dan preferensi.";
     }
 
     private string GetPanelTitle() => activePanel switch

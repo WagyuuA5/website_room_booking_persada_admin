@@ -2,8 +2,9 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
-@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
+
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Permintaan Fasilitas" PageSubtitle="Tinjau dan proses permintaan tambahan fasilitas." />
 <div class="facility-requests">
     <div class="fr-toolbar">
         <div class="fr-tabs">
@@ -175,8 +176,6 @@
 
     protected override void OnInitialized()
     {
-        LayoutTitleService.Title = "Permintaan Fasilitas";
-        LayoutTitleService.Subtitle = "Kelola semua permintaan fasilitas dari pengguna.";
 
         allRequests = new()
         {

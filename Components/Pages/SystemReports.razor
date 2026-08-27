@@ -3,8 +3,9 @@
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Shared.ReportTabs
 @using ApexCharts
-@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
+
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Laporan Sistem" PageSubtitle="Wawasan menyeluruh tentang utilisasi ruangan, permintaan fasilitas, dan dukungan IT." />
 <div class="system-reports">
 
     <div class="sr-toolbar">
@@ -94,8 +95,6 @@
 @code {
     protected override void OnInitialized()
     {
-        LayoutTitleService.Title = "Laporan Sistem";
-        LayoutTitleService.Subtitle = "Wawasan menyeluruh tentang utilisasi ruangan, permintaan fasilitas, dan dukungan IT.";
     }
 
     private string selectedTab = "booking";

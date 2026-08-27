@@ -9,7 +9,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddApexCharts();
-builder.Services.AddScoped<LayoutTitleService>();
+builder.Services.AddScoped<booking_room_admin.Components.Services.LayoutStateService>();
 builder.Services.AddScoped<booking_room_admin.Components.Services.IUserService, booking_room_admin.Components.Services.UserService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
@@ -33,3 +33,4 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+

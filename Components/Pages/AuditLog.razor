@@ -2,8 +2,9 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
-@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
+
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Audit Log" PageSubtitle="Catatan lengkap semua aktivitas dalam sistem." />
 <div class="audit-log">
     <div class="audit-header">
         <div>
@@ -105,8 +106,6 @@
 
     protected override void OnInitialized()
     {
-        LayoutTitleService.Title = "Audit Log";
-        LayoutTitleService.Subtitle = "Riwayat semua aktivitas admin dalam sistem.";
 
         columns = new()
         {

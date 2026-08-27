@@ -2,8 +2,9 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
-@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
+
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Kalender Ruangan" PageSubtitle="Tinjauan jadwal semua ruangan dalam format kalender." />
 <div class="room-calendar">
     <div class="rc-header">
         <div class="rc-title-group">
@@ -132,7 +133,6 @@
 
     protected override void OnInitialized()
     {
-        LayoutTitleService.Title = "Kalender Ruangan";
     }
 
     private void SetView(bool isadmin)

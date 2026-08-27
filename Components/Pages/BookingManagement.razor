@@ -2,9 +2,10 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
-@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 @inject booking_room_admin.Components.Services.IBookingService BookingService
 
+
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Manajemen Booking" PageSubtitle="Kelola seluruh pemesanan ruangan perusahaan." />
 <div class="booking-management">
     <div class="bm-header">
         <div class="bm-title-group">
@@ -31,7 +32,7 @@
     <div class="bm-tabs">
         @foreach (var tab in statusTabs)
         {
-            <button class="bm-tab @(selectedStatus == tab.Key ? "active" : "")" @onclick="() => SelectStatus(tab.Key)">
+            <button class="bm-tab @(selectedStatus == tab.Key ? "active" : "") @(tab.Key)" @onclick="() => SelectStatus(tab.Key)">
                 <span>@tab.Label</span>
                 <span class="bm-tab-badge">@tab.Count</span>
             </button>
@@ -129,7 +130,6 @@
 
     protected override void OnInitialized()
     {
-        LayoutTitleService.Title = "Manajemen Booking";
         LoadData();
     }
 

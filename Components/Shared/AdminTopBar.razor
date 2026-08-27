@@ -1,0 +1,135 @@
+@using booking_room_admin.Components.Shared
+@inject booking_room_admin.Components.Services.LayoutStateService LayoutState
+@inject NavigationManager Navigation
+
+<header class="admin-topbar">
+    <div class="topbar-left">
+        <button class="sidebar-toggle" @onclick="LayoutState.ToggleSidebar" title="Toggle Sidebar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <div class="topbar-title-group">
+            <h1 class="page-title">@PageTitle</h1>
+            @if (!string.IsNullOrWhiteSpace(PageSubtitle))
+            {
+                <p class="page-subtitle">@PageSubtitle</p>
+            }
+        </div>
+    </div>
+    <div class="topbar-right">
+        <div class="topbar-search">
+            <img src="icon/search.svg" alt="Cari" class="search-icon" />
+            <input type="text" placeholder="Cari menu, ruangan, user..." />
+        </div>
+        <div class="date-filter" @onclick="ToggleDatePicker">
+            <img src="icon/icon_6_admin.svg" alt="Kalender" class="icon-sm" />
+            <span>@dateRangeLabel</span>
+        </div>
+        <div class="topbar-icon-btn notification-btn" @onclick="ToggleNotification">
+            <img src="icon/icon_7_admin.svg" alt="Notifikasi" class="icon-md" />
+            @if (unreadCount > 0)
+            {
+                <span class="notification-badge">@unreadCount</span>
+            }
+        </div>
+        <div class="admin-profile-btn" @onclick="ToggleProfilePopup">
+            <div class="admin-avatar">
+                <span>WA</span>
+            </div>
+            <div class="admin-info">
+                <span class="admin-name">Admin Wahyu</span>
+                <span class="admin-role">PENGONTROL SISTEM</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => { showDatePicker = v; StateHasChanged(); })" OnDateSelected="OnDateSelected" />
+<NotificationPopup IsOpen="@showNotification" IsOpenChanged="@((bool v) => { showNotification = v; StateHasChanged(); })" />
+
+@if (showProfilePopup)
+{
+    <div class="profile-popup-overlay" @onclick="() => showProfilePopup = false">
+        <div class="profile-popup-menu" @onclick:stopPropagation="true">
+            <div class="profile-header">
+                <div class="admin-avatar lg">WA</div>
+                <div>
+                    <strong>Admin Wahyu</strong>
+                    <div class="text-sm text-gray">wahyu.admin@persada.co.id</div>
+                </div>
+            </div>
+            <hr />
+            <div class="profile-details">
+                <div class="pd-row"><span>Jabatan:</span> <strong>Pengontrol Sistem</strong></div>
+                <div class="pd-row"><span>Divisi:</span> <strong>IT & Infrastructure</strong></div>
+                <div class="pd-row"><span>Lokasi:</span> <strong>Kantor Pusat, Lt. 14</strong></div>
+                <div class="pd-row"><span>Terakhir Login:</span> <strong>Hari ini, 08:30 WIB</strong></div>
+            </div>
+            <hr />
+            <button class="profile-menu-item" @onclick="NavigateToProfile">
+                ⚙️ Pengaturan Profil
+            </button>
+            <button class="profile-menu-item text-danger">
+                🚪 Keluar
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string PageTitle { get; set; } = "Dashboard";
+
+    [Parameter]
+    public string PageSubtitle { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<DateTime?> OnDateSelectedCallback { get; set; }
+
+    private bool showDatePicker = false;
+    private bool showNotification = false;
+    private bool showProfilePopup = false;
+    private string dateRangeLabel = "01 Okt - 31 Okt 2026";
+    private int unreadCount = 3;
+
+    private void ToggleDatePicker()
+    {
+        showDatePicker = !showDatePicker;
+        if (showDatePicker) { showNotification = false; showProfilePopup = false; }
+    }
+
+    private void ToggleNotification()
+    {
+        showNotification = !showNotification;
+        if (showNotification) { showDatePicker = false; showProfilePopup = false; }
+    }
+
+    private void ToggleProfilePopup()
+    {
+        showProfilePopup = !showProfilePopup;
+        if (showProfilePopup) { showDatePicker = false; showNotification = false; }
+    }
+
+    private void OnDateSelected(DateTime? date)
+    {
+        if (date.HasValue)
+        {
+            dateRangeLabel = date.Value.ToString("dd MMM yyyy");
+            OnDateSelectedCallback.InvokeAsync(date.Value);
+            // Here you would trigger an event for the page to refresh data
+        }
+        showDatePicker = false;
+        StateHasChanged();
+    }
+
+    private void NavigateToProfile()
+    {
+        showProfilePopup = false;
+        Navigation.NavigateTo("/profile");
+    }
+}
+
+
