@@ -1,9 +1,11 @@
 @page "/dashboard"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using ApexCharts
+@using booking_room_admin.Components.Shared
 @inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
 <div class="dashboard">
+    @* ── Bagian 1: Ringkasan Statistik ── *@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_1_admin.svg" alt="Ruangan" /></div>
@@ -17,74 +19,98 @@
             <div class="stat-info">
                 <span class="stat-label">Total Pengguna<br>Terdaftar</span>
                 <span class="stat-value">124</span>
-                <span class="stat-trend up">+8%</span>
+                <span class="stat-trend up">↑ +12%</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_4_admin.svg" alt="Booking" /></div>
             <div class="stat-info">
                 <span class="stat-label">Total Pengguna<br>Booking</span>
-                <span class="stat-value">72</span>
-                <span class="stat-trend up">+4%</span>
+                <span class="stat-value">86</span>
+                <span class="stat-trend up">↑ +8%</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_3_admin.svg" alt="Utilisasi" /></div>
             <div class="stat-info">
                 <span class="stat-label">Rata-rata<br>Utilisasi</span>
-                <span class="stat-value">86%</span>
-                <span class="stat-trend up">+6%</span>
+                <span class="stat-value">72%</span>
+                <span class="stat-trend up">↑ +5%</span>
             </div>
         </div>
     </div>
 
-    <div class="requests-grid">
-        <div class="request-card">
-            <div class="request-icon"><img src="icon/coffee.svg" alt="Fasilitas" /></div>
-            <div class="request-info">
-                <span class="request-label">Permintaan Fasilitas</span>
-                <div class="request-meta">
-                    <span class="request-number">8</span>
-                    <span class="request-status">MENUNGGU</span>
-                </div>
+    @* ── Bagian 2: Requests Overview dengan ActionCard ── *@
+    <div class="section-header">
+        <h3 class="section-title">Requests Overview</h3>
+    </div>
+    <div class="requests-overview">
+        <div class="request-category">
+            <div class="category-header">
+                <span class="category-icon">🏢</span>
+                <span class="category-label">Permintaan Fasilitas</span>
+                <span class="category-count">8</span>
             </div>
+            @foreach (var req in facilityRequests.Take(2))
+            {
+                <ActionCard BorderColor="@req.Color" IconBgColor="@req.IconBg" IconFallback="@req.Icon"
+                    Title="@req.Title" ReferenceId="@req.Id" Subtitle="@req.Subtitle" SubtitleColor="@req.SubColor"
+                    ActionLabel="Proses" OnActionClick="() => { }" />
+            }
+            <a href="/facility-requests" class="view-all-link">Lihat Semua →</a>
         </div>
-        <div class="request-card">
-            <div class="request-icon"><img src="icon/icon_9_admin.svg" alt="Akun" /></div>
-            <div class="request-info">
-                <span class="request-label">Penghapusan Akun</span>
-                <div class="request-meta">
-                    <span class="request-number">4</span>
-                    <span class="request-status">MENUNGGU</span>
-                </div>
+        <div class="request-category">
+            <div class="category-header">
+                <span class="category-icon">👤</span>
+                <span class="category-label">Penghapusan Akun</span>
+                <span class="category-count">4</span>
             </div>
+            @foreach (var req in accountRequests.Take(2))
+            {
+                <ActionCard BorderColor="@req.Color" IconBgColor="@req.IconBg" IconFallback="@req.Icon"
+                    Title="@req.Title" ReferenceId="@req.Id" Subtitle="@req.Subtitle" SubtitleColor="@req.SubColor"
+                    ActionLabel="Tinjau" OnActionClick="() => { }" />
+            }
+            <a href="/users" class="view-all-link">Lihat Semua →</a>
         </div>
-        <div class="request-card">
-            <div class="request-icon"><img src="icon/icon_10_admin.svg" alt="IT" /></div>
-            <div class="request-info">
-                <span class="request-label">Tiket Dukungan IT</span>
-                <div class="request-meta">
-                    <span class="request-number">11</span>
-                    <span class="request-status">MENUNGGU</span>
-                </div>
+        <div class="request-category">
+            <div class="category-header">
+                <span class="category-icon">🔧</span>
+                <span class="category-label">Tiket IT Support</span>
+                <span class="category-count">11</span>
             </div>
+            @foreach (var req in itRequests.Take(2))
+            {
+                <ActionCard BorderColor="@req.Color" IconBgColor="@req.IconBg" IconFallback="@req.Icon"
+                    Title="@req.Title" ReferenceId="@req.Id" Subtitle="@req.Subtitle" SubtitleColor="@req.SubColor"
+                    ActionLabel="Perbaiki" OnActionClick="() => { }" />
+            }
+            <a href="#" class="view-all-link">Lihat Semua →</a>
         </div>
-        <div class="request-card">
-            <div class="request-icon"><img src="icon/icon_11_admin.svg" alt="Bug" /></div>
-            <div class="request-info">
-                <span class="request-label">Laporan Bug</span>
-                <div class="request-meta">
-                    <span class="request-number">6</span>
-                    <span class="request-status">MENUNGGU</span>
-                </div>
+        <div class="request-category">
+            <div class="category-header">
+                <span class="category-icon">🐛</span>
+                <span class="category-label">Laporan Bug</span>
+                <span class="category-count">6</span>
             </div>
+            @foreach (var req in bugRequests.Take(2))
+            {
+                <ActionCard BorderColor="@req.Color" IconBgColor="@req.IconBg" IconFallback="@req.Icon"
+                    Title="@req.Title" ReferenceId="@req.Id" Subtitle="@req.Subtitle" SubtitleColor="@req.SubColor"
+                    ActionLabel="Investigasi" OnActionClick="() => { }" />
+            }
+            <a href="#" class="view-all-link">Lihat Semua →</a>
         </div>
     </div>
 
+    @* ── Bagian 3: Charts ── *@
     <div class="charts-row">
-        <div class="chart-card wide">
+        <div class="chart-card">
             <div class="chart-header">
                 <h3>Tren Booking</h3>
+                <div class="chart-actions">
+                    <button class="chart-export-btn" title="Export">📥</button>
+                </div>
             </div>
             <ApexChart TItem="TrendPoint" Options="_trendOptions" Height="260">
                 <ApexPointSeries TItem="TrendPoint"
@@ -98,6 +124,9 @@
         <div class="chart-card">
             <div class="chart-header">
                 <h3>Ruangan Paling Sering Digunakan</h3>
+                <div class="chart-actions">
+                    <button class="chart-export-btn" title="Export">📥</button>
+                </div>
             </div>
             <ApexChart TItem="RoomUsagePoint" Options="_donutOptions" Height="260">
                 <ApexPointSeries TItem="RoomUsagePoint"
@@ -110,139 +139,125 @@
         </div>
     </div>
 
+    @* ── Bagian 4: Recent Requests ── *@
     <div class="tables-row">
         <div class="table-card">
             <div class="table-header">
                 <h3>Permintaan Terbaru</h3>
-                <a href="#" class="table-link">LIHAT SEMUA PERMINTAAN HUB &gt;</a>
+                <a href="/facility-requests" class="table-link">LIHAT SEMUA DI REQUESTS HUB →</a>
             </div>
-            <div class="table-wrapper">
-                <table class="modern-table">
-                    <thead>
-                        <tr>
-                            <th>JENIS PERMINTAAN</th>
-                            <th>PEMOHON</th>
-                            <th>RINGKASAN</th>
-                            <th>STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><span class="td-primary">Permintaan Fasilitas</span></td>
-                            <td><span class="td-primary">Rina Kartika</span></td>
-                            <td>Peminjaman ruang meeting lt 3</td>
-                            <td><span class="badge badge-pending">Baru</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="td-primary">Laporan Bug</span></td>
-                            <td><span class="td-primary">Dimas Prasetyo</span></td>
-                            <td>Error 500 saat submit form booking</td>
-                            <td><span class="badge badge-progress">Dikerjakan</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="td-primary">Penghapusan Akun</span></td>
-                            <td><span class="td-primary">Sari Wulandari</span></td>
-                            <td>Penghapusan akun karyawan resign</td>
-                            <td><span class="badge badge-progress">Dikerjakan</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="td-primary">Tiket Dukungan IT</span></td>
-                            <td><span class="td-primary">Budi Santoso</span></td>
-                            <td>Reset password email korporat</td>
-                            <td><span class="badge badge-confirmed">Selesai</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="td-primary">Permintaan Fasilitas</span></td>
-                            <td><span class="td-primary">Andi Saputra</span></td>
-                            <td>Permintaan katering rapat direksi</td>
-                            <td><span class="badge badge-pending">Baru</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <DataTable TItem="RecentRequest" Items="recentRequests" Columns="requestColumns" TotalCount="@recentRequests.Count" PageSize="5" CurrentPage="1" OnRowClick="HandleRequestClick">
+                <RowTemplate Context="req">
+                    <td>
+                        <div class="req-type-cell">
+                            <span class="req-type-icon" style="background: @req.TypeColor">@req.TypeIcon</span>
+                            <span class="td-primary">@req.Type</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar-sm" style="background: @req.AvatarColor">@req.Initials</div>
+                            <div>
+                                <span class="td-primary">@req.RequesterName</span>
+                                <span class="td-secondary">@req.Department</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>@req.Summary</td>
+                    <td><StatusBadge Status="@req.Status" /></td>
+                </RowTemplate>
+            </DataTable>
         </div>
+
+        @* ── Bagian 5: History Bookings ── *@
         <div class="table-card">
             <div class="table-header">
                 <h3>Riwayat Booking</h3>
-                <a href="#" class="table-link">SEMUA</a>
+                <a href="/booking-management" class="table-link">SEMUA</a>
             </div>
-            <div class="table-wrapper">
-                <table class="modern-table">
-                    <thead>
-                        <tr>
-                            <th>PENGGUNA</th>
-                            <th>RUANGAN</th>
-                            <th>JADWAL</th>
-                            <th>STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><span class="td-primary">Ahmad Fauzi</span><span class="td-secondary">Marketing</span></td>
-                            <td><span class="td-primary">Ruang Rapat A</span></td>
-                            <td>20 Sep 2026, 09:00 - 11:00</td>
-                            <td><span class="badge badge-confirmed">Dikonfirmasi</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="td-primary">Siti Nurhaliza</span><span class="td-secondary">Keuangan</span></td>
-                            <td><span class="td-primary">Ruang Rapat B</span></td>
-                            <td>20 Sep 2026, 13:00 - 15:00</td>
-                            <td><span class="badge badge-pending">Menunggu</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="td-primary">Budi Santoso</span><span class="td-secondary">HRD</span></td>
-                            <td><span class="td-primary">Ruang Diskusi</span></td>
-                            <td>19 Sep 2026, 10:00 - 12:00</td>
-                            <td><span class="badge badge-rejected">Ditolak</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="td-primary">Dewi Kartika</span><span class="td-secondary">IT Support</span></td>
-                            <td><span class="td-primary">Ruang Rapat Utama</span></td>
-                            <td>19 Sep 2026, 14:00 - 16:00</td>
-                            <td><span class="badge badge-confirmed">Dikonfirmasi</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <DataTable TItem="HistoryBooking" Items="historyBookings" Columns="bookingColumns" TotalCount="@historyBookings.Count" PageSize="5" CurrentPage="1">
+                <RowTemplate Context="booking">
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar-sm" style="background: @booking.AvatarColor">@booking.Initials</div>
+                            <div>
+                                <span class="td-primary">@booking.UserName</span>
+                                <span class="td-secondary">@booking.Department</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="td-primary">@booking.Room</span></td>
+                    <td>@booking.Schedule</td>
+                    <td><StatusBadge Status="@booking.Status" /></td>
+                </RowTemplate>
+            </DataTable>
         </div>
     </div>
 </div>
 
 @code {
+    // ── Chart data ──
     private List<TrendPoint> _trendData = new();
     private ApexChartOptions<TrendPoint> _trendOptions = new();
     private List<RoomUsagePoint> _donutData = new();
     private ApexChartOptions<RoomUsagePoint> _donutOptions = new();
+
+    // ── Request overview data (ActionCard) ──
+    private List<RequestItem> facilityRequests = new();
+    private List<RequestItem> accountRequests = new();
+    private List<RequestItem> itRequests = new();
+    private List<RequestItem> bugRequests = new();
+
+    // ── Table data ──
+    private List<RecentRequest> recentRequests = new();
+    private List<HistoryBooking> historyBookings = new();
+    private List<DataTable<RecentRequest>.DataTableColumn> requestColumns = new();
+    private List<DataTable<HistoryBooking>.DataTableColumn> bookingColumns = new();
 
     protected override void OnInitialized()
     {
         LayoutTitleService.Title = "Dashboard Admin";
         LayoutTitleService.Subtitle = "Ringkasan performa sistem pemesanan ruangan perusahaan.";
 
-        _trendData = new List<TrendPoint>
-        {
-            new("Mei", 18),
-            new("Jun", 24),
-            new("Jul", 35),
-            new("Ags", 28),
-            new("Sep", 42),
-            new("Okt", 38)
-        };
+        InitRequestOverview();
+        InitCharts();
+        InitTables();
+    }
 
-        _trendOptions = new ApexChartOptions<TrendPoint>
+    private void InitRequestOverview()
+    {
+        facilityRequests = new()
         {
-            Chart = new Chart
-            {
-                Type = ChartType.Area,
-                Animations = new Animations
-                {
-                    Enabled = true,
-                    Easing = Easing.Easeinout,
-                    Speed = 800
-                },
-                Toolbar = new Toolbar { Show = false },
-                Zoom = new Zoom { Enabled = false }
-            },
+            new("Permintaan Katering", "FAC-2241", "Rapat Direksi — 2 jam lalu", "#F59E0B", "#FEF3C7", "🍽️", "#92400E"),
+            new("Peralatan AV", "FAC-2238", "Ruang Rapat A — 5 jam lalu", "#F59E0B", "#FEF3C7", "📺", "#92400E"),
+        };
+        accountRequests = new()
+        {
+            new("Sari Wulandari", "ACC-1102", "Karyawan resign — Menunggu", "#EF4444", "#FEE2E2", "👤", "#991B1B"),
+            new("Rudi Hartono", "ACC-1099", "Mutasi cabang — Menunggu", "#F59E0B", "#FEF3C7", "👤", "#92400E"),
+        };
+        itRequests = new()
+        {
+            new("Server Down", "IT-4421", "Server utama — 4 jam lalu", "#EF4444", "#FEE2E2", "🖥️", "#991B1B"),
+            new("Reset Email", "IT-4418", "Belum Ditugaskan", "#F59E0B", "#FEF3C7", "📧", "#92400E"),
+        };
+        bugRequests = new()
+        {
+            new("Error 500 Submit Form", "BUG-102", "Form Booking — Kritis", "#EF4444", "#FEE2E2", "🐛", "#991B1B"),
+            new("Kalender Tidak Sinkron", "BUG-099", "Modul Calendar — Medium", "#F59E0B", "#FEF3C7", "📅", "#92400E"),
+        };
+    }
+
+    private void InitCharts()
+    {
+        _trendData = new()
+        {
+            new("Mei", 18), new("Jun", 24), new("Jul", 35),
+            new("Ags", 28), new("Sep", 42), new("Okt", 88)
+        };
+        _trendOptions = new()
+        {
+            Chart = new Chart { Type = ChartType.Area, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false }, Zoom = new Zoom { Enabled = false } },
             Stroke = new Stroke { Curve = Curve.Smooth, Width = 2 },
             Fill = new Fill { Opacity = 0.15, Type = FillType.Solid },
             DataLabels = new DataLabels { Enabled = false },
@@ -250,72 +265,67 @@
             Xaxis = new XAxis { Categories = _trendData.Select(d => d.Bulan).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "11px", Colors = new List<string> { "#8A97A6" } } } },
             Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "11px", Colors = new List<string> { "#8A97A6" } } } } },
             Grid = new Grid { BorderColor = "#E8EDF2", StrokeDashArray = 4 },
-            Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 }
+            Colors = new List<string> { "#152F4A" },
+            Theme = new Theme { Mode = Mode.Light }
         };
 
-        _donutData = new List<RoomUsagePoint>
+        _donutData = new() { new("Ruangan A", 35), new("Ruangan B", 25), new("Ruangan C", 20) };
+        _donutOptions = new()
         {
-            new("Ruangan A", 35),
-            new("Ruangan B", 25),
-            new("Ruangan C", 20)
-        };
-
-        _donutOptions = new ApexChartOptions<RoomUsagePoint>
-        {
-            Chart = new Chart
-            {
-                Type = ChartType.Donut,
-                Animations = new Animations
-                {
-                    Enabled = true,
-                    Easing = Easing.Easeinout,
-                    Speed = 800
-                }
-            },
-            PlotOptions = new PlotOptions
-            {
-                Pie = new PlotOptionsPie
-                {
-                    Donut = new PlotOptionsDonut
-                    {
-                        Size = "65%",
-                        Labels = new DonutLabels
-                        {
-                            Show = true,
-                            Value = new DonutLabelValue
-                            {
-                                Show = true,
-                                FontSize = "24px",
-                                FontWeight = "700",
-                                Color = "#1F3B5B"
-                            },
-                            Total = new DonutLabelTotal
-                            {
-                                Show = true,
-                                Label = "TOTAL",
-                                FontSize = "10px",
-                                FontWeight = "600",
-                                Color = "#8A97A6",
-                                ShowAlways = true
-                            }
-                        }
-                    }
-                }
-            },
+            Chart = new Chart { Type = ChartType.Donut, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 } },
+            PlotOptions = new PlotOptions { Pie = new PlotOptionsPie { Donut = new PlotOptionsDonut { Size = "65%", Labels = new DonutLabels { Show = true, Value = new DonutLabelValue { Show = true, FontSize = "24px", FontWeight = "700", Color = "#1F3B5B" }, Total = new DonutLabelTotal { Show = true, Label = "TOTAL", FontSize = "10px", FontWeight = "600", Color = "#8A97A6", ShowAlways = true } } } } },
             DataLabels = new DataLabels { Enabled = false },
-            Legend = new Legend
-            {
-                Position = LegendPosition.Bottom,
-                FontSize = "11px",
-                FontWeight = "500",
-                Markers = new LegendMarkers { Width = 8, Height = 8, Radius = 2 },
-                ItemMargin = new LegendItemMargin { Horizontal = 8, Vertical = 4 }
-            },
+            Legend = new Legend { Position = LegendPosition.Bottom, FontSize = "11px", FontWeight = "500", Markers = new LegendMarkers { Width = 8, Height = 8, Radius = 2 }, ItemMargin = new LegendItemMargin { Horizontal = 8, Vertical = 4 } },
+            Colors = new List<string> { "#152F4A", "#2563EB", "#94A3B8" },
             Stroke = new Stroke { Width = 0 },
-            Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 }
+            Theme = new Theme { Mode = Mode.Light }
         };
     }
 
+    private void InitTables()
+    {
+        requestColumns = new()
+        {
+            new() { Header = "JENIS PERMINTAAN", PropertyName = "Type" },
+            new() { Header = "PEMOHON", PropertyName = "RequesterName" },
+            new() { Header = "RINGKASAN", PropertyName = "Summary" },
+            new() { Header = "STATUS", PropertyName = "Status" },
+        };
+
+        recentRequests = new()
+        {
+            new("Facility", "🏢", "#DBEAFE", "Rina Kartika", "RK", "#2563EB", "IT Dept", "Peminjaman proyektor ruang meeting lt 3", "baru"),
+            new("Bug", "🐛", "#FEE2E2", "Dimas Prasetyo", "DP", "#EF4444", "Engineering", "Error 500 saat submit form booking", "diproses"),
+            new("Account", "👤", "#FED7AA", "Sari Wulandari", "SW", "#F59E0B", "Marketing", "Penghapusan akun karyawan resign", "diproses"),
+            new("IT", "🔧", "#D1FAE5", "Budi Santoso", "BS", "#10B981", "HR Dept", "Reset password email korporat", "selesai"),
+            new("Facility", "🏢", "#DBEAFE", "Andi Saputra", "AS", "#2563EB", "IT Dept", "Request catering rapat direksi", "baru"),
+        };
+
+        bookingColumns = new()
+        {
+            new() { Header = "PENGGUNA", PropertyName = "UserName" },
+            new() { Header = "RUANGAN", PropertyName = "Room" },
+            new() { Header = "JADWAL", PropertyName = "Schedule" },
+            new() { Header = "STATUS", PropertyName = "Status" },
+        };
+
+        historyBookings = new()
+        {
+            new("Andi Saputra", "AS", "#2563EB", "IT Dept", "R. (B)", "24-10-23, 09:00 - 11:00", "pending"),
+            new("Budi Santoso", "BS", "#10B981", "HR Dept", "R. (D)", "24-10-23, 13:00 - 15:00", "confirmed"),
+            new("Dian Pertiwi", "DP", "#F59E0B", "Marketing", "R. (C)", "25-10-23, 14:00 - 16:00", "rejected"),
+        };
+    }
+
+    private void HandleRequestClick(RecentRequest req) { }
+
+    // ── Records ──
     public record TrendPoint(string Bulan, int Jumlah);
     public record RoomUsagePoint(string NamaRuangan, int Jumlah);
+
+    public record RequestItem(string Title, string Id, string Subtitle, string Color, string IconBg, string Icon, string SubColor);
+
+    public record RecentRequest(string Type, string TypeIcon, string TypeColor, string RequesterName, string Initials, string AvatarColor, string Department, string Summary, string Status);
+
+    public record HistoryBooking(string UserName, string Initials, string AvatarColor, string Department, string Room, string Schedule, string Status);
 }
