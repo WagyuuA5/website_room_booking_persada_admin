@@ -1,135 +1,130 @@
 @using booking_room_admin.Components.Models
-<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
-    <div class="popup-card manual-booking-card" @onclick:stopPropagation="true">
-        <div class="mb-header">
-            <div>
-                <h2 class="mb-title">Booking Manual</h2>
-                <p class="mb-subtitle">Jadwalkan sumber daya atau ruangan baru</p>
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Size="xlarge">
+    <HeaderContent>
+        <div>
+            <h2 class="mb-title">Booking Manual</h2>
+            <p class="mb-subtitle">Jadwalkan sumber daya atau ruangan baru</p>
+        </div>
+    </HeaderContent>
+    <ChildContent>
+        <div class="mb-row">
+            <div class="mb-field">
+                <label class="mb-label">Nama Pemesan (Nama Lengkap)</label>
+                <input type="text" class="mb-input" placeholder="Masukkan nama lengkap" @bind="form.FullName" />
             </div>
-            <button class="popup-close" @onclick="Close">&times;</button>
+            <div class="mb-field">
+                <label class="mb-label">Divisi</label>
+                <select class="mb-input" @bind="form.Division">
+                    <option value="">Pilih divisi</option>
+                    @foreach (var div in divisions)
+                    {
+                        <option value="@div">@div</option>
+                    }
+                </select>
+            </div>
         </div>
 
-        <div class="mb-body">
-            <div class="mb-row">
-                <div class="mb-field">
-                    <label class="mb-label">Nama Pemesan (Nama Lengkap)</label>
-                    <input type="text" class="mb-input" placeholder="Masukkan nama lengkap" @bind="form.FullName" />
-                </div>
-                <div class="mb-field">
-                    <label class="mb-label">Divisi</label>
-                    <select class="mb-input" @bind="form.Division">
-                        <option value="">Pilih divisi</option>
-                        @foreach (var div in divisions)
-                        {
-                            <option value="@div">@div</option>
-                        }
-                    </select>
-                </div>
-            </div>
-
-            <div class="mb-field">
-                <label class="mb-label">Pilih Ruangan</label>
-                <div class="mb-room-grid">
-                    @foreach (var room in availableRooms)
-                    {
-                        <button class="mb-room-card @(form.SelectedRoomId == room.Id ? "selected" : "") @(room.IsBooked ? "booked" : "")" @onclick="() => SelectRoom(room)" disabled="@room.IsBooked">
-                            <span class="mb-room-status @(room.IsBooked ? "status-booked" : "status-available")">@(room.IsBooked ? "Dipesan" : "Tersedia")</span>
-                            <div class="mb-room-icon">🏢</div>
-                            <div class="mb-room-name">@room.Name</div>
-                            <div class="mb-room-cap">Kapasitas: @room.Capacity Orang</div>
-                        </button>
-                    }
-                </div>
-            </div>
-
-            <div class="mb-row">
-                <div class="mb-field">
-                    <label class="mb-label">Tanggal</label>
-                    <input type="date" class="mb-input" @bind="form.Date" />
-                </div>
-                <div class="mb-field">
-                    <label class="mb-label">Waktu (Mulai - Selesai)</label>
-                    <div class="mb-time-group">
-                        <input type="time" class="mb-input mb-time-input" @bind="form.StartTime" />
-                        <span class="mb-time-sep">—</span>
-                        <input type="time" class="mb-input mb-time-input" @bind="form.EndTime" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-field">
-                <label class="mb-label">Undang Peserta</label>
-                <div class="mb-attendees">
-                    <div class="mb-attendee-search">
-                        <input type="text" class="mb-input" placeholder="Undang kolega..." @bind="attendeeQuery" @bind:event="oninput" @onkeyup="SearchAttendees" />
-                    </div>
-                    <div class="mb-capacity">
-                        <div class="mb-capacity-bar">
-                            <div class="mb-capacity-fill" style="width: @($"{Math.Min(100, (double)form.Attendees.Count / (selectedRoom?.Capacity ?? 12) * 100)}%")"></div>
-                        </div>
-                        <span class="mb-capacity-text">@form.Attendees.Count dari @(selectedRoom?.Capacity ?? 12) Kapasitas Ruangan</span>
-                    </div>
-                    @if (attendeeSuggestions.Any())
-                    {
-                        <div class="mb-attendee-dropdown">
-                            @foreach (var suggestion in attendeeSuggestions.Take(5))
-                            {
-                                <div class="mb-attendee-option" @onclick="() => AddAttendee(suggestion)">
-                                    <div class="mb-attendee-avatar">@suggestion.Initials</div>
-                                    <div>
-                                        <div class="mb-attendee-name">@suggestion.Name</div>
-                                        <div class="mb-attendee-div">@suggestion.Division</div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
-                    <div class="mb-attendee-chips">
-                        @foreach (var att in form.Attendees)
-                        {
-                            <span class="mb-chip">
-                                @att.Name
-                                <button class="mb-chip-remove" @onclick="() => RemoveAttendee(att)">&times;</button>
-                            </span>
-                        }
-                        @if (conflictAttendees.Any())
-                        {
-                            <span class="mb-chip mb-chip-conflict">
-                                ⚠ Potensi bentrok jadwal
-                                <button class="mb-chip-remove" @onclick="ClearConflicts">&times;</button>
-                            </span>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-field">
-                <label class="mb-toggle">
-                    <input type="checkbox" @bind="form.InviteExternal" />
-                    <span class="mb-toggle-slider"></span>
-                    <span class="mb-toggle-label">Undang tamu eksternal</span>
-                </label>
-                @if (form.InviteExternal)
+        <div class="mb-field">
+            <label class="mb-label">Pilih Ruangan</label>
+            <div class="mb-room-grid">
+                @foreach (var room in availableRooms)
                 {
-                    <input type="email" class="mb-input mt-3" placeholder="Email Tamu (cth. tamu@perusahaan.com)" @bind="form.GuestEmail" />
+                    <button class="mb-room-card @(form.SelectedRoomId == room.Id ? "selected" : "") @(room.IsBooked ? "booked" : "")" @onclick="() => SelectRoom(room)" disabled="@room.IsBooked">
+                        <span class="mb-room-status @(room.IsBooked ? "status-booked" : "status-available")">@(room.IsBooked ? "Dipesan" : "Tersedia")</span>
+                        <div class="mb-room-icon">🏢</div>
+                        <div class="mb-room-name">@room.Name</div>
+                        <div class="mb-room-cap">Kapasitas: @room.Capacity Orang</div>
+                    </button>
                 }
             </div>
+        </div>
 
+        <div class="mb-row">
             <div class="mb-field">
-                <label class="mb-label">Catatan / Permintaan Khusus</label>
-                <textarea class="mb-textarea" placeholder="Kebutuhan peralatan, katering, dsb." rows="3" @bind="form.Notes"></textarea>
+                <label class="mb-label">Tanggal</label>
+                <input type="date" class="mb-input" @bind="form.Date" />
+            </div>
+            <div class="mb-field">
+                <label class="mb-label">Waktu (Mulai - Selesai)</label>
+                <div class="mb-time-group">
+                    <input type="time" class="mb-input mb-time-input" @bind="form.StartTime" />
+                    <span class="mb-time-sep">—</span>
+                    <input type="time" class="mb-input mb-time-input" @bind="form.EndTime" />
+                </div>
             </div>
         </div>
 
-        <div class="mb-footer">
-            <button class="btn-outline-pill" @onclick="Close">Batal</button>
-            <button class="btn-primary-pill btn-yellow" @onclick="ConfirmBooking">
-                <img src="icon/check.svg" alt="Konfirmasi" class="btn-icon" />
-                Konfirmasi Booking
-            </button>
+        <div class="mb-field">
+            <label class="mb-label">Undang Peserta</label>
+            <div class="mb-attendees">
+                <div class="mb-attendee-search">
+                    <input type="text" class="mb-input" placeholder="Undang kolega..." @bind="attendeeQuery" @bind:event="oninput" @onkeyup="SearchAttendees" />
+                </div>
+                <div class="mb-capacity">
+                    <div class="mb-capacity-bar">
+                        <div class="mb-capacity-fill" style="width: @($"{Math.Min(100, (double)form.Attendees.Count / (selectedRoom?.Capacity ?? 12) * 100)}%")"></div>
+                    </div>
+                    <span class="mb-capacity-text">@form.Attendees.Count dari @(selectedRoom?.Capacity ?? 12) Kapasitas Ruangan</span>
+                </div>
+                @if (attendeeSuggestions.Any())
+                {
+                    <div class="mb-attendee-dropdown">
+                        @foreach (var suggestion in attendeeSuggestions.Take(5))
+                        {
+                            <div class="mb-attendee-option" @onclick="() => AddAttendee(suggestion)">
+                                <div class="mb-attendee-avatar">@suggestion.Initials</div>
+                                <div>
+                                    <div class="mb-attendee-name">@suggestion.Name</div>
+                                    <div class="mb-attendee-div">@suggestion.Division</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                <div class="mb-attendee-chips">
+                    @foreach (var att in form.Attendees)
+                    {
+                        <span class="mb-chip">
+                            @att.Name
+                            <button class="mb-chip-remove" @onclick="() => RemoveAttendee(att)">&times;</button>
+                        </span>
+                    }
+                    @if (conflictAttendees.Any())
+                    {
+                        <span class="mb-chip mb-chip-conflict">
+                            ⚠ Potensi bentrok jadwal
+                            <button class="mb-chip-remove" @onclick="ClearConflicts">&times;</button>
+                        </span>
+                    }
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+
+        <div class="mb-field">
+            <label class="mb-toggle">
+                <input type="checkbox" @bind="form.InviteExternal" />
+                <span class="mb-toggle-slider"></span>
+                <span class="mb-toggle-label">Undang tamu eksternal</span>
+            </label>
+            @if (form.InviteExternal)
+            {
+                <input type="email" class="mb-input mt-3" placeholder="Email Tamu (cth. tamu@perusahaan.com)" @bind="form.GuestEmail" />
+            }
+        </div>
+
+        <div class="mb-field">
+            <label class="mb-label">Catatan / Permintaan Khusus</label>
+            <textarea class="mb-textarea" placeholder="Kebutuhan peralatan, katering, dsb." rows="3" @bind="form.Notes"></textarea>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn-outline-pill" @onclick="Close">Batal</button>
+        <button class="btn-primary-pill btn-yellow" @onclick="ConfirmBooking">
+            <img src="icon/check.svg" alt="Konfirmasi" class="btn-icon" />
+            Konfirmasi Booking
+        </button>
+    </FooterContent>
+</AppModal>
 
 @code {
     [Parameter] public bool IsOpen { get; set; }

@@ -10,6 +10,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddApexCharts();
 builder.Services.AddScoped<LayoutTitleService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 
 var app = builder.Build();
 

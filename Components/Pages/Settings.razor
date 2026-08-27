@@ -1,0 +1,227 @@
+@page "/settings"
+@layout booking_room_admin.Components.Layout.MainLayout
+@using booking_room_admin.Components.Shared
+@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
+
+<div class="settings-page">
+    @* Security *@
+    <div class="settings-section">
+        <h3 class="settings-section-title">🔒 Keamanan</h3>
+        <div class="settings-list">
+            <div class="settings-item" @onclick="@(() => activePanel = "password")">
+                <div class="settings-item-left">
+                    <span class="settings-item-icon">🔑</span>
+                    <div>
+                        <span class="settings-item-label">Ubah Password</span>
+                        <span class="settings-item-desc">Ganti password login Anda</span>
+                    </div>
+                </div>
+                <span class="settings-chevron">›</span>
+            </div>
+            <div class="settings-item" @onclick="@(() => activePanel = "2fa")">
+                <div class="settings-item-left">
+                    <span class="settings-item-icon">📱</span>
+                    <div>
+                        <span class="settings-item-label">PIN / Verifikasi 2 Langkah</span>
+                        <span class="settings-item-desc">Tambahkan lapisan keamanan ekstra</span>
+                    </div>
+                </div>
+                <span class="settings-chevron">›</span>
+            </div>
+            <div class="settings-item" @onclick="@(() => activePanel = "sessions")">
+                <div class="settings-item-left">
+                    <span class="settings-item-icon">💻</span>
+                    <div>
+                        <span class="settings-item-label">Sesi & Perangkat Aktif</span>
+                        <span class="settings-item-desc">Kelola perangkat yang sedang login</span>
+                    </div>
+                </div>
+                <span class="settings-chevron">›</span>
+            </div>
+        </div>
+    </div>
+
+    @* Preferences *@
+    <div class="settings-section">
+        <h3 class="settings-section-title">⚙️ Preferensi</h3>
+        <div class="settings-list">
+            <div class="settings-item" @onclick="@(() => activePanel = "notifications")">
+                <div class="settings-item-left">
+                    <span class="settings-item-icon">🔔</span>
+                    <div>
+                        <span class="settings-item-label">Notifikasi</span>
+                        <span class="settings-item-desc">Atur jenis notifikasi yang diterima</span>
+                    </div>
+                </div>
+                <span class="settings-chevron">›</span>
+            </div>
+            <div class="settings-item" @onclick="@(() => activePanel = "language")">
+                <div class="settings-item-left">
+                    <span class="settings-item-icon">🌐</span>
+                    <div>
+                        <span class="settings-item-label">Bahasa & Zona Waktu</span>
+                        <span class="settings-item-desc">Indonesia (WIB, UTC+7)</span>
+                    </div>
+                </div>
+                <span class="settings-chevron">›</span>
+            </div>
+        </div>
+    </div>
+
+    @* Booking System *@
+    <div class="settings-section">
+        <h3 class="settings-section-title">📅 Sistem Booking</h3>
+        <div class="settings-list">
+            <div class="settings-item" @onclick="@(() => activePanel = "hours")">
+                <div class="settings-item-left">
+                    <span class="settings-item-icon">🕐</span>
+                    <div>
+                        <span class="settings-item-label">Jam Operasional & Aturan Booking</span>
+                        <span class="settings-item-desc">08:00 - 18:00, maks 4 jam per booking</span>
+                    </div>
+                </div>
+                <span class="settings-chevron">›</span>
+            </div>
+            <div class="settings-item" @onclick="@(() => activePanel = "roles")">
+                <div class="settings-item-left">
+                    <span class="settings-item-icon">👥</span>
+                    <div>
+                        <span class="settings-item-label">Manajemen Role & Permission</span>
+                        <span class="settings-item-desc">Admin, Approver, Employee</span>
+                    </div>
+                </div>
+                <span class="settings-chevron">›</span>
+            </div>
+            <div class="settings-item" @onclick="@(() => activePanel = "calendar")">
+                <div class="settings-item-left">
+                    <span class="settings-item-icon">📧</span>
+                    <div>
+                        <span class="settings-item-label">Integrasi Kalender & Email</span>
+                        <span class="settings-item-desc">Google Calendar, Outlook</span>
+                    </div>
+                </div>
+                <span class="settings-chevron">›</span>
+            </div>
+        </div>
+    </div>
+
+    @* Appearance *@
+    <div class="settings-section">
+        <h3 class="settings-section-title">🎨 Tampilan</h3>
+        <div class="settings-list">
+            <div class="settings-item" @onclick="@(() => activePanel = "brand")">
+                <div class="settings-item-left">
+                    <span class="settings-item-icon">🖼️</span>
+                    <div>
+                        <span class="settings-item-label">Logo & Warna Brand</span>
+                        <span class="settings-item-desc">Kustomisasi tampilan aplikasi</span>
+                    </div>
+                </div>
+                <span class="settings-chevron">›</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Setting Detail Panels *@
+@if (!string.IsNullOrEmpty(activePanel))
+{
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) activePanel = null; })" Title="@GetPanelTitle()" Size="medium">
+        <ChildContent>
+            @switch (activePanel)
+            {
+                case "password":
+                    <div class="panel-form">
+                        <label class="form-label">Password Lama</label>
+                        <input type="password" class="form-input" placeholder="Masukkan password lama" />
+                        <label class="form-label">Password Baru</label>
+                        <input type="password" class="form-input" placeholder="Masukkan password baru" />
+                        <label class="form-label">Konfirmasi Password Baru</label>
+                        <input type="password" class="form-input" placeholder="Ulangi password baru" />
+                    </div>
+                    break;
+                case "hours":
+                    <div class="panel-form">
+                        <label class="form-label">Jam Buka</label>
+                        <input type="time" class="form-input" value="08:00" />
+                        <label class="form-label">Jam Tutup</label>
+                        <input type="time" class="form-input" value="18:00" />
+                        <label class="form-label">Durasi Maksimal Booking (jam)</label>
+                        <input type="number" class="form-input" value="4" min="1" max="8" />
+                        <label class="form-label">Booking di Luar Jam Kerja</label>
+                        <div class="toggle-row">
+                            <span>Izinkan</span>
+                            <input type="checkbox" class="toggle-switch" />
+                        </div>
+                    </div>
+                    break;
+                case "roles":
+                    <div class="panel-form">
+                        <div class="role-card">
+                            <span class="role-name">Admin Sistem</span>
+                            <span class="role-desc">Akses penuh ke seluruh modul dan pengaturan</span>
+                        </div>
+                        <div class="role-card">
+                            <span class="role-name">Approver</span>
+                            <span class="role-desc">Dapat menyetujui/menolak booking, tidak bisa kelola user</span>
+                        </div>
+                        <div class="role-card">
+                            <span class="role-name">Employee</span>
+                            <span class="role-desc">Hanya bisa membuat booking dan melihat statusnya</span>
+                        </div>
+                    </div>
+                    break;
+                case "brand":
+                    <div class="panel-form">
+                        <label class="form-label">Logo Aplikasi</label>
+                        <div class="upload-area">
+                            <span>Drag & drop atau klik untuk upload logo</span>
+                            <small>SVG, PNG, JPG (maks 2MB)</small>
+                        </div>
+                        <label class="form-label">Warna Primer</label>
+                        <div class="color-row">
+                            <input type="color" value="#152F4A" class="color-input" />
+                            <span class="color-hex">#152F4A</span>
+                        </div>
+                        <label class="form-label">Warna Aksen</label>
+                        <div class="color-row">
+                            <input type="color" value="#FACC15" class="color-input" />
+                            <span class="color-hex">#FACC15</span>
+                        </div>
+                    </div>
+                    break;
+                default:
+                    <p class="panel-placeholder">Pengaturan ini akan segera tersedia.</p>
+                    break;
+            }
+        </ChildContent>
+        <FooterContent>
+            <button class="btn-outline-pill" @onclick="() => activePanel = null">Batal</button>
+            <button class="btn-primary-pill" @onclick="() => activePanel = null">Simpan Perubahan</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@code {
+    private string? activePanel;
+
+    protected override void OnInitialized()
+    {
+        LayoutTitleService.Title = "Pengaturan";
+        LayoutTitleService.Subtitle = "Kelola konfigurasi sistem dan preferensi.";
+    }
+
+    private string GetPanelTitle() => activePanel switch
+    {
+        "password" => "Ubah Password",
+        "2fa" => "Verifikasi 2 Langkah",
+        "sessions" => "Sesi & Perangkat Aktif",
+        "notifications" => "Pengaturan Notifikasi",
+        "language" => "Bahasa & Zona Waktu",
+        "hours" => "Jam Operasional & Aturan Booking",
+        "roles" => "Manajemen Role & Permission",
+        "calendar" => "Integrasi Kalender & Email",
+        "brand" => "Logo & Warna Brand",
+        _ => "Pengaturan"
+    };
+}

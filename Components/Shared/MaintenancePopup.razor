@@ -1,63 +1,77 @@
 @using booking_room_admin.Components.Models
 
-<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
-    <div class="popup-card maintenance-card" @onclick:stopPropagation="true">
-        <div class="m-header">
-            <div>
-                <h2 class="m-title">Jadwalkan Perawatan</h2>
-                <p class="m-subtitle">@Room?.Name</p>
-            </div>
-            <button class="popup-close" @onclick="Close">&times;</button>
-        </div>
-
-        @if (step == 1)
-        {
-            <div class="m-body">
-                <div class="m-section-title">Kategori Perawatan</div>
-                <div class="m-category-grid">
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="⚠ MAINTENANCE ⚠" Size="medium" OnClose="Close">
+    <ChildContent>
+        <div class="m-body">
+            <p class="m-subtitle" style="font-weight:600; margin-bottom: 1rem;">@Room?.Name (@Room?.Floor)</p>
+            
+            <div class="m-field" style="margin-bottom: 1rem;">
+                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Kategori</label>
+                <select class="m-input" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" @bind="selectedCategory">
+                    <option value="">Pilih Kategori</option>
                     @foreach (var cat in categories)
                     {
-                        <button class="m-category-btn @(selectedCategory == cat ? "selected" : "")" @onclick="() => selectedCategory = cat">
-                            <span class="m-category-emoji">@GetCategoryEmoji(cat)</span>
-                            <span>@cat</span>
-                        </button>
+                        <option value="@cat">@cat</option>
                     }
+                </select>
+            </div>
+            
+            <div class="m-field" style="margin-bottom: 1rem;">
+                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Prioritas</label>
+                <select class="m-input" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" @bind="selectedPriority">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                </select>
+            </div>
+
+            <div class="m-field" style="margin-bottom: 1rem;">
+                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Fasilitas yang Diperbaiki</label>
+                <div class="m-facilities-chips" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+                    @foreach (var fac in facilitiesServiced)
+                    {
+                        <span style="padding:0.25rem 0.5rem; background:#f3f4f6; border-radius:1rem; font-size:0.85rem; cursor:pointer;" @onclick="() => facilitiesServiced.Remove(fac)">@fac ✕</span>
+                    }
+                    <button style="padding:0.25rem 0.5rem; background:#e5e7eb; border:none; border-radius:1rem; font-size:0.85rem; cursor:pointer;" @onclick="AddCustomFacility">+ Add</button>
                 </div>
-            </div>
-            <div class="m-footer">
-                <button class="btn-outline-pill" @onclick="Close">Batal</button>
-                <button class="btn-primary-pill btn-yellow" disabled="@string.IsNullOrEmpty(selectedCategory)" @onclick="NextStep">Lanjut</button>
-            </div>
-        }
-        else if (step == 2)
-        {
-            <div class="m-body">
-                <div class="m-section-title">Prioritas & Durasi</div>
-                <div class="m-field">
-                    <label class="m-label">Prioritas</label>
-                    <div class="m-priority-group">
-                        @foreach (var prio in priorities)
-                        {
-                            <button class="m-priority-btn @(selectedPriority == prio ? "selected" : "")" @onclick="() => selectedPriority = prio">@prio</button>
-                        }
+                @if(showAddFacility)
+                {
+                    <div style="margin-top:0.5rem; display:flex; gap:0.5rem;">
+                        <input type="text" @bind="newFacility" placeholder="Nama fasilitas..." style="flex:1; padding:0.25rem; border:1px solid #ccc; border-radius:4px;" />
+                        <button @onclick="ConfirmAddFacility" style="padding:0.25rem 0.5rem; background:#2563eb; color:white; border:none; border-radius:4px; cursor:pointer;">Tambah</button>
                     </div>
-                </div>
-                <div class="m-field">
-                    <label class="m-label">Durasi Perawatan</label>
-                    <select class="m-input" @bind="selectedDuration">
-                        <option value="20">20 Menit</option>
-                        <option value="30">30 Menit</option>
-                        <option value="60">1 Jam</option>
-                    </select>
+                }
+            </div>
+            
+            <div class="m-field" style="margin-bottom: 1rem;">
+                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Durasi (Cepat)</label>
+                <div style="display:flex; gap:0.5rem;">
+                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="20"?"#2563eb":"#fff"); color:@(selectedDuration=="20"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "20")">20 Min</button>
+                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="30"?"#2563eb":"#fff"); color:@(selectedDuration=="30"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "30")">30 Min</button>
+                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="60"?"#2563eb":"#fff"); color:@(selectedDuration=="60"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "60")">1 Hour</button>
                 </div>
             </div>
-            <div class="m-footer">
-                <button class="btn-outline-pill" @onclick="PrevStep">Kembali</button>
-                <button class="btn-primary-pill btn-yellow" @onclick="ConfirmMaintenance">Konfirmasi</button>
+
+            <div class="m-field" style="margin-bottom: 1rem;">
+                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Deskripsi</label>
+                <textarea style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px; min-height:80px;" @bind="description"></textarea>
             </div>
-        }
-    </div>
-</div>
+
+            <div class="m-field" style="margin-bottom: 1rem;">
+                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Upload Dokumentasi</label>
+                <div style="width:100%; padding:2rem; border:2px dashed #ccc; border-radius:4px; text-align:center; background:#f9fafb; color:#6b7280; font-size:0.9rem;">
+                    Drag & Drop file di sini (max 5MB)
+                </div>
+            </div>
+
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn-outline-pill" @onclick="Close">Batal</button>
+        <button class="btn-primary-pill btn-yellow" @onclick="ConfirmMaintenance">Konfirmasi Maintenance</button>
+    </FooterContent>
+</AppModal>
 
 @code {
     [Parameter] public bool IsOpen { get; set; }
@@ -65,22 +79,30 @@
     [Parameter] public EventCallback<Room> OnMaintenanceScheduled { get; set; }
     [Parameter] public Room? Room { get; set; }
 
-    private int step = 1;
     private string selectedCategory = string.Empty;
-    private string selectedPriority = "Sedang";
+    private string selectedPriority = "Medium";
     private string selectedDuration = "30";
+    private string description = string.Empty;
+    
+    private List<string> facilitiesServiced = new() { "AC", "Proyektor" };
+    private bool showAddFacility = false;
+    private string newFacility = string.Empty;
 
-    private List<string> categories = new() { "Listrik", "AC", "Proyektor", "Plumbing", "Internet", "Lainnya" };
-    private List<string> priorities = new() { "Rendah", "Sedang", "Tinggi" };
+    private List<string> categories = new() { "HVAC", "Equipment Repair", "Plumbing", "Electrical", "Cleaning" };
 
-    private void NextStep()
+    private void AddCustomFacility()
     {
-        step = 2;
+        showAddFacility = true;
     }
 
-    private void PrevStep()
+    private void ConfirmAddFacility()
     {
-        step = 1;
+        if (!string.IsNullOrWhiteSpace(newFacility) && !facilitiesServiced.Contains(newFacility))
+        {
+            facilitiesServiced.Add(newFacility);
+        }
+        newFacility = string.Empty;
+        showAddFacility = false;
     }
 
     private void ConfirmMaintenance()
@@ -89,6 +111,7 @@
 
         Room.Status = "maintenance";
         Room.MaintenanceEnd = DateTime.UtcNow.AddMinutes(int.Parse(selectedDuration));
+        // You could update Room description or something here if needed.
 
         OnMaintenanceScheduled.InvokeAsync(Room);
         Close();
@@ -103,23 +126,11 @@
 
     private void Reset()
     {
-        step = 1;
         selectedCategory = string.Empty;
-        selectedPriority = "Sedang";
+        selectedPriority = "Medium";
         selectedDuration = "30";
-    }
-
-    private string GetCategoryEmoji(string category)
-    {
-        return category.ToLowerInvariant() switch
-        {
-            "listrik" => "⚡",
-            "ac" => "❄️",
-            "proyektor" => "📽️",
-            "plumbing" => "🚿",
-            "internet" => "📶",
-            "lainnya" => "🔧",
-            _ => "🔧"
-        };
+        description = string.Empty;
+        facilitiesServiced = new() { "AC", "Proyektor" };
+        showAddFacility = false;
     }
 }

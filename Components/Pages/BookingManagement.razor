@@ -3,6 +3,7 @@
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
 @inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
+@inject booking_room_admin.Components.Services.IBookingService BookingService
 
 <div class="booking-management">
     <div class="bm-header">
@@ -119,14 +120,7 @@
     private string selectedDateLabel = "12 Okt 2026";
     private string selectedStatus = "all";
 
-    private List<StatusTab> statusTabs = new()
-    {
-        new("all", "Semua", 42),
-        new("pending", "Menunggu", 8),
-        new("approved", "Disetujui", 28),
-        new("rejected_system", "Ditolak Sistem", 4),
-        new("rejected_admin", "Ditolak Admin", 2)
-    };
+    private List<StatusTab> statusTabs = new();
 
     private List<Booking> allBookings = new();
     private List<Booking> filteredBookings => FilterBookings();
@@ -136,110 +130,19 @@
     protected override void OnInitialized()
     {
         LayoutTitleService.Title = "Manajemen Booking";
-        allBookings = new List<Booking>
+        LoadData();
+    }
+
+    private void LoadData()
+    {
+        allBookings = BookingService.GetAllBookings();
+        statusTabs = new List<StatusTab>
         {
-            new Booking
-            {
-                Id = 1,
-                Title = "Sesi Strategi Q3",
-                Room = "Ruang Dirantara",
-                Date = new DateTime(2026, 10, 15),
-                StartTime = "09:00",
-                EndTime = "11:00",
-                Duration = "2 Jam",
-                RequesterName = "Ahmad Fauzi",
-                RequesterDivision = "Eksekutif",
-                RequesterInitials = "AF",
-                ParticipantsCount = 8,
-                Status = "pending",
-                IsRecurring = false,
-                AccentColor = "warning"
-            },
-            new Booking
-            {
-                Id = 2,
-                Title = "Review Produk Mingguan",
-                Room = "Ruang Rapat A",
-                Date = new DateTime(2026, 10, 15),
-                StartTime = "13:00",
-                EndTime = "14:30",
-                Duration = "1 Jam 30 Menit",
-                RequesterName = "Siti Nurhaliza",
-                RequesterDivision = "Produk",
-                RequesterInitials = "SN",
-                ParticipantsCount = 12,
-                Status = "approved",
-                IsRecurring = true,
-                AccentColor = "info"
-            },
-            new Booking
-            {
-                Id = 3,
-                Title = "Onboarding Karyawan Baru",
-                Room = "Ruang Diskusi",
-                Date = new DateTime(2026, 10, 16),
-                StartTime = "10:00",
-                EndTime = "12:00",
-                Duration = "2 Jam",
-                RequesterName = "Budi Santoso",
-                RequesterDivision = "HRD",
-                RequesterInitials = "BS",
-                ParticipantsCount = 6,
-                Status = "pending",
-                IsRecurring = false,
-                AccentColor = "danger"
-            },
-            new Booking
-            {
-                Id = 4,
-                Title = "Sprint Planning",
-                Room = "Ruang Rapat B",
-                Date = new DateTime(2026, 10, 16),
-                StartTime = "14:00",
-                EndTime = "16:00",
-                Duration = "2 Jam",
-                RequesterName = "Dewi Kartika",
-                RequesterDivision = "Engineering",
-                RequesterInitials = "DK",
-                ParticipantsCount = 10,
-                Status = "approved",
-                IsRecurring = true,
-                AccentColor = "info"
-            },
-            new Booking
-            {
-                Id = 5,
-                Title = "Evaluasi Vendor",
-                Room = "Ruang Rapat Utama",
-                Date = new DateTime(2026, 10, 17),
-                StartTime = "09:30",
-                EndTime = "11:30",
-                Duration = "2 Jam",
-                RequesterName = "Rizky Hidayat",
-                RequesterDivision = "Pengadaan",
-                RequesterInitials = "RH",
-                ParticipantsCount = 15,
-                Status = "rejected_system",
-                IsRecurring = false,
-                AccentColor = "warning"
-            },
-            new Booking
-            {
-                Id = 6,
-                Title = "Workshop Digital Marketing",
-                Room = "Ruang Dirantara",
-                Date = new DateTime(2026, 10, 17),
-                StartTime = "13:00",
-                EndTime = "15:00",
-                Duration = "2 Jam",
-                RequesterName = "Maya Putri",
-                RequesterDivision = "Marketing",
-                RequesterInitials = "MP",
-                ParticipantsCount = 20,
-                Status = "rejected_admin",
-                IsRecurring = false,
-                AccentColor = "danger"
-            }
+            new("all", "Semua", allBookings.Count),
+            new("pending", "Menunggu", allBookings.Count(b => b.Status == "pending")),
+            new("approved", "Disetujui", allBookings.Count(b => b.Status == "approved")),
+            new("rejected_system", "Ditolak Sistem", allBookings.Count(b => b.Status == "rejected_system")),
+            new("rejected_admin", "Ditolak Admin", allBookings.Count(b => b.Status == "rejected_admin"))
         };
     }
 
@@ -335,6 +238,8 @@
     private void ApproveBooking(Booking booking)
     {
         booking.Status = "approved";
+        BookingService.UpdateBooking(booking);
+        LoadData();
         showDetail = false;
         selectedBooking = null;
     }
@@ -342,13 +247,16 @@
     private void RejectBooking(Booking booking)
     {
         booking.Status = "rejected_admin";
+        BookingService.UpdateBooking(booking);
+        LoadData();
         showDetail = false;
         selectedBooking = null;
     }
 
     private void OnBookingCreated(Booking booking)
     {
-        allBookings.Add(booking);
+        BookingService.AddBooking(booking);
+        LoadData();
         showManual = false;
     }
 

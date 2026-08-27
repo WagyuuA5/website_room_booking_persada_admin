@@ -1,34 +1,45 @@
 @using booking_room_admin.Components.Models
 
-<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
-    <div class="popup-card detail-room-card" @onclick:stopPropagation="true">
-        <div class="dr-header">
-            <div>
-                <h2 class="dr-title">@Room?.Name</h2>
-                <p class="dr-subtitle">@Room?.Floor · @Room?.Type</p>
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Size="large" OnClose="Close">
+    <HeaderContent>
+        <div class="dr-header-photo-container">
+            <div class="dr-header-photo-placeholder">
+                <img src="icon/icon_1_admin.svg" alt="Ruangan" />
             </div>
-            <button class="popup-close" @onclick="Close">&times;</button>
+            <div class="dr-header-overlay">
+                <h2 class="dr-title-overlay">@Room?.Name</h2>
+                <p class="dr-subtitle-overlay">@Room?.Floor · @Room?.Type</p>
+                <div class="dr-header-badges">
+                    @if (Room?.Status == "maintenance")
+                    {
+                        <StatusBadge Text="Perawatan" Type="StatusBadge.BadgeType.Amber" />
+                    }
+                    else
+                    {
+                        <StatusBadge Text="Aktif" Type="StatusBadge.BadgeType.Green" />
+                    }
+                    <StatusBadge Text="@($"{Room?.Capacity} Orang")" Type="StatusBadge.BadgeType.Indigo" />
+                </div>
+            </div>
+            <button class="modal-close" @onclick="Close" title="Tutup" style="position: absolute; top: 1rem; right: 1rem; color: #fff; background: rgba(0,0,0,0.3); border-radius: 50%; padding: 0.5rem;">✕</button>
         </div>
-
-        <div class="dr-body">
-            <div class="dr-status-row">
-                <span class="dr-badge @(Room?.Status == "active" ? "badge-active" : "badge-maintenance")">
-                    @(Room?.Status == "active" ? "Aktif" : "Perawatan")
-                </span>
-                <span class="dr-capacity">
-                    <img src="icon/people.svg" alt="Kapasitas" class="dr-meta-icon" />
-                    @Room?.Capacity Orang
-                </span>
+    </HeaderContent>
+    <ChildContent>
+        <div class="dr-body" style="margin-top: 1rem;">
+            <div class="dr-section">
+                <div class="dr-section-title">Deskripsi Ruangan</div>
+                <p class="dr-desc" style="font-size: 0.95rem; line-height: 1.6; color: #4b5563;">@Room?.Description</p>
             </div>
-
-            <p class="dr-desc">@Room?.Description</p>
 
             <div class="dr-section">
                 <div class="dr-section-title">Fasilitas</div>
-                <div class="dr-tags">
+                <div class="dr-facilities-grid">
                     @foreach (var tag in Room?.Facilities ?? new())
                     {
-                        <span class="dr-tag">@tag</span>
+                        <div class="dr-facility-item">
+                            <img src="icon/check.svg" alt="Check" class="dr-facility-icon" style="width: 1rem; height: 1rem;" />
+                            <span>@tag</span>
+                        </div>
                     }
                 </div>
             </div>
@@ -47,16 +58,15 @@
                 </div>
             </div>
         </div>
-
-        <div class="dr-footer">
-            <button class="btn-outline-pill" @onclick="Close">Tutup</button>
-            <button class="btn-primary-pill btn-yellow" @onclick="EditRoom">
-                <img src="icon/icon_14_admin.svg" alt="Ubah" class="btn-icon" />
-                Ubah Ruangan
-            </button>
-        </div>
-    </div>
-</div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn-outline-pill" @onclick="Close">Tutup</button>
+        <button class="btn-primary-pill btn-yellow" @onclick="EditRoom">
+            <img src="icon/icon_14_admin.svg" alt="Ubah" class="btn-icon" />
+            Ubah Ruangan
+        </button>
+    </FooterContent>
+</AppModal>
 
 @code {
     [Parameter] public bool IsOpen { get; set; }

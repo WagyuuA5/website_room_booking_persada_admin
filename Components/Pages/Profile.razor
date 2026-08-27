@@ -1,0 +1,58 @@
+@page "/profile"
+@layout booking_room_admin.Components.Layout.MainLayout
+@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
+
+<div class="profile-page">
+    <div class="profile-card">
+        <div class="profile-header-banner"></div>
+        <div class="profile-content">
+            <div class="profile-avatar-container">
+                <div class="profile-avatar">WA</div>
+                <button class="btn-change-avatar" title="Ubah Foto">📷</button>
+            </div>
+            
+            <div class="profile-info-grid">
+                <div class="info-group">
+                    <label class="info-label">Nama Lengkap</label>
+                    <input type="text" class="info-input" value="Admin Wahyu" />
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Email</label>
+                    <input type="email" class="info-input" value="wahyu.admin@persada.co.id" disabled />
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Peran (Role)</label>
+                    <input type="text" class="info-input" value="System Controller" disabled />
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Departemen</label>
+                    <input type="text" class="info-input" value="IT & Infrastructure" />
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Nomor Telepon</label>
+                    <input type="tel" class="info-input" value="+62 812-3456-7890" />
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Zona Waktu</label>
+                    <select class="info-input">
+                        <option value="wib" selected>Asia/Jakarta (WIB)</option>
+                        <option value="wita">Asia/Makassar (WITA)</option>
+                        <option value="wit">Asia/Jayapura (WIT)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button class="btn-primary">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        LayoutTitleService.Title = "Profil Saya";
+        LayoutTitleService.Subtitle = "Kelola informasi akun Anda.";
+    }
+}

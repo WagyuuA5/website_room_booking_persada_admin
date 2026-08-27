@@ -3,6 +3,7 @@
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
 @inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
+@inject booking_room_admin.Components.Services.IRoomService RoomService
 
 <div class="room-management">
     <div class="rm-breadcrumb">ADMINISTRASI</div>
@@ -42,34 +43,48 @@
         @foreach (var room in filteredRooms)
         {
             <div class="rm-card" @onclick="() => OpenDetail(room)">
-                <div class="rm-card-header">
-                    <div class="rm-card-icon">
-                        <img src="icon/icon_1_admin.svg" alt="Ruangan" />
+                <div class="rm-card-photo-container">
+                    <div class="rm-card-photo">
+                        <!-- Placeholder photo -->
+                        <div class="rm-photo-placeholder">
+                            <img src="icon/icon_1_admin.svg" alt="Ruangan" />
+                        </div>
                     </div>
-                    <span class="rm-card-status @(room.Status == "active" ? "status-active" : "status-maintenance")">
-                        @(room.Status == "active" ? "Aktif" : "Perawatan")
-                    </span>
+                    <div class="rm-card-badge-top-left">
+                        <StatusBadge Text="@($"{room.Capacity} Orang")" Type="StatusBadge.BadgeType.Indigo" />
+                    </div>
+                    @if (room.Status == "maintenance")
+                    {
+                        <div class="rm-card-badge-top-right">
+                            <StatusBadge Text="Perawatan" Type="StatusBadge.BadgeType.Amber" />
+                        </div>
+                    }
                 </div>
-                <h3 class="rm-card-name">@room.Name</h3>
-                <p class="rm-card-desc">@room.Description</p>
-                <div class="rm-card-meta">
-                    <span class="rm-card-meta-item">
-                        <img src="icon/people.svg" alt="Kapasitas" class="rm-meta-icon" />
-                        @room.Capacity Orang
-                    </span>
-                    <span class="rm-card-meta-item">
+                <div class="rm-card-content">
+                    <h3 class="rm-card-name">@room.Name</h3>
+                    <div class="rm-card-location">
                         <img src="icon/icon_6_admin.svg" alt="Lantai" class="rm-meta-icon" />
                         @room.Floor
-                    </span>
-                </div>
-                <div class="rm-card-footer">
+                    </div>
+                    
                     <div class="rm-card-tags">
                         @foreach (var tag in room.Facilities.Take(3))
                         {
                             <span class="rm-tag">@tag</span>
                         }
+                        @if (room.Facilities.Count > 3)
+                        {
+                            <span class="rm-tag">+@(room.Facilities.Count - 3)</span>
+                        }
                     </div>
+
+                    <p class="rm-card-desc">@room.Description</p>
+                </div>
+                <div class="rm-card-footer">
                     <span class="rm-card-bookings">@room.TotalBookings booking</span>
+                    <button class="btn-icon-only rm-delete-btn" @onclick="() => DeleteRoom(room)" @onclick:stopPropagation="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    </button>
                 </div>
             </div>
         }
@@ -98,19 +113,16 @@
 
     private List<Room> filteredRooms => FilterRooms();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         LayoutTitleService.Title = "Manajemen Ruangan";
         LayoutTitleService.Subtitle = "Kelola data ruangan, fasilitas, dan kapasitas.";
-        allRooms = new List<Room>
-        {
-            new Room { Id = 1, Name = "Ruang Dirantara", Description = "Ruang rapat utama dengan projector 4K dan sistem video konferensi.", Capacity = 20, Floor = "Lantai 3", Type = "Rapat", Status = "active", TotalBookings = 124, Facilities = new List<string>{ "WiFi", "Proyektor", "Video Konferensi", "AC" } },
-            new Room { Id = 2, Name = "Ruang Rapat A", Description = "Ruang diskusi tim dengan whiteboard dan display HD.", Capacity = 10, Floor = "Lantai 2", Type = "Diskusi", Status = "active", TotalBookings = 89, Facilities = new List<string>{ "WiFi", "Whiteboard", "Display" } },
-            new Room { Id = 3, Name = "Ruang Boardroom", Description = "Ruang eksekutif privat untuk pertemuan dewan dan klien penting.", Capacity = 12, Floor = "Lantai 14", Type = "Eksekutif", Status = "maintenance", TotalBookings = 45, Facilities = new List<string>{ "WiFi", "Video Konferensi", "Katering", "AC" } },
-            new Room { Id = 4, Name = "Ruang Training", Description = "Ruang pelatihan dengan setup kursi theater dan sound system.", Capacity = 40, Floor = "Lantai 1", Type = "Presentasi", Status = "active", TotalBookings = 67, Facilities = new List<string>{ "WiFi", "Proyektor", "Sound System", "AC" } },
-            new Room { Id = 5, Name = "Ruang Diskusi C", Description = "Ruang brainstorming kecil dengan sofa dan lighting fleksibel.", Capacity = 6, Floor = "Lantai 2", Type = "Diskusi", Status = "active", TotalBookings = 34, Facilities = new List<string>{ "WiFi", "Whiteboard" } },
-            new Room { Id = 6, Name = "Ruang Rapat Direksi", Description = "Ruang rapat direksi dengan meja konferensi premium dan sistem dokumentasi.", Capacity = 16, Floor = "Lantai 14", Type = "Eksekutif", Status = "active", TotalBookings = 28, Facilities = new List<string>{ "WiFi", "Video Konferensi", "Katering", "Proyektor", "AC" } }
-        };
+        await LoadRooms();
+    }
+
+    private async Task LoadRooms()
+    {
+        allRooms = await RoomService.GetAllRoomsAsync();
     }
 
     private List<Room> FilterRooms()
@@ -153,15 +165,24 @@
         showEditRoom = true;
     }
 
-    private void OnRoomCreated(Room room)
+    private async Task OnRoomCreated(Room room)
     {
-        allRooms.Add(room);
+        await RoomService.AddRoomAsync(room);
+        await LoadRooms();
         showAddRoom = false;
     }
 
-    private void OnRoomUpdated(Room room)
+    private async Task OnRoomUpdated(Room room)
     {
+        await RoomService.UpdateRoomAsync(room);
+        await LoadRooms();
         showEditRoom = false;
         editingRoom = null;
+    }
+
+    private async Task DeleteRoom(Room room)
+    {
+        await RoomService.DeleteRoomAsync(room.Id);
+        await LoadRooms();
     }
 }

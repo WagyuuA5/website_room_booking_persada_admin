@@ -1,0 +1,154 @@
+@page "/audit-log"
+@layout booking_room_admin.Components.Layout.MainLayout
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
+
+<div class="audit-log">
+    <div class="audit-header">
+        <div>
+            <p class="audit-subtitle">Riwayat semua aktivitas admin dalam sistem — permanen dan tidak dapat diedit.</p>
+        </div>
+        <button class="btn-export" @onclick="ExportCSV">📥 Export CSV</button>
+    </div>
+
+    <div class="audit-filters">
+        <select class="audit-filter-select" @bind="filterActor">
+            <option value="">Semua Aktor</option>
+            @foreach (var actor in actors)
+            {
+                <option value="@actor">@actor</option>
+            }
+        </select>
+        <select class="audit-filter-select" @bind="filterActionType">
+            <option value="">Semua Aksi</option>
+            <option value="Approve Booking">Approve Booking</option>
+            <option value="Reject Booking">Reject Booking</option>
+            <option value="Set Maintenance">Set Maintenance</option>
+            <option value="Change Role">Change Role</option>
+            <option value="Reset Password">Reset Password</option>
+            <option value="Add User">Add User</option>
+            <option value="Deactivate User">Deactivate User</option>
+            <option value="Delete User">Delete User</option>
+        </select>
+        <select class="audit-filter-select" @bind="filterDateRange">
+            <option value="7">7 Hari Terakhir</option>
+            <option value="30">30 Hari Terakhir</option>
+            <option value="90">90 Hari Terakhir</option>
+            <option value="0">Semua</option>
+        </select>
+    </div>
+
+    <DataTable TItem="AuditLogEntry" Items="filteredLogs" Columns="columns"
+               TotalCount="@totalFiltered" PageSize="@pageSize" CurrentPage="@currentPage"
+               OnPageChanged="HandlePageChange">
+        <RowTemplate Context="log">
+            <td class="col-time">
+                <span class="log-date">@log.Timestamp.ToString("dd MMM yyyy")</span>
+                <span class="log-time">@log.Timestamp.ToString("HH:mm:ss")</span>
+            </td>
+            <td>
+                <div class="actor-cell">
+                    <div class="actor-avatar">@log.ActorInitials</div>
+                    <span class="actor-name">@log.ActorName</span>
+                </div>
+            </td>
+            <td>
+                <StatusBadge Status="@GetActionStatus(log.ActionType)" CustomLabel="@log.ActionType" />
+            </td>
+            <td><span class="log-target">@log.TargetName</span></td>
+            <td><span class="log-detail">@log.Detail</span></td>
+        </RowTemplate>
+    </DataTable>
+</div>
+
+@code {
+    private string filterActor = "";
+    private string filterActionType = "";
+    private string filterDateRange = "7";
+    private int currentPage = 1;
+    private int pageSize = 10;
+
+    private List<AuditLogEntry> allLogs = new();
+    private List<string> actors = new();
+    private List<DataTable<AuditLogEntry>.DataTableColumn> columns = new();
+
+    private IEnumerable<AuditLogEntry> filteredLogs
+    {
+        get
+        {
+            var query = allLogs.AsEnumerable();
+            if (!string.IsNullOrEmpty(filterActor))
+                query = query.Where(l => l.ActorName == filterActor);
+            if (!string.IsNullOrEmpty(filterActionType))
+                query = query.Where(l => l.ActionType == filterActionType);
+            if (filterDateRange != "0" && int.TryParse(filterDateRange, out var days))
+                query = query.Where(l => l.Timestamp >= DateTime.Now.AddDays(-days));
+            return query.OrderByDescending(l => l.Timestamp).Skip((currentPage - 1) * pageSize).Take(pageSize);
+        }
+    }
+
+    private int totalFiltered
+    {
+        get
+        {
+            var query = allLogs.AsEnumerable();
+            if (!string.IsNullOrEmpty(filterActor))
+                query = query.Where(l => l.ActorName == filterActor);
+            if (!string.IsNullOrEmpty(filterActionType))
+                query = query.Where(l => l.ActionType == filterActionType);
+            if (filterDateRange != "0" && int.TryParse(filterDateRange, out var days))
+                query = query.Where(l => l.Timestamp >= DateTime.Now.AddDays(-days));
+            return query.Count();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        LayoutTitleService.Title = "Audit Log";
+        LayoutTitleService.Subtitle = "Riwayat semua aktivitas admin dalam sistem.";
+
+        columns = new()
+        {
+            new() { Header = "WAKTU", PropertyName = "Timestamp", Sortable = true },
+            new() { Header = "AKTOR", PropertyName = "ActorName", Sortable = true },
+            new() { Header = "AKSI", PropertyName = "ActionType" },
+            new() { Header = "TARGET", PropertyName = "TargetName" },
+            new() { Header = "DETAIL", PropertyName = "Detail" },
+        };
+
+        allLogs = new()
+        {
+            new() { Id = 1, Timestamp = DateTime.Now.AddHours(-1), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Approve Booking", ActionCategory = "Booking", TargetName = "Booking #1042", Detail = "Menyetujui booking Ruang Rapat A oleh Ahmad Fauzi" },
+            new() { Id = 2, Timestamp = DateTime.Now.AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Set Maintenance", ActionCategory = "Room", TargetName = "Ruang Diskusi", Detail = "Memulai maintenance HVAC selama 1 jam" },
+            new() { Id = 3, Timestamp = DateTime.Now.AddHours(-3), ActorName = "Admin Sarah", ActorInitials = "AS", ActionType = "Reset Password", ActionCategory = "User", TargetName = "Budi Santoso", Detail = "Reset password dan wajibkan ganti saat login berikutnya" },
+            new() { Id = 4, Timestamp = DateTime.Now.AddHours(-5), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Reject Booking", ActionCategory = "Booking", TargetName = "Booking #1039", Detail = "Menolak booking Ruang Rapat B — jadwal bertabrakan" },
+            new() { Id = 5, Timestamp = DateTime.Now.AddHours(-6), ActorName = "Admin Sarah", ActorInitials = "AS", ActionType = "Add User", ActionCategory = "User", TargetName = "Dewi Kartika", Detail = "Menambahkan user baru — Departemen IT & Digital" },
+            new() { Id = 6, Timestamp = DateTime.Now.AddDays(-1), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Change Role", ActionCategory = "User", TargetName = "Rizky Hidayat", Detail = "Mengubah role dari User menjadi Approver" },
+            new() { Id = 7, Timestamp = DateTime.Now.AddDays(-1).AddHours(-3), ActorName = "System Account", ActorInitials = "SY", ActionType = "Set Maintenance", ActionCategory = "Room", TargetName = "Ruang Rapat B", Detail = "Maintenance terjadwal — Routine Cleaning" },
+            new() { Id = 8, Timestamp = DateTime.Now.AddDays(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Deactivate User", ActionCategory = "User", TargetName = "Sari Wulandari", Detail = "Menonaktifkan akun — karyawan resign" },
+            new() { Id = 9, Timestamp = DateTime.Now.AddDays(-2).AddHours(-4), ActorName = "Admin Sarah", ActorInitials = "AS", ActionType = "Approve Booking", ActionCategory = "Booking", TargetName = "Booking #1035", Detail = "Menyetujui booking Ruang Dirantara oleh Maya Putri" },
+            new() { Id = 10, Timestamp = DateTime.Now.AddDays(-3), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Delete User", ActionCategory = "User", TargetName = "Test Account", Detail = "Menghapus permanen akun testing" },
+            new() { Id = 11, Timestamp = DateTime.Now.AddDays(-4), ActorName = "Admin Sarah", ActorInitials = "AS", ActionType = "Approve Booking", ActionCategory = "Booking", TargetName = "Booking #1030", Detail = "Menyetujui booking Ruang Rapat Utama oleh Budi Santoso" },
+            new() { Id = 12, Timestamp = DateTime.Now.AddDays(-5), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Reset Password", ActionCategory = "User", TargetName = "Ahmad Fauzi", Detail = "Reset password atas permintaan user" },
+        };
+
+        actors = allLogs.Select(l => l.ActorName).Distinct().OrderBy(a => a).ToList();
+    }
+
+    private string GetActionStatus(string actionType) => actionType switch
+    {
+        "Approve Booking" => "confirmed",
+        "Reject Booking" => "rejected",
+        "Set Maintenance" => "maintenance",
+        "Change Role" => "pending",
+        "Reset Password" => "diproses",
+        "Add User" => "confirmed",
+        "Deactivate User" => "rejected",
+        "Delete User" => "rejected",
+        _ => "pending"
+    };
+
+    private void HandlePageChange(int page) { currentPage = page; }
+    private void ExportCSV() { /* CSV export placeholder */ }
+}

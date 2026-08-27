@@ -3,6 +3,7 @@
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
 @inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
+@inject booking_room_admin.Components.Services.IRoomService RoomService
 
 <div class="room-status">
     <div class="rs-breadcrumb">ADMINISTRASI</div>
@@ -42,28 +43,66 @@
         @foreach (var room in filteredRooms)
         {
             <div class="rs-card">
-                <div class="rs-card-top">
-                    <div class="rs-card-icon">
-                        <img src="icon/icon_1_admin.svg" alt="Ruangan" />
+                <div class="rs-card-photo-container">
+                    <div class="rs-card-photo">
+                        <!-- Placeholder photo -->
+                        <div class="rs-photo-placeholder">
+                            <img src="icon/icon_1_admin.svg" alt="Ruangan" />
+                        </div>
                     </div>
-                    <div class="rs-card-info">
-                        <h3 class="rs-card-name">@room.Name</h3>
-                        <span class="rs-card-floor">@room.Floor · @room.Type</span>
+                    
+                    @if (room.Status == "maintenance")
+                    {
+                        <div class="rs-photo-overlay">
+                            @if (room.MaintenanceEnd != null)
+                            {
+                                <span class="rs-countdown-large">
+                                    <img src="icon/clock.svg" alt="Sisa" style="width:1.25rem; height:1.25rem; filter:invert(1);" />
+                                    @FormatCountdown(room.MaintenanceEnd.Value)
+                                </span>
+                            }
+                        </div>
+                    }
+
+                    <div class="rs-card-badge-top-left">
+                        @if (room.Status == "active")
+                        {
+                            <StatusBadge Text="Aktif" Type="StatusBadge.BadgeType.Green" />
+                        }
+                        else if (room.Status == "maintenance")
+                        {
+                            <StatusBadge Text="Perawatan" Type="StatusBadge.BadgeType.Amber" />
+                        }
+                        else
+                        {
+                            <StatusBadge Text="Nonaktif" Type="StatusBadge.BadgeType.Indigo" />
+                        }
+                    </div>
+
+                    <div class="rs-card-badge-top-right">
+                        @if (room.Id % 3 == 0)
+                        {
+                            <StatusBadge Text="3 in Queue" Type="StatusBadge.BadgeType.Indigo" />
+                        }
+                        else if (room.Id % 2 == 0 && room.Status == "active")
+                        {
+                            <StatusBadge Text="Just Finished" Type="StatusBadge.BadgeType.Green" />
+                        }
                     </div>
                 </div>
 
-                <div class="rs-card-body">
-                    <div class="rs-status-row">
-                        <span class="rs-badge @GetBadgeClass(room.Status)">
-                            @GetStatusLabel(room.Status)
-                        </span>
-                        @if (room.Status == "maintenance" && room.MaintenanceEnd != null)
-                        {
-                            <span class="rs-countdown">
-                                <img src="icon/clock.svg" alt="Sisa" class="rs-countdown-icon" />
-                                @FormatCountdown(room.MaintenanceEnd.Value)
-                            </span>
-                        }
+                @if (room.Status == "maintenance")
+                {
+                    <div class="rs-warning-bar">
+                        ⚠ Perawatan sedang berlangsung
+                    </div>
+                }
+
+                <div class="rs-card-content">
+                    <h3 class="rs-card-name">@room.Name</h3>
+                    <div class="rs-card-location">
+                        <img src="icon/icon_6_admin.svg" alt="Lantai" class="rs-meta-icon" />
+                        @room.Floor
                     </div>
 
                     <div class="rs-meta-row">
@@ -78,17 +117,17 @@
                     </div>
 
                     <div class="rs-card-actions">
-                        <button class="rs-toggle-btn @(room.Status == "active" ? "active" : "")"
-                        @onclick:stopPropagation="true"
-                        @onclick="() => ToggleStatus(room)">
-                            <span class="rs-toggle-track">
-                                <span class="rs-toggle-thumb"></span>
-                            </span>
-                            <span>@(room.Status == "active" ? "Aktif" : "Nonaktif")</span>
-                        </button>
-                        <button class="rs-action-btn" @onclick:stopPropagation="true" @onclick="() => OpenMaintenance(room)">
-                            <img src="icon/icon_10_admin.svg" alt="Perawatan" class="rs-action-icon" />
-                            Perawatan
+                        <div class="rs-toggle-group">
+                            <label class="rs-toggle-label">Maintenance</label>
+                            <button class="rs-toggle-switch @(room.Status == "maintenance" ? "on" : "off")"
+                                @onclick:stopPropagation="true"
+                                @onclick="() => ToggleMaintenanceStatus(room)">
+                                <span class="rs-toggle-slider"></span>
+                            </button>
+                        </div>
+                        <button class="btn-primary-pill btn-yellow btn-sm" @onclick:stopPropagation="true" @onclick="() => OpenMaintenance(room)">
+                            <img src="icon/icon_10_admin.svg" alt="Jadwal" class="btn-icon" />
+                            Jadwal
                         </button>
                     </div>
                 </div>
@@ -113,24 +152,19 @@
 
     private List<Room> filteredRooms => FilterRooms();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         LayoutTitleService.Title = "Status Ruangan";
         LayoutTitleService.Subtitle = "Pantau dan kelola ketersediaan ruangan secara real-time.";
 
-        allRooms = new List<Room>
-        {
-            new Room { Id = 1, Name = "Ruang Dirantara", Floor = "Lantai 3", Type = "Rapat", Status = "active", Capacity = 20, TotalBookings = 124, MaintenanceEnd = null },
-            new Room { Id = 2, Name = "Ruang Rapat A", Floor = "Lantai 2", Type = "Diskusi", Status = "active", Capacity = 10, TotalBookings = 89, MaintenanceEnd = null },
-            new Room { Id = 3, Name = "Ruang Boardroom", Floor = "Lantai 14", Type = "Eksekutif", Status = "maintenance", Capacity = 12, TotalBookings = 45, MaintenanceEnd = DateTime.UtcNow.AddMinutes(45) },
-            new Room { Id = 4, Name = "Ruang Training", Floor = "Lantai 1", Type = "Presentasi", Status = "active", Capacity = 40, TotalBookings = 67, MaintenanceEnd = null },
-            new Room { Id = 5, Name = "Ruang Diskusi C", Floor = "Lantai 2", Type = "Diskusi", Status = "inactive", Capacity = 6, TotalBookings = 34, MaintenanceEnd = null },
-            new Room { Id = 6, Name = "Ruang Rapat Direksi", Floor = "Lantai 14", Type = "Eksekutif", Status = "active", Capacity = 16, TotalBookings = 28, MaintenanceEnd = null },
-            new Room { Id = 7, Name = "Ruang Video Konferensi", Floor = "Lantai 3", Type = "Presentasi", Status = "maintenance", Capacity = 30, TotalBookings = 12, MaintenanceEnd = DateTime.UtcNow.AddMinutes(20) },
-            new Room { Id = 8, Name = "Ruang Brainstorming", Floor = "Lantai 1", Type = "Diskusi", Status = "active", Capacity = 8, TotalBookings = 56, MaintenanceEnd = null }
-        };
+        await LoadRooms();
 
         _ = StartCountdownLoop();
+    }
+
+    private async Task LoadRooms()
+    {
+        allRooms = await RoomService.GetAllRoomsAsync();
     }
 
     private List<Room> FilterRooms()
@@ -156,27 +190,11 @@
         return query.ToList();
     }
 
-    private string GetStatusLabel(string status) => status.ToLowerInvariant() switch
-    {
-        "active" => "Aktif",
-        "maintenance" => "Perawatan",
-        "inactive" => "Nonaktif",
-        _ => status
-    };
-
-    private string GetBadgeClass(string status) => status.ToLowerInvariant() switch
-    {
-        "active" => "badge-active",
-        "maintenance" => "badge-maintenance",
-        "inactive" => "badge-inactive",
-        _ => "badge-active"
-    };
-
     private string FormatCountdown(DateTime end)
     {
         var remaining = end - DateTime.UtcNow;
         if (remaining <= TimeSpan.Zero) return "Selesai";
-        return $"{(int)remaining.TotalMinutes:D2}:{remaining.Seconds:D2}";
+        return $"{(int)remaining.TotalHours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
     }
 
     private async Task StartCountdownLoop()
@@ -188,17 +206,21 @@
         }
     }
 
-    private void ToggleStatus(Room room)
+    private async Task ToggleMaintenanceStatus(Room room)
     {
-        if (room.Status == "active")
-        {
-            room.Status = "inactive";
-        }
-        else
+        if (room.Status == "maintenance")
         {
             room.Status = "active";
             room.MaintenanceEnd = null;
         }
+        else
+        {
+            room.Status = "maintenance";
+            // Default 30 min if toggled directly
+            room.MaintenanceEnd = DateTime.UtcNow.AddMinutes(30);
+        }
+        await RoomService.UpdateRoomAsync(room);
+        await LoadRooms();
     }
 
     private void OpenMaintenance(Room room)
@@ -207,8 +229,10 @@
         showMaintenance = true;
     }
 
-    private void OnMaintenanceScheduled(Room room)
+    private async Task OnMaintenanceScheduled(Room room)
     {
+        await RoomService.UpdateRoomAsync(room);
+        await LoadRooms();
         showMaintenance = false;
         selectedRoomForMaintenance = null;
     }

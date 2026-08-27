@@ -1,0 +1,56 @@
+@namespace booking_room_admin.Components.Shared
+
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Add Block" Size="medium">
+    <ChildContent>
+        <div class="ab-form">
+            <div class="ab-field">
+                <label>Room</label>
+                <select class="ab-input">
+                    <option>Ruang Diskusi A</option>
+                    <option>Ruang Meeting B</option>
+                </select>
+            </div>
+            <div class="ab-row">
+                <div class="ab-field">
+                    <label>Date</label>
+                    <input type="date" class="ab-input" />
+                </div>
+                <div class="ab-field">
+                    <label>Time Range</label>
+                    <div class="ab-time-range">
+                        <input type="time" class="ab-input" />
+                        <span>-</span>
+                        <input type="time" class="ab-input" />
+                    </div>
+                </div>
+            </div>
+            <div class="ab-field">
+                <label>Reason</label>
+                <select class="ab-input">
+                    <option>Maintenance</option>
+                    <option>Internal Event</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <div class="ab-field">
+                <label>Notes</label>
+                <textarea class="ab-textarea" rows="3" placeholder="Enter reason details..."></textarea>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn-outline" @onclick="Close">Cancel</button>
+        <button class="btn-primary" @onclick="Close">Block Time</button>
+    </FooterContent>
+</AppModal>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private async Task Close()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+    }
+}

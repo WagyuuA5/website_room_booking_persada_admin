@@ -1,15 +1,7 @@
 @using booking_room_admin.Components.Models
 
-<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
-    <div class="popup-card edit-room-card" @onclick:stopPropagation="true">
-        <div class="er-header">
-            <div>
-                <h2 class="er-title">Ubah Ruangan</h2>
-                <p class="er-subtitle">Perbarui data ruangan yang sudah ada.</p>
-            </div>
-            <button class="popup-close" @onclick="Close">&times;</button>
-        </div>
-
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Ubah Ruangan" Size="medium" OnClose="Close">
+    <ChildContent>
         <div class="er-body">
             <div class="er-field">
                 <label class="er-label">Nama Ruangan</label>
@@ -45,17 +37,28 @@
                 <label class="er-label">Deskripsi</label>
                 <textarea class="er-input er-textarea" @bind="form.Description"></textarea>
             </div>
+            <div class="er-field">
+                <label class="er-label">Fasilitas</label>
+                <div class="er-facilities">
+                    @foreach (var facility in allFacilities)
+                    {
+                        <label class="er-facility-label @(form.Facilities.Contains(facility) ? "active" : "")">
+                            <input type="checkbox" checked="@form.Facilities.Contains(facility)" @onchange="@((ChangeEventArgs e) => ToggleFacility(facility, e.Value))" />
+                            <span>@facility</span>
+                        </label>
+                    }
+                </div>
+            </div>
         </div>
-
-        <div class="er-footer">
-            <button class="btn-outline-pill" @onclick="Close">Batal</button>
-            <button class="btn-primary-pill btn-yellow" disabled="@(!IsValid())" @onclick="SaveChanges">
-                <img src="icon/check.svg" alt="Simpan" class="btn-icon" />
-                Simpan Perubahan
-            </button>
-        </div>
-    </div>
-</div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn-outline-pill" @onclick="Close">Batal</button>
+        <button class="btn-primary-pill btn-yellow" disabled="@(!IsValid())" @onclick="SaveChanges">
+            <img src="icon/check.svg" alt="Simpan" class="btn-icon" />
+            Simpan Perubahan
+        </button>
+    </FooterContent>
+</AppModal>
 
 @code {
     [Parameter] public bool IsOpen { get; set; }
@@ -65,6 +68,7 @@
 
     private List<string> floors = new() { "Lantai 1", "Lantai 2", "Lantai 3", "Lantai 4", "Lantai 14" };
     private List<string> roomTypes = new() { "Rapat", "Diskusi", "Presentasi", "Eksekutif" };
+    private List<string> allFacilities = new() { "WiFi", "Proyektor", "Video Konferensi", "AC", "Whiteboard", "Sound System", "Katering", "Display" };
 
     private EditRoomForm form = new();
 
@@ -78,7 +82,8 @@
                 Floor = Room.Floor,
                 Type = Room.Type,
                 Capacity = Room.Capacity,
-                Description = Room.Description
+                Description = Room.Description,
+                Facilities = Room.Facilities != null ? new List<string>(Room.Facilities) : new List<string>()
             };
         }
     }
@@ -91,6 +96,19 @@
                form.Capacity > 0;
     }
 
+    private void ToggleFacility(string facility, object? value)
+    {
+        bool isChecked = (bool)(value ?? false);
+        if (isChecked && !form.Facilities.Contains(facility))
+        {
+            form.Facilities.Add(facility);
+        }
+        else if (!isChecked && form.Facilities.Contains(facility))
+        {
+            form.Facilities.Remove(facility);
+        }
+    }
+
     private void SaveChanges()
     {
         if (Room == null || !IsValid()) return;
@@ -100,6 +118,7 @@
         Room.Type = form.Type;
         Room.Capacity = form.Capacity;
         Room.Description = form.Description;
+        Room.Facilities = new List<string>(form.Facilities);
 
         OnRoomUpdated.InvokeAsync(Room);
         Close();
@@ -118,5 +137,6 @@
         public string Type { get; set; } = string.Empty;
         public int Capacity { get; set; }
         public string Description { get; set; } = string.Empty;
+        public List<string> Facilities { get; set; } = new();
     }
 }
