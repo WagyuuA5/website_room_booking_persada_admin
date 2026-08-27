@@ -1,39 +1,58 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 @using booking_room_admin.Components.Shared
 
-<div class="admin-layout">
-    <div class="admin-topbar-black">
-        <span>PERSADA ADMIN</span>
-    </div>
+<div class="admin-layout @(sidebarCollapsed ? "sidebar-collapsed" : "")">
     <aside class="admin-sidebar">
-        <NavMenu />
+        <NavMenu IsCollapsed="@sidebarCollapsed" />
     </aside>
 
     <div class="admin-main">
         <header class="admin-topbar">
             <div class="topbar-left">
+                <button class="sidebar-toggle" @onclick="ToggleSidebar" title="Toggle Sidebar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
                 @if (!string.IsNullOrWhiteSpace(LayoutTitleService.Title))
                 {
-                    <h1 class="page-title">@LayoutTitleService.Title</h1>
-                    @if (!string.IsNullOrWhiteSpace(LayoutTitleService.Subtitle))
-                    {
-                        <p class="page-subtitle">@LayoutTitleService.Subtitle</p>
-                    }
+                    <div class="topbar-title-group">
+                        <h1 class="page-title">@LayoutTitleService.Title</h1>
+                        @if (!string.IsNullOrWhiteSpace(LayoutTitleService.Subtitle))
+                        {
+                            <p class="page-subtitle">@LayoutTitleService.Subtitle</p>
+                        }
+                    </div>
                 }
             </div>
             <div class="topbar-right">
+                <div class="topbar-search">
+                    <img src="icon/search.svg" alt="Cari" class="search-icon" />
+                    <input type="text" placeholder="Cari menu, ruangan, user..." @bind="searchQuery" @bind:event="oninput" />
+                </div>
                 <div class="date-filter" @onclick="ToggleDatePicker">
                     <img src="icon/icon_6_admin.svg" alt="Kalender" class="icon-sm" />
                     <span>@dateRangeLabel</span>
                 </div>
                 <div class="topbar-icon-btn notification-btn" @onclick="ToggleNotification">
                     <img src="icon/icon_7_admin.svg" alt="Notifikasi" class="icon-md" />
-                    <span class="notification-badge">@unreadCount</span>
+                    @if (unreadCount > 0)
+                    {
+                        <span class="notification-badge">@unreadCount</span>
+                    }
                 </div>
-                <div class="admin-avatar">
-                    <span>WA</span>
+                <div class="admin-profile-btn" @onclick="NavigateToProfile">
+                    <div class="admin-avatar">
+                        <span>WA</span>
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Admin Wahyu</span>
+                        <span class="admin-role">SYSTEM CONTROLLER</span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -54,8 +73,10 @@
 </div>
 
 @code {
+    private bool sidebarCollapsed = false;
     private bool showDatePicker = false;
     private bool showNotification = false;
+    private string searchQuery = "";
     private string dateRangeLabel = "01 Okt - 31 Okt 2026";
     private int unreadCount = 3;
 
@@ -63,6 +84,11 @@
     {
         LayoutTitleService.Title = "Dashboard Admin";
         LayoutTitleService.Subtitle = "Ringkasan performa sistem pemesanan ruangan perusahaan.";
+    }
+
+    private void ToggleSidebar()
+    {
+        sidebarCollapsed = !sidebarCollapsed;
     }
 
     private void ToggleDatePicker()
@@ -83,5 +109,10 @@
         {
             dateRangeLabel = date.Value.ToString("dd MMM yyyy");
         }
+    }
+
+    private void NavigateToProfile()
+    {
+        Navigation.NavigateTo("/profile");
     }
 }
