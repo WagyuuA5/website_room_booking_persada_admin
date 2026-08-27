@@ -1,0 +1,83 @@
+@namespace booking_room_admin.Components.Shared
+
+@if (IsOpen)
+{
+    <div class="modal-overlay @(IsOpen ? "open" : "")" @onclick="HandleOverlayClick">
+        <div class="modal-container @SizeClass" @onclick:stopPropagation="true">
+            @* Header *@
+            <div class="modal-header">
+                @if (HeaderContent != null)
+                {
+                    @HeaderContent
+                }
+                else
+                {
+                    <h4 class="modal-title">@Title</h4>
+                }
+                <button class="modal-close" @onclick="Close" title="Tutup">✕</button>
+            </div>
+
+            @* Body *@
+            <div class="modal-body">
+                @ChildContent
+            </div>
+
+            @* Footer *@
+            @if (FooterContent != null)
+            {
+                <div class="modal-footer">
+                    @FooterContent
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter] public string Title { get; set; } = "";
+
+    /// <summary>small (360px), medium (520px), large (700px), xlarge (900px), fullscreen</summary>
+    [Parameter] public string Size { get; set; } = "medium";
+
+    /// <summary>Custom header content (overrides Title)</summary>
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+
+    /// <summary>Modal body content</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Sticky footer content (action buttons)</summary>
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+
+    /// <summary>Close callback</summary>
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    /// <summary>Allow closing by clicking overlay</summary>
+    [Parameter] public bool CloseOnOverlay { get; set; } = true;
+
+    private string SizeClass => Size.ToLowerInvariant() switch
+    {
+        "small" => "modal-sm",
+        "medium" => "modal-md",
+        "large" => "modal-lg",
+        "xlarge" => "modal-xl",
+        "fullscreen" => "modal-fs",
+        _ => "modal-md"
+    };
+
+    private async Task Close()
+    {
+        await IsOpenChanged.InvokeAsync(false);
+        await OnClose.InvokeAsync();
+    }
+
+    private async Task HandleOverlayClick()
+    {
+        if (CloseOnOverlay)
+        {
+            await Close();
+        }
+    }
+}

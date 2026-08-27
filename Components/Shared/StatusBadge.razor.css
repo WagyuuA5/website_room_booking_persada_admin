@@ -1,0 +1,41 @@
+.status-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    display: inline-block;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.badge-pending {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.badge-confirmed {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.badge-rejected {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+.badge-progress {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.badge-maintenance {
+    background: #FED7AA;
+    color: #9A3412;
+}
+
+.badge-neutral {
+    background: #F3F4F6;
+    color: #4B5563;
+}

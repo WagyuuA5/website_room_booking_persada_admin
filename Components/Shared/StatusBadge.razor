@@ -1,0 +1,48 @@
+@namespace booking_room_admin.Components.Shared
+
+<span class="status-badge @GetBadgeClass()">@GetLabel()</span>
+
+@code {
+    /// <summary>Status key: pending, approved, confirmed, rejected, preparing, fulfilled, ready, active, inactive, baru, diproses, selesai, cancelled, declined, maintenance</summary>
+    [Parameter] public string Status { get; set; } = "";
+
+    /// <summary>Override label teks (jika null, pakai default mapping)</summary>
+    [Parameter] public string? CustomLabel { get; set; }
+
+    private string GetLabel()
+    {
+        if (!string.IsNullOrEmpty(CustomLabel)) return CustomLabel;
+
+        return Status.ToLowerInvariant() switch
+        {
+            "pending" => "Menunggu",
+            "approved" or "confirmed" => "Disetujui",
+            "rejected" or "rejected_admin" => "Ditolak",
+            "rejected_system" => "Ditolak Sistem",
+            "declined" => "Ditolak",
+            "preparing" or "diproses" => "Diproses",
+            "fulfilled" or "selesai" => "Selesai",
+            "ready" => "Siap",
+            "active" => "Aktif",
+            "inactive" => "Nonaktif",
+            "baru" => "Baru",
+            "cancelled" => "Dibatalkan",
+            "maintenance" => "Maintenance",
+            "overdue" => "Terlambat",
+            _ => Status
+        };
+    }
+
+    private string GetBadgeClass()
+    {
+        return Status.ToLowerInvariant() switch
+        {
+            "pending" or "baru" => "badge-pending",
+            "approved" or "confirmed" or "active" or "selesai" or "fulfilled" or "ready" => "badge-confirmed",
+            "rejected" or "rejected_admin" or "rejected_system" or "declined" or "cancelled" or "overdue" or "inactive" => "badge-rejected",
+            "preparing" or "diproses" => "badge-progress",
+            "maintenance" => "badge-maintenance",
+            _ => "badge-neutral"
+        };
+    }
+}
