@@ -80,3 +80,5 @@
     filter: brightness(0.92);
     transform: translateY(-1px);
 }
+
+.ac-btn { min-width: 100px; text-align: center; } .ac-content { flex: 1; } .ac-header { display: flex; align-items: center; justify-content: space-between; }

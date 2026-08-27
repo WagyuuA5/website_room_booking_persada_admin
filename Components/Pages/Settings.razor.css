@@ -214,3 +214,5 @@
     font-weight: 600;
     cursor: pointer;
 }
+
+.settings-section { margin-bottom: 24px; } .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; } .settings-item > div:first-child { display: flex; align-items: center; gap: 16px; } .settings-item .text-group { display: flex; flex-direction: column; justify-content: center; }

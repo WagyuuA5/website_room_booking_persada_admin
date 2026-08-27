@@ -95,3 +95,6 @@ hr {
 .text-danger:hover {
     background: #FEF2F2;
 }
+
+.icon-sm { width: 0.9rem; height: 0.9rem; object-fit: contain; }
+.icon-md { width: 1.1rem; height: 1.1rem; object-fit: contain; }

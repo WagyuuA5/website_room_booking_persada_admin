@@ -13,14 +13,14 @@
         </div>
         <div class="rc-actions">
             <div class="rc-view-toggle">
-                <button class="@(isAdminView ? "active" : "")" @onclick="() => SetView(true)">Admin View</button>
-                <button class="@(!isAdminView ? "active" : "")" @onclick="() => SetView(false)">User View</button>
+                <button class="@(isAdminView ? "active" : "")" @onclick="() => SetView(true)">Tampilan Admin</button>
+                <button class="@(!isAdminView ? "active" : "")" @onclick="() => SetView(false)">Tampilan Pengguna</button>
             </div>
             @if (isAdminView)
             {
-                <button class="btn-primary" @onclick="OpenAddBlock">
+                <button class="btn-primary-pill" @onclick="OpenAddBlock">
                     <img src="icon/plus.svg" alt="Add" class="btn-icon" />
-                    <span>+ Add Block</span>
+                    <span>+ Tambah Blokir</span>
                 </button>
             }
         </div>
@@ -40,10 +40,10 @@
         </div>
         
         <div class="rc-legend">
-            <div class="legend-item"><span class="box available"></span> Available</div>
-            <div class="legend-item"><span class="box booked"></span> Booked</div>
-            <div class="legend-item"><span class="box blocked"></span> Blocked</div>
-            <div class="legend-item"><span class="box pending"></span> Pending</div>
+            <div class="legend-item"><span class="box Tersedia"></span> Tersedia</div>
+            <div class="legend-item"><span class="box Dipesan"></span> Dipesan</div>
+            <div class="legend-item"><span class="box Diblokir"></span> Diblokir</div>
+            <div class="legend-item"><span class="box Menunggu"></span> Menunggu</div>
         </div>
     </div>
 
@@ -68,14 +68,14 @@
                     {
                         if (i == 10)
                         {
-                            <td colspan="2" class="cell-booked">
+                            <td colspan="2" class="cell-Dipesan">
                                 <div class="event-content">Budi (IT)</div>
                             </td>
                             i++; // skip next since colspan=2
                         }
                         else
                         {
-                            <td class="cell-available"></td>
+                            <td class="cell-Tersedia"></td>
                         }
                     }
                 </tr>
@@ -85,20 +85,20 @@
                     {
                         if (i == 13)
                         {
-                            <td colspan="3" class="cell-pending">
+                            <td colspan="3" class="cell-Menunggu">
                                 <div class="event-content">Siti (HRD)</div>
                             </td>
                             i += 2; // skip next 2
                         }
                         else if (i == 17)
                         {
-                            <td colspan="1" class="cell-blocked">
+                            <td colspan="1" class="cell-Diblokir">
                                 <div class="event-content">Maintenance</div>
                             </td>
                         }
                         else
                         {
-                            <td class="cell-available"></td>
+                            <td class="cell-Tersedia"></td>
                         }
                     }
                 </tr>
@@ -108,19 +108,19 @@
 
     <div class="rc-summary-panel">
         <div class="summary-item">
-            <span class="summary-label">Total Rooms:</span>
+            <span class="summary-label">Total Ruangan:</span>
             <span class="summary-value">12</span>
         </div>
         <div class="summary-item">
-            <span class="summary-label">Currently Blocked:</span>
+            <span class="summary-label">Currently Diblokir:</span>
             <span class="summary-value">2</span>
         </div>
         <div class="summary-item">
-            <span class="summary-label">Pending Overrides:</span>
+            <span class="summary-label">Menunggu Overrides:</span>
             <span class="summary-value">1</span>
         </div>
         <div class="summary-link">
-            <a href="#">View Audit Log</a>
+            <a href="#">Lihat Audit Log</a>
         </div>
     </div>
 
@@ -145,3 +145,4 @@
         showAddBlock = true;
     }
 }
+

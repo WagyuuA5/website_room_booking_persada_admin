@@ -157,7 +157,7 @@
                     </td>
                     <td>
                         <div class="user-cell">
-                            <div class="user-avatar-sm" style="background: @req.AvatarColor">@req.Initials</div>
+                            <UserAvatar Initials="@req.Initials" BgColor="@req.AvatarColor" Size="32px" />
                             <div>
                                 <span class="td-primary">@req.RequesterName</span>
                                 <span class="td-secondary">@req.Department</span>
@@ -180,7 +180,7 @@
                 <RowTemplate Context="booking">
                     <td>
                         <div class="user-cell">
-                            <div class="user-avatar-sm" style="background: @booking.AvatarColor">@booking.Initials</div>
+                            <UserAvatar Initials="@booking.Initials" BgColor="@booking.AvatarColor" Size="32px" />
                             <div>
                                 <span class="td-primary">@booking.UserName</span>
                                 <span class="td-secondary">@booking.Department</span>

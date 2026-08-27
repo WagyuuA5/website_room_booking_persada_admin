@@ -108,3 +108,6 @@
 .logout-icon {
     filter: brightness(0) saturate(100%) invert(57%) sepia(87%) saturate(2192%) hue-rotate(331deg) brightness(99%) contrast(97%);
 }
+.nav-icon { filter: brightness(0) invert(1); opacity: 0.85; }
+.logout-icon { filter: brightness(0) saturate(100%) invert(57%) sepia(87%) saturate(2192%) hue-rotate(331deg) brightness(99%) contrast(97%) !important; opacity: 1; }
+.sidebar-logo { filter: none !important; }

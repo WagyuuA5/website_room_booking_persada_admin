@@ -501,3 +501,9 @@ h1:focus {
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
+
+#blazor-error-ui { display: none !important; } /* Hidden for production */
+
+/* Global Icon Limits */
+button svg, .icon-badge svg, .btn-icon, .bm-action-btn img { max-width: 18px; max-height: 18px; flex-shrink: 0; }
+.btn-primary-pill, .btn-outline-pill { width: fit-content; }

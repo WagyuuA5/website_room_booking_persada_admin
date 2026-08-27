@@ -72,7 +72,7 @@
                             </div>
                         </div>
                         <div class="bm-card-user">
-                            <div class="bm-user-avatar">@booking.RequesterInitials</div>
+                            <UserAvatar Initials="@booking.RequesterInitials" BgColor="@booking.AccentColor" Size="40px" />
                             <div class="bm-user-info">
                                 <span class="bm-user-name">@booking.RequesterName</span>
                                 <span class="bm-user-division">@booking.RequesterDivision</span>
@@ -274,3 +274,4 @@
         public List<Booking> Bookings { get; set; } = new();
     }
 }
+

@@ -176,3 +176,7 @@
     opacity: 0.4;
     cursor: not-allowed;
 }
+
+.data-table-container { border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; }
+.data-table { border-collapse: collapse; width: 100%; }
+.data-table tr:not(:last-child) { border-bottom: 1px solid #f1f5f9; }

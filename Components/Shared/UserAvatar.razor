@@ -1,0 +1,26 @@
+<div class="user-avatar @CssClass" style="@StyleString">
+    @if (string.IsNullOrEmpty(PhotoUrl))
+    {
+        <span>@Initials</span>
+    }
+</div>
+
+@code {
+    [Parameter] public string Initials { get; set; } = "U";
+    [Parameter] public string? PhotoUrl { get; set; }
+    [Parameter] public string BgColor { get; set; } = "#1e3a8a";
+    [Parameter] public string CssClass { get; set; } = "";
+    [Parameter] public string Size { get; set; } = "36px";
+
+    private string StyleString
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(PhotoUrl))
+            {
+                return $"width: {Size}; height: {Size}; border-radius: 50%; background-image: url('{PhotoUrl}'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; flex-shrink: 0;";
+            }
+            return $"width: {Size}; height: {Size}; border-radius: 50%; background-color: {BgColor}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: calc({Size} * 0.4); flex-shrink: 0;";
+        }
+    }
+}

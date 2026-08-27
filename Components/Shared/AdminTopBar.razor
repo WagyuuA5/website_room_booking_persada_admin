@@ -36,9 +36,7 @@
             }
         </div>
         <div class="admin-profile-btn" @onclick="ToggleProfilePopup">
-            <div class="admin-avatar">
-                <span>WA</span>
-            </div>
+            <UserAvatar Initials="WA" BgColor="#1e3a8a" Size="36px" />
             <div class="admin-info">
                 <span class="admin-name">Admin Wahyu</span>
                 <span class="admin-role">PENGONTROL SISTEM</span>
@@ -55,7 +53,7 @@
     <div class="profile-popup-overlay" @onclick="() => showProfilePopup = false">
         <div class="profile-popup-menu" @onclick:stopPropagation="true">
             <div class="profile-header">
-                <div class="admin-avatar lg">WA</div>
+                <UserAvatar Initials="WA" BgColor="#1e3a8a" Size="48px" />
                 <div>
                     <strong>Admin Wahyu</strong>
                     <div class="text-sm text-gray">wahyu.admin@persada.co.id</div>
@@ -131,5 +129,7 @@
         Navigation.NavigateTo("/profile");
     }
 }
+
+
 
 
