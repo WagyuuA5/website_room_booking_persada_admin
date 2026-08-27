@@ -6,30 +6,6 @@
 @inject booking_room_admin.Components.Services.LayoutTitleService LayoutTitleService
 
 <div class="system-reports">
-    <div class="sr-breadcrumb">Administrasi &gt; Laporan Sistem</div>
-    <div class="sr-header">
-        <div class="sr-header-left">
-            <input type="text" class="sr-search" placeholder="Cari..." />
-        </div>
-        <div class="sr-header-right">
-            <div class="sr-header-icon-btn">
-                <img src="icon/icon_7_admin.svg" alt="Notifikasi" class="sr-header-icon" />
-                <span class="sr-header-badge">3</span>
-            </div>
-            <div class="sr-header-icon-btn">
-                <img src="icon/icon_6_admin.svg" alt="Kalender" class="sr-header-icon" />
-            </div>
-            <div class="sr-header-icon-btn">
-                <img src="icon/icon_14_admin.svg" alt="Pengaturan" class="sr-header-icon" />
-            </div>
-            <div class="sr-avatar">WA</div>
-        </div>
-    </div>
-
-    <div class="sr-title-section">
-        <h1 class="sr-title">LAPORAN SISTEM</h1>
-        <p class="sr-subtitle">Wawasan menyeluruh tentang utilisasi ruangan, permintaan fasilitas, dan dukungan IT.</p>
-    </div>
 
     <div class="sr-toolbar">
         <div class="sr-date-filter">
@@ -119,6 +95,7 @@
     protected override void OnInitialized()
     {
         LayoutTitleService.Title = "Laporan Sistem";
+        LayoutTitleService.Subtitle = "Wawasan menyeluruh tentang utilisasi ruangan, permintaan fasilitas, dan dukungan IT.";
     }
 
     private string selectedTab = "booking";
