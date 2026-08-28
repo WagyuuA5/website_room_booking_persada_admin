@@ -1,0 +1,9 @@
+@namespace booking_room_admin.Components.Shared
+
+<div class="skeleton-block @CssClass" style="width:@Width; height:@Height;"></div>
+
+@code {
+    [Parameter] public string Width { get; set; } = "100%";
+    [Parameter] public string Height { get; set; } = "16px";
+    [Parameter] public string CssClass { get; set; } = "";
+}

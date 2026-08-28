@@ -31,7 +31,9 @@
                             <span>@col.Header</span>
                             @if (col.Sortable && sortColumn == col.PropertyName)
                             {
-                                <span class="sort-icon">@(sortAscending ? "↑" : "↓")</span>
+                                <span class="sort-icon">
+                                    @if (sortAscending) { <Icon Name="arrow-up" Size="12" /> } else { <Icon Name="arrow-down" Size="12" /> }
+                                </span>
                             }
                         </th>
                     }
@@ -43,7 +45,7 @@
                     <tr>
                         <td colspan="@(Columns.Count + (ShowCheckbox ? 1 : 0))" class="empty-cell">
                             <div class="empty-table-state">
-                                <span class="empty-icon">📋</span>
+                                <span class="empty-icon"><Icon Name="clipboard" Size="32" CssClass="text-muted" /></span>
                                 <span class="empty-text">@EmptyMessage</span>
                             </div>
                         </td>
@@ -78,12 +80,12 @@
                 Menampilkan @(((CurrentPage - 1) * PageSize) + 1)–@Math.Min(CurrentPage * PageSize, TotalCount) dari @TotalCount
             </span>
             <div class="pagination-buttons">
-                <button class="page-btn" disabled="@(CurrentPage <= 1)" @onclick="() => GoToPage(CurrentPage - 1)">‹</button>
+                <button class="page-btn" disabled="@(CurrentPage <= 1)" @onclick="() => GoToPage(CurrentPage - 1)"><Icon Name="chevron-left" Size="14" /></button>
                 @foreach (var p in GetPageNumbers())
                 {
                     <button class="page-btn @(p == CurrentPage ? "active" : "")" @onclick="() => GoToPage(p)">@p</button>
                 }
-                <button class="page-btn" disabled="@(CurrentPage >= TotalPages)" @onclick="() => GoToPage(CurrentPage + 1)">›</button>
+                <button class="page-btn" disabled="@(CurrentPage >= TotalPages)" @onclick="() => GoToPage(CurrentPage + 1)"><Icon Name="chevron-right" Size="14" /></button>
             </div>
         </div>
     }

@@ -1,10 +1,10 @@
 @namespace booking_room_admin.Components.Shared
 
-<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Add Block" Size="medium">
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Tambah Blokir" Size="medium">
     <ChildContent>
         <div class="ab-form">
             <div class="ab-field">
-                <label>Room</label>
+                <label>Ruangan</label>
                 <select class="ab-input">
                     <option>Ruang Diskusi A</option>
                     <option>Ruang Meeting B</option>
@@ -12,11 +12,11 @@
             </div>
             <div class="ab-row">
                 <div class="ab-field">
-                    <label>Date</label>
+                    <label>Tanggal</label>
                     <input type="date" class="ab-input" />
                 </div>
                 <div class="ab-field">
-                    <label>Time Range</label>
+                    <label>Rentang Waktu</label>
                     <div class="ab-time-range">
                         <input type="time" class="ab-input" />
                         <span>-</span>
@@ -25,22 +25,22 @@
                 </div>
             </div>
             <div class="ab-field">
-                <label>Reason</label>
+                <label>Alasan</label>
                 <select class="ab-input">
-                    <option>Maintenance</option>
-                    <option>Internal Event</option>
-                    <option>Other</option>
+                    <option>Pemeliharaan</option>
+                    <option>Acara Internal</option>
+                    <option>Lainnya</option>
                 </select>
             </div>
             <div class="ab-field">
-                <label>Notes</label>
-                <textarea class="ab-textarea" rows="3" placeholder="Enter reason details..."></textarea>
+                <label>Catatan</label>
+                <textarea class="ab-textarea" rows="3" placeholder="Masukkan detail alasan..."></textarea>
             </div>
         </div>
     </ChildContent>
     <FooterContent>
-        <button class="btn-outline" @onclick="Close">Cancel</button>
-        <button class="btn-primary" @onclick="Close">Block Time</button>
+        <button class="btn-outline" @onclick="Close">Batal</button>
+        <button class="btn-primary" @onclick="Close">Blokir Jadwal</button>
     </FooterContent>
 </AppModal>
 

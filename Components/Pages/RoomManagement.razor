@@ -17,7 +17,7 @@
 <div class="room-management-page">
     @* -- Eyebrow -- *@
     <div class="rm-eyebrow-row">
-        <span class="rm-bullet">•</span>
+        <span class="rm-bullet" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--color-brand-yellow,#F2B705);vertical-align:middle;margin-right:6px;"></span>
         <span class="rm-eyebrow">MANAJEMEN RUANGAN</span>
     </div>
 
@@ -28,11 +28,22 @@
             <div class="rm-card" @onclick="() => OpenDetailModal(room)">
                 @* 16:9 Photo Container *@
                 <div class="rm-photo-wrap">
-                    <img src="@room.PhotoUrl" alt="@room.Name" class="rm-photo" onerror="this.src='images/room1.jpg'" />
-                    <span class="rm-cap-badge">?? @room.Capacity Orang</span>
+                    @if (!room.ImageFailed)
+                    {
+                        <img src="@room.PhotoUrl" alt="@room.Name" class="rm-photo" 
+                             @onerror="() => { room.ImageFailed = true; InvokeAsync(StateHasChanged); }" />
+                    }
+                    else
+                    {
+                        <div class="room-photo-fallback">
+                            <Icon Name="image-off" Size="32" CssClass="text-muted" />
+                            <span>Foto tidak tersedia</span>
+                        </div>
+                    }
+                    <span class="rm-cap-badge"><Icon Name="users" Size="14" /> @room.Capacity Orang</span>
                     @if (room.IsMaintenance)
                     {
-                        <span class="rm-maint-badge">?? Maintenance</span>
+                        <span class="rm-maint-badge"><Icon Name="alert-triangle" Size="14" /> Maintenance</span>
                     }
                 </div>
 
@@ -85,8 +96,19 @@
             <div class="rm-split-layout">
                 @* Left Column: Photo *@
                 <div class="rm-split-photo-col">
-                    <img src="@(isEditMode ? editForm.PhotoUrl : selectedRoom.PhotoUrl)" alt="Foto Ruangan" class="rm-split-photo" onerror="this.src='images/room1.jpg'" />
-                    <span class="rm-badge-available">? Tersedia Sekarang</span>
+                    @if (isEditMode ? !editForm.ImageFailed : !selectedRoom.ImageFailed)
+                    {
+                        <img src="@(isEditMode ? editForm.PhotoUrl : selectedRoom.PhotoUrl)" alt="Foto Ruangan" class="rm-split-photo" 
+                             @onerror="() => { if (isEditMode) editForm.ImageFailed = true; else selectedRoom.ImageFailed = true; InvokeAsync(StateHasChanged); }" />
+                    }
+                    else
+                    {
+                        <div class="room-photo-fallback rm-split-photo" style="border-radius: var(--radius-md, 12px);">
+                            <Icon Name="image-off" Size="32" CssClass="text-muted" />
+                            <span>Foto tidak tersedia</span>
+                        </div>
+                    }
+                    <span class="rm-badge-available"><Icon Name="check" Size="14" /> Tersedia Sekarang</span>
                 </div>
 
                 @* Right Column: Detail View or Edit Form *@
@@ -157,7 +179,7 @@
                                 <div class="rm-dropzone">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rm-upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                                     <span class="rm-drop-title">Klik untuk unggah atau seret & lepas</span>
-                                    <span class="rm-drop-hint">SVG, PNG, JPG, atau GIF (maks. 800×400px)</span>
+                                    <span class="rm-drop-hint">SVG, PNG, JPG, atau GIF (maks. 800x400px)</span>
                                 </div>
                             </div>
                         </div>
@@ -195,7 +217,10 @@
         <ChildContent>
             <div class="rm-split-layout">
                 <div class="rm-split-photo-col">
-                    <img src="@(string.IsNullOrEmpty(newRoomForm.PhotoUrl) ? "images/room1.jpg" : newRoomForm.PhotoUrl)" alt="Preview Foto" class="rm-split-photo" />
+                    <div class="room-photo-fallback rm-split-photo" style="border-radius: var(--radius-md, 12px);">
+                        <Icon Name="image" Size="32" CssClass="text-muted" />
+                        <span>Preview Foto</span>
+                    </div>
                 </div>
                 <div class="rm-split-info-col scroll-area">
                     <div class="rm-edit-form">
@@ -238,7 +263,7 @@
                             <div class="rm-dropzone">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rm-upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                                 <span class="rm-drop-title">Klik untuk unggah atau seret & lepas</span>
-                                <span class="rm-drop-hint">SVG, PNG, JPG, atau GIF (maks. 800×400px)</span>
+                                <span class="rm-drop-hint">SVG, PNG, JPG, atau GIF (maks. 800x400px)</span>
                             </div>
                         </div>
                     </div>
@@ -280,6 +305,7 @@
         public string Description { get; set; } = "";
         public string PhotoUrl { get; set; } = "images/room1.jpg";
         public bool IsMaintenance { get; set; }
+        public bool ImageFailed { get; set; }
     }
 
     private List<RoomMaster> rooms = new();

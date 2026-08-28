@@ -1,0 +1,15 @@
+@namespace booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Services
+
+<svg class="icon @CssClass" width="@Size" height="@Size" viewBox="0 0 24 24"
+     fill="none" stroke="currentColor" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    @((MarkupString)IconPath)
+</svg>
+
+@code {
+    [Parameter] public string Name { get; set; } = "";
+    [Parameter] public int Size { get; set; } = 20;
+    [Parameter] public string CssClass { get; set; } = "";
+    private string IconPath => IconLibrary.GetPath(Name);
+}

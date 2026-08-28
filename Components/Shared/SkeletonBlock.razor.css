@@ -1,0 +1,22 @@
+.skeleton-block {
+    background: linear-gradient(90deg,
+        var(--color-border, #E5E7EB) 25%,
+        var(--color-border-strong, #D1D5DB) 37%,
+        var(--color-border, #E5E7EB) 63%);
+    background-size: 400% 100%;
+    animation: skeleton-shimmer 1.4s ease infinite;
+    border-radius: var(--radius-sm, 8px);
+}
+
+@keyframes skeleton-shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}
+
+body.dark .skeleton-block {
+    background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0.06) 25%,
+        rgba(255, 255, 255, 0.12) 37%,
+        rgba(255, 255, 255, 0.06) 63%);
+    background-size: 400% 100%;
+}

@@ -15,7 +15,7 @@
             @foreach (var item in FilteredNotifications)
             {
                 <div class="notification-item @(item.IsRead ? "read" : "unread")">
-                    <div class="notification-icon">@item.Icon</div>
+                    <div class="notification-icon">@((MarkupString)item.Icon)</div>
                     <div class="notification-content">
                         <div class="notification-title">@item.Title</div>
                         <div class="notification-text">@item.Message</div>
@@ -35,10 +35,10 @@
 
     private List<NotificationItem> AllNotifications = new()
     {
-        new NotificationItem { Title = "Persetujuan Ruang Rapat Utama", Message = "Permintaan booking ruang rapat utama telah disetujui.", TimeAgo = "2 menit lalu", IsRead = false, Icon = "📋" },
-        new NotificationItem { Title = "Pembaruan Kata Sandi Berhasil", Message = "Kata sandi akun Anda berhasil diperbarui.", TimeAgo = "15 menit lalu", IsRead = false, Icon = "🔒" },
-        new NotificationItem { Title = "Laporan Mingguan Siap", Message = "Laporan penggunaan ruangan minggu ini sudah tersedia.", TimeAgo = "1 jam lalu", IsRead = true, Icon = "📊" },
-        new NotificationItem { Title = "Beban Trafik Tinggi", Message = "Sistem menerima permintaan booking di luar jam sibuk.", TimeAgo = "2 jam lalu", IsRead = true, Icon = "⚡" }
+        new NotificationItem { Title = "Persetujuan Ruang Rapat Utama", Message = "Permintaan booking ruang rapat utama telah disetujui.", TimeAgo = "2 menit lalu", IsRead = false, Icon = "<Icon Name=\"clipboard\" Size=\"16\" />" },
+        new NotificationItem { Title = "Pembaruan Kata Sandi Berhasil", Message = "Kata sandi akun Anda berhasil diperbarui.", TimeAgo = "15 menit lalu", IsRead = false, Icon = "<Icon Name=\"lock\" Size=\"16\" />" },
+        new NotificationItem { Title = "Laporan Mingguan Siap", Message = "Laporan penggunaan ruangan minggu ini sudah tersedia.", TimeAgo = "1 jam lalu", IsRead = true, Icon = "<Icon Name=\"bar-chart-2\" Size=\"16\" />" },
+        new NotificationItem { Title = "Beban Trafik Tinggi", Message = "Sistem menerima permintaan booking di luar jam sibuk.", TimeAgo = "2 jam lalu", IsRead = true, Icon = "<Icon Name=\"zap\" Size=\"16\" />" }
     };
 
     private IEnumerable<NotificationItem> FilteredNotifications => ActiveTab switch

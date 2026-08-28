@@ -1,4 +1,4 @@
-@page "/reports"
+ï»¿@page "/reports"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Shared.ReportTabs
@@ -14,7 +14,7 @@
             </button>
             <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => showExportModal = true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-sm"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                <span>Export Laporan</span>
+                <span>Ekspor Laporan</span>
             </button>
         </div>
     </RightSlot>
@@ -24,19 +24,19 @@
     @* -- Tab Navigation -- *@
     <div class="sr-tab-nav">
         <button type="button" class="sr-tab-link @(activeTab == "booking" ? "active" : "")" @onclick='() => SetTab("booking")'>
-            Room Booking
+            Booking Ruangan
         </button>
         <button type="button" class="sr-tab-link @(activeTab == "facility" ? "active" : "")" @onclick='() => SetTab("facility")'>
-            Facility Requests
+            Permintaan Fasilitas
         </button>
         <button type="button" class="sr-tab-link @(activeTab == "deletion" ? "active" : "")" @onclick='() => SetTab("deletion")'>
-            Account Deletion
+            Penghapusan Akun
         </button>
         <button type="button" class="sr-tab-link @(activeTab == "itsupport" ? "active" : "")" @onclick='() => SetTab("itsupport")'>
-            IT Support
+            Dukungan IT
         </button>
         <button type="button" class="sr-tab-link @(activeTab == "bug" ? "active" : "")" @onclick='() => SetTab("bug")'>
-            Bug Reports
+            Laporan Bug
         </button>
         <button type="button" class="sr-tab-link @(activeTab == "all" ? "active" : "")" @onclick='() => SetTab("all")'>
             All
@@ -67,9 +67,9 @@
         <div class="sr-filter-item">
             <select class="sr-pill-select" @bind="filterStatus" @bind:after="OnFilterChanged">
                 <option value="All">All Status ?</option>
-                <option value="approved">Approved / Selesai</option>
-                <option value="pending">Pending / Menunggu</option>
-                <option value="rejected">Rejected / Ditolak</option>
+                <option value="approved">Disetujui</option>
+                <option value="pending">Menunggu</option>
+                <option value="rejected">Ditolak</option>
             </select>
         </div>
         <div style="flex:1;"></div>
@@ -106,7 +106,7 @@
 </div>
 
 <DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => showDatePicker = v)" IsRangeMode="true" OnRangeSelected="OnRangeSelected" />
-<ExportModal IsOpen="@showExportModal" IsOpenChanged="@((bool v) => showExportModal = v)" ExportTitle="@($"Laporan Sistem — {GetTabTitle()}")" Columns="exportColumns" CurrentViewRows="GetExportRows()" AllRows="GetExportRows()" />
+<ExportModal IsOpen="@showExportModal" IsOpenChanged="@((bool v) => showExportModal = v)" ExportTitle="@($"Laporan Sistem ï¿½ {GetTabTitle()}")" Columns="exportColumns" CurrentViewRows="GetExportRows()" AllRows="GetExportRows()" />
 
 @code {
     private string activeTab = "booking";
@@ -153,11 +153,11 @@
 
     private string GetTabTitle() => activeTab switch
     {
-        "booking" => "Room Booking",
-        "facility" => "Facility Requests",
-        "deletion" => "Account Deletion",
-        "itsupport" => "IT Support",
-        "bug" => "Bug Reports",
+        "booking" => "Booking Ruangan",
+        "facility" => "Permintaan Fasilitas",
+        "deletion" => "Penghapusan Akun",
+        "itsupport" => "Dukungan IT",
+        "bug" => "Laporan Bug",
         _ => "Semua Aktivitas"
     };
 
@@ -170,3 +170,4 @@
         };
     }
 }
+

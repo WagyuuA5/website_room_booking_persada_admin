@@ -5,11 +5,11 @@
 @using booking_room_admin.Components.Services
 @inject ToastService Toast
 
-<TopBar Title="Permintaan Fasilitas" Subtitle="Manage incoming catering, AV, and layout setup requests." ShowGlobalSearch="false" ShowDateFilter="false">
+<TopBar Title="Permintaan Fasilitas" Subtitle="Kelola permintaan catering, AV, dan tata ruang yang masuk." ShowGlobalSearch="false" ShowDateFilter="false">
     <RightSlot>
         <button type="button" class="btn-outline-pill" @onclick="@(() => showExportModal = true)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-sm"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>Export</span>
+            <span>Ekspor</span>
         </button>
     </RightSlot>
 </TopBar>
@@ -18,37 +18,37 @@
     @* -- Top Search Bar -- *@
     <div class="fr-search-bar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fr-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" class="fr-search-input" placeholder="Search facilities, requests, users..." @bind="searchQuery" @bind:event="oninput" />
+        <input type="text" class="fr-search-input" placeholder="Cari fasilitas, permintaan, atau pengguna..." @bind="searchQuery" @bind:event="oninput" />
     </div>
 
     @* -- Status Filter Pills & Dept Dropdown -- *@
     <div class="fr-toolbar-row">
         <div class="fr-status-pills">
             <button type="button" class="fr-pill @(selectedTab == "all" ? "active" : "")" @onclick='() => SelectTab("all")'>
-                <span>All</span>
+                <span>Semua</span>
                 <span class="fr-pill-count count-all">@allRequests.Count</span>
             </button>
             <button type="button" class="fr-pill @(selectedTab == "pending" ? "active" : "")" @onclick='() => SelectTab("pending")'>
-                <span>Pending</span>
+                <span>Menunggu</span>
                 <span class="fr-pill-count count-pending">@GetCount("pending")</span>
             </button>
             <button type="button" class="fr-pill @(selectedTab == "preparing" ? "active" : "")" @onclick='() => SelectTab("preparing")'>
-                <span>Preparing</span>
+                <span>Diproses</span>
                 <span class="fr-pill-count count-preparing">@GetCount("preparing")</span>
             </button>
             <button type="button" class="fr-pill @(selectedTab == "ready" ? "active" : "")" @onclick='() => SelectTab("ready")'>
-                <span>Ready</span>
+                <span>Siap</span>
                 <span class="fr-pill-count count-ready">@GetCount("ready")</span>
             </button>
             <button type="button" class="fr-pill @(selectedTab == "fulfilled" ? "active" : "")" @onclick='() => SelectTab("fulfilled")'>
-                <span>Fulfilled</span>
+                <span>Selesai</span>
                 <span class="fr-pill-count count-fulfilled">@GetCount("fulfilled")</span>
             </button>
         </div>
 
         <div class="fr-dept-select-wrap">
             <select class="sr-pill-select" @bind="selectedDept">
-                <option value="">Filter by Department</option>
+                <option value="">Filter berdasarkan Departemen</option>
                 <option value="IT & Digital">IT & Digital</option>
                 <option value="Operasional">Operasional</option>
                 <option value="Human Resources">Human Resources</option>
@@ -60,7 +60,23 @@
 
     @* -- Request Card List -- *@
     <div class="fr-cards-list">
-        @if (!FilteredRequests.Any())
+                @if (isLoading)
+        {
+            @for (int i = 0; i < 5; i++)
+            {
+                <div class="fr-card" style="padding:1rem;">
+                    <div style="display:flex; gap:1rem; width:100%;">
+                        <SkeletonBlock Width="40px" Height="40px" CssClass="rounded-circle" />
+                        <div style="flex:1; display:flex; flex-direction:column; gap:0.5rem;">
+                            <SkeletonBlock Width="40%" Height="20px" />
+                            <SkeletonBlock Width="60%" Height="16px" />
+                            <SkeletonBlock Width="30%" Height="16px" />
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else if (!FilteredRequests.Any())
         {
             <EmptyState Title="Tidak Ada Permintaan" Description="Tidak ada permintaan fasilitas yang cocok dengan filter atau kata kunci saat ini." ActionLabel="Reset Filter" OnAction="ResetFilters" />
         }
@@ -92,14 +108,14 @@
                                 <span class="fr-meta-item user-info">@req.RequesterName (@req.Department)</span>
                             </div>
                             <div class="fr-card-items-summary">
-                                <span>? ??? @req.ItemsSummary</span>
+                                <span><Icon Name="package" Size="14" /> @req.ItemsSummary</span>
                             </div>
                         </div>
                     </div>
                     <div class="fr-card-right" @onclick:stopPropagation="true">
                         <StatusBadge Status="@req.Status" />
                         <button type="button" class="btn-action-quick @(req.Status == "pending" ? "btn-process" : "btn-update")" @onclick="() => OpenDetail(req)">
-                            @(req.Status == "pending" ? "Process" : "Update")
+                            @(req.Status == "pending" ? "Proses" : "Perbarui")
                         </button>
                     </div>
                 </div>
@@ -221,6 +237,7 @@
     private string selectedDept = "";
     private bool showDetailModal = false;
     private bool showExportModal = false;
+    private bool isLoading = false;
 
     public class RequestItemDetail { public string Category { get; set; } = ""; public string Description { get; set; } = ""; }
     public class RequestActivityLog { public string Title { get; set; } = ""; public DateTime Timestamp { get; set; } }
@@ -451,3 +468,5 @@
         }
     }
 }
+
+

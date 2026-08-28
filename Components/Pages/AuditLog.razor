@@ -23,7 +23,7 @@
         <div class="island-trigger-container">
             <button type="button" class="btn-island-trigger @(openIsland == "actor" ? "active" : "")" @onclick='() => ToggleIsland("actor")'>
                 <span>@(string.IsNullOrEmpty(selectedActor) ? "Semua Aktor" : selectedActor)</span>
-                <span class="island-caret">?</span>
+                <span class="island-caret"><Icon Name="chevron-down" Size="14" /></span>
             </button>
 
             @if (openIsland == "actor")
@@ -31,7 +31,7 @@
                 <div class="island-popup-card actor-island">
                     <div class="island-header">
                         <span class="island-title">Filter berdasarkan Aktor</span>
-                        <button type="button" class="island-close" @onclick='() => ToggleIsland("")'>?</button>
+                        <button type="button" class="island-close" @onclick='() => ToggleIsland("")'><Icon Name="x" Size="16" /></button>
                     </div>
                     <div class="island-search">
                         <input type="text" placeholder="Cari aktor..." class="island-input" @bind="actorSearchQuery" @bind:event="oninput" />
@@ -61,7 +61,7 @@
         <div class="island-trigger-container">
             <button type="button" class="btn-island-trigger @(openIsland == "action" ? "active" : "")" @onclick='() => ToggleIsland("action")'>
                 <span>@(selectedActions.Any() ? $"{selectedActions.Count} Aksi Terpilih" : "Jenis Aksi")</span>
-                <span class="island-caret">?</span>
+                <span class="island-caret"><Icon Name="chevron-down" Size="14" /></span>
             </button>
 
             @if (openIsland == "action")
@@ -69,13 +69,13 @@
                 <div class="island-popup-card action-island">
                     <div class="island-header">
                         <span class="island-title">Filter berdasarkan Jenis Aksi</span>
-                        <button type="button" class="island-close" @onclick='() => ToggleIsland("")'>?</button>
+                        <button type="button" class="island-close" @onclick='() => ToggleIsland("")'><Icon Name="x" Size="16" /></button>
                     </div>
                     <div class="island-categories-list scroll-area">
                         @* Group: Booking *@
                         <div class="action-group">
                             <div class="action-group-header" @onclick="() => isBookingGroupOpen = !isBookingGroupOpen">
-                                <span>@(isBookingGroupOpen ? "?" : "?") Booking</span>
+                                <span>@if (isBookingGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Booking</span>
                             </div>
                             @if (isBookingGroupOpen)
                             {
@@ -90,7 +90,7 @@
                         @* Group: Room *@
                         <div class="action-group">
                             <div class="action-group-header" @onclick="() => isRoomGroupOpen = !isRoomGroupOpen">
-                                <span>@(isRoomGroupOpen ? "?" : "?") Ruangan</span>
+                                <span>@if (isRoomGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Ruangan</span>
                             </div>
                             @if (isRoomGroupOpen)
                             {
@@ -105,7 +105,7 @@
                         @* Group: User *@
                         <div class="action-group">
                             <div class="action-group-header" @onclick="() => isUserGroupOpen = !isUserGroupOpen">
-                                <span>@(isUserGroupOpen ? "?" : "?") User</span>
+                                <span>@if (isUserGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } User</span>
                             </div>
                             @if (isUserGroupOpen)
                             {
@@ -121,7 +121,7 @@
                         @* Group: System *@
                         <div class="action-group">
                             <div class="action-group-header" @onclick="() => isSystemGroupOpen = !isSystemGroupOpen">
-                                <span>@(isSystemGroupOpen ? "?" : "?") Sistem</span>
+                                <span>@if (isSystemGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Sistem</span>
                             </div>
                             @if (isSystemGroupOpen)
                             {
@@ -156,25 +156,41 @@
 
     @* -- Audit Log DataTable -- *@
     <div class="audit-table-panel">
-        <DataTable TItem="AuditLogEntry" Items="PagedLogs" Columns="columns" TotalCount="@FilteredLogs.Count()" PageSize="@pageSize" CurrentPage="@currentPage" OnPageChanged="HandlePageChange">
-            <RowTemplate Context="log">
-                <td class="col-time">
-                    <span class="log-date">@log.Timestamp.ToString("dd MMM yyyy")</span>
-                    <span class="log-time">@log.Timestamp.ToString("HH:mm:ss")</span>
-                </td>
-                <td>
-                    <div class="actor-cell">
-                        <div class="actor-avatar" style="background: @log.ActorBg;">@log.ActorInitials</div>
-                        <span class="actor-name">@log.ActorName</span>
-                    </div>
-                </td>
-                <td>
-                    <StatusBadge Status="@GetActionStatus(log.ActionType)" CustomLabel="@log.ActionType" />
-                </td>
-                <td><span class="log-target">@log.TargetName</span></td>
-                <td><span class="log-detail">@log.Detail</span></td>
-            </RowTemplate>
-        </DataTable>
+                @if (isLoading)
+        {
+            @for (int i = 0; i < 8; i++)
+            {
+                <div style="display:flex; gap:0.75rem; padding:0.75rem; border-bottom:1px solid var(--color-border);">
+                    <SkeletonBlock Width="32px" Height="32px" CssClass="rounded-circle" />
+                    <SkeletonBlock Width="20%" Height="16px" />
+                    <SkeletonBlock Width="15%" Height="16px" />
+                    <SkeletonBlock Width="25%" Height="16px" />
+                    <SkeletonBlock Width="15%" Height="16px" />
+                </div>
+            }
+        }
+        else
+        {
+            <DataTable TItem="AuditLogEntry" Items="PagedLogs" Columns="columns" TotalCount="@FilteredLogs.Count()" PageSize="@pageSize" CurrentPage="@currentPage" OnPageChanged="HandlePageChange">
+                <RowTemplate Context="log">
+                    <td class="col-time">
+                        <span class="log-date">@log.Timestamp.ToString("dd MMM yyyy")</span>
+                        <span class="log-time">@log.Timestamp.ToString("HH:mm:ss")</span>
+                    </td>
+                    <td>
+                        <div class="actor-cell">
+                            <div class="actor-avatar" style="background: @log.ActorBg;">@log.ActorInitials</div>
+                            <span class="actor-name">@log.ActorName</span>
+                        </div>
+                    </td>
+                    <td>
+                        <StatusBadge Status="@GetActionStatus(log.ActionType)" CustomLabel="@log.ActionType" />
+                    </td>
+                    <td><span class="log-target">@log.TargetName</span></td>
+                    <td><span class="log-detail">@log.Detail</span></td>
+                </RowTemplate>
+            </DataTable>
+        }
     </div>
 </div>
 
@@ -189,6 +205,7 @@
     private int currentPage = 1;
     private int pageSize = 10;
     private bool showExportModal = false;
+    private bool isLoading = false;
 
     private bool isBookingGroupOpen = true;
     private bool isRoomGroupOpen = true;
@@ -315,3 +332,6 @@
         return "neutral";
     }
 }
+
+
+

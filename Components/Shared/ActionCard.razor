@@ -8,7 +8,7 @@
         }
         else
         {
-            <span class="action-card-icon-text">@IconFallback</span>
+            <span class="action-card-icon-text">@((MarkupString)IconFallback)</span>
         }
     </div>
     <div class="action-card-content">
@@ -40,7 +40,7 @@
     [Parameter] public RenderFragment? IconContent { get; set; }
 
     /// <summary>Fallback text/emoji jika tidak ada IconContent</summary>
-    [Parameter] public string IconFallback { get; set; } = "📋";
+    [Parameter] public string IconFallback { get; set; } = "<Icon Name=\"clipboard\" Size=\"20\" />";
 
     /// <summary>Judul tebal (contoh: "IT Support")</summary>
     [Parameter] public string Title { get; set; } = "";

@@ -51,7 +51,7 @@
     border: 1px solid var(--color-border, #E5E7EB);
     border-radius: var(--radius-pill, 999px);
     padding: 0.35rem 0.85rem;
-    width: 240px;
+    min-width: 180px; flex: 1 1 auto; max-width: 320px;
     gap: 0.5rem;
     box-shadow: var(--shadow-sm);
     transition: all 0.2s ease;
@@ -59,7 +59,7 @@
 
 .topbar-search:focus-within {
     border-color: var(--color-primary, #0B1E39);
-    width: 280px;
+    max-width: 360px;
 }
 
 .topbar-search .search-icon {

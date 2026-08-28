@@ -1,4 +1,4 @@
-@page "/users"
+ï»¿@page "/users"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
@@ -40,7 +40,7 @@
         </select>
         <button type="button" class="btn-export-um" @onclick="OpenExportModal">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>Export</span>
+            <span>Ekspor</span>
         </button>
     </div>
 
@@ -104,7 +104,7 @@
                     <td>
                         <span class="um-status-pill @(u.Status.ToLower() == "active" ? "status-active" : "status-inactive")">
                             <span class="status-dot"></span>
-                            @(u.Status.ToLower() == "active" ? "Active" : "Inactive")
+                            @(u.Status.ToLower() == "active" ? "Aktif" : "Nonaktif")
                         </span>
                     </td>
                     <td>
@@ -199,8 +199,8 @@
             <div class="form-group">
                 <label class="form-label">Status Akun</label>
                 <select class="form-input" @bind="formModel.Status">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="active">Aktif</option>
+                    <option value="inactive">Nonaktif</option>
                 </select>
             </div>
         </div>
@@ -278,8 +278,8 @@
             <div class="form-group">
                 <label class="form-label">Status Akun</label>
                 <select class="form-input" @bind="editModel.Status">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="active">Aktif</option>
+                    <option value="inactive">Nonaktif</option>
                 </select>
             </div>
         </div>
@@ -321,7 +321,7 @@
 
         <div class="csv-drop-zone">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="csv-upload-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
-            <div class="csv-drop-text">Upload CSV — Drag & Drop atau <label class="csv-browse"><input type="file" style="display:none" @onchange="SimulateCsvLoad" accept=".csv" />pilih file</label></div>
+            <div class="csv-drop-text">Upload CSV ï¿½ Drag & Drop atau <label class="csv-browse"><input type="file" style="display:none" @onchange="SimulateCsvLoad" accept=".csv" />pilih file</label></div>
             <span class="csv-hint">Format kolom: Nama, Email, Department, Role, User ID</span>
         </div>
 

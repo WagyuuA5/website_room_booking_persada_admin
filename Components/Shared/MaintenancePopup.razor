@@ -1,6 +1,6 @@
 @using booking_room_admin.Components.Models
 
-<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="⚠ MAINTENANCE ⚠" Size="medium" OnClose="Close">
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="MAINTENANCE" Size="medium" OnClose="Close">
     <ChildContent>
         <div class="m-body">
             <p class="m-subtitle" style="font-weight:600; margin-bottom: 1rem;">@Room?.Name (@Room?.Floor)</p>
@@ -19,10 +19,10 @@
             <div class="m-field" style="margin-bottom: 1rem;">
                 <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Prioritas</label>
                 <select class="m-input" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" @bind="selectedPriority">
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Critical">Critical</option>
+                    <option value="Rendah">Rendah</option>
+                    <option value="Sedang">Sedang</option>
+                    <option value="Tinggi">Tinggi</option>
+                    <option value="Kritis">Kritis</option>
                 </select>
             </div>
 
@@ -31,9 +31,9 @@
                 <div class="m-facilities-chips" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
                     @foreach (var fac in facilitiesServiced)
                     {
-                        <span style="padding:0.25rem 0.5rem; background:#f3f4f6; border-radius:1rem; font-size:0.85rem; cursor:pointer;" @onclick="() => facilitiesServiced.Remove(fac)">@fac ✕</span>
+                        <span style="padding:0.25rem 0.5rem; background:#f3f4f6; border-radius:1rem; font-size:0.85rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.25rem;" @onclick="() => facilitiesServiced.Remove(fac)">@fac <Icon Name="x" Size="12" /></span>
                     }
-                    <button style="padding:0.25rem 0.5rem; background:#e5e7eb; border:none; border-radius:1rem; font-size:0.85rem; cursor:pointer;" @onclick="AddCustomFacility">+ Add</button>
+                    <button style="padding:0.25rem 0.5rem; background:#e5e7eb; border:none; border-radius:1rem; font-size:0.85rem; cursor:pointer;" @onclick="AddCustomFacility">+ Tambah</button>
                 </div>
                 @if(showAddFacility)
                 {
@@ -47,9 +47,9 @@
             <div class="m-field" style="margin-bottom: 1rem;">
                 <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Durasi (Cepat)</label>
                 <div style="display:flex; gap:0.5rem;">
-                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="20"?"#2563eb":"#fff"); color:@(selectedDuration=="20"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "20")">20 Min</button>
-                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="30"?"#2563eb":"#fff"); color:@(selectedDuration=="30"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "30")">30 Min</button>
-                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="60"?"#2563eb":"#fff"); color:@(selectedDuration=="60"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "60")">1 Hour</button>
+                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="20"?"#2563eb":"#fff"); color:@(selectedDuration=="20"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "20")">20 Menit</button>
+                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="30"?"#2563eb":"#fff"); color:@(selectedDuration=="30"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "30")">30 Menit</button>
+                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="60"?"#2563eb":"#fff"); color:@(selectedDuration=="60"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "60")">1 Jam</button>
                 </div>
             </div>
 
@@ -59,9 +59,9 @@
             </div>
 
             <div class="m-field" style="margin-bottom: 1rem;">
-                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Upload Dokumentasi</label>
+                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Unggah Dokumentasi</label>
                 <div style="width:100%; padding:2rem; border:2px dashed #ccc; border-radius:4px; text-align:center; background:#f9fafb; color:#6b7280; font-size:0.9rem;">
-                    Drag & Drop file di sini (max 5MB)
+                    Seret & lepas file di sini (maks. 5MB)
                 </div>
             </div>
 
@@ -88,7 +88,7 @@
     private bool showAddFacility = false;
     private string newFacility = string.Empty;
 
-    private List<string> categories = new() { "HVAC", "Equipment Repair", "Plumbing", "Electrical", "Cleaning" };
+    private List<string> categories = new() { "HVAC", "Perbaikan Peralatan", "Plambing", "Kelistrikan", "Kebersihan" };
 
     private void AddCustomFacility()
     {

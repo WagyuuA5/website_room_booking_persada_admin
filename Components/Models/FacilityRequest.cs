@@ -27,7 +27,7 @@ public class RequestedItem
     public string Name { get; set; } = string.Empty;
     public int Quantity { get; set; } = 1;
     public string Category { get; set; } = string.Empty;
-    public string Icon { get; set; } = "📦";
+    public string Icon { get; set; } = "";
 }
 
 public class ActivityLogEntry

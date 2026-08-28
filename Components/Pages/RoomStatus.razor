@@ -9,9 +9,9 @@
 <TopBar Title="Status Ruangan" Subtitle="Pantau dan kelola ketersediaan serta status operasional ruangan." ShowGlobalSearch="true" ShowDateFilter="false">
     <RightSlot>
         <div class="rs-header-summary">
-            <span class="rs-sum-dot dot-active">? Aktif (@GetCount("active"))</span>
-            <span class="rs-sum-dot dot-maint">? Maintenance (@GetCount("maintenance"))</span>
-            <span class="rs-sum-dot dot-inactive">? Tidak Aktif (@GetCount("inactive"))</span>
+            <span class="rs-sum-dot dot-active"><span class="status-dot bg-success"></span> Aktif (@GetCount("active"))</span>
+            <span class="rs-sum-dot dot-maint"><span class="status-dot bg-warning"></span> Maintenance (@GetCount("maintenance"))</span>
+            <span class="rs-sum-dot dot-inactive"><span class="status-dot bg-muted"></span> Tidak Aktif (@GetCount("inactive"))</span>
         </div>
     </RightSlot>
 </TopBar>
@@ -19,103 +19,133 @@
 <div class="room-status-page">
     @* -- Eyebrow -- *@
     <div class="rs-eyebrow-row">
-        <span class="rs-bullet">•</span>
+        <span class="eyebrow-bullet"></span>
         <span class="rs-eyebrow">STATUS RUANGAN</span>
     </div>
 
     @* -- 4-Columns Cards Grid -- *@
-    <div class="rs-cards-grid">
-        @foreach (var room in statusRooms)
-        {
-            <div class="rs-card card-@room.Status.ToLower() @(room.Status == "inactive" ? "card-ghost" : "")">
-                @* Photo Wrap *@
-                <div class="rs-photo-wrap @(room.Status != "active" ? "photo-grayscale" : "")">
-                    <img src="@room.PhotoUrl" alt="@room.Name" class="rs-photo" onerror="this.src='images/room1.jpg'" />
-
-                    @if (room.Status != "inactive")
-                    {
-                        <span class="rs-cap-badge">?? @room.Capacity Orang</span>
-                    }
-
-                    @if (room.Status == "maintenance")
-                    {
-                        <div class="rs-maint-overlay">
-                            <span class="rs-maint-icon">??</span>
-                            <span class="rs-maint-timer">Maintenance (@FormatTime(room.RemainingSeconds))</span>
-                        </div>
-
-                        @if (room.QueueCount > 0)
-                        {
-                            <span class="rs-queue-badge">?? @room.QueueCount Dalam Antrian</span>
-                        }
-                    }
+    @if (isLoading)
+    {
+        <div class="rs-cards-grid">
+            @for (int i = 0; i < 8; i++)
+            {
+                <div class="rs-card">
+                    <SkeletonBlock Height="160px" Width="100%" CssClass="mb-3" />
+                    <div style="padding: 1rem;">
+                        <SkeletonBlock Width="70%" Height="18px" CssClass="mb-2" />
+                        <SkeletonBlock Width="50%" Height="14px" CssClass="mb-2" />
+                        <SkeletonBlock Width="40%" Height="14px" />
+                    </div>
                 </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="rs-cards-grid">
+            @foreach (var room in statusRooms)
+            {
+                <div class="rs-card card-@room.Status.ToLower() @(room.Status == "inactive" ? "card-ghost" : "")">
+                    @* Photo Wrap *@
+                    <div class="rs-photo-wrap @(room.Status != "active" ? "photo-grayscale" : "")">
+                        @if (!room.ImageFailed)
+                        {
+                            <img src="@room.PhotoUrl" alt="@room.Name" class="rs-photo"
+                                 @onerror="() => { room.ImageFailed = true; InvokeAsync(StateHasChanged); }" />
+                        }
+                        else
+                        {
+                            <div class="room-photo-fallback">
+                                <Icon Name="image-off" Size="32" CssClass="text-muted" />
+                                <span>Foto tidak tersedia</span>
+                            </div>
+                        }
 
-                @* Card Body *@
-                <div class="rs-card-body">
-                    <div class="rs-top-header-row">
-                        <div class="rs-title-wrap">
-                            <h4 class="rs-room-title">@room.Name</h4>
-                            <span class="rs-room-loc">?? @room.Location</span>
-                        </div>
-                        <div class="rs-toggle-block">
-                            <label class="rs-switch">
-                                <input type="checkbox" checked="@(room.Status == "active")" @onchange="@((ChangeEventArgs e) => ToggleRoomStatus(room, (bool)(e.Value ?? false)))" />
-                                <span class="rs-slider"></span>
-                            </label>
-                            <span class="rs-status-tag tag-@room.Status.ToLower()">
-                                @GetStatusLabel(room.Status)
-                            </span>
-                        </div>
+                        @if (room.Status != "inactive")
+                        {
+                            <span class="rs-cap-badge"><Icon Name="users" Size="14" /> @room.Capacity Orang</span>
+                        }
+
+                        @if (room.Status == "maintenance")
+                        {
+                            <div class="rs-maint-overlay">
+                                <span class="rs-maint-icon"><Icon Name="wrench" Size="24" CssClass="text-white" /></span>
+                                <span class="rs-maint-timer">Maintenance (@FormatTime(room.RemainingSeconds))</span>
+                            </div>
+
+                            @if (room.QueueCount > 0)
+                            {
+                                <span class="rs-queue-badge"><Icon Name="clock" Size="12" /> @room.QueueCount Dalam Antrian</span>
+                            }
+                        }
                     </div>
 
-                    @if (room.Status == "inactive")
-                    {
-                        <p class="rs-placeholder-text">Menunggu setup & konfigurasi admin...</p>
-                    }
-                    else if (room.Status == "maintenance")
-                    {
-                        <div class="rs-schedule-box">
-                            <span class="rs-sched-label">Jadwal Maintenance</span>
-                            <div class="rs-duration-chips">
-                                <button type="button" class="rs-dur-chip @(room.SelectedDurationMinutes == 20 ? "active" : "")" @onclick="() => SetDuration(room, 20)">20 Menit</button>
-                                <button type="button" class="rs-dur-chip @(room.SelectedDurationMinutes == 30 ? "active" : "")" @onclick="() => SetDuration(room, 30)">30 Menit</button>
-                                <button type="button" class="rs-dur-chip @(room.SelectedDurationMinutes == 60 ? "active" : "")" @onclick="() => SetDuration(room, 60)">1 Jam</button>
+                    @* Card Body *@
+                    <div class="rs-card-body">
+                        <div class="rs-top-header-row">
+                            <div class="rs-title-wrap">
+                                <h4 class="rs-room-title">@room.Name</h4>
+                                <span class="rs-room-loc"><Icon Name="map-pin" Size="14" /> @room.Location</span>
+                            </div>
+                            <div class="rs-toggle-block">
+                                <label class="rs-switch">
+                                    <input type="checkbox" checked="@(room.Status == "active")" @onchange="@((ChangeEventArgs e) => ToggleRoomStatus(room, (bool)(e.Value ?? false)))" />
+                                    <span class="rs-slider"></span>
+                                </label>
+                                <span class="rs-status-tag tag-@room.Status.ToLower()">
+                                    @GetStatusLabel(room.Status)
+                                </span>
                             </div>
                         </div>
-                    }
-                    else
-                    {
-                        <div class="rs-amenities-row">
-                            @foreach (var am in room.Amenities)
+
+                        @if (room.Status == "inactive")
+                        {
+                            <p class="rs-placeholder-text">Menunggu setup & konfigurasi admin...</p>
+                        }
+                        else if (room.Status == "maintenance")
+                        {
+                            <div class="rs-schedule-box">
+                                <span class="rs-sched-label">Jadwal Maintenance</span>
+                                <div class="rs-duration-chips">
+                                    <button type="button" class="rs-dur-chip @(room.SelectedDurationMinutes == 20 ? "active" : "")" @onclick="() => SetDuration(room, 20)">20 Menit</button>
+                                    <button type="button" class="rs-dur-chip @(room.SelectedDurationMinutes == 30 ? "active" : "")" @onclick="() => SetDuration(room, 30)">30 Menit</button>
+                                    <button type="button" class="rs-dur-chip @(room.SelectedDurationMinutes == 60 ? "active" : "")" @onclick="() => SetDuration(room, 60)">1 Jam</button>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="rs-amenities-row">
+                                @foreach (var am in room.Amenities)
+                                {
+                                    <span class="rs-amenity-chip">@am</span>
+                                }
+                            </div>
+                        }
+
+                        <div class="rs-card-bottom-row">
+                            @if (room.JustFinished)
                             {
-                                <span class="rs-amenity-chip">@am</span>
+                                <span class="rs-badge-just-finished">BARU SELESAI</span>
                             }
+                            <div style="flex:1;"></div>
+                            <button type="button" class="btn-rs-trash" @onclick="() => ConfirmDelete(room)" title="Hapus Ruangan">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rs-trash-svg"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    @* Full-width Yellow Warning Bar for Maintenance *@
+                    @if (room.Status == "maintenance")
+                    {
+                        <div class="rs-yellow-bar">
+                            <span><Icon Name="alert-triangle" Size="14" /> Maintenance</span>
                         </div>
                     }
-
-                    <div class="rs-card-bottom-row">
-                        @if (room.JustFinished)
-                        {
-                            <span class="rs-badge-just-finished">BARU SELESAI</span>
-                        }
-                        <div style="flex:1;"></div>
-                        <button type="button" class="btn-rs-trash" @onclick="() => ConfirmDelete(room)" title="Hapus Ruangan">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rs-trash-svg"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                        </button>
-                    </div>
                 </div>
-
-                @* Full-width Yellow Warning Bar for Maintenance *@
-                @if (room.Status == "maintenance")
-                {
-                    <div class="rs-yellow-bar">
-                        <span>?? Maintenance</span>
-                    </div>
-                }
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
 </div>
 
 @* -- Modal Set Maintenance -- *@
@@ -124,8 +154,8 @@
     <AppModal IsOpen="@showMaintModal" IsOpenChanged="@((bool v) => showMaintModal = v)" Size="medium">
         <HeaderContent>
             <div class="rs-modal-maint-header">
-                <h3 class="rs-maint-modal-title">?? MAINTENANCE ??</h3>
-                <span class="rs-maint-room-pill">?? @activeMaintenanceRoom.Name · @activeMaintenanceRoom.Location</span>
+                <h3 class="rs-maint-modal-title"><Icon Name="wrench" Size="20" /> MAINTENANCE</h3>
+                <span class="rs-maint-room-pill"><Icon Name="building" Size="14" /> @activeMaintenanceRoom.Name &middot; @activeMaintenanceRoom.Location</span>
             </div>
         </HeaderContent>
         <ChildContent>
@@ -159,7 +189,15 @@
                         {
                             <button type="button" class="rs-serv-chip @(maintForm.ServicedFacilities.Contains(f) ? "selected" : "")"
                                     @onclick="() => ToggleServicedFacility(f)">
-                                @(maintForm.ServicedFacilities.Contains(f) ? "?" : "+") @f
+                                @if (maintForm.ServicedFacilities.Contains(f))
+                                {
+                                    <Icon Name="check" Size="12" />
+                                }
+                                else
+                                {
+                                    @("+ ")
+                                }
+                                @f
                             </button>
                         }
                     </div>
@@ -192,10 +230,12 @@
 {
     <AppModal IsOpen="@showDeleteModal" IsOpenChanged="@((bool v) => showDeleteModal = v)" Size="small">
         <HeaderContent>
-            <h3 class="text-danger">Hapus Ruangan Ini?</h3>
+            <h3 style="margin:0; font-size:1.125rem; font-weight:600;">Hapus Ruangan</h3>
         </HeaderContent>
         <ChildContent>
-            <p>Hapus <strong>@roomToDelete.Name</strong> dari sistem secara permanen?</p>
+            <p style="margin:0; font-size:0.875rem; color:#6E6E73;">
+                Apakah Anda yakin ingin menghapus ruangan <strong>@roomToDelete.Name</strong>? Aksi ini tidak dapat dibatalkan.
+            </p>
         </ChildContent>
         <FooterContent>
             <button type="button" class="btn-outline-pill" @onclick="() => showDeleteModal = false">Batal</button>
@@ -218,6 +258,7 @@
         public bool JustFinished { get; set; }
         public List<string> Amenities { get; set; } = new();
         public string PhotoUrl { get; set; } = "images/room1.jpg";
+        public bool ImageFailed { get; set; }
     }
 
     public class MaintenanceFormModel
@@ -228,6 +269,7 @@
         public string Description { get; set; } = "";
     }
 
+    private bool isLoading = true;
     private List<RoomStatusItem> statusRooms = new();
     private RoomStatusItem? activeMaintenanceRoom;
     private RoomStatusItem? roomToDelete;
@@ -239,10 +281,14 @@
 
     private List<string> availableServiceFacilities = new() { "AC Unit", "Lighting/Pencahayaan", "Furniture/Perabotan", "Sound System", "Proyektor" };
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
+        StateHasChanged();
+        await Task.Delay(1); // yield to render skeleton
         InitStatusRooms();
         StartCountdownTimer();
+        isLoading = false;
     }
 
     private void InitStatusRooms()

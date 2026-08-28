@@ -7,118 +7,118 @@
 <div class="settings-page">
     @* Security *@
     <div class="settings-section">
-        <h3 class="settings-section-title">🔒 Keamanan</h3>
+        <h3 class="settings-section-title"><Icon Name="lock" Size="20" /> Keamanan</h3>
         <div class="settings-list">
             <div class="settings-item" @onclick="@(() => activePanel = "password")">
                 <div class="settings-item-left">
-                    <span class="settings-item-icon">🔑</span>
+                    <span class="settings-item-icon"><Icon Name="key" Size="18" /></span>
                     <div>
                         <span class="settings-item-label">Ubah Password</span>
                         <span class="settings-item-desc">Ganti password login Anda</span>
                     </div>
                 </div>
-                <span class="settings-chevron">›</span>
+                <span class="settings-chevron"><Icon Name="chevron-right" Size="16" /></span>
             </div>
             <div class="settings-item" @onclick="@(() => activePanel = "2fa")">
                 <div class="settings-item-left">
-                    <span class="settings-item-icon">📱</span>
+                    <span class="settings-item-icon"><Icon Name="smartphone" Size="18" /></span>
                     <div>
                         <span class="settings-item-label">PIN / Verifikasi 2 Langkah</span>
                         <span class="settings-item-desc">Tambahkan lapisan keamanan ekstra</span>
                     </div>
                 </div>
-                <span class="settings-chevron">›</span>
+                <span class="settings-chevron"><Icon Name="chevron-right" Size="16" /></span>
             </div>
             <div class="settings-item" @onclick="@(() => activePanel = "sessions")">
                 <div class="settings-item-left">
-                    <span class="settings-item-icon">💻</span>
+                    <span class="settings-item-icon"><Icon Name="laptop" Size="18" /></span>
                     <div>
                         <span class="settings-item-label">Sesi & Perangkat Aktif</span>
                         <span class="settings-item-desc">Kelola perangkat yang sedang login</span>
                     </div>
                 </div>
-                <span class="settings-chevron">›</span>
+                <span class="settings-chevron"><Icon Name="chevron-right" Size="16" /></span>
             </div>
         </div>
     </div>
 
     @* Preferences *@
     <div class="settings-section">
-        <h3 class="settings-section-title">⚙️ Preferensi</h3>
+        <h3 class="settings-section-title"><Icon Name="settings" Size="20" /> Preferensi</h3>
         <div class="settings-list">
             <div class="settings-item" @onclick="@(() => activePanel = "notifications")">
                 <div class="settings-item-left">
-                    <span class="settings-item-icon">🔔</span>
+                    <span class="settings-item-icon"><Icon Name="bell" Size="18" /></span>
                     <div>
                         <span class="settings-item-label">Notifikasi</span>
                         <span class="settings-item-desc">Atur jenis notifikasi yang diterima</span>
                     </div>
                 </div>
-                <span class="settings-chevron">›</span>
+                <span class="settings-chevron"><Icon Name="chevron-right" Size="16" /></span>
             </div>
             <div class="settings-item" @onclick="@(() => activePanel = "language")">
                 <div class="settings-item-left">
-                    <span class="settings-item-icon">🌐</span>
+                    <span class="settings-item-icon"><Icon Name="globe" Size="18" /></span>
                     <div>
                         <span class="settings-item-label">Bahasa & Zona Waktu</span>
                         <span class="settings-item-desc">Indonesia (WIB, UTC+7)</span>
                     </div>
                 </div>
-                <span class="settings-chevron">›</span>
+                <span class="settings-chevron"><Icon Name="chevron-right" Size="16" /></span>
             </div>
         </div>
     </div>
 
     @* Booking System *@
     <div class="settings-section">
-        <h3 class="settings-section-title">📅 Sistem Booking</h3>
+        <h3 class="settings-section-title"><Icon Name="calendar" Size="20" /> Sistem Booking</h3>
         <div class="settings-list">
             <div class="settings-item" @onclick="@(() => activePanel = "hours")">
                 <div class="settings-item-left">
-                    <span class="settings-item-icon">🕐</span>
+                    <span class="settings-item-icon"><Icon Name="clock" Size="18" /></span>
                     <div>
                         <span class="settings-item-label">Jam Operasional & Aturan Booking</span>
                         <span class="settings-item-desc">08:00 - 18:00, maks 4 jam per booking</span>
                     </div>
                 </div>
-                <span class="settings-chevron">›</span>
+                <span class="settings-chevron"><Icon Name="chevron-right" Size="16" /></span>
             </div>
             <div class="settings-item" @onclick="@(() => activePanel = "roles")">
                 <div class="settings-item-left">
-                    <span class="settings-item-icon">👥</span>
+                    <span class="settings-item-icon"><Icon Name="users" Size="18" /></span>
                     <div>
                         <span class="settings-item-label">Manajemen Role & Permission</span>
-                        <span class="settings-item-desc">Admin, Approver, Employee</span>
+                        <span class="settings-item-desc">Admin, Penyetuju, Karyawan</span>
                     </div>
                 </div>
-                <span class="settings-chevron">›</span>
+                <span class="settings-chevron"><Icon Name="chevron-right" Size="16" /></span>
             </div>
             <div class="settings-item" @onclick="@(() => activePanel = "calendar")">
                 <div class="settings-item-left">
-                    <span class="settings-item-icon">📧</span>
+                    <span class="settings-item-icon"><Icon Name="mail" Size="18" /></span>
                     <div>
                         <span class="settings-item-label">Integrasi Kalender & Email</span>
                         <span class="settings-item-desc">Google Calendar, Outlook</span>
                     </div>
                 </div>
-                <span class="settings-chevron">›</span>
+                <span class="settings-chevron"><Icon Name="chevron-right" Size="16" /></span>
             </div>
         </div>
     </div>
 
     @* Appearance *@
     <div class="settings-section">
-        <h3 class="settings-section-title">🎨 Tampilan</h3>
+        <h3 class="settings-section-title"><Icon Name="palette" Size="20" /> Tampilan</h3>
         <div class="settings-list">
             <div class="settings-item" @onclick="@(() => activePanel = "brand")">
                 <div class="settings-item-left">
-                    <span class="settings-item-icon">🖼️</span>
+                    <span class="settings-item-icon"><Icon Name="image" Size="18" /></span>
                     <div>
                         <span class="settings-item-label">Logo & Warna Brand</span>
                         <span class="settings-item-desc">Kustomisasi tampilan aplikasi</span>
                     </div>
                 </div>
-                <span class="settings-chevron">›</span>
+                <span class="settings-chevron"><Icon Name="chevron-right" Size="16" /></span>
             </div>
         </div>
     </div>
@@ -163,11 +163,11 @@
                             <span class="role-desc">Akses penuh ke seluruh modul dan pengaturan</span>
                         </div>
                         <div class="role-card">
-                            <span class="role-name">Approver</span>
+                            <span class="role-name">Penyetuju</span>
                             <span class="role-desc">Dapat menyetujui/menolak booking, tidak bisa kelola user</span>
                         </div>
                         <div class="role-card">
-                            <span class="role-name">Employee</span>
+                            <span class="role-name">Karyawan</span>
                             <span class="role-desc">Hanya bisa membuat booking dan melihat statusnya</span>
                         </div>
                     </div>
@@ -176,7 +176,7 @@
                     <div class="panel-form">
                         <label class="form-label">Logo Aplikasi</label>
                         <div class="upload-area">
-                            <span>Drag & drop atau klik untuk upload logo</span>
+                            <span>Seret & lepas atau klik untuk mengunggah logo</span>
                             <small>SVG, PNG, JPG (maks 2MB)</small>
                         </div>
                         <label class="form-label">Warna Primer</label>
