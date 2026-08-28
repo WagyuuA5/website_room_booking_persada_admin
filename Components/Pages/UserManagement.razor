@@ -6,8 +6,7 @@
 @inject IUserService UserService
 
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Manajemen Pengguna" PageSubtitle="Kelola akses dan peran pengguna aplikasi." />
-<PageHeader Title="Manajemen Pengguna" Subtitle="Kelola akses dan peran pengguna aplikasi." />
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Manajemen Pengguna" PageSubtitle="Kelola akses dan peran pengguna aplikasi." ShowGlobalSearch="false" ShowGlobalDate="true" />
 <div class="user-management">
     <div class="toolbar">
         <div class="search-box">
@@ -184,4 +183,9 @@
         return colors[Math.Abs(hash) % colors.Length];
     }
 }
+
+
+
+
+
 

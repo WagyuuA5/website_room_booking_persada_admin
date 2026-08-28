@@ -1,15 +1,13 @@
-﻿@page "/dashboard"
+@page "/dashboard"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using ApexCharts
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Services
 @inject NavigationManager Navigation
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Dashboard Admin" PageSubtitle="Ringkasan performa sistem pemesanan ruangan perusahaan." />
-<PageHeader Title="Dashboard Admin" Subtitle="Ringkasan performa sistem pemesanan ruangan perusahaan." />
-
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Dashboard Admin" PageSubtitle="Ringkasan performa sistem pemesanan ruangan perusahaan." ShowGlobalSearch="true" ShowGlobalDate="true" />
 <div class="dashboard">
-    @* ── Bagian 1: Ringkasan Statistik ── *@
+    @* -- Bagian 1: Ringkasan Statistik -- *@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon"><img src="icon/icon_1_admin.svg" alt="Ruangan" /></div>
@@ -23,7 +21,7 @@
             <div class="stat-info">
                 <span class="stat-label">Total Pengguna<br>Terdaftar</span>
                 <span class="stat-value">124</span>
-                <span class="stat-trend up">↑ +12%</span>
+                <span class="stat-trend up">? +12%</span>
             </div>
         </div>
         <div class="stat-card">
@@ -31,7 +29,7 @@
             <div class="stat-info">
                 <span class="stat-label">Total Pengguna<br>Booking</span>
                 <span class="stat-value">86</span>
-                <span class="stat-trend up">↑ +8%</span>
+                <span class="stat-trend up">? +8%</span>
             </div>
         </div>
         <div class="stat-card">
@@ -39,12 +37,12 @@
             <div class="stat-info">
                 <span class="stat-label">Rata-rata<br>Utilisasi</span>
                 <span class="stat-value">72%</span>
-                <span class="stat-trend up">↑ +5%</span>
+                <span class="stat-trend up">? +5%</span>
             </div>
         </div>
     </div>
 
-    @* ── Bagian 2: Requests Overview dengan ActionCard ── *@
+    @* -- Bagian 2: Requests Overview dengan ActionCard -- *@
     <div class="section-header">
         <h3 class="section-title">Requests Overview</h3>
     </div>
@@ -126,7 +124,7 @@
         </div>
     </div>
 
-    @* ── Bagian 3: Charts ── *@
+    @* -- Bagian 3: Charts -- *@
     <div class="charts-row">
         <div class="chart-card">
             <div class="chart-header">
@@ -166,12 +164,12 @@
         </div>
     </div>
 
-    @* ── Bagian 4: Recent Requests ── *@
+    @* -- Bagian 4: Recent Requests -- *@
     <div class="tables-row">
         <div class="table-card">
             <div class="table-header">
                 <h3>Permintaan Terbaru</h3>
-                <a href="/facility-requests" class="table-link">LIHAT SEMUA DI REQUESTS HUB →</a>
+                <a href="/facility-requests" class="table-link">LIHAT SEMUA DI REQUESTS HUB ?</a>
             </div>
             <DataTable TItem="RecentRequest" Items="recentRequests" Columns="requestColumns" TotalCount="@recentRequests.Count" PageSize="5" CurrentPage="1" OnRowClick="HandleRequestClick">
                 <RowTemplate Context="req">
@@ -196,7 +194,7 @@
             </DataTable>
         </div>
 
-        @* ── Bagian 5: History Bookings ── *@
+        @* -- Bagian 5: History Bookings -- *@
         <div class="table-card">
             <div class="table-header">
                 <h3>Riwayat Booking</h3>
@@ -227,7 +225,7 @@
     </div>
 </div>
 
-@* ── Request detail modals (Case 5) ── *@
+@* -- Request detail modals (Case 5) -- *@
 <AppModal IsOpen="@(_activeRequestModal == "facility")" IsOpenChanged="@(CloseRequestModal)" Title="Permintaan Fasilitas" Size="medium">
     <ChildContent>
         <div class="request-detail-list">
@@ -288,7 +286,7 @@
     <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Lihat Semua</a></FooterContent>
 </AppModal>
 
-@* ── Export modals (Case 6) ── *@
+@* -- Export modals (Case 6) -- *@
 <ExportModal IsOpen="@showTrendExport" IsOpenChanged="@(v => { showTrendExport = v; StateHasChanged(); })"
              ExportTitle="Tren Booking" Columns="@_trendColumns"
              CurrentViewRows="@(_trendData.Cast<object>())" AllRows="@(_trendData.Cast<object>())" />
@@ -302,25 +300,25 @@
              CurrentViewRows="@(historyBookings.Cast<object>())" AllRows="@(historyBookings.Cast<object>())" />
 
 @code {
-    // ── Chart data ──
+    // -- Chart data --
     private List<TrendPoint> _trendData = new();
     private ApexChartOptions<TrendPoint> _trendOptions = new();
     private List<RoomUsagePoint> _donutData = new();
     private ApexChartOptions<RoomUsagePoint> _donutOptions = new();
 
-    // ── Request overview data (ActionCard) ──
+    // -- Request overview data (ActionCard) --
     private List<RequestItem> facilityRequests = new();
     private List<RequestItem> accountRequests = new();
     private List<RequestItem> itRequests = new();
     private List<RequestItem> bugRequests = new();
 
-    // ── Table data ──
+    // -- Table data --
     private List<RecentRequest> recentRequests = new();
     private List<HistoryBooking> historyBookings = new();
     private List<DataTable<RecentRequest>.DataTableColumn> requestColumns = new();
     private List<DataTable<HistoryBooking>.DataTableColumn> bookingColumns = new();
 
-    // ── Modal state ──
+    // -- Modal state --
     private string? _activeRequestModal;
     private bool showTrendExport;
     private bool showDonutExport;
@@ -363,23 +361,23 @@
     {
         facilityRequests = new()
         {
-            new("Permintaan Katering", "FAC-2241", "Rapat Direksi — 2 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
-            new("Peralatan AV", "FAC-2238", "Ruang Rapat A — 5 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
+            new("Permintaan Katering", "FAC-2241", "Rapat Direksi � 2 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
+            new("Peralatan AV", "FAC-2238", "Ruang Rapat A � 5 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
         };
         accountRequests = new()
         {
-            new("Sari Wulandari", "ACC-1102", "Karyawan resign — Menunggu", "#EF4444", "#FEE2E2", SvgAccount, "#991B1B"),
-            new("Rudi Hartono", "ACC-1099", "Mutasi cabang — Menunggu", "#F59E0B", "#FEF3C7", SvgAccount, "#92400E"),
+            new("Sari Wulandari", "ACC-1102", "Karyawan resign � Menunggu", "#EF4444", "#FEE2E2", SvgAccount, "#991B1B"),
+            new("Rudi Hartono", "ACC-1099", "Mutasi cabang � Menunggu", "#F59E0B", "#FEF3C7", SvgAccount, "#92400E"),
         };
         itRequests = new()
         {
-            new("Server Down", "IT-4421", "Server utama — 4 jam lalu", "#EF4444", "#FEE2E2", SvgIt, "#991B1B"),
+            new("Server Down", "IT-4421", "Server utama � 4 jam lalu", "#EF4444", "#FEE2E2", SvgIt, "#991B1B"),
             new("Reset Email", "IT-4418", "Belum Ditugaskan", "#F59E0B", "#FEF3C7", SvgIt, "#92400E"),
         };
         bugRequests = new()
         {
-            new("Error 500 Submit Form", "BUG-102", "Form Booking — Kritis", "#EF4444", "#FEE2E2", SvgBug, "#991B1B"),
-            new("Kalender Tidak Sinkron", "BUG-099", "Modul Calendar — Medium", "#F59E0B", "#FEF3C7", SvgBug, "#92400E"),
+            new("Error 500 Submit Form", "BUG-102", "Form Booking � Kritis", "#EF4444", "#FEE2E2", SvgBug, "#991B1B"),
+            new("Kalender Tidak Sinkron", "BUG-099", "Modul Calendar � Medium", "#F59E0B", "#FEF3C7", SvgBug, "#92400E"),
         };
     }
 
@@ -459,7 +457,7 @@
 
     private void HandleRequestClick(RecentRequest req) { }
 
-    // ── Vector category icons (Case 7) ──
+    // -- Vector category icons (Case 7) --
     private const string SvgFacility = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><path d=\"M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z\"/><polyline points=\"3.27 6.96 12 12.01 20.73 6.96\"/><line x1=\"12\" y1=\"22.08\" x2=\"12\" y2=\"12\"/></svg>";
     private const string SvgBug = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><rect x=\"8\" y=\"6\" width=\"8\" height=\"14\" rx=\"4\"/><path d=\"M19 7l-3 2\"/><path d=\"M5 7l3 2\"/><path d=\"M19 13h-3\"/><path d=\"M5 13h3\"/><path d=\"M19 19l-3-2\"/><path d=\"M5 19l3-2\"/><path d=\"M12 2v4\"/></svg>";
     private const string SvgAccount = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><path d=\"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/></svg>";
@@ -477,10 +475,15 @@
     private RenderFragment CategoryIcon(string type, string bg) =>
         @<span class="req-type-icon" style="background:@bg">@((MarkupString)CatSvg(type))</span>;
 
-    // ── Records ──
+    // -- Records --
     public record TrendPoint(string Bulan, int Jumlah);
     public record RoomUsagePoint(string NamaRuangan, int Jumlah);
     public record RequestItem(string Title, string Id, string Subtitle, string Color, string IconBg, string Icon, string SubColor);
     public record RecentRequest(string Type, string TypeIcon, string TypeColor, string RequesterName, string Initials, string AvatarColor, string Department, string Summary, string Status);
     public record HistoryBooking(string UserName, string Initials, string AvatarColor, string Department, string Room, string Schedule, string Status);
 }
+
+
+
+
+

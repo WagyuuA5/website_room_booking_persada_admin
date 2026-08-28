@@ -1,12 +1,11 @@
-﻿@page "/facility-requests"
+@page "/facility-requests"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
 @using booking_room_admin.Components.Services
 
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Permintaan Fasilitas" PageSubtitle="Tinjau dan proses permintaan tambahan fasilitas." />
-<PageHeader Title="Permintaan Fasilitas" Subtitle="Tinjau dan proses permintaan tambahan fasilitas." />
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Permintaan Fasilitas" PageSubtitle="Tinjau dan proses permintaan tambahan fasilitas." ShowGlobalSearch="true" ShowGlobalDate="true" />
 <div class="facility-requests">
     <div class="fr-toolbar">
         <div class="fr-tabs">
@@ -38,7 +37,7 @@
         @if (!filteredRequests.Any())
         {
             <div class="fr-empty">
-                <span class="fr-empty-icon">📋</span>
+                <span class="fr-empty-icon">??</span>
                 <span class="fr-empty-text">Tidak ada permintaan untuk filter ini.</span>
             </div>
         }
@@ -52,7 +51,7 @@
                     IconContent="@(b => b.AddMarkupContent(0, GetIconSvg(req)))"
                     Title="@req.Title"
                     ReferenceId="@req.RequestId"
-                    Subtitle="@($"{req.RoomName} • {req.BookingDate:dd MMM yyyy} • {req.Category}")"
+                    Subtitle="@($"{req.RoomName} � {req.BookingDate:dd MMM yyyy} � {req.Category}")"
                     SubtitleColor="@GetSubtitleColor(req)"
                     ActionLabel="@GetActionLabel(req)"
                     OnActionClick="() => OpenDetail(req)" />
@@ -83,14 +82,14 @@
                         <div class="detail-avatar">@selectedRequest.RequesterInitials</div>
                         <div>
                             <div class="detail-name">@selectedRequest.RequesterName</div>
-                            <div class="detail-meta">@selectedRequest.RequesterRole • @selectedRequest.RequesterEmail</div>
+                            <div class="detail-meta">@selectedRequest.RequesterRole � @selectedRequest.RequesterEmail</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="detail-section">
                     <h5 class="detail-section-title">Ruangan & Jadwal</h5>
-                    <p class="detail-text">@selectedRequest.RoomName — @selectedRequest.BookingDate.ToString("dd MMMM yyyy")</p>
+                    <p class="detail-text">@selectedRequest.RoomName � @selectedRequest.BookingDate.ToString("dd MMMM yyyy")</p>
                 </div>
 
                 <div class="detail-section">
@@ -100,7 +99,7 @@
                         {
                             <div class="detail-item">
                                 <span class="item-icon">@((MarkupString)item.Icon)</span>
-                                <span class="item-name">@item.Category — @item.Name x@item.Quantity</span>
+                                <span class="item-name">@item.Category � @item.Name x@item.Quantity</span>
                             </div>
                         }
                     </div>
@@ -189,10 +188,10 @@
         allRequests = new()
         {
             new() { Id = 1, RequestId = "FAC-2241", Title = "Permintaan Katering Rapat Direksi", Category = "Katering", RequesterName = "Rina Kartika", RequesterInitials = "RK", RequesterRole = "Staff IT", RequesterEmail = "rina@persada.co.id", RequesterDepartment = "IT Dept", RoomName = "Ruang Rapat Utama", BookingDate = DateTime.Now.AddDays(2), Status = "pending", RequesterNote = "Mohon disediakan makan siang untuk 32 orang, termasuk 4 vegetarian.", Items = new() { new() { Name = "Executive Lunch", Quantity = 32, Category = "Katering", Icon = SvgKatering }, new() { Name = "Extra Chairs", Quantity = 2, Category = "Furnitur", Icon = SvgFurnitur } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddHours(-2), Action = "Permintaan Dibuat" }, new() { Timestamp = DateTime.Now.AddHours(-1), Action = "Menunggu Penugasan" } } },
-            new() { Id = 2, RequestId = "FAC-2238", Title = "Peralatan Audio Visual Meeting", Category = "Audio Visual", RequesterName = "Dimas Prasetyo", RequesterInitials = "DP", RequesterRole = "Engineer", RequesterEmail = "dimas@persada.co.id", RequesterDepartment = "IT Dept", RoomName = "Ruang Rapat A", BookingDate = DateTime.Now.AddDays(1), Status = "pending", Items = new() { new() { Name = "Proyektor 4K", Quantity = 1, Category = "AV", Icon = SvgAv }, new() { Name = "Wireless Mic", Quantity = 2, Category = "AV", Icon = "🎤" } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddHours(-5), Action = "Permintaan Dibuat" } } },
+            new() { Id = 2, RequestId = "FAC-2238", Title = "Peralatan Audio Visual Meeting", Category = "Audio Visual", RequesterName = "Dimas Prasetyo", RequesterInitials = "DP", RequesterRole = "Engineer", RequesterEmail = "dimas@persada.co.id", RequesterDepartment = "IT Dept", RoomName = "Ruang Rapat A", BookingDate = DateTime.Now.AddDays(1), Status = "pending", Items = new() { new() { Name = "Proyektor 4K", Quantity = 1, Category = "AV", Icon = SvgAv }, new() { Name = "Wireless Mic", Quantity = 2, Category = "AV", Icon = "??" } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddHours(-5), Action = "Permintaan Dibuat" } } },
             new() { Id = 3, RequestId = "FAC-2235", Title = "Pengaturan Furnitur Workshop", Category = "Furnitur", RequesterName = "Maya Putri", RequesterInitials = "MP", RequesterRole = "Marketing Lead", RequesterEmail = "maya@persada.co.id", RequesterDepartment = "Marketing", RoomName = "Ruang Diskusi", BookingDate = DateTime.Now.AddDays(3), Status = "preparing", AssignedTo = "Tim Furnitur", Items = new() { new() { Name = "Meja Lipat", Quantity = 5, Category = "Furnitur", Icon = SvgFurnitur } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddDays(-1), Action = "Permintaan Dibuat" }, new() { Timestamp = DateTime.Now.AddHours(-6), Action = "Ditugaskan ke Tim Furnitur" } } },
-            new() { Id = 4, RequestId = "FAC-2230", Title = "Katering Rapat Bulanan", Category = "Katering", RequesterName = "Ahmad Fauzi", RequesterInitials = "AF", RequesterRole = "Manager", RequesterEmail = "ahmad@persada.co.id", RequesterDepartment = "Finance", RoomName = "Ruang Rapat B", BookingDate = DateTime.Now, Status = "ready", AssignedTo = "Tim Katering", Items = new() { new() { Name = "Snack Box", Quantity = 15, Category = "Katering", Icon = "🍱" } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddDays(-2), Action = "Permintaan Dibuat" }, new() { Timestamp = DateTime.Now.AddDays(-1), Action = "Ditugaskan ke Tim Katering" }, new() { Timestamp = DateTime.Now.AddHours(-3), Action = "Persiapan Selesai — Siap Diantar" } } },
-            new() { Id = 5, RequestId = "FAC-2225", Title = "Setup Video Conference", Category = "Audio Visual", RequesterName = "Budi Santoso", RequesterInitials = "BS", RequesterRole = "HR Manager", RequesterEmail = "budi@persada.co.id", RequesterDepartment = "HR Dept", RoomName = "Ruang Rapat Utama", BookingDate = DateTime.Now.AddDays(-1), Status = "fulfilled", AssignedTo = "Tim AV", Items = new() { new() { Name = "Webcam 4K", Quantity = 1, Category = "AV", Icon = "📷" }, new() { Name = "Speaker", Quantity = 2, Category = "AV", Icon = "🔊" } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddDays(-3), Action = "Permintaan Dibuat" }, new() { Timestamp = DateTime.Now.AddDays(-2), Action = "Ditugaskan ke Tim AV" }, new() { Timestamp = DateTime.Now.AddDays(-1), Action = "Selesai" } } },
+            new() { Id = 4, RequestId = "FAC-2230", Title = "Katering Rapat Bulanan", Category = "Katering", RequesterName = "Ahmad Fauzi", RequesterInitials = "AF", RequesterRole = "Manager", RequesterEmail = "ahmad@persada.co.id", RequesterDepartment = "Finance", RoomName = "Ruang Rapat B", BookingDate = DateTime.Now, Status = "ready", AssignedTo = "Tim Katering", Items = new() { new() { Name = "Snack Box", Quantity = 15, Category = "Katering", Icon = "??" } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddDays(-2), Action = "Permintaan Dibuat" }, new() { Timestamp = DateTime.Now.AddDays(-1), Action = "Ditugaskan ke Tim Katering" }, new() { Timestamp = DateTime.Now.AddHours(-3), Action = "Persiapan Selesai � Siap Diantar" } } },
+            new() { Id = 5, RequestId = "FAC-2225", Title = "Setup Video Conference", Category = "Audio Visual", RequesterName = "Budi Santoso", RequesterInitials = "BS", RequesterRole = "HR Manager", RequesterEmail = "budi@persada.co.id", RequesterDepartment = "HR Dept", RoomName = "Ruang Rapat Utama", BookingDate = DateTime.Now.AddDays(-1), Status = "fulfilled", AssignedTo = "Tim AV", Items = new() { new() { Name = "Webcam 4K", Quantity = 1, Category = "AV", Icon = "??" }, new() { Name = "Speaker", Quantity = 2, Category = "AV", Icon = "??" } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddDays(-3), Action = "Permintaan Dibuat" }, new() { Timestamp = DateTime.Now.AddDays(-2), Action = "Ditugaskan ke Tim AV" }, new() { Timestamp = DateTime.Now.AddDays(-1), Action = "Selesai" } } },
         };
     }
 
@@ -284,4 +283,9 @@
         new() { Header = "Status", PropertyName = "Status", CellType = ExportCellType.Text },
     };
 }
+
+
+
+
+
 

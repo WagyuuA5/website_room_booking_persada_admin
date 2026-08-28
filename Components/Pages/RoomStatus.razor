@@ -4,234 +4,155 @@
 @using booking_room_admin.Components.Models
 @inject booking_room_admin.Components.Services.IRoomService RoomService
 
-
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Status Ruangan" PageSubtitle="Pantau status operasional dan maintenance ruangan." />
-<div class="room-status">
-    <div class="rs-breadcrumb">ADMINISTRASI</div>
-    <PageHeader Title="Status Ruangan" Subtitle="Pantau dan kelola ketersediaan ruangan secara real-time.">
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Status Ruangan" PageSubtitle="Pantau status operasional dan maintenance ruangan." ShowGlobalSearch="false" ShowGlobalDate="true">
+    <HeaderActions>
         <div class="rs-legend">
             <span class="rs-legend-item"><span class="rs-dot rs-dot-active"></span>Aktif</span>
-            <span class="rs-legend-item"><span class="rs-dot rs-dot-maintenance"></span>Perawatan</span>
-            <span class="rs-legend-item"><span class="rs-dot rs-dot-inactive"></span>Nonaktif</span>
+            <span class="rs-legend-item"><span class="rs-dot rs-dot-maintenance"></span>Maintenance</span>
+            <span class="rs-legend-item"><span class="rs-dot rs-dot-inactive"></span>Tidak Aktif</span>
         </div>
-    </PageHeader>
+    </HeaderActions>
+</booking_room_admin.Components.Shared.AdminTopBar>
 
+<div class="room-status">
     <div class="rs-toolbar">
         <div class="rs-search">
             <img src="icon/search.svg" alt="Cari" class="rs-search-icon" />
-            <input type="text" placeholder="Cari nama ruangan..." @bind="searchQuery" @bind:event="oninput" />
+            <input type="text" placeholder="Cari nama ruangan..." />
         </div>
-        <select class="rs-select" @bind="selectedFloor">
-            <option value="">Semua Lantai</option>
-            @foreach (var floor in floors)
-            {
-                <option value="@floor">@floor</option>
-            }
-        </select>
-        <select class="rs-select" @bind="selectedStatus">
-            <option value="">Semua Status</option>
-            <option value="active">Aktif</option>
-            <option value="maintenance">Perawatan</option>
-            <option value="inactive">Nonaktif</option>
-        </select>
+        <select class="rs-filter"><option>Semua Lantai</option></select>
+        <select class="rs-filter"><option>Semua Status</option></select>
     </div>
 
     <div class="rs-grid">
-        @foreach (var room in filteredRooms)
-        {
-            <div class="rs-card @(room.Status == "inactive" ? "rs-card-inactive" : "")">
-                <div class="rs-card-photo-container">
-                    <div class="rs-card-photo">
-                        <!-- Placeholder photo -->
-                        <div class="rs-photo-placeholder">
-                            <img src="icon/icon_1_admin.svg" alt="Ruangan" />
-                        </div>
-                    </div>
-                    
-                    @if (room.Status == "maintenance")
-                    {
-                        <div class="rs-photo-overlay">
-                            @if (room.MaintenanceEnd != null)
-                            {
-                                <span class="rs-countdown-large">
-                                    <img src="icon/clock.svg" alt="Sisa" style="width:1.25rem; height:1.25rem; filter:invert(1);" />
-                                    @FormatCountdown(room.MaintenanceEnd.Value)
-                                </span>
-                            }
-                        </div>
-                    }
-
-                    <div class="rs-card-badge-top-left">
-                        @if (room.Status == "active")
-                        {
-                            <StatusBadge Text="Aktif" Type="StatusBadge.BadgeType.Green" />
-                        }
-                        else if (room.Status == "maintenance")
-                        {
-                            <StatusBadge Text="Perawatan" Type="StatusBadge.BadgeType.Amber" />
-                        }
-                        else
-                        {
-                            <StatusBadge Text="Nonaktif" Type="StatusBadge.BadgeType.Indigo" />
-                        }
-                    </div>
-
-                    <div class="rs-card-badge-top-right">
-                        @if (room.Id % 3 == 0)
-                        {
-                            <StatusBadge Text="3 Dalam Antrian" Type="StatusBadge.BadgeType.Indigo" />
-                        }
-                        else if (room.Id % 2 == 0 && room.Status == "active")
-                        {
-                            <StatusBadge Text="Baru Selesai" Type="StatusBadge.BadgeType.Green" />
-                        }
+        <!-- 1. Kondisi Aktif Normal -->
+        <div class="rs-card">
+            <div class="rs-photo-wrapper">
+                <img src="images/room1.jpg" class="rs-photo" onerror="this.src='https://placehold.co/400x200/e2e8f0/64748b?text=Ruang+Aktif'" />
+                <div class="rs-badge-top-left badge-dark">20 Orang</div>
+            </div>
+            <div class="rs-card-body">
+                <div class="rs-card-header">
+                    <h3 class="rs-room-name">Ruang Rapat Utama</h3>
+                    <div class="rs-toggle-group">
+                        <label class="rs-switch">
+                            <input type="checkbox" checked @onchange="() => OpenMaintenanceModal()" />
+                            <span class="rs-slider round"></span>
+                        </label>
+                        <span class="rs-status-text text-active">AKTIF</span>
                     </div>
                 </div>
+                <div class="rs-location"><img src="icon/icon_8_admin.svg" /> Gedung A - Lantai 2</div>
+                <div class="rs-facilities">
+                    <span class="rs-chip">Projector 4K</span>
+                    <span class="rs-chip">Webcam</span>
+                    <span class="rs-chip">AC Central</span>
+                </div>
+            </div>
+            <button class="btn-delete-room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
+        </div>
 
-                @if (room.Status == "maintenance")
-                {
-                    <div class="rs-warning-bar">
-                        ⚠ Perawatan sedang berlangsung
+        <!-- 2. Kondisi Maintenance -->
+        <div class="rs-card card-maintenance">
+            <div class="rs-photo-wrapper">
+                <img src="images/room2.jpg" class="rs-photo photo-grayscale" onerror="this.src='https://placehold.co/400x200/e2e8f0/64748b?text=Ruang+Maintenance'" />
+                <div class="rs-badge-top-left badge-green">2 Dalam Antrian</div>
+                <div class="rs-overlay-center">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    <span>Maintenance (45:00)</span>
+                </div>
+            </div>
+            <div class="rs-card-body">
+                <div class="rs-card-header">
+                    <h3 class="rs-room-name">Ruang Diskusi B</h3>
+                    <div class="rs-toggle-group">
+                        <label class="rs-switch">
+                            <input type="checkbox" />
+                            <span class="rs-slider round"></span>
+                        </label>
+                        <span class="rs-status-text text-maintenance">MAINTENANCE</span>
                     </div>
-                }
-
-                <div class="rs-card-content">
-                    <h3 class="rs-card-name">@room.Name</h3>
-                    <div class="rs-card-location">
-                        <img src="icon/icon_6_admin.svg" alt="Lantai" class="rs-meta-icon" />
-                        @room.Floor
-                    </div>
-
-                    <div class="rs-meta-row">
-                        <span class="rs-meta-item">
-                            <img src="icon/people.svg" alt="Kapasitas" class="rs-meta-icon" />
-                            @room.Capacity Orang
-                        </span>
-                        <span class="rs-meta-item">
-                            <img src="icon/calendar.svg" alt="Booking" class="rs-meta-icon" />
-                            @room.TotalBookings Booking
-                        </span>
-                    </div>
-
-                    <div class="rs-card-actions">
-                        <div class="rs-toggle-group">
-                            <label class="rs-toggle-label">Maintenance</label>
-                            <button class="rs-toggle-switch @(room.Status == "maintenance" ? "on" : "off")"
-                                @onclick:stopPropagation="true"
-                                @onclick="() => ToggleMaintenanceStatus(room)">
-                                <span class="rs-toggle-slider"></span>
-                            </button>
-                        </div>
-                        <button class="btn-primary-pill btn-yellow btn-sm" @onclick:stopPropagation="true" @onclick="() => OpenMaintenance(room)">
-                            <img src="icon/icon_10_admin.svg" alt="Jadwal" class="btn-icon" />
-                            Jadwal
-                        </button>
+                </div>
+                <div class="rs-location"><img src="icon/icon_8_admin.svg" /> Gedung B - Lantai 1</div>
+                <div class="rs-schedule-row">
+                    <div class="rs-schedule-label">Jadwal Maintenance:</div>
+                    <div class="rs-duration-chips">
+                        <button class="rs-dur-chip">20 Menit</button>
+                        <button class="rs-dur-chip active">30 Menit</button>
+                        <button class="rs-dur-chip">1 Jam</button>
                     </div>
                 </div>
             </div>
-        }
-    </div>
+            <div class="rs-maintenance-bar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Maintenance</span>
+            </div>
+            <button class="btn-delete-room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
+        </div>
 
-    <MaintenancePopup IsOpen="@showMaintenance" IsOpenChanged="@((bool v) => showMaintenance = v)" Room="@selectedRoomForMaintenance" OnMaintenanceScheduled="OnMaintenanceScheduled" />
+        <!-- 3. Kondisi Tidak Aktif / Ghost Room -->
+        <div class="rs-card card-ghost">
+            <div class="rs-photo-wrapper">
+                <img src="images/room3.jpg" class="rs-photo photo-grayscale" onerror="this.src='https://placehold.co/400x200/e2e8f0/64748b?text=Ruang+Placeholder'" />
+            </div>
+            <div class="rs-card-body">
+                <div class="rs-card-header">
+                    <h3 class="rs-room-name">Ruang Belum Dikonfigurasi</h3>
+                    <div class="rs-toggle-group">
+                        <label class="rs-switch">
+                            <input type="checkbox" disabled />
+                            <span class="rs-slider round"></span>
+                        </label>
+                        <span class="rs-status-text text-inactive">TIDAK AKTIF</span>
+                    </div>
+                </div>
+                <div class="rs-location"><img src="icon/icon_8_admin.svg" /> Belum ada lokasi</div>
+                <div class="rs-facilities text-muted text-sm">Menunggu setup admin...</div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<AppModal IsOpen="showMaintenanceModal" IsOpenChanged="v => showMaintenanceModal = v" Title="Set Maintenance">
+    <div class="form-group">
+        <label>Kategori Maintenance</label>
+        <select class="form-input">
+            <option>Preventive</option>
+            <option>Corrective</option>
+            <option>Routine Cleaning</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Prioritas</label>
+        <select class="form-input">
+            <option>Normal</option>
+            <option>High</option>
+            <option>Urgent</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Fasilitas yang Diservis</label>
+        <input type="text" class="form-input" placeholder="Contoh: AC, Proyektor..." />
+    </div>
+    <div class="form-group">
+        <label>Upload Dokumentasi (Opsional)</label>
+        <input type="file" class="form-input" />
+    </div>
+    <div class="form-group">
+        <label>Deskripsi</label>
+        <textarea class="form-input" rows="3" placeholder="Detail kerusakan atau perawatan..."></textarea>
+    </div>
+    <div class="modal-actions">
+        <button class="btn-outline" @onclick="() => showMaintenanceModal = false">Batal</button>
+        <button class="btn-primary" @onclick="() => showMaintenanceModal = false">Simpan</button>
+    </div>
+</AppModal>
+
 @code {
-    private bool showMaintenance = false;
-    private Room? selectedRoomForMaintenance = null;
+    private bool showMaintenanceModal = false;
 
-    private string searchQuery = "";
-    private string selectedFloor = "";
-    private string selectedStatus = "";
-
-    private List<string> floors = new() { "Lantai 1", "Lantai 2", "Lantai 3", "Lantai 4", "Lantai 14" };
-
-    private List<Room> allRooms = new();
-
-    private List<Room> filteredRooms => FilterRooms();
-
-    protected override async Task OnInitializedAsync()
+    private void OpenMaintenanceModal()
     {
-
-        await LoadRooms();
-
-        _ = StartCountdownLoop();
-    }
-
-    private async Task LoadRooms()
-    {
-        allRooms = await RoomService.GetAllRoomsAsync();
-    }
-
-    private List<Room> FilterRooms()
-    {
-        var query = allRooms.AsEnumerable();
-
-        if (!string.IsNullOrWhiteSpace(searchQuery))
-        {
-            var q = searchQuery.ToLowerInvariant();
-            query = query.Where(r => r.Name.ToLowerInvariant().Contains(q) || r.Type.ToLowerInvariant().Contains(q));
-        }
-
-        if (!string.IsNullOrWhiteSpace(selectedFloor))
-        {
-            query = query.Where(r => r.Floor == selectedFloor);
-        }
-
-        if (!string.IsNullOrWhiteSpace(selectedStatus))
-        {
-            query = query.Where(r => r.Status == selectedStatus);
-        }
-
-        return query.ToList();
-    }
-
-    private string FormatCountdown(DateTime end)
-    {
-        var remaining = end - DateTime.UtcNow;
-        if (remaining <= TimeSpan.Zero) return "Selesai";
-        return $"{(int)remaining.TotalHours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
-    }
-
-    private async Task StartCountdownLoop()
-    {
-        while (true)
-        {
-            await InvokeAsync(StateHasChanged);
-            await Task.Delay(1000);
-        }
-    }
-
-    private async Task ToggleMaintenanceStatus(Room room)
-    {
-        if (room.Status == "maintenance")
-        {
-            room.Status = "active";
-            room.MaintenanceEnd = null;
-        }
-        else
-        {
-            room.Status = "maintenance";
-            // Default 30 Menit if toggled directly
-            room.MaintenanceEnd = DateTime.UtcNow.AddMinutes(30);
-        }
-        await RoomService.UpdateRoomAsync(room);
-        await LoadRooms();
-    }
-
-    private void OpenMaintenance(Room room)
-    {
-        selectedRoomForMaintenance = room;
-        showMaintenance = true;
-    }
-
-    private async Task OnMaintenanceScheduled(Room room)
-    {
-        await RoomService.UpdateRoomAsync(room);
-        await LoadRooms();
-        showMaintenance = false;
-        selectedRoomForMaintenance = null;
+        showMaintenanceModal = true;
     }
 }
-
-
-

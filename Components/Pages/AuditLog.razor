@@ -5,14 +5,16 @@
 @using booking_room_admin.Components.Services
 
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Audit Log" PageSubtitle="Catatan lengkap semua aktivitas dalam sistem." />
-<div class="audit-log">
-    <PageHeader Title="Audit Log" Subtitle="Riwayat semua aktivitas admin dalam sistem — permanen dan tidak dapat diedit.">
+<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Audit Log" PageSubtitle="Catatan lengkap semua aktivitas dalam sistem." ShowGlobalSearch="true" ShowGlobalDate="false">
+    <HeaderActions>
         <button class="btn-export" @onclick="@(() => showAuditExport = true)">
             <img src="icon/icon_17_admin.svg" alt="Export" class="export-icon-white" />
             <span>Export</span>
         </button>
-    </PageHeader>
+    </HeaderActions>
+</booking_room_admin.Components.Shared.AdminTopBar>
+<div class="audit-log">
+    
 
     <div class="audit-filters">
         <select class="audit-filter-select" @bind="filterActor">
@@ -167,4 +169,9 @@
 
     private void HandlePageChange(int page) { currentPage = page; }
 }
+
+
+
+
+
 
