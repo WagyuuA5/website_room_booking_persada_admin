@@ -1,17 +1,26 @@
 .sidebar-header {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.6rem;
-    padding: 1.25rem 1rem;
+    padding: 1.6rem 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sidebar-logo {
-    height: 32px;
+    height: 42px;
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
     flex-shrink: 0;
+}
+
+.sidebar-collapsed .sidebar-header {
+    padding: 1.4rem 0.5rem;
+}
+
+.sidebar-collapsed .sidebar-logo {
+    height: 40px;
 }
 
 .sidebar-brand {

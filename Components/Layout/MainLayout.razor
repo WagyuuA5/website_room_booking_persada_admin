@@ -1,11 +1,18 @@
 @inherits LayoutComponentBase
 @inject booking_room_admin.Components.Services.LayoutStateService LayoutState
+@inject IJSRuntime JSRuntime
 @using booking_room_admin.Components.Shared
 @implements IDisposable
 
 <div class="admin-layout @(LayoutState.IsSidebarCollapsed ? "sidebar-collapsed" : "")">
     <aside class="admin-sidebar">
         <NavMenu IsCollapsed="@LayoutState.IsSidebarCollapsed" />
+        <button class="sidebar-toggle-glass" @onclick="LayoutState.ToggleSidebar"
+                title="Sembunyikan / Tampilkan menu" aria-label="Toggle Sidebar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
     </aside>
 
     <div class="admin-main">
@@ -22,13 +29,47 @@
 </div>
 
 @code {
-    protected override void OnInitialized()
+    private DotNetObjectReference<MainLayout>? _objRef;
+
+    protected override async Task OnInitializedAsync()
     {
         LayoutState.OnChange += StateHasChanged;
+        await LayoutState.InitThemeAsync();
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("applyThemeMode", LayoutState.IsDarkMode);
+        }
+        catch { }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("applyThemeMode", LayoutState.IsDarkMode);
+            }
+            catch { }
+
+            _objRef = DotNetObjectReference.Create(this);
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("initSidebarDrag", _objRef);
+            }
+            catch { }
+        }
+    }
+
+    [JSInvokable]
+    public void ToggleSidebarFromJs()
+    {
+        LayoutState.ToggleSidebar();
     }
 
     public void Dispose()
     {
         LayoutState.OnChange -= StateHasChanged;
+        _objRef?.Dispose();
     }
 }

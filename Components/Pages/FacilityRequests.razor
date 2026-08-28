@@ -2,9 +2,11 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Services
 
 
 <booking_room_admin.Components.Shared.AdminTopBar PageTitle="Permintaan Fasilitas" PageSubtitle="Tinjau dan proses permintaan tambahan fasilitas." />
+<PageHeader Title="Permintaan Fasilitas" Subtitle="Tinjau dan proses permintaan tambahan fasilitas." />
 <div class="facility-requests">
     <div class="fr-toolbar">
         <div class="fr-tabs">
@@ -25,7 +27,10 @@
                 <option value="Finance">Finance</option>
                 <option value="Operations">Operations</option>
             </select>
-            <button class="btn-export" @onclick="ExportData">📥 Export</button>
+            <button class="btn-export" @onclick="@(() => showFrExport = true)">
+                <img src="icon/icon_17_admin.svg" alt="Export" class="export-icon-white" />
+                <span>Export</span>
+            </button>
         </div>
     </div>
 
@@ -55,6 +60,10 @@
         }
     </div>
 </div>
+
+<ExportModal IsOpen="@showFrExport" IsOpenChanged="@(v => { showFrExport = v; StateHasChanged(); })"
+             ExportTitle="Permintaan Fasilitas" Columns="@_frColumns"
+             CurrentViewRows="@(filteredRequests.ToList().Cast<object>())" AllRows="@(allRequests.Cast<object>())" />
 
 @* Detail Popup *@
 @if (showDetail && selectedRequest != null)
@@ -257,5 +266,16 @@
         CloseDetail();
     }
 
-    private void ExportData() { /* CSV export placeholder */ }
+    private bool showFrExport;
+    private List<ExportColumn> _frColumns = new()
+    {
+        new() { Header = "ID", PropertyName = "RequestId", CellType = ExportCellType.Text },
+        new() { Header = "Judul", PropertyName = "Title", CellType = ExportCellType.Text },
+        new() { Header = "Kategori", PropertyName = "Category", CellType = ExportCellType.Text },
+        new() { Header = "Pemohon", PropertyName = "RequesterName", CellType = ExportCellType.Text },
+        new() { Header = "Departemen", PropertyName = "RequesterDepartment", CellType = ExportCellType.Text },
+        new() { Header = "Ruangan", PropertyName = "RoomName", CellType = ExportCellType.Text },
+        new() { Header = "Tanggal", PropertyName = "BookingDate", CellType = ExportCellType.Date },
+        new() { Header = "Status", PropertyName = "Status", CellType = ExportCellType.Text },
+    };
 }

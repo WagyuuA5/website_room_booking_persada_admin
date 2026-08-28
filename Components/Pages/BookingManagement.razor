@@ -7,16 +7,12 @@
 
 <booking_room_admin.Components.Shared.AdminTopBar PageTitle="Manajemen Booking" PageSubtitle="Kelola seluruh pemesanan ruangan perusahaan." />
 <div class="booking-management">
-    <div class="bm-header">
-        <div class="bm-title-group">
-            <span class="bm-title-bullet"></span>
-            <h1 class="bm-title">Manajemen Booking</h1>
-        </div>
+    <PageHeader Title="Manajemen Booking" Subtitle="Kelola seluruh pemesanan ruangan perusahaan.">
         <button class="btn-primary bm-create-btn" @onclick="OpenManualBooking">
             <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
             <span>Buat Booking Manual</span>
         </button>
-    </div>
+    </PageHeader>
 
     <div class="bm-toolbar">
         <div class="bm-search">

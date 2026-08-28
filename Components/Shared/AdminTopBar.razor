@@ -3,23 +3,7 @@
 @inject NavigationManager Navigation
 
 <header class="admin-topbar">
-    <div class="topbar-left">
-        <button class="sidebar-toggle" @onclick="LayoutState.ToggleSidebar" title="Toggle Sidebar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-        </button>
-        <div class="topbar-title-group">
-            <h1 class="page-title">@PageTitle</h1>
-            @if (!string.IsNullOrWhiteSpace(PageSubtitle))
-            {
-                <p class="page-subtitle">@PageSubtitle</p>
-            }
-        </div>
-    </div>
-    <div class="topbar-right">
+    <div class="topbar-dynamic-island">
         <div class="topbar-search">
             <img src="icon/search.svg" alt="Cari" class="search-icon" />
             <input type="text" placeholder="Cari menu, ruangan, user..." />
@@ -28,6 +12,28 @@
             <img src="icon/icon_6_admin.svg" alt="Kalender" class="icon-sm" />
             <span>@dateRangeLabel</span>
         </div>
+        <button class="topbar-icon-btn theme-toggle" @onclick="ToggleTheme" title="Mode Gelap / Terang">
+            @if (LayoutState.IsDarkMode)
+            {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            }
+            else
+            {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            }
+        </button>
         <div class="topbar-icon-btn notification-btn" @onclick="ToggleNotification">
             <img src="icon/icon_7_admin.svg" alt="Notifikasi" class="icon-md" />
             @if (unreadCount > 0)
@@ -51,7 +57,7 @@
 @if (showProfilePopup)
 {
     <div class="profile-popup-overlay" @onclick="() => showProfilePopup = false">
-        <div class="profile-popup-menu" @onclick:stopPropagation="true">
+        <div class="profile-popup" @onclick:stopPropagation="true">
             <div class="profile-header">
                 <UserAvatar Initials="WA" BgColor="#1e3a8a" Size="48px" />
                 <div>
@@ -66,13 +72,6 @@
                 <div class="pd-row"><span>Lokasi:</span> <strong>Kantor Pusat, Lt. 14</strong></div>
                 <div class="pd-row"><span>Terakhir Login:</span> <strong>Hari ini, 08:30 WIB</strong></div>
             </div>
-            <hr />
-            <button class="profile-menu-item" @onclick="NavigateToProfile">
-                ⚙️ Pengaturan Profil
-            </button>
-            <button class="profile-menu-item text-danger">
-                🚪 Keluar
-            </button>
         </div>
     </div>
 }
@@ -92,6 +91,12 @@
     private bool showProfilePopup = false;
     private string dateRangeLabel = "01 Okt - 31 Okt 2026";
     private int unreadCount = 3;
+
+    private void ToggleTheme()
+    {
+        LayoutState.ToggleTheme();
+        StateHasChanged();
+    }
 
     private void ToggleDatePicker()
     {
@@ -117,19 +122,8 @@
         {
             dateRangeLabel = date.Value.ToString("dd MMM yyyy");
             OnDateSelectedCallback.InvokeAsync(date.Value);
-            // Here you would trigger an event for the page to refresh data
         }
         showDatePicker = false;
         StateHasChanged();
     }
-
-    private void NavigateToProfile()
-    {
-        showProfilePopup = false;
-        Navigation.NavigateTo("/profile");
-    }
 }
-
-
-
-

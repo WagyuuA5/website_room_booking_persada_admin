@@ -42,19 +42,24 @@
 }
 
 .btn-export {
-    background: #ffffff;
-    border: 1px solid #E8EDF2;
-    border-radius: 8px;
-    padding: 0.4rem 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: #152F4A;
+    border: 1px solid #152F4A;
+    border-radius: 999px;
+    padding: 0.45rem 0.95rem;
     font-size: 0.78rem;
     font-weight: 600;
-    color: #374151;
+    color: #ffffff;
     cursor: pointer;
     transition: all 0.15s ease;
     white-space: nowrap;
 }
 
-.btn-export:hover { background: #F3F4F6; }
+.btn-export:hover { background: #1e3a5f; }
+
+.btn-export .export-icon-white { width: 0.95rem; height: 0.95rem; }
 
 /* Table cell helpers */
 .col-time {

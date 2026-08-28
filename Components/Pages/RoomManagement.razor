@@ -8,16 +8,12 @@
 <booking_room_admin.Components.Shared.AdminTopBar PageTitle="Manajemen Ruangan" PageSubtitle="Kelola daftar ruangan dan kapasitasnya." />
 <div class="room-management">
     <div class="rm-breadcrumb">ADMINISTRASI</div>
-    <div class="rm-header">
-        <div>
-            <h1 class="rm-title">Manajemen Ruangan</h1>
-            <p class="rm-subtitle">Kelola data ruangan, fasilitas, dan kapasitas.</p>
-        </div>
+    <PageHeader Title="Manajemen Ruangan" Subtitle="Kelola data ruangan, fasilitas, dan kapasitas.">
         <button class="btn-primary-pill btn-yellow" @onclick="OpenAddRoom">
             <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
             <span>Tambah Ruangan</span>
         </button>
-    </div>
+    </PageHeader>
 
     <div class="rm-toolbar">
         <div class="rm-search">

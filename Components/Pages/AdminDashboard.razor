@@ -2,9 +2,12 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using ApexCharts
 @using booking_room_admin.Components.Shared
-
+@using booking_room_admin.Components.Services
+@inject NavigationManager Navigation
 
 <booking_room_admin.Components.Shared.AdminTopBar PageTitle="Dashboard Admin" PageSubtitle="Ringkasan performa sistem pemesanan ruangan perusahaan." />
+<PageHeader Title="Dashboard Admin" Subtitle="Ringkasan performa sistem pemesanan ruangan perusahaan." />
+
 <div class="dashboard">
     @* ── Bagian 1: Ringkasan Statistik ── *@
     <div class="stats-grid">
@@ -46,7 +49,7 @@
         <h3 class="section-title">Requests Overview</h3>
     </div>
     <div class="summary-cards-grid">
-        <div class="summary-card">
+        <div class="summary-card clickable" @onclick='() => OpenRequestModal("facility")'>
             <div class="summary-card-header">
                 <div class="summary-icon-title">
                     <div class="icon-badge" style="background:#FCE7F3;color:#BE185D;">
@@ -65,11 +68,11 @@
             </div>
         </div>
 
-        <div class="summary-card">
+        <div class="summary-card clickable" @onclick='() => OpenRequestModal("account")'>
             <div class="summary-card-header">
                 <div class="summary-icon-title">
                     <div class="icon-badge" style="background:#FEF3C7;color:#D97706;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="23" y2="12"/><line x1="23" y1="8" x2="19" y2="12"/></svg>
+                        @((MarkupString)SvgAccount)
                     </div>
                     <span>Penghapusan Akun</span>
                 </div>
@@ -84,11 +87,11 @@
             </div>
         </div>
 
-        <div class="summary-card">
+        <div class="summary-card clickable" @onclick='() => OpenRequestModal("it")'>
             <div class="summary-card-header">
                 <div class="summary-icon-title">
                     <div class="icon-badge" style="background:#DBEAFE;color:#1D4ED8;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        @((MarkupString)SvgIt)
                     </div>
                     <span>Tiket IT Support</span>
                 </div>
@@ -103,11 +106,11 @@
             </div>
         </div>
 
-        <div class="summary-card">
+        <div class="summary-card clickable" @onclick='() => OpenRequestModal("bug")'>
             <div class="summary-card-header">
                 <div class="summary-icon-title">
                     <div class="icon-badge" style="background:#FEE2E2;color:#B91C1C;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v22"/><path d="m5 10 3 3-3 3"/><path d="m19 10-3 3 3 3"/><path d="M2 14h20"/><path d="M2 10h20"/><path d="M8 2h8"/></svg>
+                        @((MarkupString)SvgBug)
                     </div>
                     <span>Laporan Bug</span>
                 </div>
@@ -123,13 +126,15 @@
         </div>
     </div>
 
-    @* -- Bagian 3: Charts ── *@
+    @* ── Bagian 3: Charts ── *@
     <div class="charts-row">
         <div class="chart-card">
             <div class="chart-header">
                 <h3>Tren Booking</h3>
                 <div class="chart-actions">
-                    <button class="chart-export-btn" title="Export">📥</button>
+                    <button class="chart-export-btn" title="Export" @onclick="() => showTrendExport = true">
+                        <img src="icon/icon_17_admin.svg" alt="Export" class="export-icon-white" />
+                    </button>
                 </div>
             </div>
             <ApexChart TItem="TrendPoint" Options="_trendOptions" Height="@("250px")">
@@ -145,7 +150,9 @@
             <div class="chart-header">
                 <h3>Ruangan Paling Sering Digunakan</h3>
                 <div class="chart-actions">
-                    <button class="chart-export-btn" title="Export">📥</button>
+                    <button class="chart-export-btn" title="Export" @onclick="() => showDonutExport = true">
+                        <img src="icon/icon_17_admin.svg" alt="Export" class="export-icon-white" />
+                    </button>
                 </div>
             </div>
             <ApexChart TItem="RoomUsagePoint" Options="_donutOptions" Height="@("250px")">
@@ -170,7 +177,7 @@
                 <RowTemplate Context="req">
                     <td>
                         <div class="req-type-cell">
-                            <span class="req-type-icon" style="background: @req.TypeColor">@req.TypeIcon</span>
+                            @CategoryIcon(req.Type, req.TypeColor)
                             <span class="td-primary">@req.Type</span>
                         </div>
                     </td>
@@ -193,7 +200,12 @@
         <div class="table-card">
             <div class="table-header">
                 <h3>Riwayat Booking</h3>
-                <a href="/booking-management" class="table-link">SEMUA</a>
+                <div class="table-header-actions">
+                    <button class="chart-export-btn table-export-btn" title="Export" @onclick="() => showHistoryExport = true">
+                        <img src="icon/icon_17_admin.svg" alt="Export" class="export-icon-white" />
+                    </button>
+                    <a href="/booking-management" class="table-link">SEMUA</a>
+                </div>
             </div>
             <DataTable TItem="HistoryBooking" Items="historyBookings" Columns="bookingColumns" TotalCount="@historyBookings.Count" PageSize="5" CurrentPage="1">
                 <RowTemplate Context="booking">
@@ -215,6 +227,80 @@
     </div>
 </div>
 
+@* ── Request detail modals (Case 5) ── *@
+<AppModal IsOpen="@(_activeRequestModal == "facility")" IsOpenChanged="@(CloseRequestModal)" Title="Permintaan Fasilitas" Size="medium">
+    <ChildContent>
+        <div class="request-detail-list">
+            @foreach (var r in facilityRequests)
+            {
+                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconFallback="@r.Icon"
+                            Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
+                            ActionLabel="Proses" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
+                            OnActionClick="@(() => NavigateTo("/facility-requests"))" />
+            }
+        </div>
+    </ChildContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Lihat Semua</a></FooterContent>
+</AppModal>
+
+<AppModal IsOpen="@(_activeRequestModal == "account")" IsOpenChanged="@(CloseRequestModal)" Title="Penghapusan Akun" Size="medium">
+    <ChildContent>
+        <div class="request-detail-list">
+            @foreach (var r in accountRequests)
+            {
+                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconFallback="@r.Icon"
+                            Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
+                            ActionLabel="Tinjau" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
+                            OnActionClick="@(() => NavigateTo("/users"))" />
+            }
+        </div>
+    </ChildContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/users">Lihat Semua</a></FooterContent>
+</AppModal>
+
+<AppModal IsOpen="@(_activeRequestModal == "it")" IsOpenChanged="@(CloseRequestModal)" Title="Tiket IT Support" Size="medium">
+    <ChildContent>
+        <div class="request-detail-list">
+            @foreach (var r in itRequests)
+            {
+                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconFallback="@r.Icon"
+                            Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
+                            ActionLabel="Perbaiki" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
+                            OnActionClick="@(() => NavigateTo("/facility-requests"))" />
+            }
+        </div>
+    </ChildContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Lihat Semua</a></FooterContent>
+</AppModal>
+
+<AppModal IsOpen="@(_activeRequestModal == "bug")" IsOpenChanged="@(CloseRequestModal)" Title="Laporan Bug" Size="medium">
+    <ChildContent>
+        <div class="request-detail-list">
+            @foreach (var r in bugRequests)
+            {
+                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconFallback="@r.Icon"
+                            Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
+                            ActionLabel="Investigasi" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
+                            OnActionClick="@(() => NavigateTo("/facility-requests"))" />
+            }
+        </div>
+    </ChildContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Lihat Semua</a></FooterContent>
+</AppModal>
+
+@* ── Export modals (Case 6) ── *@
+<ExportModal IsOpen="@showTrendExport" IsOpenChanged="@(v => { showTrendExport = v; StateHasChanged(); })"
+             ExportTitle="Tren Booking" Columns="@_trendColumns"
+             CurrentViewRows="@(_trendData.Cast<object>())" AllRows="@(_trendData.Cast<object>())" />
+
+<ExportModal IsOpen="@showDonutExport" IsOpenChanged="@(v => { showDonutExport = v; StateHasChanged(); })"
+             ExportTitle="Ruangan Paling Sering Digunakan" Columns="@_donutColumns"
+             CurrentViewRows="@(_donutData.Cast<object>())" AllRows="@(_donutData.Cast<object>())" />
+
+<ExportModal IsOpen="@showHistoryExport" IsOpenChanged="@(v => { showHistoryExport = v; StateHasChanged(); })"
+             ExportTitle="Riwayat Booking" Columns="@_historyColumns"
+             CurrentViewRows="@(historyBookings.Cast<object>())" AllRows="@(historyBookings.Cast<object>())" />
+
 @code {
     // ── Chart data ──
     private List<TrendPoint> _trendData = new();
@@ -234,12 +320,43 @@
     private List<DataTable<RecentRequest>.DataTableColumn> requestColumns = new();
     private List<DataTable<HistoryBooking>.DataTableColumn> bookingColumns = new();
 
+    // ── Modal state ──
+    private string? _activeRequestModal;
+    private bool showTrendExport;
+    private bool showDonutExport;
+    private bool showHistoryExport;
+
+    private List<ExportColumn> _trendColumns = new();
+    private List<ExportColumn> _donutColumns = new();
+    private List<ExportColumn> _historyColumns = new();
+
     protected override void OnInitialized()
     {
-
         InitRequestOverview();
         InitCharts();
         InitTables();
+        InitExportColumns();
+    }
+
+    private void InitExportColumns()
+    {
+        _trendColumns = new()
+        {
+            new() { Header = "Bulan", PropertyName = "Bulan", CellType = ExportCellType.Text },
+            new() { Header = "Jumlah Booking", PropertyName = "Jumlah", CellType = ExportCellType.Number },
+        };
+        _donutColumns = new()
+        {
+            new() { Header = "Ruangan", PropertyName = "NamaRuangan", CellType = ExportCellType.Text },
+            new() { Header = "Jumlah Penggunaan", PropertyName = "Jumlah", CellType = ExportCellType.Number },
+        };
+        _historyColumns = new()
+        {
+            new() { Header = "Pengguna", PropertyName = "UserName", CellType = ExportCellType.Text },
+            new() { Header = "Ruangan", PropertyName = "Room", CellType = ExportCellType.Text },
+            new() { Header = "Jadwal", PropertyName = "Schedule", CellType = ExportCellType.Text },
+            new() { Header = "Status", PropertyName = "Status", CellType = ExportCellType.Text },
+        };
     }
 
     private void InitRequestOverview()
@@ -335,19 +452,35 @@
         };
     }
 
+    private void OpenRequestModal(string category) => _activeRequestModal = category;
+    private void CloseRequestModal(bool v) { if (!v) _activeRequestModal = null; StateHasChanged(); }
+    private void NavigateTo(string url) { Navigation.NavigateTo(url); }
+    private static string StripId(string id) => id.Contains('-') ? id.Split('-').Last() : id;
+
     private void HandleRequestClick(RecentRequest req) { }
+
+    // ── Vector category icons (Case 7) ──
+    private const string SvgFacility = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><path d=\"M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z\"/><polyline points=\"3.27 6.96 12 12.01 20.73 6.96\"/><line x1=\"12\" y1=\"22.08\" x2=\"12\" y2=\"12\"/></svg>";
+    private const string SvgBug = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><rect x=\"8\" y=\"6\" width=\"8\" height=\"14\" rx=\"4\"/><path d=\"M19 7l-3 2\"/><path d=\"M5 7l3 2\"/><path d=\"M19 13h-3\"/><path d=\"M5 13h3\"/><path d=\"M19 19l-3-2\"/><path d=\"M5 19l3-2\"/><path d=\"M12 2v4\"/></svg>";
+    private const string SvgAccount = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><path d=\"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/></svg>";
+    private const string SvgIt = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\"/></svg>";
+
+    private string CatSvg(string type) => type switch
+    {
+        "Facility" => SvgFacility,
+        "Bug" => SvgBug,
+        "Account" => SvgAccount,
+        "IT" => SvgIt,
+        _ => SvgAccount
+    };
+
+    private RenderFragment CategoryIcon(string type, string bg) =>
+        @<span class="req-type-icon" style="background:@bg">@((MarkupString)CatSvg(type))</span>;
 
     // ── Records ──
     public record TrendPoint(string Bulan, int Jumlah);
     public record RoomUsagePoint(string NamaRuangan, int Jumlah);
-
     public record RequestItem(string Title, string Id, string Subtitle, string Color, string IconBg, string Icon, string SubColor);
-
     public record RecentRequest(string Type, string TypeIcon, string TypeColor, string RequesterName, string Initials, string AvatarColor, string Department, string Summary, string Status);
-
     public record HistoryBooking(string UserName, string Initials, string AvatarColor, string Department, string Room, string Schedule, string Status);
 }
-
-
-
-

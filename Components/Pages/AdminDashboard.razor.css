@@ -315,3 +315,67 @@
 .summary-counter { background: #EF4444; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
 .summary-card-body h2 { font-size: 32px; font-weight: 700; color: #1E293B; margin: 0; line-height: 1; }
 .summary-status { font-size: 11px; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; margin-top: 4px; }
+
+/* ── Clickable summary cards (Case 5) ── */
+.summary-card.clickable { cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
+.summary-card.clickable:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(20, 40, 60, 0.1); border-color: #CBD5E1; }
+
+/* ── Export icon (Case 6.1) ── */
+.chart-export-btn {
+    background: #152F4A;
+    border: none;
+    border-radius: 50%;
+    width: 1.9rem;
+    height: 1.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.chart-export-btn:hover { background: #1e3a5f; transform: scale(1.08); }
+
+.export-icon-white {
+    width: 1rem;
+    height: 1rem;
+    filter: brightness(0) invert(1);
+}
+
+.table-header-actions { display: flex; align-items: center; gap: 0.6rem; }
+.table-export-btn { width: 1.75rem; height: 1.75rem; }
+
+/* ── Vector category icons (Case 7) ── */
+.req-type-icon .cat-svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    color: #334155;
+}
+
+/* ── Request detail modal list ── */
+.request-detail-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+/* ── Dark mode ── */
+body.dark .stat-card,
+body.dark .summary-card,
+body.dark .chart-card,
+body.dark .table-card {
+    background: var(--surface);
+    border-color: var(--border);
+    box-shadow: var(--card-shadow);
+}
+
+body.dark .stat-value,
+body.dark .summary-card-body h2,
+body.dark .section-title,
+body.dark .chart-header h3,
+body.dark .table-header h3 { color: var(--text-strong); }
+
+body.dark .summary-status,
+body.dark .stat-label { color: var(--text-muted); }
+
+body.dark .chart-export-btn { background: #1e3a5f; }
+
+body.dark .req-type-icon .cat-svg { color: #CBD5E1; }
+
+body.dark .summary-card.clickable:hover { border-color: rgba(148,163,184,0.4); }

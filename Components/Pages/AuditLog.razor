@@ -2,16 +2,17 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Services
 
 
 <booking_room_admin.Components.Shared.AdminTopBar PageTitle="Audit Log" PageSubtitle="Catatan lengkap semua aktivitas dalam sistem." />
 <div class="audit-log">
-    <div class="audit-header">
-        <div>
-            <p class="audit-subtitle">Riwayat semua aktivitas admin dalam sistem — permanen dan tidak dapat diedit.</p>
-        </div>
-        <button class="btn-export" @onclick="ExportCSV">📥 Export CSV</button>
-    </div>
+    <PageHeader Title="Audit Log" Subtitle="Riwayat semua aktivitas admin dalam sistem — permanen dan tidak dapat diedit.">
+        <button class="btn-export" @onclick="@(() => showAuditExport = true)">
+            <img src="icon/icon_17_admin.svg" alt="Export" class="export-icon-white" />
+            <span>Export</span>
+        </button>
+    </PageHeader>
 
     <div class="audit-filters">
         <select class="audit-filter-select" @bind="filterActor">
@@ -62,6 +63,10 @@
         </RowTemplate>
     </DataTable>
 </div>
+
+<ExportModal IsOpen="@showAuditExport" IsOpenChanged="@(v => { showAuditExport = v; StateHasChanged(); })"
+             ExportTitle="Audit Log" Columns="@_auditColumns"
+             CurrentViewRows="@(filteredLogs.ToList().Cast<object>())" AllRows="@(allLogs.Cast<object>())" />
 
 @code {
     private string filterActor = "";
@@ -116,6 +121,15 @@
             new() { Header = "DETAIL", PropertyName = "Detail" },
         };
 
+        _auditColumns = new()
+        {
+            new() { Header = "Waktu", PropertyName = "Timestamp", CellType = ExportCellType.Date },
+            new() { Header = "Aktor", PropertyName = "ActorName", CellType = ExportCellType.Text },
+            new() { Header = "Aksi", PropertyName = "ActionType", CellType = ExportCellType.Text },
+            new() { Header = "Target", PropertyName = "TargetName", CellType = ExportCellType.Text },
+            new() { Header = "Detail", PropertyName = "Detail", CellType = ExportCellType.Text },
+        };
+
         allLogs = new()
         {
             new() { Id = 1, Timestamp = DateTime.Now.AddHours(-1), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Approve Booking", ActionCategory = "Booking", TargetName = "Booking #1042", Detail = "Menyetujui booking Ruang Rapat A oleh Ahmad Fauzi" },
@@ -148,7 +162,9 @@
         _ => "pending"
     };
 
+    private bool showAuditExport;
+    private List<ExportColumn> _auditColumns = new();
+
     private void HandlePageChange(int page) { currentPage = page; }
-    private void ExportCSV() { /* CSV export placeholder */ }
 }
 

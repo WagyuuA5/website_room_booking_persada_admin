@@ -6,11 +6,7 @@
 
 <booking_room_admin.Components.Shared.AdminTopBar PageTitle="Kalender Ruangan" PageSubtitle="Tinjauan jadwal semua ruangan dalam format kalender." />
 <div class="room-calendar">
-    <div class="rc-header">
-        <div class="rc-title-group">
-            <span class="rc-title-bullet"></span>
-            <h1 class="rc-title">Kalender Ruangan</h1>
-        </div>
+    <PageHeader Title="Kalender Ruangan" Subtitle="Tinjauan jadwal semua ruangan dalam format kalender.">
         <div class="rc-actions">
             <div class="rc-view-toggle">
                 <button class="@(isAdminView ? "active" : "")" @onclick="() => SetView(true)">Tampilan Admin</button>
@@ -24,7 +20,7 @@
                 </button>
             }
         </div>
-    </div>
+    </PageHeader>
 
     <div class="rc-toolbar">
         <select class="rc-filter-select">
