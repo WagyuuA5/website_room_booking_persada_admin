@@ -10,7 +10,7 @@
     --glass-bg: rgba(255, 255, 255, 0.55);
     --glass-border: rgba(255, 255, 255, 0.4);
     --glass-text: #1E293B;
-    --sidebar-bg: #152F4A;
+    --sidebar-bg: #0f1e3c;
     --card-shadow: 0 2px 8px rgba(20, 40, 60, 0.04);
     --modal-overlay: rgba(15, 23, 42, 0.35);
 }
@@ -27,7 +27,7 @@ body.dark {
     --glass-bg: rgba(17, 25, 40, 0.6);
     --glass-border: rgba(148, 163, 184, 0.22);
     --glass-text: #E2E8F0;
-    --sidebar-bg: #0B1320;
+    --sidebar-bg: #0f1e3c;
     --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
     --modal-overlay: rgba(2, 6, 16, 0.55);
 }
@@ -42,7 +42,10 @@ body.dark {
 /* ── Sidebar ── */
 .admin-sidebar {
     width: 240px;
-    background: var(--sidebar-bg);
+    background-color: #0f1e3c !important;
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     color: #fff;
     position: fixed;
     top: 0;
@@ -62,44 +65,13 @@ body.dark {
 }
 
 /* ── Glass sidebar toggle (pinned to sidebar edge) ── */
-.sidebar-toggle-glass {
-    position: fixed;
-    top: 50%;
-    left: calc(240px - 14px);
-    transform: translateY(-50%);
-    z-index: 110;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #000; /* maybe var(--text)? The sidebar is dark, but wait, the toggle is on the border. Let's stick to user's glass style */
-    cursor: pointer;
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease, transform 0.2s ease;
-    padding: 0;
-}
 
-.sidebar-toggle-glass:hover {
-    background: rgba(255, 255, 255, 0.28);
-}
 
-.sidebar-toggle-glass svg {
-    transition: transform 0.3s ease;
-    color: var(--text);
-}
 
-.sidebar-collapsed .sidebar-toggle-glass {
-    left: calc(64px - 14px);
-}
 
-.sidebar-collapsed .sidebar-toggle-glass svg {
-    transform: rotate(180deg);
-}
+
+
+
 
 /* ── Main area ── */
 .admin-main {
@@ -146,15 +118,29 @@ body.dark {
         padding: 0.75rem;
     }
 
-    .sidebar-toggle-glass {
-        left: -10px; /* Hidden by default on mobile, or maybe placed differently? */
-        /* Wait, if sidebar is translated -100%, the left is -100%. */
-        transform: translateX(-100%);
-        transition: transform 0.3s ease, left 0.3s ease;
+    
+
     }
 
-    .admin-sidebar.open ~ .sidebar-toggle-glass {
-        transform: translateX(0);
-        left: calc(240px - 14px);
-    }
+
+
+.admin-sidebar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
+.admin-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.admin-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+.admin-sidebar::-webkit-scrollbar-button {
+    display: none;
+}
+
+
+
