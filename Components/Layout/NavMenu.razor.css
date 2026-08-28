@@ -5,6 +5,7 @@
     gap: 0.6rem;
     padding: 1.6rem 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: visible;
 }
 
 .sidebar-logo {
@@ -42,7 +43,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.4);
+    color: #ffffff;
     padding: 1rem 1.25rem 0.5rem;
     margin-top: 0.25rem;
 }
@@ -52,7 +53,7 @@
 }
 
 ::deep .nav-link {
-    color: rgba(255, 255, 255, 0.65);
+    color: #ffffff;
     background: none;
     border: none;
     border-radius: 10px;
@@ -86,7 +87,7 @@
     width: 1.1rem;
     height: 1.1rem;
     object-fit: contain;
-    opacity: 0.85;
+    opacity: 1;
     flex-shrink: 0;
 }
 
@@ -97,7 +98,7 @@
 }
 
 .footer-link {
-    color: rgba(255, 255, 255, 0.55) !important;
+    color: #ffffff !important;
     font-size: 0.8rem !important;
 }
 
@@ -117,6 +118,6 @@
 .logout-icon {
     filter: brightness(0) saturate(100%) invert(57%) sepia(87%) saturate(2192%) hue-rotate(331deg) brightness(99%) contrast(97%);
 }
-.nav-icon { filter: brightness(0) invert(1); opacity: 0.85; }
+.nav-icon { filter: brightness(0) invert(1); opacity: 1; }
 .logout-icon { filter: brightness(0) saturate(100%) invert(57%) sepia(87%) saturate(2192%) hue-rotate(331deg) brightness(99%) contrast(97%) !important; opacity: 1; }
 .sidebar-logo { filter: none !important; }

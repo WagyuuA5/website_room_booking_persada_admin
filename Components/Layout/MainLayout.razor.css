@@ -63,9 +63,9 @@ body.dark {
 
 /* ── Glass sidebar toggle (pinned to sidebar edge) ── */
 .sidebar-toggle-glass {
-    position: absolute;
+    position: fixed;
     top: 50%;
-    right: -14px;
+    left: calc(240px - 14px);
     transform: translateY(-50%);
     z-index: 110;
     width: 28px;
@@ -78,9 +78,9 @@ body.dark {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: #000; /* maybe var(--text)? The sidebar is dark, but wait, the toggle is on the border. Let's stick to user's glass style */
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease, transform 0.2s ease;
     padding: 0;
 }
 
@@ -90,6 +90,11 @@ body.dark {
 
 .sidebar-toggle-glass svg {
     transition: transform 0.3s ease;
+    color: var(--text);
+}
+
+.sidebar-collapsed .sidebar-toggle-glass {
+    left: calc(64px - 14px);
 }
 
 .sidebar-collapsed .sidebar-toggle-glass svg {
@@ -142,6 +147,14 @@ body.dark {
     }
 
     .sidebar-toggle-glass {
-        right: -10px;
+        left: -10px; /* Hidden by default on mobile, or maybe placed differently? */
+        /* Wait, if sidebar is translated -100%, the left is -100%. */
+        transform: translateX(-100%);
+        transition: transform 0.3s ease, left 0.3s ease;
+    }
+
+    .admin-sidebar.open ~ .sidebar-toggle-glass {
+        transform: translateX(0);
+        left: calc(240px - 14px);
     }
 }

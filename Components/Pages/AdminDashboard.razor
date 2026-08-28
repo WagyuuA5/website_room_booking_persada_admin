@@ -1,4 +1,4 @@
-@page "/dashboard"
+﻿@page "/dashboard"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using ApexCharts
 @using booking_room_admin.Components.Shared
@@ -233,7 +233,7 @@
         <div class="request-detail-list">
             @foreach (var r in facilityRequests)
             {
-                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconFallback="@r.Icon"
+                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconContent="@(b => b.AddMarkupContent(0, r.Icon))"
                             Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
                             ActionLabel="Proses" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
                             OnActionClick="@(() => NavigateTo("/facility-requests"))" />
@@ -248,7 +248,7 @@
         <div class="request-detail-list">
             @foreach (var r in accountRequests)
             {
-                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconFallback="@r.Icon"
+                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconContent="@(b => b.AddMarkupContent(0, r.Icon))"
                             Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
                             ActionLabel="Tinjau" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
                             OnActionClick="@(() => NavigateTo("/users"))" />
@@ -263,7 +263,7 @@
         <div class="request-detail-list">
             @foreach (var r in itRequests)
             {
-                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconFallback="@r.Icon"
+                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconContent="@(b => b.AddMarkupContent(0, r.Icon))"
                             Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
                             ActionLabel="Perbaiki" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
                             OnActionClick="@(() => NavigateTo("/facility-requests"))" />
@@ -278,7 +278,7 @@
         <div class="request-detail-list">
             @foreach (var r in bugRequests)
             {
-                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconFallback="@r.Icon"
+                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconContent="@(b => b.AddMarkupContent(0, r.Icon))"
                             Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
                             ActionLabel="Investigasi" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
                             OnActionClick="@(() => NavigateTo("/facility-requests"))" />
@@ -363,23 +363,23 @@
     {
         facilityRequests = new()
         {
-            new("Permintaan Katering", "FAC-2241", "Rapat Direksi — 2 jam lalu", "#F59E0B", "#FEF3C7", "🍽️", "#92400E"),
-            new("Peralatan AV", "FAC-2238", "Ruang Rapat A — 5 jam lalu", "#F59E0B", "#FEF3C7", "📺", "#92400E"),
+            new("Permintaan Katering", "FAC-2241", "Rapat Direksi — 2 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
+            new("Peralatan AV", "FAC-2238", "Ruang Rapat A — 5 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
         };
         accountRequests = new()
         {
-            new("Sari Wulandari", "ACC-1102", "Karyawan resign — Menunggu", "#EF4444", "#FEE2E2", "👤", "#991B1B"),
-            new("Rudi Hartono", "ACC-1099", "Mutasi cabang — Menunggu", "#F59E0B", "#FEF3C7", "👤", "#92400E"),
+            new("Sari Wulandari", "ACC-1102", "Karyawan resign — Menunggu", "#EF4444", "#FEE2E2", SvgAccount, "#991B1B"),
+            new("Rudi Hartono", "ACC-1099", "Mutasi cabang — Menunggu", "#F59E0B", "#FEF3C7", SvgAccount, "#92400E"),
         };
         itRequests = new()
         {
-            new("Server Down", "IT-4421", "Server utama — 4 jam lalu", "#EF4444", "#FEE2E2", "🖥️", "#991B1B"),
-            new("Reset Email", "IT-4418", "Belum Ditugaskan", "#F59E0B", "#FEF3C7", "📧", "#92400E"),
+            new("Server Down", "IT-4421", "Server utama — 4 jam lalu", "#EF4444", "#FEE2E2", SvgIt, "#991B1B"),
+            new("Reset Email", "IT-4418", "Belum Ditugaskan", "#F59E0B", "#FEF3C7", SvgIt, "#92400E"),
         };
         bugRequests = new()
         {
-            new("Error 500 Submit Form", "BUG-102", "Form Booking — Kritis", "#EF4444", "#FEE2E2", "🐛", "#991B1B"),
-            new("Kalender Tidak Sinkron", "BUG-099", "Modul Calendar — Medium", "#F59E0B", "#FEF3C7", "📅", "#92400E"),
+            new("Error 500 Submit Form", "BUG-102", "Form Booking — Kritis", "#EF4444", "#FEE2E2", SvgBug, "#991B1B"),
+            new("Kalender Tidak Sinkron", "BUG-099", "Modul Calendar — Medium", "#F59E0B", "#FEF3C7", SvgBug, "#92400E"),
         };
     }
 
@@ -429,11 +429,11 @@
 
         recentRequests = new()
         {
-            new("Facility", "🏢", "#DBEAFE", "Rina Kartika", "RK", "#2563EB", "IT Dept", "Peminjaman proyektor ruang meeting lt 3", "baru"),
-            new("Bug", "🐛", "#FEE2E2", "Dimas Prasetyo", "DP", "#EF4444", "Engineering", "Error 500 saat submit form booking", "diproses"),
-            new("Account", "👤", "#FED7AA", "Sari Wulandari", "SW", "#F59E0B", "Marketing", "Penghapusan akun karyawan resign", "diproses"),
-            new("IT", "🔧", "#D1FAE5", "Budi Santoso", "BS", "#10B981", "HR Dept", "Reset password email korporat", "selesai"),
-            new("Facility", "🏢", "#DBEAFE", "Andi Saputra", "AS", "#2563EB", "IT Dept", "Request catering rapat direksi", "baru"),
+            new("Facility", SvgFacility, "#DBEAFE", "Rina Kartika", "RK", "#2563EB", "IT Dept", "Peminjaman proyektor ruang meeting lt 3", "baru"),
+            new("Bug", SvgBug, "#FEE2E2", "Dimas Prasetyo", "DP", "#EF4444", "Engineering", "Error 500 saat submit form booking", "diproses"),
+            new("Account", SvgAccount, "#FED7AA", "Sari Wulandari", "SW", "#F59E0B", "Marketing", "Penghapusan akun karyawan resign", "diproses"),
+            new("IT", SvgIt, "#D1FAE5", "Budi Santoso", "BS", "#10B981", "HR Dept", "Reset password email korporat", "selesai"),
+            new("Facility", SvgFacility, "#DBEAFE", "Andi Saputra", "AS", "#2563EB", "IT Dept", "Request catering rapat direksi", "baru"),
         };
 
         bookingColumns = new()

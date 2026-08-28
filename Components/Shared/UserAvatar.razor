@@ -1,5 +1,9 @@
-<div class="user-avatar @CssClass" style="@StyleString">
-    @if (string.IsNullOrEmpty(PhotoUrl))
+<div class="user-avatar avatar-circle @CssClass" style="@StyleString">
+    @if (!string.IsNullOrEmpty(PhotoUrl))
+    {
+        <img src="@PhotoUrl" alt="Avatar" />
+    }
+    else
     {
         <span>@Initials</span>
     }
@@ -18,9 +22,9 @@
         {
             if (!string.IsNullOrEmpty(PhotoUrl))
             {
-                return $"width: {Size}; height: {Size}; border-radius: 50%; background-image: url('{PhotoUrl}'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; flex-shrink: 0;";
+                return $"width: {Size}; height: {Size};";
             }
-            return $"width: {Size}; height: {Size}; border-radius: 50%; background-color: {BgColor}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: calc({Size} * 0.4); flex-shrink: 0;";
+            return $"width: {Size}; height: {Size}; background-color: {BgColor}; color: white;";
         }
     }
 }

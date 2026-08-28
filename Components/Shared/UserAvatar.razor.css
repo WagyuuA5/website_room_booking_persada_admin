@@ -1,0 +1,18 @@
+.avatar-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;          /* WAJIB: memotong apapun yang melebihi batas lingkaran */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;            /* mencegah avatar "gepeng"/berubah bentuk saat container menyempit */
+    font-size: 13px;           /* ukuran font inisial dibatasi agar tidak overflow untuk nama panjang */
+    font-weight: 600;
+    line-height: 1;
+}
+.avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;         /* WAJIB untuk foto asli nanti — memastikan foto mengisi lingkaran tanpa distorsi/overflow apapun rasio aspek aslinya */
+}
