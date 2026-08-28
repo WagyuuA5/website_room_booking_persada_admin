@@ -3,140 +3,203 @@
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
 @using booking_room_admin.Components.Services
+@inject ToastService Toast
 
+<TopBar Title="Permintaan Fasilitas" Subtitle="Manage incoming catering, AV, and layout setup requests." ShowGlobalSearch="false" ShowDateFilter="false">
+    <RightSlot>
+        <button type="button" class="btn-outline-pill" @onclick="@(() => showExportModal = true)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-sm"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Export</span>
+        </button>
+    </RightSlot>
+</TopBar>
 
-<TopBar Title="Permintaan Fasilitas" Subtitle="Tinjau dan proses permintaan tambahan fasilitas." ShowGlobalSearch="false" ShowDateFilter="false" />
-<div class="facility-requests">
-    <div class="fr-toolbar">
-        <div class="fr-tabs">
-            @foreach (var tab in statusTabs)
-            {
-                <button class="fr-tab @(selectedTab == tab.Key ? "active" : "")" @onclick="() => SelectTab(tab.Key)">
-                    <span>@tab.Label</span>
-                    <span class="fr-tab-badge">@GetTabCount(tab.Key)</span>
-                </button>
-            }
-        </div>
-        <div class="fr-actions">
-            <select class="fr-dept-filter" @bind="selectedDepartment">
-                <option value="">Semua Departemen</option>
-                <option value="IT Dept">IT Dept</option>
-                <option value="HR Dept">HR Dept</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Finance">Finance</option>
-                <option value="Operations">Operations</option>
-            </select>
-            <button class="btn-export" @onclick="@(() => showFrExport = true)">
-                <img src="icon/icon_17_admin.svg" alt="Export" class="export-icon-white" />
-                <span>Export</span>
+<div class="facility-requests-page">
+    @* -- Top Search Bar -- *@
+    <div class="fr-search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fr-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="fr-search-input" placeholder="Search facilities, requests, users..." @bind="searchQuery" @bind:event="oninput" />
+    </div>
+
+    @* -- Status Filter Pills & Dept Dropdown -- *@
+    <div class="fr-toolbar-row">
+        <div class="fr-status-pills">
+            <button type="button" class="fr-pill @(selectedTab == "all" ? "active" : "")" @onclick='() => SelectTab("all")'>
+                <span>All</span>
+                <span class="fr-pill-count count-all">@allRequests.Count</span>
             </button>
+            <button type="button" class="fr-pill @(selectedTab == "pending" ? "active" : "")" @onclick='() => SelectTab("pending")'>
+                <span>Pending</span>
+                <span class="fr-pill-count count-pending">@GetCount("pending")</span>
+            </button>
+            <button type="button" class="fr-pill @(selectedTab == "preparing" ? "active" : "")" @onclick='() => SelectTab("preparing")'>
+                <span>Preparing</span>
+                <span class="fr-pill-count count-preparing">@GetCount("preparing")</span>
+            </button>
+            <button type="button" class="fr-pill @(selectedTab == "ready" ? "active" : "")" @onclick='() => SelectTab("ready")'>
+                <span>Ready</span>
+                <span class="fr-pill-count count-ready">@GetCount("ready")</span>
+            </button>
+            <button type="button" class="fr-pill @(selectedTab == "fulfilled" ? "active" : "")" @onclick='() => SelectTab("fulfilled")'>
+                <span>Fulfilled</span>
+                <span class="fr-pill-count count-fulfilled">@GetCount("fulfilled")</span>
+            </button>
+        </div>
+
+        <div class="fr-dept-select-wrap">
+            <select class="sr-pill-select" @bind="selectedDept">
+                <option value="">Filter by Department</option>
+                <option value="IT & Digital">IT & Digital</option>
+                <option value="Operasional">Operasional</option>
+                <option value="Human Resources">Human Resources</option>
+                <option value="Finance">Finance</option>
+                <option value="Marketing">Marketing</option>
+            </select>
         </div>
     </div>
 
-    <div class="fr-list">
-        @if (!filteredRequests.Any())
+    @* -- Request Card List -- *@
+    <div class="fr-cards-list">
+        @if (!FilteredRequests.Any())
         {
-            <div class="fr-empty">
-                <span class="fr-empty-icon">??</span>
-                <span class="fr-empty-text">Tidak ada permintaan untuk filter ini.</span>
-            </div>
+            <EmptyState Title="Tidak Ada Permintaan" Description="Tidak ada permintaan fasilitas yang cocok dengan filter atau kata kunci saat ini." ActionLabel="Reset Filter" OnAction="ResetFilters" />
         }
         else
         {
-            @foreach (var req in filteredRequests)
+            @foreach (var req in FilteredRequests)
             {
-                <ActionCard
-                    BorderColor="@GetBorderColor(req)"
-                    IconBgColor="@GetIconBg(req)"
-                    IconContent="@(b => b.AddMarkupContent(0, GetIconSvg(req)))"
-                    Title="@req.Title"
-                    ReferenceId="@req.RequestId"
-                    Subtitle="@($"{req.RoomName} • {req.BookingDate:dd MMM yyyy} • {req.Category}")"
-                    SubtitleColor="@GetSubtitleColor(req)"
-                    ActionLabel="@GetActionLabel(req)"
-                    OnActionClick="() => OpenDetail(req)" />
+                <div class="fr-card" @onclick="() => OpenDetail(req)">
+                    <div class="fr-card-left">
+                        <div class="fr-avatar" style="background: @req.AvatarBg;">@req.RequesterInitials</div>
+                        <div class="fr-card-details">
+                            <div class="fr-card-header-row">
+                                <h4 class="fr-card-title">@req.Title</h4>
+                                @if (req.IsUrgent)
+                                {
+                                    <span class="badge-urgent">URGENT</span>
+                                }
+                            </div>
+                            <div class="fr-card-meta">
+                                <span class="fr-meta-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fr-meta-icon"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    @req.RoomName
+                                </span>
+                                <span class="fr-meta-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fr-meta-icon"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    @req.BookingDate.ToString("dd MMM yyyy, HH:mm")
+                                </span>
+                                <span class="fr-meta-item code-text">#@req.RequestId</span>
+                                <span class="fr-meta-item user-info">@req.RequesterName (@req.Department)</span>
+                            </div>
+                            <div class="fr-card-items-summary">
+                                <span>? ??? @req.ItemsSummary</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fr-card-right" @onclick:stopPropagation="true">
+                        <StatusBadge Status="@req.Status" />
+                        <button type="button" class="btn-action-quick @(req.Status == "pending" ? "btn-process" : "btn-update")" @onclick="() => OpenDetail(req)">
+                            @(req.Status == "pending" ? "Process" : "Update")
+                        </button>
+                    </div>
+                </div>
             }
         }
     </div>
 </div>
 
-<ExportModal IsOpen="@showFrExport" IsOpenChanged="@(v => { showFrExport = v; StateHasChanged(); })"
-             ExportTitle="Permintaan Fasilitas" Columns="@_frColumns"
-             CurrentViewRows="@(filteredRequests.ToList().Cast<object>())" AllRows="@(allRequests.Cast<object>())" />
-
-@* Detail Popup *@
-@if (showDetail && selectedRequest != null)
+@* -- Detail Popup Modal -- *@
+@if (selectedRequest != null)
 {
-    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) CloseDetail(); })" Title="@($"{selectedRequest.Title} #{selectedRequest.RequestId}")" Size="large">
+    <AppModal IsOpen="@showDetailModal" IsOpenChanged="@((bool v) => showDetailModal = v)" Size="large">
+        <HeaderContent>
+            <div class="fr-modal-header">
+                <h3 class="fr-modal-title">@selectedRequest.Title</h3>
+                <div class="fr-modal-badges">
+                    <span class="badge-req-id">#@selectedRequest.RequestId</span>
+                    <StatusBadge Status="@selectedRequest.Status" />
+                    @if (selectedRequest.IsUrgent)
+                    {
+                        <span class="badge-urgent">URGENT</span>
+                    }
+                </div>
+            </div>
+        </HeaderContent>
         <ChildContent>
-            <div class="detail-content">
-                <div class="detail-row">
-                    <div class="detail-badge">
-                        <StatusBadge Status="@selectedRequest.Status" />
+            <div class="fr-modal-body-grid">
+                @* Requester Info Box *@
+                <div class="fr-requester-box">
+                    <div class="fr-req-avatar" style="background: @selectedRequest.AvatarBg;">@selectedRequest.RequesterInitials</div>
+                    <div class="fr-req-info">
+                        <strong class="fr-req-name">@selectedRequest.RequesterName</strong>
+                        <span class="fr-req-role">@selectedRequest.Department • @selectedRequest.RequesterEmail</span>
+                    </div>
+                    <div class="fr-room-pin-badge">
+                        <span>?? @selectedRequest.RoomName</span>
+                    </div>
+                    <div class="fr-date-badge">
+                        <span>?? @selectedRequest.BookingDate.ToString("dd MMM yyyy, HH:mm")</span>
                     </div>
                 </div>
 
-                <div class="detail-section">
-                    <h5 class="detail-section-title">Informasi Pemohon</h5>
-                    <div class="detail-requester">
-                        <div class="detail-avatar">@selectedRequest.RequesterInitials</div>
-                        <div>
-                            <div class="detail-name">@selectedRequest.RequesterName</div>
-                            <div class="detail-meta">@selectedRequest.RequesterRole • @selectedRequest.RequesterEmail</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="detail-section">
-                    <h5 class="detail-section-title">Ruangan & Jadwal</h5>
-                    <p class="detail-text">@selectedRequest.RoomName — @selectedRequest.BookingDate.ToString("dd MMMM yyyy")</p>
-                </div>
-
-                <div class="detail-section">
-                    <h5 class="detail-section-title">Item yang Diminta</h5>
-                    <div class="detail-items">
+                @* Requested Items Section *@
+                <div class="fr-section">
+                    <h5 class="fr-section-title">Requested Items</h5>
+                    <div class="fr-items-list">
                         @foreach (var item in selectedRequest.Items)
                         {
-                            <div class="detail-item">
-                                <span class="item-icon">@((MarkupString)item.Icon)</span>
-                                <span class="item-name">@item.Category — @item.Name x@item.Quantity</span>
+                            <div class="fr-item-row">
+                                <div class="fr-item-icon">??</div>
+                                <div class="fr-item-text">
+                                    <strong>@item.Category</strong>
+                                    <span>@item.Description</span>
+                                </div>
                             </div>
                         }
                     </div>
                 </div>
 
-                @if (!string.IsNullOrEmpty(selectedRequest.RequesterNote))
+                @* Requester Note (Sticky Note Style) *@
+                @if (!string.IsNullOrWhiteSpace(selectedRequest.RequesterNote))
                 {
-                    <div class="detail-section">
-                        <h5 class="detail-section-title">Catatan Pemohon</h5>
-                        <div class="detail-note">@selectedRequest.RequesterNote</div>
+                    <div class="fr-note-box">
+                        <div class="fr-note-header">
+                            <span>?? Catatan Pemohon</span>
+                        </div>
+                        <p class="fr-note-text">@selectedRequest.RequesterNote</p>
                     </div>
                 }
 
-                <div class="detail-section">
-                    <h5 class="detail-section-title">Tugaskan Ke</h5>
-                    <select class="form-control-sm" @bind="assignTo">
-                        <option value="">Pilih Tim/Staff...</option>
-                        <option value="Tim Katering">Tim Katering</option>
-                        <option value="Tim AV">Tim Audio Visual</option>
-                        <option value="Tim Furnitur">Tim Furnitur</option>
-                        <option value="General Affairs">General Affairs</option>
-                    </select>
+                @* Action Fields: Assign To & Internal Notes *@
+                <div class="fr-action-fields-grid">
+                    <div class="fr-field">
+                        <label class="fr-field-label">Assign To (PIC)</label>
+                        <select class="fr-modal-input" @bind="selectedRequest.Assignee">
+                            <option value="">Pilih Tim / PIC</option>
+                            <option value="Sarah Jenkins (General Affairs)">Sarah Jenkins (General Affairs)</option>
+                            <option value="Rian Wahyu (IT Support)">Rian Wahyu (IT Support)</option>
+                            <option value="Budi Santoso (Facility Team)">Budi Santoso (Facility Team)</option>
+                            <option value="Catering Service PIC">Catering Service PIC</option>
+                        </select>
+                    </div>
+                    <div class="fr-field">
+                        <label class="fr-field-label">Internal Notes (Private / Admin Only)</label>
+                        <textarea class="fr-modal-textarea" rows="2" placeholder="Catatan internal tim operasional..." @bind="selectedRequest.InternalNotes"></textarea>
+                    </div>
                 </div>
 
-                <div class="detail-section">
-                    <h5 class="detail-section-title">Catatan Internal</h5>
-                    <textarea class="form-control-sm" rows="3" placeholder="Catatan internal (tidak terlihat pemohon)..." @bind="internalNotes"></textarea>
-                </div>
-
-                <div class="detail-section">
-                    <h5 class="detail-section-title">Riwayat Aktivitas</h5>
-                    <div class="activity-log">
-                        @foreach (var log in selectedRequest.ActivityLog.OrderByDescending(l => l.Timestamp))
+                @* Activity Log Timeline *@
+                <div class="fr-section">
+                    <h5 class="fr-section-title">Activity Log</h5>
+                    <div class="fr-timeline">
+                        @foreach (var act in selectedRequest.ActivityLogs)
                         {
-                            <div class="activity-entry">
-                                <span class="activity-time">@log.Timestamp.ToString("HH:mm")</span>
-                                <span class="activity-action">@log.Action</span>
+                            <div class="fr-timeline-item">
+                                <div class="fr-timeline-bullet"></div>
+                                <div class="fr-timeline-content">
+                                    <span class="fr-timeline-title">@act.Title</span>
+                                    <span class="fr-timeline-time">@act.Timestamp.ToString("dd MMM yyyy, HH:mm")</span>
+                                </div>
                             </div>
                         }
                     </div>
@@ -144,149 +207,247 @@
             </div>
         </ChildContent>
         <FooterContent>
-            <button class="btn-outline-pill" @onclick="() => RejectRequest(selectedRequest)">Tolak</button>
-            <button class="btn-primary-pill" @onclick="() => AssignRequest(selectedRequest)">Tugaskan & Proses</button>
+            <button type="button" class="btn-outline-pill btn-reject" @onclick="RejectRequest">Reject</button>
+            <button type="button" class="btn-primary-pill btn-yellow" @onclick="ProcessRequest">Assign & Process</button>
         </FooterContent>
     </AppModal>
 }
 
+<ExportModal IsOpen="@showExportModal" IsOpenChanged="@((bool v) => showExportModal = v)" ExportTitle="Permintaan Fasilitas" Columns="exportColumns" CurrentViewRows="FilteredRequests.Cast<object>()" AllRows="allRequests.Cast<object>()" />
+
 @code {
+    private string searchQuery = "";
     private string selectedTab = "all";
-    private string selectedDepartment = "";
-    private bool showDetail = false;
-    private FacilityRequest? selectedRequest;
-    private string assignTo = "";
-    private string internalNotes = "";
+    private string selectedDept = "";
+    private bool showDetailModal = false;
+    private bool showExportModal = false;
 
-    private List<(string Key, string Label)> statusTabs = new()
+    public class RequestItemDetail { public string Category { get; set; } = ""; public string Description { get; set; } = ""; }
+    public class RequestActivityLog { public string Title { get; set; } = ""; public DateTime Timestamp { get; set; } }
+
+    public class FacilityRequestItem
     {
-        ("all", "Semua"),
-        ("pending", "Menunggu"),
-        ("preparing", "Diproses"),
-        ("ready", "Siap"),
-        ("fulfilled", "Selesai"),
-    };
-
-    private List<FacilityRequest> allRequests = new();
-
-    private IEnumerable<FacilityRequest> filteredRequests
-    {
-        get
-        {
-            var query = allRequests.AsEnumerable();
-            if (selectedTab != "all")
-                query = query.Where(r => r.Status == selectedTab);
-            if (!string.IsNullOrEmpty(selectedDepartment))
-                query = query.Where(r => r.RequesterDepartment == selectedDepartment);
-            return query.OrderByDescending(r => r.CreatedAt);
-        }
+        public string RequestId { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string RoomName { get; set; } = "";
+        public DateTime BookingDate { get; set; }
+        public string RequesterName { get; set; } = "";
+        public string RequesterInitials { get; set; } = "";
+        public string RequesterEmail { get; set; } = "";
+        public string Department { get; set; } = "";
+        public string AvatarBg { get; set; } = "#2563EB";
+        public bool IsUrgent { get; set; }
+        public string Status { get; set; } = "pending";
+        public string ItemsSummary { get; set; } = "";
+        public string RequesterNote { get; set; } = "";
+        public string Assignee { get; set; } = "";
+        public string InternalNotes { get; set; } = "";
+        public List<RequestItemDetail> Items { get; set; } = new();
+        public List<RequestActivityLog> ActivityLogs { get; set; } = new();
     }
+
+    private FacilityRequestItem? selectedRequest;
+    private List<FacilityRequestItem> allRequests = new();
+
+    private List<ExportColumn> exportColumns = new()
+    {
+        new() { Header = "ID", PropertyName = "RequestId" },
+        new() { Header = "Judul", PropertyName = "Title" },
+        new() { Header = "Pemohon", PropertyName = "RequesterName" },
+        new() { Header = "Departemen", PropertyName = "Department" },
+        new() { Header = "Ruangan", PropertyName = "RoomName" },
+        new() { Header = "Status", PropertyName = "Status" }
+    };
 
     protected override void OnInitialized()
     {
+        InitDummyRequests();
+    }
 
-        allRequests = new()
+    private void InitDummyRequests()
+    {
+        allRequests = new List<FacilityRequestItem>
         {
-            new() { Id = 1, RequestId = "FAC-2241", Title = "Permintaan Katering Rapat Direksi", Category = "Katering", RequesterName = "Rina Kartika", RequesterInitials = "RK", RequesterRole = "Staff IT", RequesterEmail = "rina@persada.co.id", RequesterDepartment = "IT Dept", RoomName = "Ruang Rapat Utama", BookingDate = DateTime.Now.AddDays(2), Status = "pending", RequesterNote = "Mohon disediakan makan siang untuk 32 orang, termasuk 4 vegetarian.", Items = new() { new() { Name = "Executive Lunch", Quantity = 32, Category = "Katering", Icon = SvgKatering }, new() { Name = "Extra Chairs", Quantity = 2, Category = "Furnitur", Icon = SvgFurnitur } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddHours(-2), Action = "Permintaan Dibuat" }, new() { Timestamp = DateTime.Now.AddHours(-1), Action = "Menunggu Penugasan" } } },
-            new() { Id = 2, RequestId = "FAC-2238", Title = "Peralatan Audio Visual Meeting", Category = "Audio Visual", RequesterName = "Dimas Prasetyo", RequesterInitials = "DP", RequesterRole = "Engineer", RequesterEmail = "dimas@persada.co.id", RequesterDepartment = "IT Dept", RoomName = "Ruang Rapat A", BookingDate = DateTime.Now.AddDays(1), Status = "pending", Items = new() { new() { Name = "Proyektor 4K", Quantity = 1, Category = "AV", Icon = SvgAv }, new() { Name = "Wireless Mic", Quantity = 2, Category = "AV", Icon = "??" } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddHours(-5), Action = "Permintaan Dibuat" } } },
-            new() { Id = 3, RequestId = "FAC-2235", Title = "Pengaturan Furnitur Workshop", Category = "Furnitur", RequesterName = "Maya Putri", RequesterInitials = "MP", RequesterRole = "Marketing Lead", RequesterEmail = "maya@persada.co.id", RequesterDepartment = "Marketing", RoomName = "Ruang Diskusi", BookingDate = DateTime.Now.AddDays(3), Status = "preparing", AssignedTo = "Tim Furnitur", Items = new() { new() { Name = "Meja Lipat", Quantity = 5, Category = "Furnitur", Icon = SvgFurnitur } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddDays(-1), Action = "Permintaan Dibuat" }, new() { Timestamp = DateTime.Now.AddHours(-6), Action = "Ditugaskan ke Tim Furnitur" } } },
-            new() { Id = 4, RequestId = "FAC-2230", Title = "Katering Rapat Bulanan", Category = "Katering", RequesterName = "Ahmad Fauzi", RequesterInitials = "AF", RequesterRole = "Manager", RequesterEmail = "ahmad@persada.co.id", RequesterDepartment = "Finance", RoomName = "Ruang Rapat B", BookingDate = DateTime.Now, Status = "ready", AssignedTo = "Tim Katering", Items = new() { new() { Name = "Snack Box", Quantity = 15, Category = "Katering", Icon = "??" } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddDays(-2), Action = "Permintaan Dibuat" }, new() { Timestamp = DateTime.Now.AddDays(-1), Action = "Ditugaskan ke Tim Katering" }, new() { Timestamp = DateTime.Now.AddHours(-3), Action = "Persiapan Selesai — Siap Diantar" } } },
-            new() { Id = 5, RequestId = "FAC-2225", Title = "Setup Video Conference", Category = "Audio Visual", RequesterName = "Budi Santoso", RequesterInitials = "BS", RequesterRole = "HR Manager", RequesterEmail = "budi@persada.co.id", RequesterDepartment = "HR Dept", RoomName = "Ruang Rapat Utama", BookingDate = DateTime.Now.AddDays(-1), Status = "fulfilled", AssignedTo = "Tim AV", Items = new() { new() { Name = "Webcam 4K", Quantity = 1, Category = "AV", Icon = "??" }, new() { Name = "Speaker", Quantity = 2, Category = "AV", Icon = "??" } }, ActivityLog = new() { new() { Timestamp = DateTime.Now.AddDays(-3), Action = "Permintaan Dibuat" }, new() { Timestamp = DateTime.Now.AddDays(-2), Action = "Ditugaskan ke Tim AV" }, new() { Timestamp = DateTime.Now.AddDays(-1), Action = "Selesai" } } },
+            new()
+            {
+                RequestId = "FAC-901",
+                Title = "Catering & Extra AV Setup",
+                RoomName = "Ruang Rapat Utama",
+                BookingDate = DateTime.Today.AddHours(9).AddMinutes(30),
+                RequesterName = "Ahmad Fauzi",
+                RequesterInitials = "AF",
+                RequesterEmail = "ahmad.fauzi@company.com",
+                Department = "IT & Digital",
+                AvatarBg = "#0B1E39",
+                IsUrgent = true,
+                Status = "pending",
+                ItemsSummary = "Catering & Furniture — Executive Lunch (x12), Extra Chairs (x2)",
+                RequesterNote = "Mohon setup sound system dan proyektor siap 15 menit sebelum acara dimulai.",
+                Assignee = "Sarah Jenkins (General Affairs)",
+                InternalNotes = "Sudah dikoordinasikan dengan vendor katering.",
+                Items = new List<RequestItemDetail>
+                {
+                    new() { Category = "Catering", Description = "Executive Lunch Box (12 pax) + Snack Sore" },
+                    new() { Category = "AV Equipment", Description = "Wireless Mic (2 unit) & Sound System Stand" }
+                },
+                ActivityLogs = new List<RequestActivityLog>
+                {
+                    new() { Title = "Request Created", Timestamp = DateTime.Now.AddHours(-2) },
+                    new() { Title = "Awaiting Assignment", Timestamp = DateTime.Now.AddHours(-1) }
+                }
+            },
+            new()
+            {
+                RequestId = "FAC-902",
+                Title = "Extra Chairs & Whiteboard Markers",
+                RoomName = "Ruang Diskusi B",
+                BookingDate = DateTime.Today.AddHours(14),
+                RequesterName = "Dewi Lestari",
+                RequesterInitials = "DL",
+                RequesterEmail = "dewi.lestari@company.com",
+                Department = "Finance",
+                AvatarBg = "#16A34A",
+                IsUrgent = false,
+                Status = "preparing",
+                ItemsSummary = "Furniture & Stationeries — 4 Kursi Tambahan, Spidol Papan Tulis",
+                RequesterNote = "Butuh kursi tambahan karena ada tamu auditor eksternal.",
+                Assignee = "Budi Santoso (Facility Team)",
+                Items = new List<RequestItemDetail>
+                {
+                    new() { Category = "Furniture", Description = "Kursi Rapat Ergonomis (4 buah)" },
+                    new() { Category = "Stationeries", Description = "Marker Board 3 Warna + Penghapus" }
+                },
+                ActivityLogs = new List<RequestActivityLog>
+                {
+                    new() { Title = "Request Created", Timestamp = DateTime.Now.AddHours(-3) },
+                    new() { Title = "Assigned to Budi Santoso", Timestamp = DateTime.Now.AddHours(-2) },
+                    new() { Title = "Status Changed to Preparing", Timestamp = DateTime.Now.AddMinutes(-45) }
+                }
+            },
+            new()
+            {
+                RequestId = "FAC-903",
+                Title = "Townhall Streaming & Stage Setup",
+                RoomName = "Auditorium Serbaguna",
+                BookingDate = DateTime.Today.AddDays(1).AddHours(10),
+                RequesterName = "Rudi Hartono",
+                RequesterInitials = "RH",
+                RequesterEmail = "rudi.hartono@company.com",
+                Department = "Marketing",
+                AvatarBg = "#F59E0B",
+                IsUrgent = true,
+                Status = "ready",
+                ItemsSummary = "AV & Stage — Live Streaming 4K Cam, Lighting, Stage Podium",
+                RequesterNote = "Townhall Q4 seluruh perusahaan, disiarkan langsung ke cabang Surabaya & Bandung.",
+                Assignee = "Rian Wahyu (IT Support)",
+                Items = new List<RequestItemDetail>
+                {
+                    new() { Category = "AV Setup", Description = "Dual Camera 4K + OBS Live Studio Switcher" },
+                    new() { Category = "Lighting", Description = "Stage Warm Light (4 Bar)" }
+                },
+                ActivityLogs = new List<RequestActivityLog>
+                {
+                    new() { Title = "Request Created", Timestamp = DateTime.Now.AddDays(-1) },
+                    new() { Title = "Technical Rehearsal Completed", Timestamp = DateTime.Now.AddHours(-4) },
+                    new() { Title = "Status Changed to Ready", Timestamp = DateTime.Now.AddHours(-1) }
+                }
+            },
+            new()
+            {
+                RequestId = "FAC-904",
+                Title = "Coffee Break & Tea Service",
+                RoomName = "Ruang Dirantara VIP",
+                BookingDate = DateTime.Today.AddHours(-2),
+                RequesterName = "Siti Rahma",
+                RequesterInitials = "SR",
+                RequesterEmail = "siti.rahma@company.com",
+                Department = "Human Resources",
+                AvatarBg = "#9333EA",
+                IsUrgent = false,
+                Status = "fulfilled",
+                ItemsSummary = "Catering — Premium Coffee & Pastry (8 pax)",
+                RequesterNote = "Interview Direksi.",
+                Assignee = "Catering Service PIC",
+                Items = new List<RequestItemDetail>
+                {
+                    new() { Category = "Catering", Description = "Arabica Coffee Machine + Croissant Basket" }
+                },
+                ActivityLogs = new List<RequestActivityLog>
+                {
+                    new() { Title = "Request Created", Timestamp = DateTime.Now.AddHours(-5) },
+                    new() { Title = "Delivered to Room", Timestamp = DateTime.Now.AddHours(-3) },
+                    new() { Title = "Marked as Fulfilled", Timestamp = DateTime.Now.AddHours(-2) }
+                }
+            }
         };
     }
 
-    private int GetTabCount(string tab) => tab == "all" ? allRequests.Count : allRequests.Count(r => r.Status == tab);
-
-    private string GetBorderColor(FacilityRequest req) => req.Status switch
+    private IEnumerable<FacilityRequestItem> FilteredRequests
     {
-        "pending" => "#F59E0B",
-        "preparing" => "#2563EB",
-        "ready" => "#10B981",
-        "fulfilled" => "#6B7280",
-        _ => "#F59E0B"
-    };
+        get
+        {
+            var q = allRequests.AsEnumerable();
+            if (selectedTab != "all") q = q.Where(r => r.Status.Equals(selectedTab, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(selectedDept)) q = q.Where(r => r.Department.Equals(selectedDept, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                var query = searchQuery.ToLowerInvariant();
+                q = q.Where(r => r.Title.ToLowerInvariant().Contains(query) ||
+                                 r.RequesterName.ToLowerInvariant().Contains(query) ||
+                                 r.RoomName.ToLowerInvariant().Contains(query) ||
+                                 r.RequestId.ToLowerInvariant().Contains(query));
+            }
+            return q;
+        }
+    }
 
-    private string GetIconBg(FacilityRequest req) => req.Category switch
+    private int GetCount(string status) => allRequests.Count(r => r.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
+
+    private void SelectTab(string tab)
     {
-        "Katering" => "#FEF3C7",
-        "Audio Visual" => "#DBEAFE",
-        "Furnitur" => "#E0E7FF",
-        _ => "#F3F4F6"
-    };
+        selectedTab = tab;
+    }
 
-        private const string SvgKatering = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><path d=\"M17 8h1a4 4 0 1 1 0 8h-1\"/><path d=\"M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z\"/><line x1=\"6\" y1=\"2\" x2=\"6\" y2=\"4\"/><line x1=\"10\" y1=\"2\" x2=\"10\" y2=\"4\"/><line x1=\"14\" y1=\"2\" x2=\"14\" y2=\"4\"/></svg>";
-    private const string SvgAv = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><polygon points=\"23 7 16 12 23 17 23 7\"/><rect x=\"1\" y=\"5\" width=\"15\" height=\"14\" rx=\"2\" ry=\"2\"/></svg>";
-    private const string SvgFurnitur = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><path d=\"M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z\"/><polyline points=\"3.27 6.96 12 12.01 20.73 6.96\"/><line x1=\"12\" y1=\"22.08\" x2=\"12\" y2=\"12\"/></svg>";
-    private const string SvgDefault = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" y1=\"8\" x2=\"12\" y2=\"12\"/><line x1=\"12\" y1=\"16\" x2=\"12.01\" y2=\"16\"/></svg>";
-
-    private string GetIconSvg(FacilityRequest req) => req.Category switch
+    private void ResetFilters()
     {
-        "Katering" => SvgKatering,
-        "Audio Visual" => SvgAv,
-        "Furnitur" => SvgFurnitur,
-        _ => SvgDefault
-    };
+        searchQuery = "";
+        selectedTab = "all";
+        selectedDept = "";
+    }
 
-    private string GetSubtitleColor(FacilityRequest req) => req.Status switch
-    {
-        "pending" => "#92400E",
-        "preparing" => "#1E40AF",
-        _ => "#6B7280"
-    };
-
-    private string GetActionLabel(FacilityRequest req) => req.Status switch
-    {
-        "pending" => "Proses",
-        "preparing" => "Update",
-        "ready" => "Selesaikan",
-        _ => "Lihat"
-    };
-
-    private void SelectTab(string tab) { selectedTab = tab; }
-
-    private void OpenDetail(FacilityRequest req)
+    private void OpenDetail(FacilityRequestItem req)
     {
         selectedRequest = req;
-        assignTo = req.AssignedTo ?? "";
-        internalNotes = req.InternalNotes ?? "";
-        showDetail = true;
+        showDetailModal = true;
     }
 
-    private void CloseDetail() { showDetail = false; selectedRequest = null; }
-
-    private void AssignRequest(FacilityRequest req)
+    private void ProcessRequest()
     {
-        req.AssignedTo = assignTo;
-        req.InternalNotes = internalNotes;
-        req.Status = req.Status == "pending" ? "preparing" : req.Status == "preparing" ? "ready" : "fulfilled";
-        req.ActivityLog.Add(new() { Timestamp = DateTime.Now, Action = $"Status diubah ke {req.Status} oleh Admin", Actor = "Admin Wahyu" });
-        CloseDetail();
+        if (selectedRequest != null)
+        {
+            selectedRequest.Status = selectedRequest.Status == "pending" ? "preparing" : "ready";
+            selectedRequest.ActivityLogs.Add(new RequestActivityLog
+            {
+                Title = $"Status updated to {selectedRequest.Status.ToUpper()} by Admin",
+                Timestamp = DateTime.Now
+            });
+            Toast.Success($"Permintaan #{selectedRequest.RequestId} berhasil diproses.");
+            showDetailModal = false;
+        }
     }
 
-    private void RejectRequest(FacilityRequest req)
+    private void RejectRequest()
     {
-        req.Status = "rejected";
-        req.ActivityLog.Add(new() { Timestamp = DateTime.Now, Action = "Permintaan Ditolak", Actor = "Admin Wahyu" });
-        CloseDetail();
+        if (selectedRequest != null)
+        {
+            selectedRequest.Status = "rejected";
+            selectedRequest.ActivityLogs.Add(new RequestActivityLog
+            {
+                Title = "Request Rejected by Admin",
+                Timestamp = DateTime.Now
+            });
+            Toast.Error($"Permintaan #{selectedRequest.RequestId} telah ditolak.");
+            showDetailModal = false;
+        }
     }
-
-    private bool showFrExport;
-    private List<ExportColumn> _frColumns = new()
-    {
-        new() { Header = "ID", PropertyName = "RequestId", CellType = ExportCellType.Text },
-        new() { Header = "Judul", PropertyName = "Title", CellType = ExportCellType.Text },
-        new() { Header = "Kategori", PropertyName = "Category", CellType = ExportCellType.Text },
-        new() { Header = "Pemohon", PropertyName = "RequesterName", CellType = ExportCellType.Text },
-        new() { Header = "Departemen", PropertyName = "RequesterDepartment", CellType = ExportCellType.Text },
-        new() { Header = "Ruangan", PropertyName = "RoomName", CellType = ExportCellType.Text },
-        new() { Header = "Tanggal", PropertyName = "BookingDate", CellType = ExportCellType.Date },
-        new() { Header = "Status", PropertyName = "Status", CellType = ExportCellType.Text },
-    };
 }
-
-
-
-
-
-
-

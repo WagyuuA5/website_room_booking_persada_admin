@@ -14,15 +14,27 @@ window.initSidebarDrag = function (dotNetRef) {
     var sidebar = layout.querySelector('.admin-sidebar');
     if (!sidebar) return;
     var handle = sidebar.querySelector('.sidebar-drag-handle');
+    var logo = sidebar.querySelector('.sidebar-logo');
+    var header = sidebar.querySelector('.sidebar-header');
 
-    var startX = 0, dragging = false, THRESHOLD = 35;
+    var startX = 0, startY = 0, dragging = false, THRESHOLD = 35;
+    var touchStartX = 0, touchStartY = 0;
 
+    // Double click / Double tap on logo or header or handle
+    function onDblClick() {
+        dotNetRef.invokeMethodAsync('ToggleSidebarFromJs');
+    }
+
+    if (handle) handle.addEventListener('dblclick', onDblClick);
+    if (header) header.addEventListener('dblclick', onDblClick);
+
+    // Pointer Drag Handle
     function onPointerDown(e) {
         var rect = sidebar.getBoundingClientRect();
-        // Trigger if clicking near edge or on handle
         if (e.target === handle || (e.clientX >= rect.right - 14 && e.clientX <= rect.right + 6)) {
             if (e.pointerType === 'mouse' && e.button !== 0) return;
             startX = e.clientX;
+            startY = e.clientY;
             dragging = true;
             sidebar.classList.add('dragging');
             if (handle) handle.classList.add('active');
@@ -53,6 +65,29 @@ window.initSidebarDrag = function (dotNetRef) {
             try { e.target.releasePointerCapture(e.pointerId); } catch(err){}
         }
     }
+
+    // Touch Swipe Gesture for Tablet/Mobile
+    sidebar.addEventListener('touchstart', function (e) {
+        if (e.touches.length === 1) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }
+    }, { passive: true });
+
+    sidebar.addEventListener('touchend', function (e) {
+        if (e.changedTouches.length === 1) {
+            var dx = e.changedTouches[0].clientX - touchStartX;
+            var dy = e.changedTouches[0].clientY - touchStartY;
+            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                var collapsed = layout.classList.contains('sidebar-collapsed');
+                if (dx < 0 && !collapsed) {
+                    dotNetRef.invokeMethodAsync('ToggleSidebarFromJs');
+                } else if (dx > 0 && collapsed) {
+                    dotNetRef.invokeMethodAsync('ToggleSidebarFromJs');
+                }
+            }
+        }
+    }, { passive: true });
 
     sidebar.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('pointermove', onPointerMove);

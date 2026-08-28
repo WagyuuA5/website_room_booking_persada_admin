@@ -3,176 +3,315 @@
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
 @using booking_room_admin.Components.Services
+@inject ToastService Toast
 
-
-<TopBar Title="Audit Log" Subtitle="Catatan lengkap semua aktivitas dalam sistem." ShowGlobalSearch="false" ShowDateFilter="false">
+<TopBar Title="Audit Log" Subtitle="History of all admin activities in the system � permanent and uneditable." ShowGlobalSearch="false" ShowDateFilter="false">
     <RightSlot>
-        <button class="btn-export" @onclick="@(() => showAuditExport = true)">
-            <img src="icon/icon_17_admin.svg" alt="Export" class="export-icon-white" />
-            <span>Export</span>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="@(() => showExportModal = true)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-sm"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Export CSV</span>
         </button>
     </RightSlot>
 </TopBar>
-<div class="audit-log">
-    
 
-    <div class="audit-filters">
-        <select class="audit-filter-select" @bind="filterActor">
-            <option value="">Semua Aktor</option>
-            @foreach (var actor in actors)
+<div class="audit-log-page">
+    @* -- Filter Island Toolbar -- *@
+    <div class="audit-island-toolbar">
+        <span class="audit-filter-label">Filters:</span>
+
+        @* 1. Actor Island Trigger *@
+        <div class="island-trigger-container">
+            <button type="button" class="btn-island-trigger @(openIsland == "actor" ? "active" : "")" @onclick='() => ToggleIsland("actor")'>
+                <span>@(string.IsNullOrEmpty(selectedActor) ? "All Actors" : selectedActor)</span>
+                <span class="island-caret">?</span>
+            </button>
+
+            @if (openIsland == "actor")
             {
-                <option value="@actor">@actor</option>
+                <div class="island-popup-card actor-island">
+                    <div class="island-header">
+                        <span class="island-title">Filter by Actor</span>
+                        <button type="button" class="island-close" @onclick='() => ToggleIsland("")'>?</button>
+                    </div>
+                    <div class="island-search">
+                        <input type="text" placeholder="Search actors..." class="island-input" @bind="actorSearchQuery" @bind:event="oninput" />
+                    </div>
+                    <div class="island-actor-list scroll-area">
+                        @foreach (var act in FilteredActorList)
+                        {
+                            <label class="island-actor-item">
+                                <input type="checkbox" checked="@(selectedActor == act.Name)" @onchange="@((ChangeEventArgs e) => SelectActor(act.Name, (bool)(e.Value ?? false)))" />
+                                <div class="actor-mini-avatar" style="background: @act.AvatarBg;">@act.Initials</div>
+                                <div class="actor-info">
+                                    <strong class="actor-name">@act.Name</strong>
+                                    <span class="actor-role">@act.Role</span>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                    <div class="island-footer">
+                        <button type="button" class="island-link-clear" @onclick="ClearActorFilter">Clear All</button>
+                        <button type="button" class="island-btn-apply" @onclick='() => ToggleIsland("")'>Apply Filter</button>
+                    </div>
+                </div>
             }
+        </div>
+
+        @* 2. Action Type Island Trigger *@
+        <div class="island-trigger-container">
+            <button type="button" class="btn-island-trigger @(openIsland == "action" ? "active" : "")" @onclick='() => ToggleIsland("action")'>
+                <span>@(selectedActions.Any() ? $"{selectedActions.Count} Actions Selected" : "Action Type")</span>
+                <span class="island-caret">?</span>
+            </button>
+
+            @if (openIsland == "action")
+            {
+                <div class="island-popup-card action-island">
+                    <div class="island-header">
+                        <span class="island-title">Filter by Action Type</span>
+                        <button type="button" class="island-close" @onclick='() => ToggleIsland("")'>?</button>
+                    </div>
+                    <div class="island-categories-list scroll-area">
+                        @* Group: Booking *@
+                        <div class="action-group">
+                            <div class="action-group-header" @onclick="() => isBookingGroupOpen = !isBookingGroupOpen">
+                                <span>@(isBookingGroupOpen ? "?" : "?") Booking</span>
+                            </div>
+                            @if (isBookingGroupOpen)
+                            {
+                                <div class="action-group-items">
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Approve Booking")" @onchange='e => ToggleAction("Approve Booking", (bool)(e.Value ?? false))' /> Approve Booking</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Reject Booking")" @onchange='e => ToggleAction("Reject Booking", (bool)(e.Value ?? false))' /> Reject Booking</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Cancel Booking")" @onchange='e => ToggleAction("Cancel Booking", (bool)(e.Value ?? false))' /> Cancel Booking</label>
+                                </div>
+                            }
+                        </div>
+
+                        @* Group: Room *@
+                        <div class="action-group">
+                            <div class="action-group-header" @onclick="() => isRoomGroupOpen = !isRoomGroupOpen">
+                                <span>@(isRoomGroupOpen ? "?" : "?") Room</span>
+                            </div>
+                            @if (isRoomGroupOpen)
+                            {
+                                <div class="action-group-items">
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Add Room")" @onchange='e => ToggleAction("Add Room", (bool)(e.Value ?? false))' /> Add Room</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Edit Room")" @onchange='e => ToggleAction("Edit Room", (bool)(e.Value ?? false))' /> Edit Room</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Set Maintenance")" @onchange='e => ToggleAction("Set Maintenance", (bool)(e.Value ?? false))' /> Set Maintenance</label>
+                                </div>
+                            }
+                        </div>
+
+                        @* Group: User *@
+                        <div class="action-group">
+                            <div class="action-group-header" @onclick="() => isUserGroupOpen = !isUserGroupOpen">
+                                <span>@(isUserGroupOpen ? "?" : "?") User</span>
+                            </div>
+                            @if (isUserGroupOpen)
+                            {
+                                <div class="action-group-items">
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Add User")" @onchange='e => ToggleAction("Add User", (bool)(e.Value ?? false))' /> Add User</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Edit User")" @onchange='e => ToggleAction("Edit User", (bool)(e.Value ?? false))' /> Edit User</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Deactivate User")" @onchange='e => ToggleAction("Deactivate User", (bool)(e.Value ?? false))' /> Deactivate User</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Reset Password")" @onchange='e => ToggleAction("Reset Password", (bool)(e.Value ?? false))' /> Reset Password</label>
+                                </div>
+                            }
+                        </div>
+
+                        @* Group: System *@
+                        <div class="action-group">
+                            <div class="action-group-header" @onclick="() => isSystemGroupOpen = !isSystemGroupOpen">
+                                <span>@(isSystemGroupOpen ? "?" : "?") System</span>
+                            </div>
+                            @if (isSystemGroupOpen)
+                            {
+                                <div class="action-group-items">
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Change Settings")" @onchange='e => ToggleAction("Change Settings", (bool)(e.Value ?? false))' /> Change Settings</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Export Data")" @onchange='e => ToggleAction("Export Data", (bool)(e.Value ?? false))' /> Export Data</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="island-footer">
+                        <button type="button" class="island-link-clear" @onclick="ClearActionFilter">Clear All</button>
+                        <button type="button" class="island-btn-apply" @onclick='() => ToggleIsland("")'>Apply Filter ?</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* 3. Date Range Preset Trigger *@
+        <select class="audit-date-preset-select" @bind="selectedDateRange">
+            <option value="7">Last 7 Days</option>
+            <option value="30">Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
+            <option value="0">All Time</option>
         </select>
-        <select class="audit-filter-select" @bind="filterActionType">
-            <option value="">Semua Aksi</option>
-            <option value="Approve Booking">Approve Booking</option>
-            <option value="Reject Booking">Reject Booking</option>
-            <option value="Set Maintenance">Set Maintenance</option>
-            <option value="Change Role">Change Role</option>
-            <option value="Reset Password">Reset Password</option>
-            <option value="Add User">Add User</option>
-            <option value="Deactivate User">Deactivate User</option>
-            <option value="Delete User">Delete User</option>
-        </select>
-        <select class="audit-filter-select" @bind="filterDateRange">
-            <option value="7">7 Hari Terakhir</option>
-            <option value="30">30 Hari Terakhir</option>
-            <option value="90">90 Hari Terakhir</option>
-            <option value="0">Semua</option>
-        </select>
+
+        @if (!string.IsNullOrEmpty(selectedActor) || selectedActions.Any() || selectedDateRange != "7")
+        {
+            <button type="button" class="btn-clear-island-filters" @onclick="ResetAllFilters" title="Reset Semua Filter">? Clear Filters</button>
+        }
     </div>
 
-    <DataTable TItem="AuditLogEntry" Items="filteredLogs" Columns="columns"
-               TotalCount="@totalFiltered" PageSize="@pageSize" CurrentPage="@currentPage"
-               OnPageChanged="HandlePageChange">
-        <RowTemplate Context="log">
-            <td class="col-time">
-                <span class="log-date">@log.Timestamp.ToString("dd MMM yyyy")</span>
-                <span class="log-time">@log.Timestamp.ToString("HH:mm:ss")</span>
-            </td>
-            <td>
-                <div class="actor-cell">
-                    <div class="actor-avatar">@log.ActorInitials</div>
-                    <span class="actor-name">@log.ActorName</span>
-                </div>
-            </td>
-            <td>
-                <StatusBadge Status="@GetActionStatus(log.ActionType)" CustomLabel="@log.ActionType" />
-            </td>
-            <td><span class="log-target">@log.TargetName</span></td>
-            <td><span class="log-detail">@log.Detail</span></td>
-        </RowTemplate>
-    </DataTable>
+    @* -- Audit Log DataTable -- *@
+    <div class="audit-table-panel">
+        <DataTable TItem="AuditLogEntry" Items="PagedLogs" Columns="columns" TotalCount="@FilteredLogs.Count()" PageSize="@pageSize" CurrentPage="@currentPage" OnPageChanged="HandlePageChange">
+            <RowTemplate Context="log">
+                <td class="col-time">
+                    <span class="log-date">@log.Timestamp.ToString("dd MMM yyyy")</span>
+                    <span class="log-time">@log.Timestamp.ToString("HH:mm:ss")</span>
+                </td>
+                <td>
+                    <div class="actor-cell">
+                        <div class="actor-avatar" style="background: @log.ActorBg;">@log.ActorInitials</div>
+                        <span class="actor-name">@log.ActorName</span>
+                    </div>
+                </td>
+                <td>
+                    <StatusBadge Status="@GetActionStatus(log.ActionType)" CustomLabel="@log.ActionType" />
+                </td>
+                <td><span class="log-target">@log.TargetName</span></td>
+                <td><span class="log-detail">@log.Detail</span></td>
+            </RowTemplate>
+        </DataTable>
+    </div>
 </div>
 
-<ExportModal IsOpen="@showAuditExport" IsOpenChanged="@(v => { showAuditExport = v; StateHasChanged(); })"
-             ExportTitle="Audit Log" Columns="@_auditColumns"
-             CurrentViewRows="@(filteredLogs.ToList().Cast<object>())" AllRows="@(allLogs.Cast<object>())" />
+<ExportModal IsOpen="@showExportModal" IsOpenChanged="@((bool v) => showExportModal = v)" ExportTitle="Audit Log" Columns="exportColumns" CurrentViewRows="FilteredLogs.Cast<object>()" AllRows="allLogs.Cast<object>()" />
 
 @code {
-    private string filterActor = "";
-    private string filterActionType = "";
-    private string filterDateRange = "7";
+    private string openIsland = "";
+    private string selectedActor = "";
+    private string actorSearchQuery = "";
+    private HashSet<string> selectedActions = new();
+    private string selectedDateRange = "7";
     private int currentPage = 1;
     private int pageSize = 10;
+    private bool showExportModal = false;
+
+    private bool isBookingGroupOpen = true;
+    private bool isRoomGroupOpen = true;
+    private bool isUserGroupOpen = false;
+    private bool isSystemGroupOpen = false;
+
+    public class ActorItem { public string Name { get; set; } = ""; public string Role { get; set; } = ""; public string Initials { get; set; } = ""; public string AvatarBg { get; set; } = "#0B1E39"; }
+
+    private List<ActorItem> actorDirectory = new()
+    {
+        new() { Name = "Admin Wahyu", Role = "Superadmin", Initials = "AW", AvatarBg = "#0B1E39" },
+        new() { Name = "Sarah Jenkins", Role = "Admin Facility", Initials = "SJ", AvatarBg = "#2563EB" },
+        new() { Name = "Budi Santoso", Role = "Admin Operasional", Initials = "BS", AvatarBg = "#16A34A" },
+        new() { Name = "Dewi Lestari", Role = "Admin Finance", Initials = "DL", AvatarBg = "#F59E0B" }
+    };
 
     private List<AuditLogEntry> allLogs = new();
-    private List<string> actors = new();
-    private List<DataTable<AuditLogEntry>.DataTableColumn> columns = new();
 
-    private IEnumerable<AuditLogEntry> filteredLogs
+    private List<DataTable<AuditLogEntry>.DataTableColumn> columns = new()
     {
-        get
-        {
-            var query = allLogs.AsEnumerable();
-            if (!string.IsNullOrEmpty(filterActor))
-                query = query.Where(l => l.ActorName == filterActor);
-            if (!string.IsNullOrEmpty(filterActionType))
-                query = query.Where(l => l.ActionType == filterActionType);
-            if (filterDateRange != "0" && int.TryParse(filterDateRange, out var days))
-                query = query.Where(l => l.Timestamp >= DateTime.Now.AddDays(-days));
-            return query.OrderByDescending(l => l.Timestamp).Skip((currentPage - 1) * pageSize).Take(pageSize);
-        }
-    }
+        new() { Header = "WAKTU", PropertyName = "Timestamp" },
+        new() { Header = "AKTOR", PropertyName = "ActorName" },
+        new() { Header = "AKSI", PropertyName = "ActionType" },
+        new() { Header = "TARGET", PropertyName = "TargetName" },
+        new() { Header = "DETAIL", PropertyName = "Detail" }
+    };
 
-    private int totalFiltered
+    private List<ExportColumn> exportColumns = new()
     {
-        get
-        {
-            var query = allLogs.AsEnumerable();
-            if (!string.IsNullOrEmpty(filterActor))
-                query = query.Where(l => l.ActorName == filterActor);
-            if (!string.IsNullOrEmpty(filterActionType))
-                query = query.Where(l => l.ActionType == filterActionType);
-            if (filterDateRange != "0" && int.TryParse(filterDateRange, out var days))
-                query = query.Where(l => l.Timestamp >= DateTime.Now.AddDays(-days));
-            return query.Count();
-        }
-    }
+        new() { Header = "Waktu", PropertyName = "Timestamp" },
+        new() { Header = "Aktor", PropertyName = "ActorName" },
+        new() { Header = "Aksi", PropertyName = "ActionType" },
+        new() { Header = "Target", PropertyName = "TargetName" },
+        new() { Header = "Detail", PropertyName = "Detail" }
+    };
 
     protected override void OnInitialized()
     {
-
-        columns = new()
-        {
-            new() { Header = "WAKTU", PropertyName = "Timestamp", Sortable = true },
-            new() { Header = "AKTOR", PropertyName = "ActorName", Sortable = true },
-            new() { Header = "AKSI", PropertyName = "ActionType" },
-            new() { Header = "TARGET", PropertyName = "TargetName" },
-            new() { Header = "DETAIL", PropertyName = "Detail" },
-        };
-
-        _auditColumns = new()
-        {
-            new() { Header = "Waktu", PropertyName = "Timestamp", CellType = ExportCellType.Date },
-            new() { Header = "Aktor", PropertyName = "ActorName", CellType = ExportCellType.Text },
-            new() { Header = "Aksi", PropertyName = "ActionType", CellType = ExportCellType.Text },
-            new() { Header = "Target", PropertyName = "TargetName", CellType = ExportCellType.Text },
-            new() { Header = "Detail", PropertyName = "Detail", CellType = ExportCellType.Text },
-        };
-
-        allLogs = new()
-        {
-            new() { Id = 1, Timestamp = DateTime.Now.AddHours(-1), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Approve Booking", ActionCategory = "Booking", TargetName = "Booking #1042", Detail = "Menyetujui booking Ruang Rapat A oleh Ahmad Fauzi" },
-            new() { Id = 2, Timestamp = DateTime.Now.AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Set Maintenance", ActionCategory = "Room", TargetName = "Ruang Diskusi", Detail = "Memulai maintenance HVAC selama 1 jam" },
-            new() { Id = 3, Timestamp = DateTime.Now.AddHours(-3), ActorName = "Admin Sarah", ActorInitials = "AS", ActionType = "Reset Password", ActionCategory = "User", TargetName = "Budi Santoso", Detail = "Reset password dan wajibkan ganti saat login berikutnya" },
-            new() { Id = 4, Timestamp = DateTime.Now.AddHours(-5), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Reject Booking", ActionCategory = "Booking", TargetName = "Booking #1039", Detail = "Menolak booking Ruang Rapat B — jadwal bertabrakan" },
-            new() { Id = 5, Timestamp = DateTime.Now.AddHours(-6), ActorName = "Admin Sarah", ActorInitials = "AS", ActionType = "Add User", ActionCategory = "User", TargetName = "Dewi Kartika", Detail = "Menambahkan user baru — Departemen IT & Digital" },
-            new() { Id = 6, Timestamp = DateTime.Now.AddDays(-1), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Change Role", ActionCategory = "User", TargetName = "Rizky Hidayat", Detail = "Mengubah role dari User menjadi Approver" },
-            new() { Id = 7, Timestamp = DateTime.Now.AddDays(-1).AddHours(-3), ActorName = "System Account", ActorInitials = "SY", ActionType = "Set Maintenance", ActionCategory = "Room", TargetName = "Ruang Rapat B", Detail = "Maintenance terjadwal — Routine Cleaning" },
-            new() { Id = 8, Timestamp = DateTime.Now.AddDays(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Deactivate User", ActionCategory = "User", TargetName = "Sari Wulandari", Detail = "Menonaktifkan akun — karyawan resign" },
-            new() { Id = 9, Timestamp = DateTime.Now.AddDays(-2).AddHours(-4), ActorName = "Admin Sarah", ActorInitials = "AS", ActionType = "Approve Booking", ActionCategory = "Booking", TargetName = "Booking #1035", Detail = "Menyetujui booking Ruang Dirantara oleh Maya Putri" },
-            new() { Id = 10, Timestamp = DateTime.Now.AddDays(-3), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Delete User", ActionCategory = "User", TargetName = "Test Account", Detail = "Menghapus permanen akun testing" },
-            new() { Id = 11, Timestamp = DateTime.Now.AddDays(-4), ActorName = "Admin Sarah", ActorInitials = "AS", ActionType = "Approve Booking", ActionCategory = "Booking", TargetName = "Booking #1030", Detail = "Menyetujui booking Ruang Rapat Utama oleh Budi Santoso" },
-            new() { Id = 12, Timestamp = DateTime.Now.AddDays(-5), ActorName = "Admin Wahyu", ActorInitials = "AW", ActionType = "Reset Password", ActionCategory = "User", TargetName = "Ahmad Fauzi", Detail = "Reset password atas permintaan user" },
-        };
-
-        actors = allLogs.Select(l => l.ActorName).Distinct().OrderBy(a => a).ToList();
+        InitLogs();
     }
 
-    private string GetActionStatus(string actionType) => actionType switch
+    private void InitLogs()
     {
-        "Approve Booking" => "confirmed",
-        "Reject Booking" => "rejected",
-        "Set Maintenance" => "maintenance",
-        "Change Role" => "pending",
-        "Reset Password" => "diproses",
-        "Add User" => "confirmed",
-        "Deactivate User" => "rejected",
-        "Delete User" => "rejected",
-        _ => "pending"
-    };
+        allLogs = new List<AuditLogEntry>
+        {
+            new() { Id = 1, Timestamp = DateTime.Now.AddMinutes(-12), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Approve Booking", TargetName = "Ruang Rapat Utama (#BK-1042)", Detail = "Pemesanan disetujui untuk Divisi IT & Digital" },
+            new() { Id = 2, Timestamp = DateTime.Now.AddHours(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Set Maintenance", TargetName = "Ruang Dirantara VIP", Detail = "Pemeliharaan AC & Sound System (60 Menit)" },
+            new() { Id = 3, Timestamp = DateTime.Now.AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Add User", TargetName = "Eko Prasetyo (Marketing)", Detail = "User baru ditambahkan dengan role User" },
+            new() { Id = 4, Timestamp = DateTime.Now.AddHours(-4), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#16A34A", ActionType = "Reject Booking", TargetName = "Auditorium Serbaguna (#BK-1035)", Detail = "Jadwal bentrok dengan Townhall Perusahaan" },
+            new() { Id = 5, Timestamp = DateTime.Now.AddDays(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Edit Room", TargetName = "Ruang Diskusi B", Detail = "Kapasitas ruangan diperbarui dari 6 menjadi 8 orang" },
+            new() { Id = 6, Timestamp = DateTime.Now.AddDays(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Reset Password", TargetName = "Ahmad Fauzi (IT)", Detail = "Reset password dikirimkan via email" },
+            new() { Id = 7, Timestamp = DateTime.Now.AddDays(-3), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#F59E0B", ActionType = "Export Data", TargetName = "Laporan Keuangan Q3", Detail = "Export laporan format XLSX" }
+        };
+    }
 
-    private bool showAuditExport;
-    private List<ExportColumn> _auditColumns = new();
+    private IEnumerable<ActorItem> FilteredActorList =>
+        string.IsNullOrWhiteSpace(actorSearchQuery)
+            ? actorDirectory
+            : actorDirectory.Where(a => a.Name.ToLowerInvariant().Contains(actorSearchQuery.ToLowerInvariant()));
 
-    private void HandlePageChange(int page) { currentPage = page; }
+    private IEnumerable<AuditLogEntry> FilteredLogs
+    {
+        get
+        {
+            var q = allLogs.AsEnumerable();
+            if (!string.IsNullOrEmpty(selectedActor)) q = q.Where(l => l.ActorName.Equals(selectedActor, StringComparison.OrdinalIgnoreCase));
+            if (selectedActions.Any()) q = q.Where(l => selectedActions.Contains(l.ActionType));
+            if (selectedDateRange == "7") q = q.Where(l => l.Timestamp >= DateTime.Now.AddDays(-7));
+            else if (selectedDateRange == "30") q = q.Where(l => l.Timestamp >= DateTime.Now.AddDays(-30));
+            else if (selectedDateRange == "90") q = q.Where(l => l.Timestamp >= DateTime.Now.AddDays(-90));
+            return q;
+        }
+    }
+
+    private IEnumerable<AuditLogEntry> PagedLogs =>
+        FilteredLogs.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+    private void ToggleIsland(string name)
+    {
+        openIsland = openIsland == name ? "" : name;
+    }
+
+    private void SelectActor(string name, bool isChecked)
+    {
+        selectedActor = isChecked ? name : "";
+    }
+
+    private void ClearActorFilter()
+    {
+        selectedActor = "";
+        actorSearchQuery = "";
+    }
+
+    private void ToggleAction(string action, bool isChecked)
+    {
+        if (isChecked) selectedActions.Add(action);
+        else selectedActions.Remove(action);
+    }
+
+    private void ClearActionFilter()
+    {
+        selectedActions.Clear();
+    }
+
+    private void ResetAllFilters()
+    {
+        selectedActor = "";
+        selectedActions.Clear();
+        selectedDateRange = "7";
+        actorSearchQuery = "";
+        openIsland = "";
+    }
+
+    private void HandlePageChange(int page)
+    {
+        currentPage = page;
+    }
+
+    private string GetActionStatus(string action)
+    {
+        if (action.Contains("Approve") || action.Contains("Add")) return "approved";
+        if (action.Contains("Reject") || action.Contains("Delete") || action.Contains("Deactivate")) return "rejected";
+        if (action.Contains("Maintenance") || action.Contains("Reset")) return "pending";
+        return "neutral";
+    }
 }
-
-
-
-
-
-
-

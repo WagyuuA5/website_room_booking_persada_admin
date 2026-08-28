@@ -6,6 +6,7 @@ public class AuditLogEntry
     public DateTime Timestamp { get; set; }
     public string ActorName { get; set; } = string.Empty;
     public string ActorInitials { get; set; } = string.Empty;
+    public string ActorBg { get; set; } = "#0B1E39";
     public string ActionType { get; set; } = string.Empty;
     public string ActionCategory { get; set; } = string.Empty;
     public string TargetName { get; set; } = string.Empty;

@@ -1,11 +1,10 @@
 @inject NavigationManager Navigation
 
 <div class="sidebar-header">
-    <img src="icon/logoo_psd-removebg-preview 2.svg" alt="PERSADA" class="sidebar-logo" />
-    
+    <img src="icon/logoo_psd-removebg-preview 2.svg" alt="PERSADA" class="sidebar-logo" title="Klik dua kali untuk ciutkan/perluas" />
 </div>
 
-<div class="sidebar-nav-container">
+<div class="sidebar-nav-container scroll-area">
     @if (!IsCollapsed)
     {
         <div class="sidebar-section-title">Menu Utama</div>
@@ -18,6 +17,15 @@
                 @if (!IsCollapsed)
                 {
                     <span>Dashboard</span>
+                }
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="my-bookings" title="Status Booking Saya">
+                <img src="icon/icon_4_admin.svg" alt="Booking Saya" class="nav-icon" />
+                @if (!IsCollapsed)
+                {
+                    <span>Status Booking Saya</span>
                 }
             </NavLink>
         </div>
