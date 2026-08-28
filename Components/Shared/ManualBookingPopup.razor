@@ -3,130 +3,166 @@
 @using booking_room_admin.Components.Services
 @inject ToastService Toast
 
-<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Size="xlarge">
+<AppModal IsOpen="@IsOpen" IsOpenChanged="@IsOpenChanged" Size="large">
     <HeaderContent>
-        <div>
-            <h2 class="mb-title">Booking Manual</h2>
-            <p class="mb-subtitle">Jadwalkan sumber daya atau ruangan baru</p>
+        <div class="mb-popup-header">
+            <h3 class="mb-popup-title">Booking Manual</h3>
+            <p class="mb-popup-subtitle">Jadwalkan sumber daya atau ruangan baru</p>
         </div>
     </HeaderContent>
     <ChildContent>
         @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div class="mb-error-alert">
-                <span>?? @errorMessage</span>
-            </div>
+            <div class="alert alert-danger">@errorMessage</div>
         }
 
-        <div class="mb-row">
-            <div class="mb-field">
-                <label class="mb-label">Nama Pemesan (Nama Lengkap) <span class="req">*</span></label>
-                <input type="text" class="mb-input @(hasSubmitted && string.IsNullOrWhiteSpace(form.FullName) ? "is-invalid" : "")" placeholder="Masukkan nama lengkap" @bind="form.FullName" />
-                @if (hasSubmitted && string.IsNullOrWhiteSpace(form.FullName))
-                {
-                    <span class="field-error">Nama pemesan wajib diisi.</span>
-                }
-            </div>
-            <div class="mb-field">
-                <label class="mb-label">Divisi / Departemen <span class="req">*</span></label>
-                <select class="mb-input @(hasSubmitted && string.IsNullOrWhiteSpace(form.Division) ? "is-invalid" : "")" @bind="form.Division">
-                    <option value="">Pilih divisi</option>
-                    @foreach (var div in divisions)
-                    {
-                        <option value="@div">@div</option>
-                    }
-                </select>
-                @if (hasSubmitted && string.IsNullOrWhiteSpace(form.Division))
-                {
-                    <span class="field-error">Divisi wajib dipilih.</span>
-                }
-            </div>
-        </div>
-
-        <div class="mb-field">
-            <label class="mb-label">Pilih Ruangan <span class="req">*</span></label>
-            <div class="mb-room-grid">
-                @foreach (var room in availableRooms)
-                {
-                    <button type="button" class="mb-room-card @(form.SelectedRoomId == room.Id ? "selected" : "") @(room.IsBooked ? "booked" : "")" @onclick="() => SelectRoom(room)" disabled="@room.IsBooked">
-                        <span class="mb-room-status @(room.IsBooked ? "status-booked" : "status-available")">@(room.IsBooked ? "Dipesan" : "Tersedia")</span>
-                        <div class="mb-room-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="cat-svg"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
-                        <div class="mb-room-name">@room.Name</div>
-                        <div class="mb-room-cap">Kapasitas: @room.Capacity Orang</div>
-                    </button>
-                }
-            </div>
-            @if (hasSubmitted && selectedRoom == null)
-            {
-                <span class="field-error">Pilih ruangan yang tersedia.</span>
-            }
-        </div>
-
-        <div class="mb-row">
-            <div class="mb-field">
-                <label class="mb-label">Tanggal <span class="req">*</span></label>
-                <input type="date" class="mb-input @(hasSubmitted && !form.Date.HasValue ? "is-invalid" : "")" @bind="form.Date" />
-                @if (hasSubmitted && !form.Date.HasValue)
-                {
-                    <span class="field-error">Tanggal wajib diisi.</span>
-                }
-            </div>
-            <div class="mb-field">
-                <label class="mb-label">Waktu (Mulai - Selesai) <span class="req">*</span></label>
-                <div class="mb-time-group">
-                    <input type="time" class="mb-input mb-time-input" @bind="form.StartTime" />
-                    <span class="mb-time-sep">-</span>
-                    <input type="time" class="mb-input mb-time-input" @bind="form.EndTime" />
+        <div class="mb-form-grid">
+            @* 1. Nama Pemesan & Divisi *@
+            <div class="mb-row-2col">
+                <div class="mb-field">
+                    <label class="mb-label">Nama Pemesan (Lengkap) <span class="req">*</span></label>
+                    <input type="text" class="mb-input" placeholder="Masukkan nama lengkap" @bind="form.FullName" />
                 </div>
-                @if (hasSubmitted && (!form.StartTime.HasValue || !form.EndTime.HasValue))
-                {
-                    <span class="field-error">Jam mulai dan selesai wajib diisi.</span>
-                }
-            </div>
-        </div>
-
-        <div class="mb-field">
-            <label class="mb-label">Undang Peserta</label>
-            <div class="mb-attendees">
-                <div class="mb-attendee-search">
-                    <input type="text" class="mb-input" placeholder="Undang kolega..." @bind="attendeeQuery" @bind:event="oninput" @onkeyup="SearchAttendees" />
-                </div>
-                <div class="mb-capacity">
-                    <div class="mb-capacity-bar">
-                        <div class="mb-capacity-fill" style="width: @($"{Math.Min(100, (double)form.Attendees.Count / (selectedRoom?.Capacity ?? 12) * 100)}%")"></div>
-                    </div>
-                    <span class="mb-capacity-text">@form.Attendees.Count dari @(selectedRoom?.Capacity ?? 12) Kapasitas Ruangan</span>
-                </div>
-                @if (attendeeSuggestions.Any())
-                {
-                    <div class="mb-attendee-dropdown">
-                        @foreach (var suggestion in attendeeSuggestions.Take(5))
+                <div class="mb-field">
+                    <label class="mb-label">Divisi <span class="req">*</span></label>
+                    <select class="mb-select" @bind="form.Division">
+                        <option value="">Pilih divisi</option>
+                        @foreach (var div in divisions)
                         {
-                            <div class="mb-attendee-option" @onclick="() => AddAttendee(suggestion)">
-                                <div class="mb-attendee-avatar">@suggestion.Initials</div>
-                                <div>
-                                    <div class="mb-attendee-name">@suggestion.Name</div>
-                                    <div class="mb-attendee-div">@suggestion.Division</div>
+                            <option value="@div">@div</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            @* 2. Pilih Ruangan (Interactive Cards) *@
+            <div class="mb-field">
+                <label class="mb-label">Pilih Ruangan <span class="req">*</span></label>
+                <div class="mb-rooms-cards-grid">
+                    @foreach (var r in availableRooms)
+                    {
+                        <div class="mb-room-card @(form.SelectedRoomId == r.Id ? "selected" : "") @(r.IsBooked ? "disabled" : "")"
+                             @onclick="() => SelectRoom(r)">
+                            <div class="mb-rc-top">
+                                <strong class="mb-rc-name">@r.Name</strong>
+                                <span class="mb-rc-badge @(r.IsBooked ? "badge-booked" : "badge-avail")">
+                                    @(r.IsBooked ? "TERPESAN" : "TERSEDIA")
+                                </span>
+                            </div>
+                            <div class="mb-rc-meta">
+                                <span>?? Kap: @r.Capacity Pax</span>
+                                <span>?? @r.Location</span>
+                            </div>
+                            <div class="mb-rc-amenities">
+                                <span>@r.AmenitiesSummary</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* 3. Tanggal dan Waktu *@
+            <div class="mb-row-3col">
+                <div class="mb-field">
+                    <label class="mb-label">Tanggal <span class="req">*</span></label>
+                    <input type="date" class="mb-input" @bind="form.Date" />
+                </div>
+                <div class="mb-field">
+                    <label class="mb-label">Waktu Mulai <span class="req">*</span></label>
+                    <input type="time" class="mb-input" @bind="form.StartTime" />
+                </div>
+                <div class="mb-field">
+                    <label class="mb-label">Waktu Selesai <span class="req">*</span></label>
+                    <input type="time" class="mb-input" @bind="form.EndTime" />
+                </div>
+            </div>
+
+            @* 4. Undang Peserta & Capacity Bar *@
+            <div class="mb-field">
+                <div class="mb-attendee-header-row">
+                    <label class="mb-label">Undang Peserta</label>
+                    @if (selectedRoom != null)
+                    {
+                        <span class="mb-cap-text @(form.Attendees.Count > selectedRoom.Capacity ? "text-danger" : "")">
+                            @form.Attendees.Count dari @selectedRoom.Capacity Kapasitas Ruangan
+                        </span>
+                    }
+                </div>
+
+                @if (selectedRoom != null)
+                {
+                    <div class="mb-progress-track">
+                        <div class="mb-progress-bar @(form.Attendees.Count > selectedRoom.Capacity ? "bar-over" : "")"
+                             style="width: @Math.Min(100, selectedRoom.Capacity > 0 ? (form.Attendees.Count * 100 / selectedRoom.Capacity) : 0)%"></div>
+                    </div>
+                }
+
+                <div class="mb-attendee-input-wrap">
+                    <input type="text" class="mb-input" placeholder="Cari nama karyawan untuk ditambahkan..."
+                           @bind="attendeeQuery" @bind:event="oninput" @bind:after="SearchAttendees" />
+
+                    @if (attendeeSuggestions.Any())
+                    {
+                        <div class="mb-suggestions-drop">
+                            @foreach (var s in attendeeSuggestions)
+                            {
+                                <div class="mb-suggestion-item" @onclick="() => AddAttendee(s)">
+                                    <div class="mb-sug-avatar">@s.Initials</div>
+                                    <div class="mb-sug-info">
+                                        <strong>@s.Name</strong>
+                                        <span>@s.Division</span>
+                                    </div>
+                                    @if (s.HasConflict)
+                                    {
+                                        <span class="badge-conflict-sm">? Berpotensi bentrok jadwal</span>
+                                    }
                                 </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @if (form.Attendees.Any())
+                {
+                    <div class="mb-attendee-chips-row">
+                        @foreach (var att in form.Attendees)
+                        {
+                            <div class="mb-att-pill @(att.HasConflict ? "pill-conflict" : "")">
+                                <span class="mb-att-av">@att.Initials</span>
+                                <span class="mb-att-name">@att.Name</span>
+                                @if (att.HasConflict)
+                                {
+                                    <span class="att-warn" title="Berpotensi bentrok jadwal">?</span>
+                                }
+                                <button type="button" class="mb-att-del" @onclick="() => RemoveAttendee(att)">×</button>
                             </div>
                         }
                     </div>
                 }
-                <div class="mb-attendee-chips">
-                    @foreach (var att in form.Attendees)
-                    {
-                        <span class="mb-chip">
-                            @att.Name
-                            <button type="button" class="mb-chip-remove" @onclick="() => RemoveAttendee(att)">&times;</button>
-                        </span>
-                    }
-                </div>
             </div>
-        </div>
 
-        <div class="mb-field">
-            <label class="mb-label">Catatan / Keperluan Rapat</label>
-            <textarea class="mb-textarea" placeholder="Contoh: Rapat koordinasi proyek Q4, butuh projector dan sound system." rows="3" @bind="form.Notes"></textarea>
+            @* 5. Toggle External Guest *@
+            <div class="mb-field mb-toggle-row">
+                <label class="mb-toggle-switch">
+                    <input type="checkbox" @bind="form.InviteExternal" />
+                    <span class="mb-slider"></span>
+                </label>
+                <span class="mb-toggle-label">Undang tamu eksternal</span>
+            </div>
+
+            @if (form.InviteExternal)
+            {
+                <div class="mb-field">
+                    <label class="mb-label">Email Tamu (Pisahkan dengan koma jika lebih dari 1)</label>
+                    <input type="text" class="mb-input" placeholder="email@perusahaan.com, client@partner.id" @bind="form.ExternalGuests" />
+                </div>
+            }
+
+            @* 6. Catatan / Permintaan Khusus *@
+            <div class="mb-field">
+                <label class="mb-label">Catatan / Permintaan Khusus</label>
+                <textarea class="mb-textarea" rows="2" placeholder="Kebutuhan alat, catering, susunan meja, dll..." @bind="form.Notes"></textarea>
+            </div>
         </div>
     </ChildContent>
     <FooterContent>
@@ -134,12 +170,10 @@
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="ConfirmBooking" disabled="@isSubmitting">
             @if (isSubmitting)
             {
-                <span class="spinner-sm"></span>
                 <span>Menyimpan...</span>
             }
             else
             {
-                <img src="icon/check.svg" alt="Konfirmasi" class="btn-icon" />
                 <span>Konfirmasi Booking</span>
             }
         </button>
@@ -160,6 +194,8 @@
         public TimeOnly? StartTime { get; set; }
         public TimeOnly? EndTime { get; set; }
         public List<AttendeeSuggestion> Attendees { get; set; } = new();
+        public bool InviteExternal { get; set; }
+        public string ExternalGuests { get; set; } = "";
         public string Notes { get; set; } = "";
     }
 
@@ -168,6 +204,8 @@
         public int Id { get; set; }
         public string Name { get; set; } = "";
         public int Capacity { get; set; }
+        public string Location { get; set; } = "";
+        public string AmenitiesSummary { get; set; } = "";
         public bool IsBooked { get; set; }
     }
 
@@ -177,23 +215,23 @@
         public string Name { get; set; } = "";
         public string Division { get; set; } = "";
         public string Initials { get; set; } = "";
+        public bool HasConflict { get; set; }
     }
 
-    private ManualBookingForm form = new() { Date = DateTime.Today, StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(10, 30) };
+    private ManualBookingForm form = new() { Date = DateTime.Today, StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(11, 0) };
     private string attendeeQuery = "";
     private List<AttendeeSuggestion> attendeeSuggestions = new();
-    private bool hasSubmitted = false;
     private bool isSubmitting = false;
     private string errorMessage = "";
 
-    private List<string> divisions = new() { "IT & Digital", "Operasional", "SDM / HRD", "Keuangan", "Marketing", "Pengadaan", "Legal" };
+    private List<string> divisions = new() { "IT & Digital", "Operasional", "Human Resources", "Finance", "Marketing", "Legal", "General Affairs" };
 
     private List<RoomOption> availableRooms = new()
     {
-        new RoomOption { Id = 1, Name = "Ruang Dirantara", Capacity = 12, IsBooked = false },
-        new RoomOption { Id = 2, Name = "Ruang Rapat A", Capacity = 8, IsBooked = false },
-        new RoomOption { Id = 3, Name = "Ruang Diskusi B", Capacity = 6, IsBooked = false },
-        new RoomOption { Id = 4, Name = "Auditorium Utama", Capacity = 50, IsBooked = false }
+        new() { Id = 1, Name = "Ruang Dirantara", Capacity = 12, Location = "Lantai 14, Wing Utara", AmenitiesSummary = "Proyektor 4K, Video Conf, Wi-Fi 6", IsBooked = false },
+        new() { Id = 2, Name = "Ruang Rapat Utama", Capacity = 20, Location = "Lantai 2, Wing A", AmenitiesSummary = "Dual Screen, Smart Board, AC Central", IsBooked = false },
+        new() { Id = 3, Name = "Ruang Diskusi B", Capacity = 6, Location = "Lantai 2, Wing B", AmenitiesSummary = "TV 65\", Whiteboard, Sound System", IsBooked = false },
+        new() { Id = 4, Name = "Auditorium Serbaguna", Capacity = 50, Location = "Lantai 1, Sayap Timur", AmenitiesSummary = "Stage Sound, 4K Live Cam, Stage Light", IsBooked = true }
     };
 
     private RoomOption? selectedRoom => availableRooms.FirstOrDefault(r => r.Id == form.SelectedRoomId);
@@ -233,20 +271,18 @@
     {
         IsOpen = false;
         IsOpenChanged.InvokeAsync(false);
-        form = new ManualBookingForm { Date = DateTime.Today, StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(10, 30) };
-        hasSubmitted = false;
+        form = new ManualBookingForm { Date = DateTime.Today, StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(11, 0) };
         isSubmitting = false;
         errorMessage = "";
     }
 
     private async Task ConfirmBooking()
     {
-        hasSubmitted = true;
         errorMessage = "";
 
         if (selectedRoom == null || string.IsNullOrWhiteSpace(form.FullName) || string.IsNullOrWhiteSpace(form.Division) || !form.Date.HasValue || !form.StartTime.HasValue || !form.EndTime.HasValue)
         {
-            errorMessage = "Mohon lengkapi semua kolom yang wajib diisi (*).";
+            errorMessage = "Mohon lengkapi Nama Pemesan, Divisi, Ruangan, Tanggal, dan Jam Mulai/Selesai.";
             return;
         }
 
@@ -259,24 +295,22 @@
         isSubmitting = true;
         StateHasChanged();
 
-        await Task.Delay(400); // simulate async process
+        await Task.Delay(300);
 
         var booking = new Booking
         {
             Id = new Random().Next(1000, 9999),
-            Title = string.IsNullOrWhiteSpace(form.Notes) ? $"Meeting {form.Division}" : form.Notes.Substring(0, Math.Min(35, form.Notes.Length)),
+            Title = string.IsNullOrWhiteSpace(form.Notes) ? $"Pertemuan {form.Division}" : form.Notes.Substring(0, Math.Min(35, form.Notes.Length)),
             Room = selectedRoom.Name,
             Date = form.Date.Value,
             StartTime = form.StartTime.Value.ToString("HH:mm"),
             EndTime = form.EndTime.Value.ToString("HH:mm"),
-            Duration = CalculateDuration(form.StartTime.Value, form.EndTime.Value),
+            Duration = $"{Math.Round((form.EndTime.Value - form.StartTime.Value).TotalHours, 1)} Jam",
             RequesterName = form.FullName,
             RequesterDivision = form.Division,
-            RequesterInitials = GetInitials(form.FullName),
+            RequesterInitials = form.FullName.Length >= 2 ? form.FullName.Substring(0, 2).ToUpper() : "WA",
             ParticipantsCount = Math.Max(1, form.Attendees.Count),
-            Status = "approved",
-            IsRecurring = false,
-            AccentColor = "info"
+            Status = "approved"
         };
 
         Toast.Success("Booking berhasil dibuat.");
@@ -284,34 +318,12 @@
         Close();
     }
 
-    private string CalculateDuration(TimeOnly start, TimeOnly end)
-    {
-        var diff = end.ToTimeSpan() - start.ToTimeSpan();
-        if (diff > TimeSpan.Zero)
-        {
-            var hours = (int)diff.TotalHours;
-            var minutes = diff.Minutes;
-            if (hours > 0 && minutes > 0) return $"{hours} Jam {minutes} Menit";
-            if (hours > 0) return $"{hours} Jam";
-            return $"{minutes} Menit";
-        }
-        return "-";
-    }
-
-    private string GetInitials(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return "U";
-        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant();
-        return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
-    }
-
     private static readonly List<AttendeeSuggestion> FakeAttendees = new()
     {
-        new AttendeeSuggestion { Id = 1, Name = "Ahmad Fauzi", Division = "IT & Digital", Initials = "AF" },
-        new AttendeeSuggestion { Id = 2, Name = "Siti Rahma", Division = "SDM / HRD", Initials = "SR" },
-        new AttendeeSuggestion { Id = 3, Name = "Budi Santoso", Division = "Operasional", Initials = "BS" },
-        new AttendeeSuggestion { Id = 4, Name = "Dewi Lestari", Division = "Keuangan", Initials = "DL" },
-        new AttendeeSuggestion { Id = 5, Name = "Eko Prasetyo", Division = "Marketing", Initials = "EP" }
+        new() { Id = 1, Name = "Ahmad Fauzi", Division = "IT & Digital", Initials = "AF", HasConflict = false },
+        new() { Id = 2, Name = "Siti Rahma", Division = "Human Resources", Initials = "SR", HasConflict = false },
+        new() { Id = 3, Name = "Budi Santoso", Division = "Operasional", Initials = "BS", HasConflict = true },
+        new() { Id = 4, Name = "Dewi Lestari", Division = "Finance", Initials = "DL", HasConflict = false },
+        new() { Id = 5, Name = "Eko Prasetyo", Division = "Marketing", Initials = "EP", HasConflict = true }
     };
 }

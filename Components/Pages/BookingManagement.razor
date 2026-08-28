@@ -2,280 +2,474 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
-@inject booking_room_admin.Components.Services.IBookingService BookingService
-
+@using booking_room_admin.Components.Services
+@inject ToastService Toast
 
 <TopBar Title="Manajemen Booking" Subtitle="Kelola seluruh pemesanan ruangan perusahaan." ShowGlobalSearch="false" ShowDateFilter="false">
     <RightSlot>
-        <button class="btn-primary-pill btn-yellow" @onclick="OpenManualBooking">
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => showManualBooking = true">
             <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
             <span>+ Buat Booking Manual</span>
         </button>
     </RightSlot>
 </TopBar>
-<div class="booking-management">
-    
 
-    <div class="bm-toolbar">
-        <div class="bm-search">
-            <img src="icon/search.svg" alt="Cari" class="bm-search-icon" />
-            <input type="text" placeholder="Cari berdasarkan nama, divisi, atau ruangan..." @bind="searchQuery" @bind:event="oninput" />
-        </div>
-        <div class="bm-date-filter" @onclick="ToggleDatePicker">
-            <img src="icon/calendar.svg" alt="Kalender" class="bm-filter-icon" />
-            <span>@selectedDateLabel</span>
-        </div>
+<div class="booking-management-page">
+    @* -- Eyebrow -- *@
+    <div class="bm-eyebrow-row">
+        <span class="bm-bullet">�</span>
+        <span class="bm-eyebrow">MANAJEMEN BOOKING</span>
     </div>
 
-    <div class="bm-tabs">
-        @foreach (var tab in statusTabs)
-        {
-            <button class="bm-tab @(selectedStatus == tab.Key ? "active" : "") @(tab.Key)" @onclick="() => SelectStatus(tab.Key)">
-                <span>@tab.Label</span>
-                <span class="bm-tab-badge">@tab.Count</span>
+    @* -- Search and Date Filter -- *@
+    <div class="bm-search-row">
+        <div class="bm-search-bar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="bm-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="bm-search-input" placeholder="Cari berdasarkan nama, divisi, atau ruangan..." @bind="searchQuery" @bind:event="oninput" />
+        </div>
+        <button type="button" class="bm-date-pill" @onclick="() => showDatePicker = true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-sm"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>@filterDateLabel</span>
+        </button>
+    </div>
+
+    @* -- Status Tabs -- *@
+    <div class="bm-status-toolbar">
+        <div class="bm-pills-list">
+            <button type="button" class="bm-pill @(selectedTab == "all" ? "active" : "")" @onclick='() => SelectTab("all")'>
+                <span>Semua</span>
+                <span class="bm-count count-all">@allBookings.Count</span>
             </button>
-        }
+            <button type="button" class="bm-pill @(selectedTab == "pending" ? "active" : "")" @onclick='() => SelectTab("pending")'>
+                <span>Menunggu</span>
+                <span class="bm-count count-pending">@GetCount("pending")</span>
+            </button>
+            <button type="button" class="bm-pill @(selectedTab == "approved" ? "active" : "")" @onclick='() => SelectTab("approved")'>
+                <span>Disetujui</span>
+                <span class="bm-count count-approved">@GetCount("approved")</span>
+            </button>
+            <button type="button" class="bm-pill @(selectedTab == "rejected" ? "active" : "")" @onclick='() => SelectTab("rejected")'>
+                <span>Ditolak</span>
+                <span class="bm-count count-rejected">@GetCount("rejected")</span>
+            </button>
+            <button type="button" class="bm-pill @(selectedTab == "cancelled" ? "active" : "")" @onclick='() => SelectTab("cancelled")'>
+                <span>Dibatalkan</span>
+                <span class="bm-count count-cancelled">@GetCount("cancelled")</span>
+            </button>
+        </div>
     </div>
 
-    <div class="bm-booking-list">
-        @foreach (var group in groupedBookings)
+    @* -- Booking Card List Grouped by Date -- *@
+    <div class="bm-cards-container">
+        @if (!GroupedBookings.Any())
         {
-            <div class="bm-date-group">
-                <div class="bm-date-label">@group.Date.ToString("dd MMMM yyyy").ToUpper()</div>
-                @foreach (var booking in group.Bookings)
-                {
-                    <div class="bm-card @GetCardAccentClass(booking)" @onclick="() => OpenDetail(booking)">
-                        <div class="bm-card-accent"></div>
-                        <div class="bm-card-time">
-                            <span class="bm-time-start">@booking.StartTime</span>
-                            <span class="bm-time-sep">—</span>
-                            <span class="bm-time-end">@booking.EndTime</span>
-                            <span class="bm-time-duration">@booking.Duration</span>
-                        </div>
-                        <div class="bm-card-info">
-                            <div class="bm-card-title-row">
-                                <span class="bm-card-title">@booking.Title</span>
-                                @if (booking.IsRecurring)
-                                {
-                                    <span class="bm-recurring-badge">
-                                        <img src="icon/repeat.svg" alt="Berulang" class="bm-recurring-icon" />
-                                        Berulang
-                                    </span>
-                                }
-                            </div>
-                            <div class="bm-card-meta">
-                                <span class="bm-card-room">@booking.Room</span>
-                                <span class="bm-card-sep">•</span>
-                                <span class="bm-card-participants">@booking.ParticipantsCount peserta</span>
-                            </div>
-                        </div>
-                        <div class="bm-card-user">
-                            <UserAvatar Initials="@booking.RequesterInitials" BgColor="@booking.AccentColor" Size="40px" />
-                            <div class="bm-user-info">
-                                <span class="bm-user-name">@booking.RequesterName</span>
-                                <span class="bm-user-division">@booking.RequesterDivision</span>
-                            </div>
-                        </div>
-                        <div class="bm-card-actions">
-                            <span class="bm-status-badge @GetStatusClass(booking.Status)">@GetStatusLabel(booking.Status)</span>
-                            <div class="bm-action-btns">
-                                <button class="bm-action-btn reject" @onclick:stopPropagation="true" @onclick="() => RejectBooking(booking)">
-                                    <img src="icon/x.svg" alt="Tolak" />
-                                </button>
-                                <button class="bm-action-btn approve" @onclick:stopPropagation="true" @onclick="() => ApproveBooking(booking)">
-                                    <img src="icon/check.svg" alt="Setujui" />
-                                </button>
-                            </div>
-                        </div>
+            <EmptyState Title="Tidak Ada Booking Ditemukan" Description="Tidak ada jadwal booking yang cocok dengan filter dan kata kunci pencarian Anda." ActionLabel="Reset Filter" OnAction="ResetFilters" />
+        }
+        else
+        {
+            @foreach (var group in GroupedBookings)
+            {
+                <div class="bm-date-group">
+                    <div class="bm-date-header">
+                        <span class="bm-group-title">@group.Key.ToString("dd MMMM").ToUpper()</span>
+                        <div class="bm-group-line"></div>
                     </div>
-                }
+
+                    <div class="bm-date-cards">
+                        @foreach (var b in group)
+                        {
+                            <div class="bm-booking-card @(b.HasConflict ? "card-conflict" : "")" @onclick="() => OpenDetail(b)">
+                                <div class="bm-left-strip strip-@b.Status.ToLower() @(b.HasConflict ? "strip-conflict" : "")"></div>
+
+                                @* Col 1: Time *@
+                                <div class="bm-col-time">
+                                    <span class="bm-start-time">@b.StartTime</span>
+                                    <span class="bm-end-time">@b.EndTime</span>
+                                    <span class="bm-duration-badge">@b.Duration.ToUpper()</span>
+                                </div>
+
+                                @* Col 2: Info *@
+                                <div class="bm-col-info">
+                                    <h4 class="bm-meeting-title">@b.Title</h4>
+                                    <div class="bm-meeting-meta">
+                                        <span class="bm-meta-room">?? @b.Room</span>
+                                        <span class="bm-meta-participants">?? @b.ParticipantsCount Peserta</span>
+                                    </div>
+                                </div>
+
+                                @* Col 3: Requester *@
+                                <div class="bm-col-requester">
+                                    <div class="bm-avatar" style="background: @b.AvatarBg;">@b.RequesterInitials</div>
+                                    <div class="bm-req-info">
+                                        <strong class="bm-req-name">@b.RequesterName</strong>
+                                        <span class="bm-req-dept">@b.RequesterDivision</span>
+                                    </div>
+                                </div>
+
+                                @* Col 4: Status & Quick Actions *@
+                                <div class="bm-col-actions" @onclick:stopPropagation="true">
+                                    <StatusBadge Status="@b.Status" CustomLabel="@GetStatusLabel(b.Status)" />
+                                    @if (b.Status == "pending")
+                                    {
+                                        <div class="bm-quick-actions">
+                                            <button type="button" class="btn-quick-reject" @onclick="() => QuickReject(b)" title="Tolak Cepat">?</button>
+                                            <button type="button" class="btn-quick-approve" @onclick="() => QuickApprove(b)" title="Setujui Cepat">?</button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="bm-list-footer">
+                <span class="bm-footer-count">Menampilkan @FilteredBookings.Count() dari @allBookings.Count booking</span>
             </div>
         }
     </div>
-
-    <div class="bm-footer">
-        <span class="bm-footer-text">Menampilkan 1–@filteredBookings.Count dari @totalBookings booking</span>
-        <div class="bm-pagination">
-            <button class="bm-page-btn" disabled>&lsaquo;</button>
-            <button class="bm-page-btn active">1</button>
-            <button class="bm-page-btn">2</button>
-            <button class="bm-page-btn">&rsaquo;</button>
-        </div>
-    </div>
-
-    <DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => showDatePicker = v)" OnDateSelected="OnDateSelected" />
-    <BookingDetailPopup IsOpen="@showDetail" IsOpenChanged="@((bool v) => showDetail = v)" Booking="@selectedBooking" OnApprove="ApproveBooking" OnReject="RejectBooking" />
-    <ManualBookingPopup IsOpen="@showManual" IsOpenChanged="@((bool v) => showManual = v)" OnBookingCreated="OnBookingCreated" />
-    <NotificationPopup IsOpen="@showNotification" IsOpenChanged="@((bool v) => showNotification = v)" />
 </div>
 
+@* -- Detail Modal -- *@
+@if (selectedBooking != null)
+{
+    <AppModal IsOpen="@showDetailModal" IsOpenChanged="@((bool v) => showDetailModal = v)" Size="medium">
+        <HeaderContent>
+            <div class="bm-modal-header">
+                <div>
+                    <h3 class="bm-modal-title">@selectedBooking.Room</h3>
+                    <StatusBadge Status="@selectedBooking.Status" CustomLabel="@GetStatusLabel(selectedBooking.Status)" />
+                </div>
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <div class="bm-modal-body">
+                <p class="bm-room-desc">Ruang meeting eksekutif premium untuk sesi strategi, koordinasi tim, dan presentasi tingkat tinggi.</p>
+
+                <div class="bm-chips-row">
+                    <span class="bm-spec-chip">?? @selectedBooking.ParticipantsCount Peserta</span>
+                    <span class="bm-spec-chip">?? Gedung Pusat, Lantai 14</span>
+                </div>
+
+                <div class="bm-section">
+                    <h5 class="bm-section-title">FASILITAS RUANGAN</h5>
+                    <div class="bm-amenities-grid">
+                        <span class="bm-amenity-item">?? Wi-Fi Cepat</span>
+                        <span class="bm-amenity-item">??? Layar 85 Inci</span>
+                        <span class="bm-amenity-item">?? Video Konferensi</span>
+                        <span class="bm-amenity-item">? Katering / Minuman</span>
+                    </div>
+                </div>
+
+                <div class="bm-detail-box">
+                    <div class="bm-box-row">
+                        <span class="bm-box-label">PEMOHON:</span>
+                        <div class="bm-box-user">
+                            <div class="bm-avatar-sm" style="background: @selectedBooking.AvatarBg;">@selectedBooking.RequesterInitials</div>
+                            <strong>@selectedBooking.RequesterName (@selectedBooking.RequesterDivision)</strong>
+                        </div>
+                    </div>
+                    <div class="bm-box-row">
+                        <span class="bm-box-label">JADWAL:</span>
+                        <strong>@selectedBooking.Date.ToString("dd MMMM yyyy"), @selectedBooking.StartTime - @selectedBooking.EndTime (@selectedBooking.Duration)</strong>
+                    </div>
+                    <div class="bm-box-row">
+                        <span class="bm-box-label">JUDUL RAPAT:</span>
+                        <strong>@selectedBooking.Title</strong>
+                    </div>
+                    <div class="bm-box-row">
+                        <span class="bm-box-label">JUMLAH PESERTA:</span>
+                        <strong>@selectedBooking.ParticipantsCount Peserta</strong>
+                    </div>
+                </div>
+
+                @if (selectedBooking.Status != "pending" && !string.IsNullOrEmpty(selectedBooking.ProcessedBy))
+                {
+                    <div class="bm-processed-info">
+                        <span>?? @selectedBooking.ProcessedBy, @selectedBooking.ProcessedAt</span>
+                    </div>
+                }
+            </div>
+        </ChildContent>
+        <FooterContent>
+            @if (selectedBooking.Status == "pending")
+            {
+                <button type="button" class="btn-outline-pill" @onclick="() => RejectBooking(selectedBooking)">Tolak</button>
+                <button type="button" class="btn-primary-pill" style="background:#0B1E39; color:#fff;" @onclick="() => ApproveBooking(selectedBooking)">Setujui</button>
+            }
+            else
+            {
+                <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Tutup</button>
+            }
+        </FooterContent>
+    </AppModal>
+}
+
+<DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => showDatePicker = v)" IsRangeMode="false" OnDateSelected="OnDatePicked" />
+<ManualBookingPopup @bind-IsOpen="showManualBooking" OnBookingCreated="HandleBookingCreated" />
+
 @code {
-    private bool showDatePicker = false;
-    private bool showDetail = false;
-    private bool showManual = false;
-    private bool showNotification = false;
-
     private string searchQuery = "";
-    private string selectedDateLabel = "12 Okt 2026";
-    private string selectedStatus = "all";
+    private string selectedTab = "all";
+    private string filterDateLabel = "Semua Tanggal";
+    private DateTime? selectedDateFilter;
+    private bool showDatePicker = false;
+    private bool showDetailModal = false;
+    private bool showManualBooking = false;
 
-    private List<StatusTab> statusTabs = new();
+    public class BookingExtendedItem
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = "";
+        public string Room { get; set; } = "";
+        public DateTime Date { get; set; }
+        public string StartTime { get; set; } = "";
+        public string EndTime { get; set; } = "";
+        public string Duration { get; set; } = "";
+        public string RequesterName { get; set; } = "";
+        public string RequesterDivision { get; set; } = "";
+        public string RequesterInitials { get; set; } = "";
+        public string AvatarBg { get; set; } = "#0B1E39";
+        public int ParticipantsCount { get; set; }
+        public string Status { get; set; } = "pending";
+        public bool HasConflict { get; set; }
+        public string ProcessedBy { get; set; } = "";
+        public string ProcessedAt { get; set; } = "";
+    }
 
-    private List<Booking> allBookings = new();
-    private List<Booking> filteredBookings => FilterBookings();
-    private Booking? selectedBooking = null;
-    private int totalBookings => allBookings.Count;
+    private BookingExtendedItem? selectedBooking;
+    private List<BookingExtendedItem> allBookings = new();
 
     protected override void OnInitialized()
     {
-        LoadData();
+        InitBookings();
     }
 
-    private void LoadData()
+    private void InitBookings()
     {
-        allBookings = BookingService.GetAllBookings();
-        statusTabs = new List<StatusTab>
+        allBookings = new List<BookingExtendedItem>
         {
-            new("all", "Semua", allBookings.Count),
-            new("pending", "Menunggu", allBookings.Count(b => b.Status == "pending")),
-            new("approved", "Disetujui", allBookings.Count(b => b.Status == "approved")),
-            new("rejected_system", "Ditolak Sistem", allBookings.Count(b => b.Status == "rejected_system")),
-            new("rejected_admin", "Ditolak Admin", allBookings.Count(b => b.Status == "rejected_admin"))
+            new()
+            {
+                Id = 101,
+                Title = "Rapat Evaluasi Triwulan Q3",
+                Room = "Ruang Dirantara",
+                Date = DateTime.Today,
+                StartTime = "09:00",
+                EndTime = "11:00",
+                Duration = "2 Jam",
+                RequesterName = "Ahmad Fauzi",
+                RequesterDivision = "IT & Digital",
+                RequesterInitials = "AF",
+                AvatarBg = "#0B1E39",
+                ParticipantsCount = 12,
+                Status = "pending",
+                HasConflict = false
+            },
+            new()
+            {
+                Id = 102,
+                Title = "Koordinasi Implementasi Core System",
+                Room = "Ruang Dirantara",
+                Date = DateTime.Today,
+                StartTime = "10:30",
+                EndTime = "12:30",
+                Duration = "2 Jam",
+                RequesterName = "Budi Santoso",
+                RequesterDivision = "Operasional",
+                RequesterInitials = "BS",
+                AvatarBg = "#16A34A",
+                ParticipantsCount = 8,
+                Status = "pending",
+                HasConflict = true
+            },
+            new()
+            {
+                Id = 103,
+                Title = "Sesi Wawancara Kandidat Tech Lead",
+                Room = "Ruang Diskusi B",
+                Date = DateTime.Today,
+                StartTime = "13:30",
+                EndTime = "15:00",
+                Duration = "1.5 Jam",
+                RequesterName = "Siti Rahma",
+                RequesterDivision = "Human Resources",
+                RequesterInitials = "SR",
+                AvatarBg = "#9333EA",
+                ParticipantsCount = 4,
+                Status = "approved",
+                HasConflict = false,
+                ProcessedBy = "Disetujui oleh Admin Wahyu",
+                ProcessedAt = DateTime.Today.ToString("dd MMM yyyy, 08:30")
+            },
+            new()
+            {
+                Id = 104,
+                Title = "Presentasi Pitching Client Partnership",
+                Room = "Auditorium Serbaguna",
+                Date = DateTime.Today.AddDays(1),
+                StartTime = "14:00",
+                EndTime = "17:00",
+                Duration = "3 Jam",
+                RequesterName = "Eko Prasetyo",
+                RequesterDivision = "Marketing",
+                RequesterInitials = "EP",
+                AvatarBg = "#F59E0B",
+                ParticipantsCount = 30,
+                Status = "approved",
+                HasConflict = false,
+                ProcessedBy = "Disetujui oleh Admin Wahyu",
+                ProcessedAt = DateTime.Today.ToString("dd MMM yyyy, 09:00")
+            },
+            new()
+            {
+                Id = 105,
+                Title = "Audit Finansial Internal Tahunan",
+                Room = "Ruang Rapat Utama",
+                Date = DateTime.Today.AddDays(1),
+                StartTime = "09:00",
+                EndTime = "12:00",
+                Duration = "3 Jam",
+                RequesterName = "Dewi Lestari",
+                RequesterDivision = "Finance",
+                RequesterInitials = "DL",
+                AvatarBg = "#2563EB",
+                ParticipantsCount = 10,
+                Status = "rejected",
+                HasConflict = false,
+                ProcessedBy = "Ditolak oleh Admin Sarah",
+                ProcessedAt = DateTime.Today.ToString("dd MMM yyyy, 09:15")
+            },
+            new()
+            {
+                Id = 106,
+                Title = "Sesi Brainstorming Desain Aplikasi",
+                Room = "Ruang Diskusi B",
+                Date = DateTime.Today.AddDays(2),
+                StartTime = "10:00",
+                EndTime = "11:30",
+                Duration = "1.5 Jam",
+                RequesterName = "Mega Utami",
+                RequesterDivision = "Marketing",
+                RequesterInitials = "MU",
+                AvatarBg = "#EC4899",
+                ParticipantsCount = 6,
+                Status = "cancelled",
+                HasConflict = false,
+                ProcessedBy = "Dibatalkan oleh Pengguna",
+                ProcessedAt = DateTime.Today.ToString("dd MMM yyyy, 10:00")
+            }
         };
     }
 
-    private List<BookingGroup> groupedBookings => filteredBookings
-        .OrderBy(b => b.Date)
-        .ThenBy(b => b.StartTime)
-        .GroupBy(b => b.Date)
-        .Select(g => new BookingGroup
-        {
-            Date = g.Key,
-            Bookings = g.ToList()
-        })
-        .ToList();
-
-    private List<Booking> FilterBookings()
+    private IEnumerable<BookingExtendedItem> FilteredBookings
     {
-        var query = allBookings.AsEnumerable();
-
-        if (!string.IsNullOrWhiteSpace(searchQuery))
+        get
         {
-            var q = searchQuery.ToLowerInvariant();
-            query = query.Where(b =>
-                b.RequesterName.ToLowerInvariant().Contains(q) ||
-                b.RequesterDivision.ToLowerInvariant().Contains(q) ||
-                b.Room.ToLowerInvariant().Contains(q) ||
-                b.Title.ToLowerInvariant().Contains(q));
+            var q = allBookings.AsEnumerable();
+            if (selectedTab != "all") q = q.Where(b => b.Status.Equals(selectedTab, StringComparison.OrdinalIgnoreCase));
+            if (selectedDateFilter.HasValue) q = q.Where(b => b.Date.Date == selectedDateFilter.Value.Date);
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                var query = searchQuery.ToLowerInvariant();
+                q = q.Where(b => b.Title.ToLowerInvariant().Contains(query) ||
+                                 b.RequesterName.ToLowerInvariant().Contains(query) ||
+                                 b.RequesterDivision.ToLowerInvariant().Contains(query) ||
+                                 b.Room.ToLowerInvariant().Contains(query));
+            }
+            return q;
         }
-
-        if (selectedStatus != "all")
-        {
-            query = query.Where(b => b.Status == selectedStatus);
-        }
-
-        return query.ToList();
     }
 
-    private string GetCardAccentClass(Booking b) => b.AccentColor switch
-    {
-        "warning" => "accent-warning",
-        "danger" => "accent-danger",
-        "info" => "accent-info",
-        _ => "accent-warning"
-    };
+    private IEnumerable<IGrouping<DateTime, BookingExtendedItem>> GroupedBookings =>
+        FilteredBookings.OrderBy(b => b.Date).ThenBy(b => b.StartTime).GroupBy(b => b.Date.Date);
 
-    private string GetStatusClass(string status) => status switch
+    private int GetCount(string status) => allBookings.Count(b => b.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
+
+    private void SelectTab(string tab)
     {
-        "pending" => "status-pending",
-        "approved" => "status-approved",
-        "rejected_system" => "status-rejected-system",
-        "rejected_admin" => "status-rejected-admin",
-        _ => "status-pending"
-    };
+        selectedTab = tab;
+    }
+
+    private void OnDatePicked(DateTime? d)
+    {
+        selectedDateFilter = d;
+        filterDateLabel = d.HasValue ? d.Value.ToString("dd MMM yyyy") : "Semua Tanggal";
+    }
+
+    private void ResetFilters()
+    {
+        searchQuery = "";
+        selectedTab = "all";
+        selectedDateFilter = null;
+        filterDateLabel = "Semua Tanggal";
+    }
+
+    private void OpenDetail(BookingExtendedItem b)
+    {
+        selectedBooking = b;
+        showDetailModal = true;
+    }
+
+    private void QuickApprove(BookingExtendedItem b)
+    {
+        b.Status = "approved";
+        b.HasConflict = false;
+        b.ProcessedBy = "Disetujui oleh Admin Wahyu";
+        b.ProcessedAt = DateTime.Now.ToString("dd MMM yyyy, HH:mm");
+        Toast.Success($"Booking '{b.Title}' berhasil disetujui.");
+        StateHasChanged();
+    }
+
+    private void QuickReject(BookingExtendedItem b)
+    {
+        b.Status = "rejected";
+        b.ProcessedBy = "Ditolak oleh Admin Wahyu";
+        b.ProcessedAt = DateTime.Now.ToString("dd MMM yyyy, HH:mm");
+        Toast.Error($"Booking '{b.Title}' telah ditolak.");
+        StateHasChanged();
+    }
+
+    private void ApproveBooking(BookingExtendedItem b)
+    {
+        QuickApprove(b);
+        showDetailModal = false;
+    }
+
+    private void RejectBooking(BookingExtendedItem b)
+    {
+        QuickReject(b);
+        showDetailModal = false;
+    }
+
+    private void HandleBookingCreated(Booking b)
+    {
+        allBookings.Insert(0, new BookingExtendedItem
+        {
+            Id = b.Id,
+            Title = b.Title,
+            Room = b.Room,
+            Date = b.Date,
+            StartTime = b.StartTime,
+            EndTime = b.EndTime,
+            Duration = b.Duration,
+            RequesterName = b.RequesterName,
+            RequesterDivision = b.RequesterDivision,
+            RequesterInitials = b.RequesterInitials,
+            ParticipantsCount = b.ParticipantsCount,
+            Status = "approved",
+            ProcessedBy = "Dibuat Manual oleh Admin Wahyu",
+            ProcessedAt = DateTime.Now.ToString("dd MMM yyyy, HH:mm")
+        });
+        StateHasChanged();
+    }
 
     private string GetStatusLabel(string status) => status switch
     {
         "pending" => "Menunggu",
         "approved" => "Disetujui",
-        "rejected_system" => "Ditolak Sistem",
-        "rejected_admin" => "Ditolak Admin",
+        "rejected" => "Ditolak",
+        "cancelled" => "Dibatalkan",
         _ => status
     };
-
-    private void SelectStatus(string key)
-    {
-        selectedStatus = key;
-    }
-
-    private void ToggleDatePicker()
-    {
-        showDatePicker = !showDatePicker;
-    }
-
-    private void OnDateSelected(DateTime? date)
-    {
-        if (date.HasValue)
-        {
-            selectedDateLabel = date.Value.ToString("dd MMM yyyy");
-        }
-        showDatePicker = false;
-    }
-
-    private void OpenDetail(Booking booking)
-    {
-        selectedBooking = booking;
-        showDetail = true;
-    }
-
-    private void OpenManualBooking()
-    {
-        showManual = true;
-    }
-
-    private void ApproveBooking(Booking booking)
-    {
-        booking.Status = "approved";
-        BookingService.UpdateBooking(booking);
-        LoadData();
-        showDetail = false;
-        selectedBooking = null;
-    }
-
-    private void RejectBooking(Booking booking)
-    {
-        booking.Status = "rejected_admin";
-        BookingService.UpdateBooking(booking);
-        LoadData();
-        showDetail = false;
-        selectedBooking = null;
-    }
-
-    private void OnBookingCreated(Booking booking)
-    {
-        BookingService.AddBooking(booking);
-        LoadData();
-        showManual = false;
-    }
-
-    private class StatusTab
-    {
-        public string Key { get; set; } = string.Empty;
-        public string Label { get; set; } = string.Empty;
-        public int Count { get; set; }
-        public StatusTab(string key, string label, int count) => (Key, Label, Count) = (key, label, count);
-    }
-
-    private class BookingGroup
-    {
-        public DateTime Date { get; set; }
-        public List<Booking> Bookings { get; set; } = new();
-    }
 }
-
-
-
-
-
-
-

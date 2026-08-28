@@ -14,7 +14,7 @@
     <div class="topbar-right">
         @if (ShowGlobalSearch)
         {
-            <div class="topbar-search">
+            <div class="topbar-search" title="Cari menu, ruangan, atau pengguna">
                 <img src="icon/search.svg" alt="Cari" class="search-icon" />
                 <input type="text" placeholder="@SearchPlaceholder" />
             </div>
@@ -22,10 +22,10 @@
 
         @if (ShowDateFilter)
         {
-            <div class="date-filter" @onclick="ToggleDatePicker">
+            <button type="button" class="topbar-date-btn" @onclick="ToggleDatePicker" title="Pilih rentang tanggal">
                 <img src="icon/icon_6_admin.svg" alt="Kalender" class="icon-sm" />
                 <span>@dateRangeLabel</span>
-            </div>
+            </button>
         }
 
         @if (RightSlot != null)
@@ -35,43 +35,45 @@
             </div>
         }
 
-        <button class="topbar-icon-btn theme-toggle" @onclick="ToggleTheme" title="Mode Gelap / Terang">
-            @if (LayoutState.IsDarkMode)
-            {
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="5"></circle>
-                    <line x1="12" y1="1" x2="12" y2="3"></line>
-                    <line x1="12" y1="21" x2="12" y2="23"></line>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                    <line x1="1" y1="12" x2="3" y2="12"></line>
-                    <line x1="21" y1="12" x2="23" y2="12"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </svg>
-            }
-            else
-            {
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-            }
-        </button>
+        <div class="topbar-utilities-group">
+            <button type="button" class="topbar-icon-btn theme-toggle" @onclick="ToggleTheme" title="@(LayoutState.IsDarkMode ? "Ganti ke Mode Terang" : "Ganti ke Mode Gelap")">
+                @if (LayoutState.IsDarkMode)
+                {
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                }
+                else
+                {
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                }
+            </button>
 
-        <div class="topbar-icon-btn notification-btn" @onclick="ToggleNotification">
-            <img src="icon/icon_7_admin.svg" alt="Notifikasi" class="icon-md" />
-            @if (unreadCount > 0)
-            {
-                <span class="notification-badge">@unreadCount</span>
-            }
-        </div>
+            <button type="button" class="topbar-icon-btn notification-btn" @onclick="ToggleNotification" title="@($"Notifikasi ({unreadCount} belum dibaca)")">
+                <img src="icon/icon_7_admin.svg" alt="Notifikasi" class="icon-md" />
+                @if (unreadCount > 0)
+                {
+                    <span class="notification-badge">@unreadCount</span>
+                }
+            </button>
 
-        <div class="admin-profile-btn" @onclick="ToggleProfilePopup">
-            <UserAvatar Initials="WA" BgColor="#1e3a8a" Size="36px" />
-            <div class="admin-info">
-                <span class="admin-name">Admin Wahyu</span>
-                <span class="admin-role">PENGONTROL SISTEM</span>
-            </div>
+            <button type="button" class="admin-profile-btn" @onclick="ToggleProfilePopup" title="Buka menu akun">
+                <UserAvatar Initials="WA" BgColor="#0B1E39" Size="36px" />
+                <div class="admin-info">
+                    <span class="admin-name">Admin Wahyu</span>
+                    <span class="admin-role">PENGONTROL SISTEM</span>
+                </div>
+            </button>
         </div>
     </div>
 </header>
@@ -84,7 +86,7 @@
     <div class="profile-popup-overlay" @onclick="() => showProfilePopup = false">
         <div class="profile-popup" @onclick:stopPropagation="true">
             <div class="profile-header">
-                <UserAvatar Initials="WA" BgColor="#1e3a8a" Size="48px" />
+                <UserAvatar Initials="WA" BgColor="#0B1E39" Size="48px" />
                 <div>
                     <strong>Admin Wahyu</strong>
                     <div class="text-sm text-gray">wahyu.admin@persada.co.id</div>
@@ -106,7 +108,7 @@
     [Parameter] public string Subtitle { get; set; } = string.Empty;
     [Parameter] public bool ShowGlobalSearch { get; set; } = true;
     [Parameter] public bool ShowDateFilter { get; set; } = true;
-    [Parameter] public string SearchPlaceholder { get; set; } = "Cari menu, ruangan, user...";
+    [Parameter] public string SearchPlaceholder { get; set; } = "Cari menu, ruangan, atau pengguna...";
     [Parameter] public RenderFragment? RightSlot { get; set; }
 
     [Parameter] public EventCallback<DateTime?> OnDateSelectedCallback { get; set; }

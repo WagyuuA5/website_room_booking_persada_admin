@@ -2,190 +2,461 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
-@inject booking_room_admin.Components.Services.IRoomService RoomService
+@using booking_room_admin.Components.Services
+@inject ToastService Toast
 
-
-<TopBar Title="Manajemen Ruangan" Subtitle="Kelola daftar ruangan dan kapasitasnya." ShowGlobalSearch="false" ShowDateFilter="false">
+<TopBar Title="Manajemen Ruangan" Subtitle="@($"Kelola informasi, kapasitas, dan fasilitas {rooms.Count} ruang meeting.")" ShowGlobalSearch="true" ShowDateFilter="false">
     <RightSlot>
-        <button class="btn-primary-pill btn-yellow" @onclick="OpenAddRoom">
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
             <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
-            <span>Tambah Ruangan</span>
+            <span>+ Tambah Ruangan</span>
         </button>
     </RightSlot>
 </TopBar>
-<div class="room-management">
-    <div class="rm-breadcrumb">ADMINISTRASI</div>
-    
 
-    <div class="rm-toolbar">
-        <div class="rm-search">
-            <img src="icon/search.svg" alt="Cari" class="rm-search-icon" />
-            <input type="text" placeholder="Cari nama ruangan..." @bind="searchQuery" @bind:event="oninput" />
-        </div>
-        <select class="rm-select" @bind="selectedFloor">
-            <option value="">Semua Lantai</option>
-            @foreach (var floor in floors)
-            {
-                <option value="@floor">@floor</option>
-            }
-        </select>
-        <select class="rm-select" @bind="selectedType">
-            <option value="">Semua Tipe</option>
-            @foreach (var type in roomTypes)
-            {
-                <option value="@type">@type</option>
-            }
-        </select>
+<div class="room-management-page">
+    @* -- Eyebrow -- *@
+    <div class="rm-eyebrow-row">
+        <span class="rm-bullet">•</span>
+        <span class="rm-eyebrow">MANAJEMEN RUANGAN</span>
     </div>
 
-    <div class="rm-grid">
-        @foreach (var room in filteredRooms)
+    @* -- Room Cards Grid (3 Columns) -- *@
+    <div class="rm-cards-grid">
+        @foreach (var room in rooms)
         {
-            <div class="rm-card" @onclick="() => OpenDetail(room)">
-                <div class="rm-card-photo-container">
-                    <div class="rm-card-photo">
-                        <!-- Placeholder photo -->
-                        <div class="rm-photo-placeholder">
-                            <img src="icon/icon_1_admin.svg" alt="Ruangan" />
-                        </div>
-                    </div>
-                    <div class="rm-card-badge-top-left">
-                        <StatusBadge Text="@($"{room.Capacity} Orang")" Type="StatusBadge.BadgeType.Indigo" />
-                    </div>
-                    @if (room.Status == "maintenance")
+            <div class="rm-card" @onclick="() => OpenDetailModal(room)">
+                @* 16:9 Photo Container *@
+                <div class="rm-photo-wrap">
+                    <img src="@room.PhotoUrl" alt="@room.Name" class="rm-photo" onerror="this.src='images/room1.jpg'" />
+                    <span class="rm-cap-badge">?? @room.Capacity Orang</span>
+                    @if (room.IsMaintenance)
                     {
-                        <div class="rm-card-badge-top-right">
-                            <StatusBadge Text="Perawatan" Type="StatusBadge.BadgeType.Amber" />
-                        </div>
+                        <span class="rm-maint-badge">?? Maintenance</span>
                     }
                 </div>
+
+                @* Content *@
                 <div class="rm-card-content">
                     <h3 class="rm-card-name">@room.Name</h3>
                     <div class="rm-card-location">
-                        <img src="icon/icon_6_admin.svg" alt="Lantai" class="rm-meta-icon" />
-                        @room.Floor
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rm-pin-icon"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>@room.Location</span>
                     </div>
-                    
-                    <div class="rm-card-tags">
-                        @foreach (var tag in room.Facilities.Take(3))
+
+                    <div class="rm-amenities-chips">
+                        @foreach (var am in room.Amenities.Take(3))
                         {
-                            <span class="rm-tag">@tag</span>
+                            <span class="rm-chip">@am</span>
                         }
-                        @if (room.Facilities.Count > 3)
+                        @if (room.Amenities.Count > 3)
                         {
-                            <span class="rm-tag">+@(room.Facilities.Count - 3)</span>
+                            <span class="rm-chip rm-chip-more">+@(room.Amenities.Count - 3) lainnya</span>
                         }
                     </div>
 
                     <p class="rm-card-desc">@room.Description</p>
-                </div>
-                <div class="rm-card-footer">
-                    <span class="rm-card-bookings">@room.TotalBookings booking</span>
-                    <button class="btn-icon-only rm-delete-btn" @onclick="() => DeleteRoom(room)" @onclick:stopPropagation="true">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                    </button>
+
+                    <div class="rm-card-footer" @onclick:stopPropagation="true">
+                        <button type="button" class="btn-delete-room" @onclick="() => ConfirmDelete(room)" title="Hapus Ruangan">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rm-trash-icon"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         }
     </div>
-
-    <AddRoomPopup IsOpen="@showAddRoom" IsOpenChanged="@((bool v) => showAddRoom = v)" OnRoomCreated="OnRoomCreated" />
-    <EditRoomPopup IsOpen="@showEditRoom" IsOpenChanged="@((bool v) => showEditRoom = v)" Room="@editingRoom" OnRoomUpdated="OnRoomUpdated" />
-    <RoomDetailPopup IsOpen="@showDetail" IsOpenChanged="@((bool v) => showDetail = v)" Room="@selectedRoom" OnEdit="OpenEditRoom" />
 </div>
 
-@code {
-    private bool showAddRoom = false;
-    private bool showEditRoom = false;
-    private bool showDetail = false;
+@* -- Modal Detail / Edit Ruangan (Split 2-Column) -- *@
+@if (selectedRoom != null)
+{
+    <AppModal IsOpen="@showDetailModal" IsOpenChanged="@((bool v) => showDetailModal = v)" Size="large">
+        <HeaderContent>
+            @if (isEditMode)
+            {
+                <div class="rm-modal-title-group">
+                    <h3 class="rm-modal-title">Edit Detail Ruangan</h3>
+                    <p class="rm-modal-subtitle">Perbarui konfigurasi ruang kerja ini.</p>
+                </div>
+            }
+        </HeaderContent>
+        <ChildContent>
+            <div class="rm-split-layout">
+                @* Left Column: Photo *@
+                <div class="rm-split-photo-col">
+                    <img src="@(isEditMode ? editForm.PhotoUrl : selectedRoom.PhotoUrl)" alt="Foto Ruangan" class="rm-split-photo" onerror="this.src='images/room1.jpg'" />
+                    <span class="rm-badge-available">? Tersedia Sekarang</span>
+                </div>
 
-    private string searchQuery = "";
-    private string selectedFloor = "";
-    private string selectedType = "";
+                @* Right Column: Detail View or Edit Form *@
+                <div class="rm-split-info-col scroll-area">
+                    @if (!isEditMode)
+                    {
+                        @* View Mode *@
+                        <div class="rm-detail-view">
+                            <h2 class="rm-detail-name">@selectedRoom.Name</h2>
+                            <div class="rm-detail-loc">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rm-pin-icon"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                <span>@selectedRoom.Location</span>
+                            </div>
 
-    private List<string> floors = new() { "Lantai 1", "Lantai 2", "Lantai 3", "Lantai 4", "Lantai 14" };
-    private List<string> roomTypes = new() { "Rapat", "Diskusi", "Presentasi", "Eksekutif" };
+                            <p class="rm-detail-long-desc">@selectedRoom.Description</p>
 
-    private List<Room> allRooms = new();
-    private Room? selectedRoom = null;
-    private Room? editingRoom = null;
+                            <div class="rm-amenities-section">
+                                <h5 class="rm-section-label">FASILITAS TERSEDIA</h5>
+                                <div class="rm-amenities-2col-grid">
+                                    <div class="rm-amenity-tile"><span>??</span> <span>Wi-Fi Kecepatan Tinggi</span></div>
+                                    <div class="rm-amenity-tile"><span>???</span> <span>Layar 85 inci</span></div>
+                                    <div class="rm-amenity-tile"><span>??</span> <span>Konferensi Video</span></div>
+                                    <div class="rm-amenity-tile"><span>??</span> <span>Hingga @selectedRoom.Capacity Orang</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        @* Edit Mode Form *@
+                        <div class="rm-edit-form">
+                            <div class="rm-field">
+                                <label class="rm-label">NAMA RUANGAN</label>
+                                <input type="text" class="rm-input" @bind="editForm.Name" />
+                            </div>
 
-    private List<Room> filteredRooms => FilterRooms();
+                            <div class="rm-row-2col">
+                                <div class="rm-field">
+                                    <label class="rm-label">LOKASI</label>
+                                    <input type="text" class="rm-input" @bind="editForm.Location" />
+                                </div>
+                                <div class="rm-field">
+                                    <label class="rm-label">KAPASITAS</label>
+                                    <input type="number" class="rm-input" @bind="editForm.Capacity" />
+                                </div>
+                            </div>
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadRooms();
-    }
+                            <div class="rm-field">
+                                <label class="rm-label">FASILITAS TERMASUK</label>
+                                <div class="rm-chips-select-grid">
+                                    @foreach (var am in allAvailableAmenities)
+                                    {
+                                        <button type="button" class="rm-select-chip @(editForm.Amenities.Contains(am) ? "selected" : "")"
+                                                @onclick="() => ToggleAmenity(am)">
+                                            @(editForm.Amenities.Contains(am) ? "?" : "+") @am
+                                        </button>
+                                    }
+                                </div>
+                            </div>
 
-    private async Task LoadRooms()
-    {
-        allRooms = await RoomService.GetAllRoomsAsync();
-    }
+                            <div class="rm-field">
+                                <label class="rm-label">DESKRIPSI RUANGAN</label>
+                                <textarea class="rm-textarea" rows="3" @bind="editForm.Description"></textarea>
+                            </div>
 
-    private List<Room> FilterRooms()
-    {
-        var query = allRooms.AsEnumerable();
-
-        if (!string.IsNullOrWhiteSpace(searchQuery))
-        {
-            var q = searchQuery.ToLowerInvariant();
-            query = query.Where(r => r.Name.ToLowerInvariant().Contains(q) || r.Description.ToLowerInvariant().Contains(q));
-        }
-
-        if (!string.IsNullOrWhiteSpace(selectedFloor))
-        {
-            query = query.Where(r => r.Floor == selectedFloor);
-        }
-
-        if (!string.IsNullOrWhiteSpace(selectedType))
-        {
-            query = query.Where(r => r.Type == selectedType);
-        }
-
-        return query.ToList();
-    }
-
-    private void OpenAddRoom()
-    {
-        showAddRoom = true;
-    }
-
-    private void OpenDetail(Room room)
-    {
-        selectedRoom = room;
-        showDetail = true;
-    }
-
-    private void OpenEditRoom(Room room)
-    {
-        editingRoom = room;
-        showEditRoom = true;
-    }
-
-    private async Task OnRoomCreated(Room room)
-    {
-        await RoomService.AddRoomAsync(room);
-        await LoadRooms();
-        showAddRoom = false;
-    }
-
-    private async Task OnRoomUpdated(Room room)
-    {
-        await RoomService.UpdateRoomAsync(room);
-        await LoadRooms();
-        showEditRoom = false;
-        editingRoom = null;
-    }
-
-    private async Task DeleteRoom(Room room)
-    {
-        await RoomService.DeleteRoomAsync(room.Id);
-        await LoadRooms();
-    }
+                            <div class="rm-field">
+                                <label class="rm-label">FOTO RUANGAN</label>
+                                <div class="rm-dropzone">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rm-upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    <span class="rm-drop-title">Klik untuk unggah atau seret & lepas</span>
+                                    <span class="rm-drop-hint">SVG, PNG, JPG, atau GIF (maks. 800×400px)</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            @if (!isEditMode)
+            {
+                <button type="button" class="btn-primary-pill" style="background:#0B1E39; color:#fff;" @onclick="() => isEditMode = true">
+                    <span>Edit ?</span>
+                </button>
+                <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Batal</button>
+            }
+            else
+            {
+                <button type="button" class="btn-outline-pill" @onclick="() => isEditMode = false">Batal</button>
+                <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveEditRoom">Simpan Perubahan</button>
+            }
+        </FooterContent>
+    </AppModal>
 }
 
+@* -- Modal Tambah Ruangan Baru -- *@
+@if (showAddModal)
+{
+    <AppModal IsOpen="@showAddModal" IsOpenChanged="@((bool v) => showAddModal = v)" Size="large">
+        <HeaderContent>
+            <div class="rm-modal-title-group">
+                <h3 class="rm-modal-title">Atur Ruangan Baru</h3>
+                <p class="rm-modal-subtitle">Tambahkan ruang meeting baru ke dalam sistem.</p>
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <div class="rm-split-layout">
+                <div class="rm-split-photo-col">
+                    <img src="@(string.IsNullOrEmpty(newRoomForm.PhotoUrl) ? "images/room1.jpg" : newRoomForm.PhotoUrl)" alt="Preview Foto" class="rm-split-photo" />
+                </div>
+                <div class="rm-split-info-col scroll-area">
+                    <div class="rm-edit-form">
+                        <div class="rm-field">
+                            <label class="rm-label">NAMA RUANGAN <span class="req">*</span></label>
+                            <input type="text" class="rm-input" placeholder="cth. Ruang Alpha" @bind="newRoomForm.Name" />
+                        </div>
 
+                        <div class="rm-row-2col">
+                            <div class="rm-field">
+                                <label class="rm-label">LOKASI <span class="req">*</span></label>
+                                <input type="text" class="rm-input" placeholder="cth. Lantai 2, Wing A" @bind="newRoomForm.Location" />
+                            </div>
+                            <div class="rm-field">
+                                <label class="rm-label">KAPASITAS <span class="req">*</span></label>
+                                <input type="number" class="rm-input" placeholder="Jumlah orang" @bind="newRoomForm.Capacity" />
+                            </div>
+                        </div>
 
+                        <div class="rm-field">
+                            <label class="rm-label">FASILITAS TERMASUK</label>
+                            <div class="rm-chips-select-grid">
+                                @foreach (var am in allAvailableAmenities)
+                                {
+                                    <button type="button" class="rm-select-chip @(newRoomForm.Amenities.Contains(am) ? "selected" : "")"
+                                            @onclick="() => ToggleNewAmenity(am)">
+                                        @(newRoomForm.Amenities.Contains(am) ? "?" : "+") @am
+                                    </button>
+                                }
+                            </div>
+                        </div>
 
+                        <div class="rm-field">
+                            <label class="rm-label">DESKRIPSI RUANGAN</label>
+                            <textarea class="rm-textarea" rows="3" placeholder="Jelaskan secara singkat kegunaan atau fitur utama ruangan..." @bind="newRoomForm.Description"></textarea>
+                        </div>
 
+                        <div class="rm-field">
+                            <label class="rm-label">FOTO RUANGAN</label>
+                            <div class="rm-dropzone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rm-upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <span class="rm-drop-title">Klik untuk unggah atau seret & lepas</span>
+                                <span class="rm-drop-hint">SVG, PNG, JPG, atau GIF (maks. 800×400px)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => showAddModal = false">Batal</button>
+            <button type="button" class="btn-primary-pill btn-yellow" @onclick="CreateNewRoom">Tambah Ruangan</button>
+        </FooterContent>
+    </AppModal>
+}
 
+@* -- Modal Konfirmasi Hapus -- *@
+@if (roomToDelete != null)
+{
+    <AppModal IsOpen="@showDeleteModal" IsOpenChanged="@((bool v) => showDeleteModal = v)" Size="small">
+        <HeaderContent>
+            <h3 class="rm-modal-title text-danger">Hapus Ruangan Ini?</h3>
+        </HeaderContent>
+        <ChildContent>
+            <p>Apakah Anda yakin ingin menghapus <strong>@roomToDelete.Name</strong>? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.</p>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => showDeleteModal = false">Batal</button>
+            <button type="button" class="btn-primary-pill" style="background:#DC2626; color:#fff;" @onclick="ExecuteDelete">Hapus</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@code {
+    public class RoomMaster
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Location { get; set; } = "";
+        public int Capacity { get; set; }
+        public List<string> Amenities { get; set; } = new();
+        public string Description { get; set; } = "";
+        public string PhotoUrl { get; set; } = "images/room1.jpg";
+        public bool IsMaintenance { get; set; }
+    }
+
+    private List<RoomMaster> rooms = new();
+    private RoomMaster? selectedRoom;
+    private RoomMaster? roomToDelete;
+    private RoomMaster editForm = new();
+    private RoomMaster newRoomForm = new();
+
+    private bool showDetailModal = false;
+    private bool isEditMode = false;
+    private bool showAddModal = false;
+    private bool showDeleteModal = false;
+
+    private List<string> allAvailableAmenities = new()
+    {
+        "Wi-Fi Kecepatan Tinggi", "Layar 85 inci", "Konferensi Video",
+        "AC Central", "Whiteboard Glass", "Sound System", "Dual Projector", "Smart Board", "TV 4K"
+    };
+
+    protected override void OnInitialized()
+    {
+        InitRooms();
+    }
+
+    private void InitRooms()
+    {
+        rooms = new List<RoomMaster>
+        {
+            new()
+            {
+                Id = 1,
+                Name = "Alpha Room",
+                Location = "Lantai 2, Wing A",
+                Capacity = 12,
+                Amenities = new List<string> { "Projector 4K", "AC Central", "Whiteboard Glass", "Video Conf" },
+                Description = "Ruang meeting eksekutif dirancang untuk presentasi penting dan rapat koordinasi strategis.",
+                PhotoUrl = "images/room1.jpg",
+                IsMaintenance = false
+            },
+            new()
+            {
+                Id = 2,
+                Name = "Beta Room",
+                Location = "Lantai 2, Wing B",
+                Capacity = 8,
+                Amenities = new List<string> { "TV 65\"", "AC Split", "Whiteboard" },
+                Description = "Ruang rapat tim semi-formal dengan pencahayaan alami dan fasilitas meeting modern.",
+                PhotoUrl = "images/room2.jpg",
+                IsMaintenance = false
+            },
+            new()
+            {
+                Id = 3,
+                Name = "Gamma Room",
+                Location = "Lantai 3, VIP Wing",
+                Capacity = 20,
+                Amenities = new List<string> { "Dual Projector", "Smart Board", "Sound System" },
+                Description = "Boardroom kapasitas besar dilengkapi konferensi audio video berstandar enterprise.",
+                PhotoUrl = "images/room3.jpg",
+                IsMaintenance = true
+            },
+            new()
+            {
+                Id = 4,
+                Name = "Delta Room",
+                Location = "Lantai 3, Wing A",
+                Capacity = 15,
+                Amenities = new List<string> { "TV 4K", "Glass Wall", "Polycom" },
+                Description = "Ruang kolaborasi dinamis untuk lokakarya, sesi brainstorming, dan diskusi antar divisi.",
+                PhotoUrl = "images/room4.jpg",
+                IsMaintenance = false
+            },
+            new()
+            {
+                Id = 5,
+                Name = "Epsilon Room",
+                Location = "Lantai 4, HR Wing",
+                Capacity = 4,
+                Amenities = new List<string> { "Monitor 32\"", "AC Split" },
+                Description = "Ruang pertemuan privat ideal untuk sesi wawancara, konsultasi, dan evaluasi 1-on-1.",
+                PhotoUrl = "images/room5.jpg",
+                IsMaintenance = false
+            }
+        };
+    }
+
+    private void OpenDetailModal(RoomMaster room)
+    {
+        selectedRoom = room;
+        isEditMode = false;
+        editForm = new RoomMaster
+        {
+            Id = room.Id,
+            Name = room.Name,
+            Location = room.Location,
+            Capacity = room.Capacity,
+            Amenities = new List<string>(room.Amenities),
+            Description = room.Description,
+            PhotoUrl = room.PhotoUrl,
+            IsMaintenance = room.IsMaintenance
+        };
+        showDetailModal = true;
+    }
+
+    private void OpenAddModal()
+    {
+        newRoomForm = new RoomMaster
+        {
+            Capacity = 10,
+            PhotoUrl = "images/room1.jpg",
+            Amenities = new List<string> { "Wi-Fi Kecepatan Tinggi", "Konferensi Video" }
+        };
+        showAddModal = true;
+    }
+
+    private void ToggleAmenity(string am)
+    {
+        if (editForm.Amenities.Contains(am)) editForm.Amenities.Remove(am);
+        else editForm.Amenities.Add(am);
+    }
+
+    private void ToggleNewAmenity(string am)
+    {
+        if (newRoomForm.Amenities.Contains(am)) newRoomForm.Amenities.Remove(am);
+        else newRoomForm.Amenities.Add(am);
+    }
+
+    private void SaveEditRoom()
+    {
+        if (selectedRoom != null)
+        {
+            selectedRoom.Name = editForm.Name;
+            selectedRoom.Location = editForm.Location;
+            selectedRoom.Capacity = editForm.Capacity;
+            selectedRoom.Amenities = new List<string>(editForm.Amenities);
+            selectedRoom.Description = editForm.Description;
+            Toast.Success("Detail ruangan berhasil diperbarui.");
+            showDetailModal = false;
+        }
+    }
+
+    private void CreateNewRoom()
+    {
+        if (string.IsNullOrWhiteSpace(newRoomForm.Name))
+        {
+            Toast.Error("Nama ruangan wajib diisi.");
+            return;
+        }
+
+        rooms.Add(new RoomMaster
+        {
+            Id = rooms.Count + 1,
+            Name = newRoomForm.Name,
+            Location = string.IsNullOrWhiteSpace(newRoomForm.Location) ? "Lantai 1, Wing Utama" : newRoomForm.Location,
+            Capacity = newRoomForm.Capacity,
+            Amenities = new List<string>(newRoomForm.Amenities),
+            Description = newRoomForm.Description,
+            PhotoUrl = "images/room1.jpg"
+        });
+
+        Toast.Success($"Ruangan '{newRoomForm.Name}' berhasil ditambahkan.");
+        showAddModal = false;
+    }
+
+    private void ConfirmDelete(RoomMaster r)
+    {
+        roomToDelete = r;
+        showDeleteModal = true;
+    }
+
+    private void ExecuteDelete()
+    {
+        if (roomToDelete != null)
+        {
+            rooms.Remove(roomToDelete);
+            Toast.Success($"Ruangan '{roomToDelete.Name}' telah dihapus.");
+            showDeleteModal = false;
+        }
+    }
+}

@@ -5,7 +5,7 @@
 @using booking_room_admin.Components.Services
 @inject ToastService Toast
 
-<TopBar Title="Audit Log" Subtitle="History of all admin activities in the system — permanent and uneditable." ShowGlobalSearch="false" ShowDateFilter="false">
+<TopBar Title="Audit Log" Subtitle="Riwayat seluruh aktivitas admin pada sistem — permanen dan tidak dapat diubah." ShowGlobalSearch="false" ShowDateFilter="false">
     <RightSlot>
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="@(() => showExportModal = true)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-sm"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -17,12 +17,12 @@
 <div class="audit-log-page">
     @* -- Filter Island Toolbar -- *@
     <div class="audit-island-toolbar">
-        <span class="audit-filter-label">Filters:</span>
+        <span class="audit-filter-label">Filter:</span>
 
         @* 1. Actor Island Trigger *@
         <div class="island-trigger-container">
             <button type="button" class="btn-island-trigger @(openIsland == "actor" ? "active" : "")" @onclick='() => ToggleIsland("actor")'>
-                <span>@(string.IsNullOrEmpty(selectedActor) ? "All Actors" : selectedActor)</span>
+                <span>@(string.IsNullOrEmpty(selectedActor) ? "Semua Aktor" : selectedActor)</span>
                 <span class="island-caret">?</span>
             </button>
 
@@ -30,11 +30,11 @@
             {
                 <div class="island-popup-card actor-island">
                     <div class="island-header">
-                        <span class="island-title">Filter by Actor</span>
+                        <span class="island-title">Filter berdasarkan Aktor</span>
                         <button type="button" class="island-close" @onclick='() => ToggleIsland("")'>?</button>
                     </div>
                     <div class="island-search">
-                        <input type="text" placeholder="Search actors..." class="island-input" @bind="actorSearchQuery" @bind:event="oninput" />
+                        <input type="text" placeholder="Cari aktor..." class="island-input" @bind="actorSearchQuery" @bind:event="oninput" />
                     </div>
                     <div class="island-actor-list scroll-area">
                         @foreach (var act in FilteredActorList)
@@ -50,8 +50,8 @@
                         }
                     </div>
                     <div class="island-footer">
-                        <button type="button" class="island-link-clear" @onclick="ClearActorFilter">Clear All</button>
-                        <button type="button" class="island-btn-apply" @onclick='() => ToggleIsland("")'>Apply Filter</button>
+                        <button type="button" class="island-link-clear" @onclick="ClearActorFilter">Hapus Semua</button>
+                        <button type="button" class="island-btn-apply" @onclick='() => ToggleIsland("")'>Terapkan Filter</button>
                     </div>
                 </div>
             }
@@ -60,7 +60,7 @@
         @* 2. Action Type Island Trigger *@
         <div class="island-trigger-container">
             <button type="button" class="btn-island-trigger @(openIsland == "action" ? "active" : "")" @onclick='() => ToggleIsland("action")'>
-                <span>@(selectedActions.Any() ? $"{selectedActions.Count} Actions Selected" : "Action Type")</span>
+                <span>@(selectedActions.Any() ? $"{selectedActions.Count} Aksi Terpilih" : "Jenis Aksi")</span>
                 <span class="island-caret">?</span>
             </button>
 
@@ -68,7 +68,7 @@
             {
                 <div class="island-popup-card action-island">
                     <div class="island-header">
-                        <span class="island-title">Filter by Action Type</span>
+                        <span class="island-title">Filter berdasarkan Jenis Aksi</span>
                         <button type="button" class="island-close" @onclick='() => ToggleIsland("")'>?</button>
                     </div>
                     <div class="island-categories-list scroll-area">
@@ -80,9 +80,9 @@
                             @if (isBookingGroupOpen)
                             {
                                 <div class="action-group-items">
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Approve Booking")" @onchange='e => ToggleAction("Approve Booking", (bool)(e.Value ?? false))' /> Approve Booking</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Reject Booking")" @onchange='e => ToggleAction("Reject Booking", (bool)(e.Value ?? false))' /> Reject Booking</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Cancel Booking")" @onchange='e => ToggleAction("Cancel Booking", (bool)(e.Value ?? false))' /> Cancel Booking</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Setujui Booking")" @onchange='e => ToggleAction("Setujui Booking", (bool)(e.Value ?? false))' /> Setujui Booking</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Tolak Booking")" @onchange='e => ToggleAction("Tolak Booking", (bool)(e.Value ?? false))' /> Tolak Booking</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Batalkan Booking")" @onchange='e => ToggleAction("Batalkan Booking", (bool)(e.Value ?? false))' /> Batalkan Booking</label>
                                 </div>
                             }
                         </div>
@@ -90,14 +90,14 @@
                         @* Group: Room *@
                         <div class="action-group">
                             <div class="action-group-header" @onclick="() => isRoomGroupOpen = !isRoomGroupOpen">
-                                <span>@(isRoomGroupOpen ? "?" : "?") Room</span>
+                                <span>@(isRoomGroupOpen ? "?" : "?") Ruangan</span>
                             </div>
                             @if (isRoomGroupOpen)
                             {
                                 <div class="action-group-items">
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Add Room")" @onchange='e => ToggleAction("Add Room", (bool)(e.Value ?? false))' /> Add Room</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Edit Room")" @onchange='e => ToggleAction("Edit Room", (bool)(e.Value ?? false))' /> Edit Room</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Set Maintenance")" @onchange='e => ToggleAction("Set Maintenance", (bool)(e.Value ?? false))' /> Set Maintenance</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Tambah Ruangan")" @onchange='e => ToggleAction("Tambah Ruangan", (bool)(e.Value ?? false))' /> Tambah Ruangan</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Edit Ruangan")" @onchange='e => ToggleAction("Edit Ruangan", (bool)(e.Value ?? false))' /> Edit Ruangan</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Atur Maintenance")" @onchange='e => ToggleAction("Atur Maintenance", (bool)(e.Value ?? false))' /> Atur Maintenance</label>
                                 </div>
                             }
                         </div>
@@ -110,9 +110,9 @@
                             @if (isUserGroupOpen)
                             {
                                 <div class="action-group-items">
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Add User")" @onchange='e => ToggleAction("Add User", (bool)(e.Value ?? false))' /> Add User</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Tambah User")" @onchange='e => ToggleAction("Tambah User", (bool)(e.Value ?? false))' /> Tambah User</label>
                                     <label><input type="checkbox" checked="@selectedActions.Contains("Edit User")" @onchange='e => ToggleAction("Edit User", (bool)(e.Value ?? false))' /> Edit User</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Deactivate User")" @onchange='e => ToggleAction("Deactivate User", (bool)(e.Value ?? false))' /> Deactivate User</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Nonaktifkan User")" @onchange='e => ToggleAction("Nonaktifkan User", (bool)(e.Value ?? false))' /> Nonaktifkan User</label>
                                     <label><input type="checkbox" checked="@selectedActions.Contains("Reset Password")" @onchange='e => ToggleAction("Reset Password", (bool)(e.Value ?? false))' /> Reset Password</label>
                                 </div>
                             }
@@ -121,20 +121,20 @@
                         @* Group: System *@
                         <div class="action-group">
                             <div class="action-group-header" @onclick="() => isSystemGroupOpen = !isSystemGroupOpen">
-                                <span>@(isSystemGroupOpen ? "?" : "?") System</span>
+                                <span>@(isSystemGroupOpen ? "?" : "?") Sistem</span>
                             </div>
                             @if (isSystemGroupOpen)
                             {
                                 <div class="action-group-items">
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Change Settings")" @onchange='e => ToggleAction("Change Settings", (bool)(e.Value ?? false))' /> Change Settings</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Ubah Pengaturan")" @onchange='e => ToggleAction("Ubah Pengaturan", (bool)(e.Value ?? false))' /> Ubah Pengaturan</label>
                                     <label><input type="checkbox" checked="@selectedActions.Contains("Export Data")" @onchange='e => ToggleAction("Export Data", (bool)(e.Value ?? false))' /> Export Data</label>
                                 </div>
                             }
                         </div>
                     </div>
                     <div class="island-footer">
-                        <button type="button" class="island-link-clear" @onclick="ClearActionFilter">Clear All</button>
-                        <button type="button" class="island-btn-apply" @onclick='() => ToggleIsland("")'>Apply Filter ?</button>
+                        <button type="button" class="island-link-clear" @onclick="ClearActionFilter">Hapus Semua</button>
+                        <button type="button" class="island-btn-apply" @onclick='() => ToggleIsland("")'>Terapkan Filter ?</button>
                     </div>
                 </div>
             }
@@ -142,15 +142,15 @@
 
         @* 3. Date Range Preset Trigger *@
         <select class="audit-date-preset-select" @bind="selectedDateRange">
-            <option value="7">Last 7 Days</option>
-            <option value="30">Last 30 Days</option>
-            <option value="90">Last 90 Days</option>
-            <option value="0">All Time</option>
+            <option value="7">7 Hari Terakhir</option>
+            <option value="30">30 Hari Terakhir</option>
+            <option value="90">90 Hari Terakhir</option>
+            <option value="0">Semua Waktu</option>
         </select>
 
         @if (!string.IsNullOrEmpty(selectedActor) || selectedActions.Any() || selectedDateRange != "7")
         {
-            <button type="button" class="btn-clear-island-filters" @onclick="ResetAllFilters" title="Reset Semua Filter">? Clear Filters</button>
+            <button type="button" class="btn-clear-island-filters" @onclick="ResetAllFilters" title="Reset Semua Filter">? Reset Filter</button>
         }
     </div>
 
@@ -234,11 +234,11 @@
     {
         allLogs = new List<AuditLogEntry>
         {
-            new() { Id = 1, Timestamp = DateTime.Now.AddMinutes(-12), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Approve Booking", TargetName = "Ruang Rapat Utama (#BK-1042)", Detail = "Pemesanan disetujui untuk Divisi IT & Digital" },
-            new() { Id = 2, Timestamp = DateTime.Now.AddHours(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Set Maintenance", TargetName = "Ruang Dirantara VIP", Detail = "Pemeliharaan AC & Sound System (60 Menit)" },
-            new() { Id = 3, Timestamp = DateTime.Now.AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Add User", TargetName = "Eko Prasetyo (Marketing)", Detail = "User baru ditambahkan dengan role User" },
-            new() { Id = 4, Timestamp = DateTime.Now.AddHours(-4), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#16A34A", ActionType = "Reject Booking", TargetName = "Auditorium Serbaguna (#BK-1035)", Detail = "Jadwal bentrok dengan Townhall Perusahaan" },
-            new() { Id = 5, Timestamp = DateTime.Now.AddDays(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Edit Room", TargetName = "Ruang Diskusi B", Detail = "Kapasitas ruangan diperbarui dari 6 menjadi 8 orang" },
+            new() { Id = 1, Timestamp = DateTime.Now.AddMinutes(-12), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Booking", TargetName = "Ruang Rapat Utama (#BK-1042)", Detail = "Pemesanan disetujui untuk Divisi IT & Digital" },
+            new() { Id = 2, Timestamp = DateTime.Now.AddHours(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Atur Maintenance", TargetName = "Ruang Dirantara VIP", Detail = "Pemeliharaan AC & Sound System (60 Menit)" },
+            new() { Id = 3, Timestamp = DateTime.Now.AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Tambah User", TargetName = "Eko Prasetyo (Marketing)", Detail = "User baru ditambahkan dengan role User" },
+            new() { Id = 4, Timestamp = DateTime.Now.AddHours(-4), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#16A34A", ActionType = "Tolak Booking", TargetName = "Auditorium Serbaguna (#BK-1035)", Detail = "Jadwal bentrok dengan Townhall Perusahaan" },
+            new() { Id = 5, Timestamp = DateTime.Now.AddDays(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Edit Ruangan", TargetName = "Ruang Diskusi B", Detail = "Kapasitas ruangan diperbarui dari 6 menjadi 8 orang" },
             new() { Id = 6, Timestamp = DateTime.Now.AddDays(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Reset Password", TargetName = "Ahmad Fauzi (IT)", Detail = "Reset password dikirimkan via email" },
             new() { Id = 7, Timestamp = DateTime.Now.AddDays(-3), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#F59E0B", ActionType = "Export Data", TargetName = "Laporan Keuangan Q3", Detail = "Export laporan format XLSX" }
         };
@@ -309,9 +309,9 @@
 
     private string GetActionStatus(string action)
     {
-        if (action.Contains("Approve") || action.Contains("Add")) return "approved";
-        if (action.Contains("Reject") || action.Contains("Delete") || action.Contains("Deactivate")) return "rejected";
-        if (action.Contains("Maintenance") || action.Contains("Reset")) return "pending";
+        if (action.Contains("Setujui") || action.Contains("Tambah")) return "approved";
+        if (action.Contains("Tolak") || action.Contains("Hapus") || action.Contains("Nonaktifkan")) return "rejected";
+        if (action.Contains("Maintenance") || action.Contains("Reset") || action.Contains("Atur")) return "pending";
         return "neutral";
     }
 }

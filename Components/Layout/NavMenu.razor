@@ -4,7 +4,7 @@
     <img src="icon/logoo_psd-removebg-preview 2.svg" alt="PERSADA" class="sidebar-logo" title="Klik dua kali untuk ciutkan/perluas" />
 </div>
 
-<div class="sidebar-nav-container scroll-area">
+<div class="sidebar-nav-container">
     @if (!IsCollapsed)
     {
         <div class="sidebar-section-title">Menu Utama</div>
@@ -21,16 +21,7 @@
             </NavLink>
         </div>
         <div class="nav-item">
-            <NavLink class="nav-link" href="my-bookings" title="Status Booking Saya">
-                <img src="icon/icon_4_admin.svg" alt="Booking Saya" class="nav-icon" />
-                @if (!IsCollapsed)
-                {
-                    <span>Status Booking Saya</span>
-                }
-            </NavLink>
-        </div>
-        <div class="nav-item">
-            <NavLink class="nav-link" href="booking-management" title="Manajemen Booking">
+            <NavLink class="nav-link" href="booking-management" Match="NavLinkMatch.All" title="Manajemen Booking">
                 <img src="icon/calendar.svg" alt="Booking" class="nav-icon" />
                 @if (!IsCollapsed)
                 {
@@ -39,7 +30,7 @@
             </NavLink>
         </div>
         <div class="nav-item">
-            <NavLink class="nav-link" href="rooms" title="Ruangan">
+            <NavLink class="nav-link" href="rooms" Match="NavLinkMatch.All" title="Ruangan">
                 <img src="icon/icon_1_admin.svg" alt="Ruangan" class="nav-icon" />
                 @if (!IsCollapsed)
                 {
@@ -48,7 +39,7 @@
             </NavLink>
         </div>
         <div class="nav-item">
-            <NavLink class="nav-link" href="rooms/status" title="Status Ruangan">
+            <NavLink class="nav-link" href="rooms/status" Match="NavLinkMatch.All" title="Status">
                 <img src="icon/icon_12_admin.svg" alt="Status" class="nav-icon" />
                 @if (!IsCollapsed)
                 {
@@ -65,7 +56,7 @@
 
     <nav class="nav flex-column">
         <div class="nav-item">
-            <NavLink class="nav-link" href="users" title="Manajemen User">
+            <NavLink class="nav-link" href="users" Match="NavLinkMatch.All" title="Manajemen User">
                 <img src="icon/icon_13_admin.svg" alt="Users" class="nav-icon" />
                 @if (!IsCollapsed)
                 {
@@ -74,7 +65,7 @@
             </NavLink>
         </div>
         <div class="nav-item">
-            <NavLink class="nav-link" href="reports" title="Laporan Sistem">
+            <NavLink class="nav-link" href="reports" Match="NavLinkMatch.All" title="Laporan Sistem">
                 <img src="icon/icon_15_admin.svg" alt="Reports" class="nav-icon" />
                 @if (!IsCollapsed)
                 {
@@ -83,7 +74,7 @@
             </NavLink>
         </div>
         <div class="nav-item">
-            <NavLink class="nav-link" href="audit-log" title="Audit Log">
+            <NavLink class="nav-link" href="audit-log" Match="NavLinkMatch.All" title="Audit Log">
                 <img src="icon/icon_16_admin.svg" alt="Audit Log" class="nav-icon" />
                 @if (!IsCollapsed)
                 {
@@ -92,7 +83,7 @@
             </NavLink>
         </div>
         <div class="nav-item">
-            <NavLink class="nav-link" href="facility-requests" title="Permintaan Fasilitas">
+            <NavLink class="nav-link" href="facility-requests" Match="NavLinkMatch.All" title="Permintaan Fasilitas">
                 <img src="icon/coffee.svg" alt="Facility" class="nav-icon" />
                 @if (!IsCollapsed)
                 {
@@ -101,7 +92,7 @@
             </NavLink>
         </div>
         <div class="nav-item">
-            <NavLink class="nav-link" href="room-calendar" title="Kalender Ruangan">
+            <NavLink class="nav-link" href="room-calendar" Match="NavLinkMatch.All" title="Kalender Ruangan">
                 <img src="icon/icon_6_admin.svg" alt="Calendar" class="nav-icon" />
                 @if (!IsCollapsed)
                 {
@@ -110,7 +101,7 @@
             </NavLink>
         </div>
         <div class="nav-item">
-            <NavLink class="nav-link" href="settings" title="Pengaturan">
+            <NavLink class="nav-link" href="settings" Match="NavLinkMatch.All" title="Pengaturan">
                 <img src="icon/icon_18_admin.svg" alt="Settings" class="nav-icon" />
                 @if (!IsCollapsed)
                 {
@@ -122,15 +113,6 @@
 </div>
 
 <div class="sidebar-footer">
-    <div class="nav-item">
-        <a class="nav-link footer-link" href="#" title="Bantuan">
-            <img src="icon/icon_17_admin.svg" alt="Support" class="nav-icon" />
-            @if (!IsCollapsed)
-            {
-                <span>Bantuan</span>
-            }
-        </a>
-    </div>
     <div class="nav-item">
         <a class="nav-link footer-link logout-link" href="#" @onclick="HandleLogout" @onclick:preventDefault title="Keluar">
             <img src="icon/icon_14_admin.svg" alt="Logout" class="nav-icon logout-icon" />
