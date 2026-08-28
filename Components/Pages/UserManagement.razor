@@ -4,141 +4,446 @@
 @using booking_room_admin.Components.Models
 @using booking_room_admin.Components.Services
 @inject IUserService UserService
+@inject ToastService Toast
 
+<TopBar Title="Manajemen User" Subtitle="Kelola akses, profil, dan hak pengguna sistem booking ruangan." ShowGlobalSearch="false" ShowDateFilter="false">
+    <RightSlot>
+        <button type="button" class="btn-outline-pill" @onclick="() => showImportModal = true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Import CSV</span>
+        </button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
+            <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
+            <span>+ Tambah User</span>
+        </button>
+    </RightSlot>
+</TopBar>
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Manajemen Pengguna" PageSubtitle="Kelola akses dan peran pengguna aplikasi." ShowGlobalSearch="false" ShowGlobalDate="true" />
-<div class="user-management">
-    <div class="toolbar">
-        <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" placeholder="Cari nama atau email..." @bind="searchQuery" @bind:event="oninput" @onkeyup="HandleSearch" />
+<div class="user-management-page">
+    <div class="um-eyebrow">ADMINISTRASI</div>
+
+    @* -- Search & Filter Bar -- *@
+    <div class="um-toolbar">
+        <div class="um-search-box">
+            <img src="icon/search.svg" alt="Cari" class="um-search-icon" />
+            <input type="text" placeholder="Cari berdasarkan nama, email, atau ID user..." @bind="searchQuery" @bind:event="oninput" @onkeyup="HandleSearchKey" />
         </div>
-        <div class="filters">
-            <select class="filter-select" @bind="roleFilter" @bind:after="LoadUsers">
-                <option value="All">Semua Role</option>
-                <option value="Admin">Admin</option>
-                <option value="Approver">Approver</option>
-                <option value="User">User</option>
-            </select>
-            <button class="btn-primary" @onclick="() => showAddUser = true">+ Tambah Pengguna</button>
-        </div>
+        <select class="um-filter-select" @bind="departmentFilter" @bind:after="LoadUsers">
+            <option value="All">Semua Departemen</option>
+            <option value="IT & Digital">IT & Digital</option>
+            <option value="Human Resources">Human Resources</option>
+            <option value="Finance">Finance</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Operations">Operations</option>
+            <option value="Legal">Legal</option>
+            <option value="General Affairs">General Affairs</option>
+        </select>
+        <button type="button" class="btn-export-um" @onclick="OpenExportModal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Export</span>
+        </button>
     </div>
 
-    @if (isLoading)
+    @if (hasError)
     {
-        <div class="loading-state">
-            <div class="spinner"></div>
-            <span>Memuat data pengguna...</span>
+        <div class="error-state">
+            <div class="error-icon">??</div>
+            <h3 class="error-title">Tidak dapat memuat data user</h3>
+            <p class="error-desc">Terjadi kendala saat menghubungkan ke database pengguna. Silakan coba kembali.</p>
+            <button class="btn-primary-pill btn-yellow" @onclick="LoadUsers">Coba Lagi</button>
+        </div>
+    }
+    else if (isLoading)
+    {
+        <div class="skeleton-loader">
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+        </div>
+    }
+    else if (!users.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">??</div>
+            <h3 class="empty-title">Tidak ada user ditemukan</h3>
+            <p class="empty-desc">Tidak ada akun pengguna yang cocok dengan kriteria pencarian atau filter yang dipilih.</p>
+            <button class="btn-primary-pill btn-yellow" @onclick="ResetFilters">Reset Filter</button>
         </div>
     }
     else
     {
-        <DataTable TItem="User" Items="users" Columns="columns" TotalCount="totalCount" PageSize="pageSize" CurrentPage="currentPage" OnPageChanged="HandlePageChange" ShowCheckbox="true" OnSelectionChanged="HandleSelection">
-            <BulkActions>
-                <button class="btn-bulk">Set Active</button>
-                <button class="btn-bulk btn-danger">Hapus Terpilih</button>
-            </BulkActions>
-            <RowTemplate Context="user">
-                <td>
-                    <div class="user-cell">
-                        <div class="user-avatar" style="background: @GetAvatarColor(user.FullName)">@user.Initials</div>
-                        <div>
-                            <span class="td-primary">@user.FullName</span>
-                            <span class="td-secondary">@user.Email</span>
+        <div class="um-table-container">
+            <DataTable TItem="User"
+                       Items="users"
+                       Columns="columns"
+                       TotalCount="totalCount"
+                       PageSize="pageSize"
+                       CurrentPage="currentPage"
+                       OnPageChanged="HandlePageChange"
+                       ShowCheckbox="false">
+                <RowTemplate Context="u">
+                    <td>
+                        <div class="user-row-cell">
+                            <div class="user-avatar-circle" style="background: @GetAvatarColor(u.FullName)">
+                                @u.Initials
+                            </div>
+                            <div class="user-name-box">
+                                <span class="user-full-name">@u.FullName</span>
+                                <span class="user-email-text">@u.Email</span>
+                            </div>
                         </div>
-                    </div>
-                </td>
-                <td><span class="td-primary">@user.Department</span></td>
-                <td><span class="role-badge @user.Role.ToLower()">@user.Role</span></td>
-                <td><StatusBadge Status="@user.Status" /></td>
-                <td><span class="td-secondary">@user.TotalBookings Booking</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn-icon" title="Edit Role" @onclick="() => OpenRoleModal(user)">✎</button>
-                    </div>
-                </td>
-            </RowTemplate>
-        </DataTable>
+                    </td>
+                    <td>
+                        <span class="um-dept-text">@u.Department</span>
+                    </td>
+                    <td>
+                        <span class="um-bookings-text">@u.TotalBookings Rooms</span>
+                    </td>
+                    <td>
+                        <span class="um-status-pill @(u.Status.ToLower() == "active" ? "status-active" : "status-inactive")">
+                            <span class="status-dot"></span>
+                            @(u.Status.ToLower() == "active" ? "Active" : "Inactive")
+                        </span>
+                    </td>
+                    <td>
+                        <div class="um-actions">
+                            <button type="button" class="btn-action-edit" title="Edit User" @onclick="() => OpenEditModal(u)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
+                            <button type="button" class="btn-action-delete" title="Hapus User" @onclick="() => OpenDeleteModal(u)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            </button>
+                        </div>
+                    </td>
+                </RowTemplate>
+            </DataTable>
+        </div>
     }
 </div>
 
-@if (showAddUser)
-{
-    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => showAddUser = v)" Title="Tambah Pengguna Baru" Size="medium">
-        <ChildContent>
-            <p>Fitur penambahan pengguna sinkronisasi dengan Azure AD sedang dikembangkan.</p>
-        </ChildContent>
-        <FooterContent>
-            <button class="btn-primary" @onclick="() => showAddUser = false">Tutup</button>
-        </FooterContent>
-    </AppModal>
-}
-
-@if (showRoleModal && selectedUser != null)
-{
-    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => showRoleModal = v)" Title="Ubah Role Pengguna" Size="small">
-        <ChildContent>
-            <div style="margin-bottom: 1rem;">
-                <strong>Pengguna:</strong> @selectedUser.FullName
+@* -- Modal 1: Tambah User -- *@
+<AppModal IsOpen="showAddModal" IsOpenChanged="v => showAddModal = v" Title="Tambah User" Size="medium">
+    <ChildContent>
+        <p class="modal-subtitle-text">Tambahkan pengguna baru ke sistem booking ruangan.</p>
+        
+        <div class="um-form">
+            <div class="form-group">
+                <label class="form-label">Nama Lengkap <span class="req">*</span></label>
+                <input type="text" class="form-input @(hasAddSubmitted && string.IsNullOrWhiteSpace(formModel.FullName) ? "is-invalid" : "")" placeholder="Contoh: Budi Santoso" @bind="formModel.FullName" />
+                @if (hasAddSubmitted && string.IsNullOrWhiteSpace(formModel.FullName))
+                {
+                    <span class="field-error">Nama lengkap wajib diisi.</span>
+                }
             </div>
-            <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #374151;">Pilih Role Baru:</label>
-            <select class="filter-select" style="width: 100%;" @bind="newRole">
-                <option value="Admin">Admin</option>
-                <option value="Approver">Approver</option>
-                <option value="User">User</option>
-            </select>
-        </ChildContent>
-        <FooterContent>
-            <button class="btn-outline" style="padding: 0.4rem 1rem; border: 1px solid #D1D5DB; border-radius: 8px; background: white; cursor: pointer;" @onclick="() => showRoleModal = false">Batal</button>
-            <button class="btn-primary" @onclick="SaveRole">Simpan</button>
-        </FooterContent>
-    </AppModal>
-}
+
+            <div class="form-group">
+                <label class="form-label">Email Perusahaan <span class="req">*</span></label>
+                <input type="email" class="form-input @(hasAddSubmitted && !IsValidEmail(formModel.Email) ? "is-invalid" : "")" placeholder="Contoh: budi.santoso@ptpersada.co.id" @bind="formModel.Email" />
+                @if (hasAddSubmitted)
+                {
+                    if (string.IsNullOrWhiteSpace(formModel.Email))
+                    {
+                        <span class="field-error">Email wajib diisi.</span>
+                    }
+                    else if (!IsValidEmail(formModel.Email))
+                    {
+                        <span class="field-error">Format email tidak valid.</span>
+                    }
+                }
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">User ID / NIK <span class="req">*</span></label>
+                    <input type="text" class="form-input @(hasAddSubmitted && string.IsNullOrWhiteSpace(formModel.EmployeeId) ? "is-invalid" : "")" placeholder="Contoh: EMP-1045" @bind="formModel.EmployeeId" />
+                    @if (hasAddSubmitted && string.IsNullOrWhiteSpace(formModel.EmployeeId))
+                    {
+                        <span class="field-error">User ID wajib diisi.</span>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Departemen <span class="req">*</span></label>
+                    <select class="form-input" @bind="formModel.Department">
+                        <option value="IT & Digital">IT & Digital</option>
+                        <option value="Human Resources">Human Resources</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Legal">Legal</option>
+                        <option value="General Affairs">General Affairs</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">Nomor Telepon</label>
+                    <input type="text" class="form-input" placeholder="+62 812-xxxx-xxxx" @bind="formModel.Phone" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Role Akses <span class="req">*</span></label>
+                    <select class="form-input" @bind="formModel.Role">
+                        <option value="Administrator">Administrator</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Approver">Approver</option>
+                        <option value="User">User</option>
+                        <option value="Viewer">Viewer</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Status Akun</label>
+                <select class="form-input" @bind="formModel.Status">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showAddModal = false" disabled="@isFormSubmitting">Batal</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveNewUser" disabled="@isFormSubmitting">
+            @if (isFormSubmitting)
+            {
+                <span class="spinner-sm"></span>
+                <span>Menyimpan...</span>
+            }
+            else
+            {
+                <span>Simpan User</span>
+            }
+        </button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal 2: Edit User -- *@
+<AppModal IsOpen="showEditModal" IsOpenChanged="v => showEditModal = v" Title="Edit User" Size="medium">
+    <ChildContent>
+        <p class="modal-subtitle-text">Perbarui data dan hak akses pengguna sistem.</p>
+
+        <div class="um-form">
+            <div class="form-group">
+                <label class="form-label">Nama Lengkap <span class="req">*</span></label>
+                <input type="text" class="form-input" @bind="editModel.FullName" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email Perusahaan <span class="req">*</span></label>
+                <input type="email" class="form-input" @bind="editModel.Email" />
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">User ID / NIK</label>
+                    <input type="text" class="form-input" @bind="editModel.EmployeeId" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Departemen</label>
+                    <select class="form-input" @bind="editModel.Department">
+                        <option value="IT & Digital">IT & Digital</option>
+                        <option value="Human Resources">Human Resources</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Legal">Legal</option>
+                        <option value="General Affairs">General Affairs</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">Nomor Telepon</label>
+                    <input type="text" class="form-input" @bind="editModel.Phone" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Role Akses</label>
+                    <select class="form-input" @bind="editModel.Role">
+                        <option value="Administrator">Administrator</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Approver">Approver</option>
+                        <option value="User">User</option>
+                        <option value="Viewer">Viewer</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Status Akun</label>
+                <select class="form-input" @bind="editModel.Status">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showEditModal = false" disabled="@isFormSubmitting">Batal</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveEditUser" disabled="@isFormSubmitting">
+            @if (isFormSubmitting)
+            {
+                <span class="spinner-sm"></span>
+                <span>Menyimpan...</span>
+            }
+            else
+            {
+                <span>Simpan Perubahan</span>
+            }
+        </button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal 3: Hapus User -- *@
+<AppModal IsOpen="showDeleteModal" IsOpenChanged="v => showDeleteModal = v" Title="Hapus User?" Size="small">
+    <ChildContent>
+        <div class="delete-user-content">
+            <p>Apakah Anda yakin ingin menghapus user <strong>@userToDelete?.FullName</strong>?</p>
+            <p class="text-muted text-sm">Tindakan ini tidak dapat dibatalkan dan akan menghapus riwayat akses pengguna.</p>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showDeleteModal = false">Batal</button>
+        <button type="button" class="btn-danger-pill" @onclick="ConfirmDeleteUser">Hapus User</button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal 4: Import CSV -- *@
+<AppModal IsOpen="showImportModal" IsOpenChanged="v => showImportModal = v" Title="Import User" Size="large">
+    <ChildContent>
+        <p class="modal-subtitle-text">Upload file CSV untuk menambahkan beberapa user sekaligus.</p>
+
+        <div class="csv-drop-zone">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="csv-upload-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+            <div class="csv-drop-text">Upload CSV � Drag & Drop atau <label class="csv-browse"><input type="file" style="display:none" @onchange="SimulateCsvLoad" accept=".csv" />pilih file</label></div>
+            <span class="csv-hint">Format kolom: Nama, Email, Department, Role, User ID</span>
+        </div>
+
+        @if (csvPreviewList.Any())
+        {
+            <div class="csv-summary-bar">
+                <span class="csv-valid-badge">? @csvPreviewList.Count data valid siap diimpor</span>
+            </div>
+
+            <div class="csv-preview-table-wrap">
+                <table class="csv-preview-table">
+                    <thead>
+                        <tr>
+                            <th>NAMA</th>
+                            <th>EMAIL</th>
+                            <th>DEPARTEMEN</th>
+                            <th>ROLE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in csvPreviewList)
+                        {
+                            <tr>
+                                <td>@c.FullName</td>
+                                <td>@c.Email</td>
+                                <td>@c.Department</td>
+                                <td>@c.Role</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showImportModal = false">Batal</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="ConfirmCsvImport" disabled="@(!csvPreviewList.Any())">Import User</button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal 5: Export Modal -- *@
+<ExportModal IsOpen="showExportModal"
+             IsOpenChanged="v => showExportModal = v"
+             ExportTitle="Data Pengguna Sistem Booking"
+             Columns="exportColumns"
+             CurrentViewRows="users.Cast<object>()"
+             AllRows="allUsersExport.Cast<object>()" />
 
 @code {
     private List<User> users = new();
+    private List<User> allUsersExport = new();
     private int totalCount = 0;
     private int currentPage = 1;
-    private int pageSize = 15;
+    private int pageSize = 10;
     private bool isLoading = true;
-    
+    private bool hasError = false;
+
     private string searchQuery = "";
-    private string roleFilter = "All";
-    
-    private bool showAddUser = false;
-    private bool showRoleModal = false;
-    private User? selectedUser;
-    private string newRole = "";
-    
-    private List<DataTable<User>.DataTableColumn> columns = new();
+    private string departmentFilter = "All";
+
+    // Modals
+    private bool showAddModal = false;
+    private bool showEditModal = false;
+    private bool showDeleteModal = false;
+    private bool showImportModal = false;
+    private bool showExportModal = false;
+
+    private bool hasAddSubmitted = false;
+    private bool isFormSubmitting = false;
+
+    private User formModel = new() { Department = "IT & Digital", Role = "User", Status = "active" };
+    private User editModel = new();
+    private User? userToDelete;
+
+    private List<User> csvPreviewList = new();
+
+    private List<DataTable<User>.DataTableColumn> columns = new()
+    {
+        new() { Header = "USER", PropertyName = "FullName", Sortable = true },
+        new() { Header = "DEPARTMENT", PropertyName = "Department", Sortable = true },
+        new() { Header = "TOTAL BOOKING", PropertyName = "TotalBookings", Sortable = true },
+        new() { Header = "STATUS", PropertyName = "Status", Sortable = true },
+        new() { Header = "ACTION", PropertyName = "" }
+    };
+
+    private List<ExportColumn> exportColumns = new()
+    {
+        new() { Header = "ID User", PropertyName = "EmployeeId" },
+        new() { Header = "Nama Lengkap", PropertyName = "FullName" },
+        new() { Header = "Email", PropertyName = "Email" },
+        new() { Header = "Departemen", PropertyName = "Department" },
+        new() { Header = "Role", PropertyName = "Role" },
+        new() { Header = "Status", PropertyName = "Status" },
+        new() { Header = "Total Booking", PropertyName = "TotalBookings" }
+    };
 
     protected override async Task OnInitializedAsync()
     {
-
-        columns = new()
-        {
-            new() { Header = "PENGGUNA", PropertyName = "FullName" },
-            new() { Header = "DEPARTEMEN", PropertyName = "Department" },
-            new() { Header = "PERAN", PropertyName = "Role" },
-            new() { Header = "STATUS", PropertyName = "Status" },
-            new() { Header = "TOTAL BOOKING", PropertyName = "TotalBookings" },
-            new() { Header = "AKSI", PropertyName = "" }
-        };
-
         await LoadUsers();
     }
 
     private async Task LoadUsers()
     {
         isLoading = true;
+        hasError = false;
         StateHasChanged();
 
-        var result = await UserService.GetUsersAsync(currentPage, pageSize, searchQuery, roleFilter);
-        users = result.Users.ToList();
-        totalCount = result.TotalCount;
-
-        isLoading = false;
-        StateHasChanged();
+        try
+        {
+            var result = await UserService.GetUsersFilteredAsync(currentPage, pageSize, searchQuery, departmentFilter);
+            users = result.Users.ToList();
+            totalCount = result.TotalCount;
+        }
+        catch
+        {
+            hasError = true;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
     }
 
     private async Task HandlePageChange(int page)
@@ -147,7 +452,7 @@
         await LoadUsers();
     }
 
-    private async Task HandleSearch(KeyboardEventArgs e)
+    private async Task HandleSearchKey(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
@@ -156,36 +461,148 @@
         }
     }
 
-    private void HandleSelection(List<User> selected) { }
-
-    private void OpenRoleModal(User u)
+    private async Task ResetFilters()
     {
-        selectedUser = u;
-        newRole = u.Role;
-        showRoleModal = true;
+        searchQuery = "";
+        departmentFilter = "All";
+        currentPage = 1;
+        await LoadUsers();
     }
 
-    private async Task SaveRole()
+    private void OpenAddModal()
     {
-        if (selectedUser != null)
+        formModel = new User
         {
-            await UserService.UpdateUserRoleAsync(selectedUser.Id, newRole);
+            Department = "IT & Digital",
+            Role = "User",
+            Status = "active",
+            EmployeeId = $"EMP-{new Random().Next(1050, 9999)}"
+        };
+        hasAddSubmitted = false;
+        isFormSubmitting = false;
+        showAddModal = true;
+    }
+
+    private async Task SaveNewUser()
+    {
+        hasAddSubmitted = true;
+        if (string.IsNullOrWhiteSpace(formModel.FullName) || !IsValidEmail(formModel.Email) || string.IsNullOrWhiteSpace(formModel.EmployeeId))
+        {
+            return;
+        }
+
+        isFormSubmitting = true;
+        StateHasChanged();
+
+        var success = await UserService.AddUserAsync(formModel);
+        isFormSubmitting = false;
+        showAddModal = false;
+
+        if (success)
+        {
+            Toast.Success($"User '{formModel.FullName}' berhasil ditambahkan.");
+            currentPage = 1;
             await LoadUsers();
         }
-        showRoleModal = false;
+        else
+        {
+            Toast.Error("Gagal menambahkan user. NIK atau Email sudah terdaftar.");
+        }
+    }
+
+    private void OpenEditModal(User u)
+    {
+        editModel = new User
+        {
+            Id = u.Id,
+            FullName = u.FullName,
+            Email = u.Email,
+            Department = u.Department,
+            EmployeeId = u.EmployeeId,
+            Phone = u.Phone,
+            Role = u.Role,
+            Status = u.Status,
+            TotalBookings = u.TotalBookings
+        };
+        showEditModal = true;
+    }
+
+    private async Task SaveEditUser()
+    {
+        isFormSubmitting = true;
+        StateHasChanged();
+
+        var success = await UserService.UpdateUserAsync(editModel);
+        isFormSubmitting = false;
+        showEditModal = false;
+
+        if (success)
+        {
+            Toast.Success("Data user berhasil diperbarui.");
+            await LoadUsers();
+        }
+        else
+        {
+            Toast.Error("Gagal memperbarui data user.");
+        }
+    }
+
+    private void OpenDeleteModal(User u)
+    {
+        userToDelete = u;
+        showDeleteModal = true;
+    }
+
+    private async Task ConfirmDeleteUser()
+    {
+        if (userToDelete != null)
+        {
+            await UserService.DeleteUserAsync(userToDelete.Id);
+            Toast.Success("User berhasil dihapus.");
+            showDeleteModal = false;
+            await LoadUsers();
+        }
+    }
+
+    private async Task OpenExportModal()
+    {
+        allUsersExport = await UserService.GetAllUsersAsync();
+        showExportModal = true;
+    }
+
+    private void SimulateCsvLoad(ChangeEventArgs e)
+    {
+        csvPreviewList = new List<User>
+        {
+            new() { FullName = "Anton Kurniawan", Email = "anton.k@ptpersada.co.id", Department = "Operations", Role = "User", EmployeeId = "EMP-2001", Status = "active" },
+            new() { FullName = "Rina Susanti", Email = "rina.s@ptpersada.co.id", Department = "Finance", Role = "Approver", EmployeeId = "EMP-2002", Status = "active" },
+            new() { FullName = "Doni Ramadhan", Email = "doni.r@ptpersada.co.id", Department = "IT & Digital", Role = "Administrator", EmployeeId = "EMP-2003", Status = "active" }
+        };
+    }
+
+    private async Task ConfirmCsvImport()
+    {
+        if (csvPreviewList.Any())
+        {
+            var count = await UserService.ImportUsersAsync(csvPreviewList);
+            Toast.Success($"{count} user baru berhasil diimpor dari CSV.");
+            csvPreviewList.Clear();
+            showImportModal = false;
+            await LoadUsers();
+        }
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return false;
+        return email.Contains('@') && email.Contains('.');
     }
 
     private string GetAvatarColor(string name)
     {
         if (string.IsNullOrWhiteSpace(name)) return "#2563EB";
         var hash = name.GetHashCode();
-        var colors = new[] { "#2563EB", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899" };
+        var colors = new[] { "#1E3A8A", "#0D9488", "#0284C7", "#7C3AED", "#D97706", "#DC2626" };
         return colors[Math.Abs(hash) % colors.Length];
     }
 }
-
-
-
-
-
-

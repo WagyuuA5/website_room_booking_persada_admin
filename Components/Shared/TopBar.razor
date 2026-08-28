@@ -1,0 +1,154 @@
+@namespace booking_room_admin.Components.Shared
+@inject booking_room_admin.Components.Services.LayoutStateService LayoutState
+@inject NavigationManager Navigation
+
+<header class="topbar">
+    <div class="topbar-left">
+        <h1 class="topbar-title">@Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Subtitle))
+        {
+            <p class="topbar-subtitle">@Subtitle</p>
+        }
+    </div>
+
+    <div class="topbar-right">
+        @if (ShowGlobalSearch)
+        {
+            <div class="topbar-search">
+                <img src="icon/search.svg" alt="Cari" class="search-icon" />
+                <input type="text" placeholder="@SearchPlaceholder" />
+            </div>
+        }
+
+        @if (ShowDateFilter)
+        {
+            <div class="date-filter" @onclick="ToggleDatePicker">
+                <img src="icon/icon_6_admin.svg" alt="Kalender" class="icon-sm" />
+                <span>@dateRangeLabel</span>
+            </div>
+        }
+
+        @if (RightSlot != null)
+        {
+            <div class="topbar-right-slot">
+                @RightSlot
+            </div>
+        }
+
+        <button class="topbar-icon-btn theme-toggle" @onclick="ToggleTheme" title="Mode Gelap / Terang">
+            @if (LayoutState.IsDarkMode)
+            {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            }
+            else
+            {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            }
+        </button>
+
+        <div class="topbar-icon-btn notification-btn" @onclick="ToggleNotification">
+            <img src="icon/icon_7_admin.svg" alt="Notifikasi" class="icon-md" />
+            @if (unreadCount > 0)
+            {
+                <span class="notification-badge">@unreadCount</span>
+            }
+        </div>
+
+        <div class="admin-profile-btn" @onclick="ToggleProfilePopup">
+            <UserAvatar Initials="WA" BgColor="#1e3a8a" Size="36px" />
+            <div class="admin-info">
+                <span class="admin-name">Admin Wahyu</span>
+                <span class="admin-role">PENGONTROL SISTEM</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => { showDatePicker = v; StateHasChanged(); })" OnDateSelected="OnDateSelected" />
+<NotificationPopup IsOpen="@showNotification" IsOpenChanged="@((bool v) => { showNotification = v; StateHasChanged(); })" />
+
+@if (showProfilePopup)
+{
+    <div class="profile-popup-overlay" @onclick="() => showProfilePopup = false">
+        <div class="profile-popup" @onclick:stopPropagation="true">
+            <div class="profile-header">
+                <UserAvatar Initials="WA" BgColor="#1e3a8a" Size="48px" />
+                <div>
+                    <strong>Admin Wahyu</strong>
+                    <div class="text-sm text-gray">wahyu.admin@persada.co.id</div>
+                </div>
+            </div>
+            <hr />
+            <div class="profile-details">
+                <div class="pd-row"><span>Jabatan:</span> <strong>Pengontrol Sistem</strong></div>
+                <div class="pd-row"><span>Divisi:</span> <strong>IT & Infrastructure</strong></div>
+                <div class="pd-row"><span>Lokasi:</span> <strong>Kantor Pusat, Lt. 14</strong></div>
+                <div class="pd-row"><span>Terakhir Login:</span> <strong>Hari ini, 08:30 WIB</strong></div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Title { get; set; } = "Dashboard";
+    [Parameter] public string Subtitle { get; set; } = string.Empty;
+    [Parameter] public bool ShowGlobalSearch { get; set; } = true;
+    [Parameter] public bool ShowDateFilter { get; set; } = true;
+    [Parameter] public string SearchPlaceholder { get; set; } = "Cari menu, ruangan, user...";
+    [Parameter] public RenderFragment? RightSlot { get; set; }
+
+    [Parameter] public EventCallback<DateTime?> OnDateSelectedCallback { get; set; }
+
+    private bool showDatePicker = false;
+    private bool showNotification = false;
+    private bool showProfilePopup = false;
+    private string dateRangeLabel = "01 Okt - 31 Okt 2026";
+    private int unreadCount = 3;
+
+    private void ToggleTheme()
+    {
+        LayoutState.ToggleTheme();
+        StateHasChanged();
+    }
+
+    private void ToggleDatePicker()
+    {
+        showDatePicker = !showDatePicker;
+        if (showDatePicker) { showNotification = false; showProfilePopup = false; }
+    }
+
+    private void ToggleNotification()
+    {
+        showNotification = !showNotification;
+        if (showNotification) { showDatePicker = false; showProfilePopup = false; }
+    }
+
+    private void ToggleProfilePopup()
+    {
+        showProfilePopup = !showProfilePopup;
+        if (showProfilePopup) { showDatePicker = false; showNotification = false; }
+    }
+
+    private void OnDateSelected(DateTime? date)
+    {
+        if (date.HasValue)
+        {
+            dateRangeLabel = date.Value.ToString("dd MMM yyyy");
+            OnDateSelectedCallback.InvokeAsync(date.Value);
+        }
+        showDatePicker = false;
+        StateHasChanged();
+    }
+}

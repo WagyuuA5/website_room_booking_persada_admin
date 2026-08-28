@@ -5,7 +5,7 @@
 @using booking_room_admin.Components.Services
 @inject NavigationManager Navigation
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Dashboard Admin" PageSubtitle="Ringkasan performa sistem pemesanan ruangan perusahaan." ShowGlobalSearch="true" ShowGlobalDate="true" />
+<TopBar Title="Dashboard Admin" Subtitle="Ringkasan performa sistem pemesanan ruangan perusahaan." ShowGlobalSearch="true" ShowDateFilter="true" />
 <div class="dashboard">
     @* -- Bagian 1: Ringkasan Statistik -- *@
     <div class="stats-grid">
@@ -181,11 +181,8 @@
                     </td>
                     <td>
                         <div class="user-cell">
-                            <UserAvatar Initials="@req.Initials" BgColor="@req.AvatarColor" Size="32px" />
-                            <div>
-                                <span class="td-primary">@req.RequesterName</span>
-                                <span class="td-secondary">@req.Department</span>
-                            </div>
+                            <UserAvatar Initials="@req.Initials" BgColor="@req.AvatarColor" Size="36px" />
+                            <div class="user-cell-info"><span class="td-primary">@req.RequesterName</span><span class="td-secondary">@req.Department</span></div>
                         </div>
                     </td>
                     <td>@req.Summary</td>
@@ -209,11 +206,8 @@
                 <RowTemplate Context="booking">
                     <td>
                         <div class="user-cell">
-                            <UserAvatar Initials="@booking.Initials" BgColor="@booking.AvatarColor" Size="32px" />
-                            <div>
-                                <span class="td-primary">@booking.UserName</span>
-                                <span class="td-secondary">@booking.Department</span>
-                            </div>
+                            <UserAvatar Initials="@booking.Initials" BgColor="@booking.AvatarColor" Size="36px" />
+                            <div class="user-cell-info"><span class="td-primary">@booking.UserName</span><span class="td-secondary">@booking.Department</span></div>
                         </div>
                     </td>
                     <td><span class="td-primary">@booking.Room</span></td>
@@ -482,6 +476,7 @@
     public record RecentRequest(string Type, string TypeIcon, string TypeColor, string RequesterName, string Initials, string AvatarColor, string Department, string Summary, string Status);
     public record HistoryBooking(string UserName, string Initials, string AvatarColor, string Department, string Room, string Schedule, string Status);
 }
+
 
 
 

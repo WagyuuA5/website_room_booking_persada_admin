@@ -1,8 +1,10 @@
 @namespace booking_room_admin.Components.Shared
+@inject IJSRuntime JS
+@implements IDisposable
 
 @if (IsOpen)
 {
-    <div class="modal-overlay @(IsOpen ? "open" : "")" @onclick="HandleOverlayClick">
+    <div class="modal-overlay @(IsOpen ? "open" : "")" @onclick="HandleOverlayClick" @onkeydown="HandleKeyDown" tabindex="-1" @ref="_overlayRef">
         <div class="modal-container @SizeClass" @onclick:stopPropagation="true">
             @* Header *@
             <div class="modal-header">
@@ -14,7 +16,7 @@
                 {
                     <h4 class="modal-title">@Title</h4>
                 }
-                <button class="modal-close" @onclick="Close" title="Tutup">✕</button>
+                <button type="button" class="modal-close" @onclick="Close" title="Tutup (Esc)">?</button>
             </div>
 
             @* Body *@
@@ -39,7 +41,7 @@
 
     [Parameter] public string Title { get; set; } = "";
 
-    /// <summary>small (360px), medium (520px), large (700px), xlarge (900px), fullscreen</summary>
+    /// <summary>small (380px), medium (540px), large (720px), xlarge (920px), fullscreen</summary>
     [Parameter] public string Size { get; set; } = "medium";
 
     /// <summary>Custom header content (overrides Title)</summary>
@@ -57,6 +59,9 @@
     /// <summary>Allow closing by clicking overlay</summary>
     [Parameter] public bool CloseOnOverlay { get; set; } = true;
 
+    private ElementReference _overlayRef;
+    private bool _prevIsOpen = false;
+
     private string SizeClass => Size.ToLowerInvariant() switch
     {
         "small" => "modal-sm",
@@ -67,8 +72,30 @@
         _ => "modal-md"
     };
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (IsOpen != _prevIsOpen)
+        {
+            _prevIsOpen = IsOpen;
+            try
+            {
+                if (IsOpen)
+                {
+                    await JS.InvokeVoidAsync("eval", "document.body.style.overflow = 'hidden'");
+                    await _overlayRef.FocusAsync();
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("eval", "document.body.style.overflow = ''");
+                }
+            }
+            catch { }
+        }
+    }
+
     private async Task Close()
     {
+        try { await JS.InvokeVoidAsync("eval", "document.body.style.overflow = ''"); } catch { }
         await IsOpenChanged.InvokeAsync(false);
         await OnClose.InvokeAsync();
     }
@@ -79,5 +106,18 @@
         {
             await Close();
         }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await Close();
+        }
+    }
+
+    public void Dispose()
+    {
+        try { JS.InvokeVoidAsync("eval", "document.body.style.overflow = ''"); } catch { }
     }
 }

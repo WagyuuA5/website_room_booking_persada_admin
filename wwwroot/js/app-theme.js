@@ -1,6 +1,11 @@
 window.applyThemeMode = function (isDark) {
-    if (isDark) document.body.classList.add('dark');
-    else document.body.classList.remove('dark');
+    if (isDark) {
+        document.body.classList.add('dark');
+        document.documentElement.classList.add('dark');
+    } else {
+        document.body.classList.remove('dark');
+        document.documentElement.classList.remove('dark');
+    }
 };
 
 window.initSidebarDrag = function (dotNetRef) {
@@ -8,33 +13,51 @@ window.initSidebarDrag = function (dotNetRef) {
     if (!layout) return;
     var sidebar = layout.querySelector('.admin-sidebar');
     if (!sidebar) return;
+    var handle = sidebar.querySelector('.sidebar-drag-handle');
 
-    var startX = 0, startY = 0, dragging = false, THRESHOLD = 40;
+    var startX = 0, dragging = false, THRESHOLD = 35;
 
-    sidebar.addEventListener('pointerdown', function (e) {
+    function onPointerDown(e) {
         var rect = sidebar.getBoundingClientRect();
-        if (e.clientX < rect.right - 18) return;
-        if (e.pointerType === 'mouse' && e.button !== 0) return;
-        startX = e.clientX;
-        startY = e.clientY;
-        dragging = true;
-    });
+        // Trigger if clicking near edge or on handle
+        if (e.target === handle || (e.clientX >= rect.right - 14 && e.clientX <= rect.right + 6)) {
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            startX = e.clientX;
+            dragging = true;
+            sidebar.classList.add('dragging');
+            if (handle) handle.classList.add('active');
+            try { e.target.setPointerCapture(e.pointerId); } catch(err){}
+        }
+    }
 
-    window.addEventListener('pointermove', function (e) {
+    function onPointerMove(e) {
         if (!dragging) return;
         var dx = e.clientX - startX;
-        var dy = e.clientY - startY;
-        if (Math.abs(dx) > THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
-            dragging = false;
+        if (Math.abs(dx) > THRESHOLD) {
             var collapsed = layout.classList.contains('sidebar-collapsed');
             var shouldCollapse = dx < 0;
             if (shouldCollapse !== collapsed) {
                 dotNetRef.invokeMethodAsync('ToggleSidebarFromJs');
+                dragging = false;
+                sidebar.classList.remove('dragging');
+                if (handle) handle.classList.remove('active');
             }
         }
-    });
+    }
 
-    window.addEventListener('pointerup', function () { dragging = false; });
+    function onPointerUp(e) {
+        if (dragging) {
+            dragging = false;
+            sidebar.classList.remove('dragging');
+            if (handle) handle.classList.remove('active');
+            try { e.target.releasePointerCapture(e.pointerId); } catch(err){}
+        }
+    }
+
+    sidebar.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
 };
 
 window.downloadBase64File = function (fileName, base64, mimeType) {

@@ -1,0 +1,49 @@
+@namespace booking_room_admin.Components.Shared
+@implements IDisposable
+@inject booking_room_admin.Components.Services.ToastService ToastSvc
+
+<div class="toast-stack">
+    @foreach (var t in _toasts)
+    {
+        <div class="toast @t.Type">
+            <span class="toast-icon">
+                @if (t.Type == "success") { <text>?</text> }
+                else if (t.Type == "error") { <text>?</text> }
+                else { <text>?</text> }
+            </span>
+            <span class="toast-message">@t.Message</span>
+        </div>
+    }
+</div>
+
+@code {
+    private List<(string Message, string Type)> _toasts = new();
+    private System.Timers.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        ToastSvc.OnToast += HandleToast;
+    }
+
+    private void HandleToast(string message, string type)
+    {
+        _toasts.Add((message, type));
+        if (_toasts.Count > 4) _toasts.RemoveAt(0);
+        InvokeAsync(StateHasChanged);
+
+        _timer = new System.Timers.Timer(3200);
+        _timer.Elapsed += (s, e) =>
+        {
+            _timer?.Stop();
+            if (_toasts.Any()) { _toasts.RemoveAt(0); InvokeAsync(StateHasChanged); }
+        };
+        _timer.AutoReset = false;
+        _timer.Start();
+    }
+
+    public void Dispose()
+    {
+        ToastSvc.OnToast -= HandleToast;
+        _timer?.Dispose();
+    }
+}

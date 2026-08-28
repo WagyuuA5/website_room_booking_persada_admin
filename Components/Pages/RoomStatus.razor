@@ -2,157 +2,535 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
-@inject booking_room_admin.Components.Services.IRoomService RoomService
+@using booking_room_admin.Components.Services
+@inject ToastService Toast
+@implements IDisposable
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Status Ruangan" PageSubtitle="Pantau status operasional dan maintenance ruangan." ShowGlobalSearch="false" ShowGlobalDate="true">
-    <HeaderActions>
-        <div class="rs-legend">
-            <span class="rs-legend-item"><span class="rs-dot rs-dot-active"></span>Aktif</span>
-            <span class="rs-legend-item"><span class="rs-dot rs-dot-maintenance"></span>Maintenance</span>
-            <span class="rs-legend-item"><span class="rs-dot rs-dot-inactive"></span>Tidak Aktif</span>
+<TopBar Title="Status Ruangan" Subtitle="Pantau dan kelola ketersediaan serta status operasional ruangan." ShowGlobalSearch="false" ShowDateFilter="false">
+    <RightSlot>
+        <div class="rs-legend-top">
+            <span class="rs-legend-item"><span class="rs-dot rs-dot-active"></span>Aktif (@rooms.Count(r => r.Status == RoomCardStatus.Active))</span>
+            <span class="rs-legend-item"><span class="rs-dot rs-dot-maintenance"></span>Maintenance (@rooms.Count(r => r.Status == RoomCardStatus.Maintenance))</span>
+            <span class="rs-legend-item"><span class="rs-dot rs-dot-inactive"></span>Tidak Aktif (@rooms.Count(r => r.Status == RoomCardStatus.Inactive))</span>
         </div>
-    </HeaderActions>
-</booking_room_admin.Components.Shared.AdminTopBar>
+    </RightSlot>
+</TopBar>
 
-<div class="room-status">
+<div class="room-status-page">
     <div class="rs-toolbar">
         <div class="rs-search">
             <img src="icon/search.svg" alt="Cari" class="rs-search-icon" />
-            <input type="text" placeholder="Cari nama ruangan..." />
+            <input type="text" placeholder="Cari berdasarkan nama ruangan, gedung, atau fasilitas..." @bind="searchQuery" @bind:event="oninput" />
         </div>
-        <select class="rs-filter"><option>Semua Lantai</option></select>
-        <select class="rs-filter"><option>Semua Status</option></select>
+        <select class="rs-filter" @bind="selectedFloor">
+            <option value="">Semua Lantai</option>
+            <option value="Lt. 1">Lantai 1</option>
+            <option value="Lt. 2">Lantai 2</option>
+            <option value="Lt. 3">Lantai 3</option>
+            <option value="Lt. 14">Lantai 14 (VIP)</option>
+        </select>
+        <select class="rs-filter" @bind="selectedStatusFilter">
+            <option value="all">Semua Status</option>
+            <option value="active">Aktif</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="inactive">Tidak Aktif</option>
+        </select>
     </div>
 
-    <div class="rs-grid">
-        <!-- 1. Kondisi Aktif Normal -->
-        <div class="rs-card">
-            <div class="rs-photo-wrapper">
-                <img src="images/room1.jpg" class="rs-photo" onerror="this.src='https://placehold.co/400x200/e2e8f0/64748b?text=Ruang+Aktif'" />
-                <div class="rs-badge-top-left badge-dark">20 Orang</div>
-            </div>
-            <div class="rs-card-body">
-                <div class="rs-card-header">
-                    <h3 class="rs-room-name">Ruang Rapat Utama</h3>
-                    <div class="rs-toggle-group">
-                        <label class="rs-switch">
-                            <input type="checkbox" checked @onchange="() => OpenMaintenanceModal()" />
-                            <span class="rs-slider round"></span>
-                        </label>
-                        <span class="rs-status-text text-active">AKTIF</span>
-                    </div>
-                </div>
-                <div class="rs-location"><img src="icon/icon_8_admin.svg" /> Gedung A - Lantai 2</div>
-                <div class="rs-facilities">
-                    <span class="rs-chip">Projector 4K</span>
-                    <span class="rs-chip">Webcam</span>
-                    <span class="rs-chip">AC Central</span>
-                </div>
-            </div>
-            <button class="btn-delete-room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
+    @if (!filteredRooms.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">??</div>
+            <h3 class="empty-title">Tidak Ada Ruangan</h3>
+            <p class="empty-desc">Tidak ditemukan ruangan yang cocok dengan filter atau kata kunci pencarian Anda.</p>
+            <button class="btn-primary-pill btn-yellow" @onclick="ResetFilters">Reset Filter</button>
         </div>
+    }
+    else
+    {
+        <div class="rs-grid">
+            @foreach (var room in filteredRooms)
+            {
+                @if (room.Status == RoomCardStatus.Active)
+                {
+                    <!-- 1. Kondisi AKTIF NORMAL -->
+                    <div class="rs-card card-active">
+                        <div class="rs-photo-wrapper">
+                            <img src="@room.PhotoUrl" class="rs-photo" onerror="this.src='https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&auto=format&fit=crop&q=60'" alt="@room.Name" />
+                            <div class="rs-badge-top-left badge-dark">@room.Capacity Orang</div>
+                        </div>
+                        <div class="rs-card-body">
+                            <div class="rs-card-header">
+                                <h3 class="rs-room-name">@room.Name</h3>
+                                <div class="rs-toggle-group">
+                                    <label class="rs-switch">
+                                        <input type="checkbox" checked @onchange="() => PromptSetMaintenance(room)" />
+                                        <span class="rs-slider round"></span>
+                                    </label>
+                                    <span class="rs-status-text text-active">AKTIF</span>
+                                </div>
+                            </div>
+                            <div class="rs-location">
+                                <img src="icon/icon_8_admin.svg" alt="Lokasi" />
+                                <span>@room.Location</span>
+                            </div>
+                            <div class="rs-facilities">
+                                @foreach (var f in room.Facilities)
+                                {
+                                    <span class="rs-chip">@f</span>
+                                }
+                            </div>
+                        </div>
+                        <button class="btn-delete-room" title="Hapus Ruangan" @onclick="() => PromptDelete(room)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        </button>
+                    </div>
+                }
+                else if (room.Status == RoomCardStatus.Maintenance)
+                {
+                    <!-- 2. Kondisi MAINTENANCE -->
+                    <div class="rs-card card-maintenance">
+                        <div class="rs-photo-wrapper">
+                            <img src="@room.PhotoUrl" class="rs-photo photo-grayscale" onerror="this.src='https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=600&auto=format&fit=crop&q=60'" alt="@room.Name" />
+                            @if (room.QueueCount > 0)
+                            {
+                                <div class="rs-badge-top-left badge-green">@room.QueueCount Dalam Antrian</div>
+                            }
+                            <div class="rs-overlay-center">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                                <span>Maintenance (@FormatCountdown(room.MaintenanceSecondsRemaining))</span>
+                            </div>
+                        </div>
+                        <div class="rs-card-body">
+                            <div class="rs-card-header">
+                                <h3 class="rs-room-name">@room.Name</h3>
+                                <div class="rs-toggle-group">
+                                    <label class="rs-switch">
+                                        <input type="checkbox" @onchange="() => SetActiveDirect(room)" />
+                                        <span class="rs-slider round"></span>
+                                    </label>
+                                    <span class="rs-status-text text-maintenance">MAINTENANCE</span>
+                                </div>
+                            </div>
+                            <div class="rs-location">
+                                <img src="icon/icon_8_admin.svg" alt="Lokasi" />
+                                <span>@room.Location</span>
+                            </div>
+                            <div class="rs-schedule-row">
+                                <div class="rs-schedule-label">Jadwal Maintenance:</div>
+                                <div class="rs-duration-chips">
+                                    <button type="button" class="rs-dur-chip @(room.MaintenanceSelectedDuration == 20 ? "active" : "")" @onclick="() => QuickUpdateDuration(room, 20)">20 Menit</button>
+                                    <button type="button" class="rs-dur-chip @(room.MaintenanceSelectedDuration == 30 ? "active" : "")" @onclick="() => QuickUpdateDuration(room, 30)">30 Menit</button>
+                                    <button type="button" class="rs-dur-chip @(room.MaintenanceSelectedDuration == 60 ? "active" : "")" @onclick="() => QuickUpdateDuration(room, 60)">1 Jam</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        @if (room.IsJustFinished)
+                        {
+                            <span class="badge-just-finished">Baru Selesai</span>
+                        }
 
-        <!-- 2. Kondisi Maintenance -->
-        <div class="rs-card card-maintenance">
-            <div class="rs-photo-wrapper">
-                <img src="images/room2.jpg" class="rs-photo photo-grayscale" onerror="this.src='https://placehold.co/400x200/e2e8f0/64748b?text=Ruang+Maintenance'" />
-                <div class="rs-badge-top-left badge-green">2 Dalam Antrian</div>
-                <div class="rs-overlay-center">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                    <span>Maintenance (45:00)</span>
-                </div>
-            </div>
-            <div class="rs-card-body">
-                <div class="rs-card-header">
-                    <h3 class="rs-room-name">Ruang Diskusi B</h3>
-                    <div class="rs-toggle-group">
-                        <label class="rs-switch">
-                            <input type="checkbox" />
-                            <span class="rs-slider round"></span>
-                        </label>
-                        <span class="rs-status-text text-maintenance">MAINTENANCE</span>
+                        <div class="rs-maintenance-bar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            <span>Maintenance</span>
+                        </div>
+                        <button class="btn-delete-room" title="Hapus Ruangan" @onclick="() => PromptDelete(room)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        </button>
                     </div>
-                </div>
-                <div class="rs-location"><img src="icon/icon_8_admin.svg" /> Gedung B - Lantai 1</div>
-                <div class="rs-schedule-row">
-                    <div class="rs-schedule-label">Jadwal Maintenance:</div>
-                    <div class="rs-duration-chips">
-                        <button class="rs-dur-chip">20 Menit</button>
-                        <button class="rs-dur-chip active">30 Menit</button>
-                        <button class="rs-dur-chip">1 Jam</button>
+                }
+                else
+                {
+                    <!-- 3. Kondisi INACTIVE / GHOST ROOM -->
+                    <div class="rs-card card-ghost">
+                        <div class="rs-photo-wrapper">
+                            <img src="@room.PhotoUrl" class="rs-photo photo-grayscale" onerror="this.src='https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=600&auto=format&fit=crop&q=60'" alt="@room.Name" />
+                        </div>
+                        <div class="rs-card-body">
+                            <div class="rs-card-header">
+                                <h3 class="rs-room-name">@room.Name</h3>
+                                <div class="rs-toggle-group">
+                                    <label class="rs-switch">
+                                        <input type="checkbox" disabled />
+                                        <span class="rs-slider round"></span>
+                                    </label>
+                                    <span class="rs-status-text text-inactive">TIDAK AKTIF</span>
+                                </div>
+                            </div>
+                            <div class="rs-location">
+                                <img src="icon/icon_8_admin.svg" alt="Lokasi" />
+                                <span>@room.Location</span>
+                            </div>
+                            <div class="rs-facilities text-muted text-sm">
+                                <span>Menunggu setup & konfigurasi admin...</span>
+                            </div>
+                        </div>
+                        @if (room.CanDelete)
+                        {
+                            <button class="btn-delete-room" title="Hapus Ruangan" @onclick="() => PromptDelete(room)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            </button>
+                        }
                     </div>
-                </div>
-            </div>
-            <div class="rs-maintenance-bar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                <span>Maintenance</span>
-            </div>
-            <button class="btn-delete-room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
+                }
+            }
         </div>
-
-        <!-- 3. Kondisi Tidak Aktif / Ghost Room -->
-        <div class="rs-card card-ghost">
-            <div class="rs-photo-wrapper">
-                <img src="images/room3.jpg" class="rs-photo photo-grayscale" onerror="this.src='https://placehold.co/400x200/e2e8f0/64748b?text=Ruang+Placeholder'" />
-            </div>
-            <div class="rs-card-body">
-                <div class="rs-card-header">
-                    <h3 class="rs-room-name">Ruang Belum Dikonfigurasi</h3>
-                    <div class="rs-toggle-group">
-                        <label class="rs-switch">
-                            <input type="checkbox" disabled />
-                            <span class="rs-slider round"></span>
-                        </label>
-                        <span class="rs-status-text text-inactive">TIDAK AKTIF</span>
-                    </div>
-                </div>
-                <div class="rs-location"><img src="icon/icon_8_admin.svg" /> Belum ada lokasi</div>
-                <div class="rs-facilities text-muted text-sm">Menunggu setup admin...</div>
-            </div>
-        </div>
-    </div>
+    }
 </div>
 
-<AppModal IsOpen="showMaintenanceModal" IsOpenChanged="v => showMaintenanceModal = v" Title="Set Maintenance">
-    <div class="form-group">
-        <label>Kategori Maintenance</label>
-        <select class="form-input">
-            <option>Preventive</option>
-            <option>Corrective</option>
-            <option>Routine Cleaning</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label>Prioritas</label>
-        <select class="form-input">
-            <option>Normal</option>
-            <option>High</option>
-            <option>Urgent</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label>Fasilitas yang Diservis</label>
-        <input type="text" class="form-input" placeholder="Contoh: AC, Proyektor..." />
-    </div>
-    <div class="form-group">
-        <label>Upload Dokumentasi (Opsional)</label>
-        <input type="file" class="form-input" />
-    </div>
-    <div class="form-group">
-        <label>Deskripsi</label>
-        <textarea class="form-input" rows="3" placeholder="Detail kerusakan atau perawatan..."></textarea>
-    </div>
-    <div class="modal-actions">
-        <button class="btn-outline" @onclick="() => showMaintenanceModal = false">Batal</button>
-        <button class="btn-primary" @onclick="() => showMaintenanceModal = false">Simpan</button>
-    </div>
+<!-- Modal 1: Set Maintenance (5 Field Sesuai Spesifikasi) -->
+<AppModal IsOpen="showMaintenanceModal" IsOpenChanged="v => showMaintenanceModal = v" Title="Set Maintenance Ruangan" Size="medium">
+    <ChildContent>
+        <div class="maintenance-modal-form">
+            <div class="form-group">
+                <label class="form-label">Ruangan</label>
+                <div class="form-static"><strong>@(selectedRoom?.Name ?? "-")</strong> (@(selectedRoom?.Location ?? "-"))</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">1. Kategori Maintenance <span class="req">*</span></label>
+                <select class="form-input" @bind="maintCategory">
+                    <option value="Equipment Repair">Equipment Repair</option>
+                    <option value="Facility Installation">Facility Installation</option>
+                    <option value="Routine Cleaning">Routine Cleaning</option>
+                    <option value="System Restoration">System Restoration</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">2. Prioritas <span class="req">*</span></label>
+                <div class="priority-chips">
+                    <button type="button" class="prio-chip prio-low @(maintPriority == "Low" ? "selected" : "")" @onclick='() => maintPriority = "Low"'>Low</button>
+                    <button type="button" class="prio-chip prio-med @(maintPriority == "Medium" ? "selected" : "")" @onclick='() => maintPriority = "Medium"'>Medium</button>
+                    <button type="button" class="prio-chip prio-high @(maintPriority == "High" ? "selected" : "")" @onclick='() => maintPriority = "High"'>High</button>
+                    <button type="button" class="prio-chip prio-crit @(maintPriority == "Critical" ? "selected" : "")" @onclick='() => maintPriority = "Critical"'>Critical</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">3. Fasilitas yang Diservis</label>
+                <div class="facility-multi-chips">
+                    @foreach (var fac in availableFacilityOptions)
+                    {
+                        <button type="button" class="fac-chip @(selectedServicedFacilities.Contains(fac) ? "selected" : "")" @onclick="() => ToggleServicedFacility(fac)">
+                            @(selectedServicedFacilities.Contains(fac) ? "? ": "+ ")@fac
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">4. Upload Dokumentasi (Opsional, maks 5MB)</label>
+                <div class="upload-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <span class="upload-text">Drag & drop foto kerusakan di sini, atau <label class="upload-browse"><input type="file" style="display:none" @onchange="OnFileUpload" accept=".jpg,.jpeg,.png,.gif" />pilih file</label></span>
+                    <span class="upload-hint">Format: JPG, PNG, GIF (Maks 5MB)</span>
+                    @if (!string.IsNullOrEmpty(uploadedFileName))
+                    {
+                        <div class="uploaded-file-tag">?? @uploadedFileName</div>
+                    }
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">5. Deskripsi</label>
+                <textarea class="form-input" rows="3" placeholder="Deskripsikan detail kerusakan atau instruksi perawatan..." @bind="maintDescription"></textarea>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showMaintenanceModal = false">Batal</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="ConfirmSetMaintenance">Konfirmasi Maintenance</button>
+    </FooterContent>
+</AppModal>
+
+<!-- Modal 2: Konfirmasi Hapus Ruangan -->
+<AppModal IsOpen="showDeleteModal" IsOpenChanged="v => showDeleteModal = v" Title="Hapus Ruangan?" Size="small">
+    <ChildContent>
+        <div class="delete-confirm-body">
+            <p>Apakah Anda yakin ingin menghapus ruangan <strong>@(roomToDelete?.Name ?? "")</strong>?</p>
+            <p class="text-muted text-sm">Tindakan ini permanen dan akan menghapus seluruh konfigurasi jadwal pada ruangan ini.</p>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showDeleteModal = false">Batal</button>
+        <button type="button" class="btn-danger-pill" @onclick="ConfirmDelete">Hapus Ruangan</button>
+    </FooterContent>
 </AppModal>
 
 @code {
-    private bool showMaintenanceModal = false;
+    public enum RoomCardStatus { Active, Maintenance, Inactive }
 
-    private void OpenMaintenanceModal()
+    public class RoomItem
     {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Location { get; set; } = "";
+        public int Capacity { get; set; }
+        public RoomCardStatus Status { get; set; }
+        public List<string> Facilities { get; set; } = new();
+        public string PhotoUrl { get; set; } = "";
+        public int MaintenanceSecondsRemaining { get; set; } = 2700; // 45:00
+        public int MaintenanceSelectedDuration { get; set; } = 45;
+        public int QueueCount { get; set; } = 0;
+        public bool IsJustFinished { get; set; } = false;
+        public bool CanDelete { get; set; } = true;
+    }
+
+    private List<RoomItem> rooms = new();
+    private string searchQuery = "";
+    private string selectedFloor = "";
+    private string selectedStatusFilter = "all";
+
+    // Modal state
+    private bool showMaintenanceModal = false;
+    private bool showDeleteModal = false;
+    private RoomItem? selectedRoom;
+    private RoomItem? roomToDelete;
+
+    // Maintenance Form fields
+    private string maintCategory = "Equipment Repair";
+    private string maintPriority = "High";
+    private HashSet<string> selectedServicedFacilities = new();
+    private string uploadedFileName = "";
+    private string maintDescription = "";
+
+    private List<string> availableFacilityOptions = new()
+    {
+        "AC Central", "Projector 4K", "Webcam HD", "Sound System", "Smart TV 65\"", "Lighting", "Furniture / Meja"
+    };
+
+    // Timer management (Realtime countdown with safe lifecycle)
+    private System.Threading.Timer? _countdownTimer;
+    private bool _disposed = false;
+
+    protected override void OnInitialized()
+    {
+        InitMockRooms();
+        StartRealtimeTimer();
+    }
+
+    private void InitMockRooms()
+    {
+        rooms = new List<RoomItem>
+        {
+            new() {
+                Id = 1,
+                Name = "Ruang Rapat Utama",
+                Location = "Gedung A - Lt. 2",
+                Capacity = 20,
+                Status = RoomCardStatus.Active,
+                Facilities = new() { "Projector 4K", "Webcam", "AC Central" },
+                PhotoUrl = "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&auto=format&fit=crop&q=60"
+            },
+            new() {
+                Id = 2,
+                Name = "Ruang Diskusi B",
+                Location = "Gedung B - Lt. 1",
+                Capacity = 8,
+                Status = RoomCardStatus.Maintenance,
+                Facilities = new() { "Smart TV", "Whiteboard", "AC" },
+                PhotoUrl = "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=600&auto=format&fit=crop&q=60",
+                MaintenanceSecondsRemaining = 2700, // 45:00
+                MaintenanceSelectedDuration = 30,
+                QueueCount = 2,
+                IsJustFinished = false
+            },
+            new() {
+                Id = 3,
+                Name = "Ruang Dirantara VIP",
+                Location = "Kantor Pusat - Lt. 14",
+                Capacity = 15,
+                Status = RoomCardStatus.Active,
+                Facilities = new() { "Teleconference", "Sound System", "Catering Bar" },
+                PhotoUrl = "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&auto=format&fit=crop&q=60"
+            },
+            new() {
+                Id = 4,
+                Name = "Ghost Room (Placeholder)",
+                Location = "Gedung C - Lt. 3",
+                Capacity = 0,
+                Status = RoomCardStatus.Inactive,
+                Facilities = new(),
+                PhotoUrl = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=600&auto=format&fit=crop&q=60",
+                CanDelete = true
+            },
+            new() {
+                Id = 5,
+                Name = "Ruang Podcast / Studio",
+                Location = "Gedung B - Lt. 2",
+                Capacity = 4,
+                Status = RoomCardStatus.Active,
+                Facilities = new() { "Mic Condenser", "Acoustic Foam", "Camera 4K" },
+                PhotoUrl = "https://images.unsplash.com/photo-1590402494682-cd3fb53b1f70?w=600&auto=format&fit=crop&q=60"
+            },
+            new() {
+                Id = 6,
+                Name = "Ruang Interview 1",
+                Location = "Gedung A - Lt. 1",
+                Capacity = 4,
+                Status = RoomCardStatus.Maintenance,
+                Facilities = new() { "Glass Board", "AC" },
+                PhotoUrl = "https://images.unsplash.com/photo-1505409859467-3a796fd5798e?w=600&auto=format&fit=crop&q=60",
+                MaintenanceSecondsRemaining = 1200, // 20:00
+                MaintenanceSelectedDuration = 20,
+                QueueCount = 0,
+                IsJustFinished = true
+            },
+            new() {
+                Id = 7,
+                Name = "Auditorium Serbaguna",
+                Location = "Gedung A - Lt. Ground",
+                Capacity = 80,
+                Status = RoomCardStatus.Active,
+                Facilities = new() { "Stage Lighting", "Wireless Mic", "Dual Projector" },
+                PhotoUrl = "https://images.unsplash.com/photo-1582657233895-0f37a3f150c0?w=600&auto=format&fit=crop&q=60"
+            },
+            new() {
+                Id = 8,
+                Name = "Ruang Cadangan B-04",
+                Location = "Gedung B - Lt. 4",
+                Capacity = 0,
+                Status = RoomCardStatus.Inactive,
+                Facilities = new(),
+                PhotoUrl = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=600&auto=format&fit=crop&q=60",
+                CanDelete = false
+            }
+        };
+    }
+
+    private void StartRealtimeTimer()
+    {
+        _countdownTimer = new System.Threading.Timer(_ =>
+        {
+            if (_disposed) return;
+            bool changed = false;
+            foreach (var r in rooms)
+            {
+                if (r.Status == RoomCardStatus.Maintenance && r.MaintenanceSecondsRemaining > 0)
+                {
+                    r.MaintenanceSecondsRemaining--;
+                    changed = true;
+                }
+            }
+            if (changed && !_disposed)
+            {
+                InvokeAsync(StateHasChanged);
+            }
+        }, null, 1000, 1000);
+    }
+
+    private string FormatCountdown(int totalSeconds)
+    {
+        if (totalSeconds <= 0) return "00:00";
+        int m = totalSeconds / 60;
+        int s = totalSeconds % 60;
+        return $"{m:D2}:{s:D2}";
+    }
+
+    private IEnumerable<RoomItem> filteredRooms
+    {
+        get
+        {
+            var q = rooms.AsEnumerable();
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                var query = searchQuery.ToLowerInvariant();
+                q = q.Where(r => r.Name.ToLowerInvariant().Contains(query) ||
+                                 r.Location.ToLowerInvariant().Contains(query) ||
+                                 r.Facilities.Any(f => f.ToLowerInvariant().Contains(query)));
+            }
+            if (!string.IsNullOrWhiteSpace(selectedFloor))
+            {
+                q = q.Where(r => r.Location.Contains(selectedFloor));
+            }
+            if (selectedStatusFilter == "active") q = q.Where(r => r.Status == RoomCardStatus.Active);
+            else if (selectedStatusFilter == "maintenance") q = q.Where(r => r.Status == RoomCardStatus.Maintenance);
+            else if (selectedStatusFilter == "inactive") q = q.Where(r => r.Status == RoomCardStatus.Inactive);
+
+            return q;
+        }
+    }
+
+    private void ResetFilters()
+    {
+        searchQuery = "";
+        selectedFloor = "";
+        selectedStatusFilter = "all";
+    }
+
+    private void PromptSetMaintenance(RoomItem room)
+    {
+        selectedRoom = room;
+        maintCategory = "Equipment Repair";
+        maintPriority = "High";
+        selectedServicedFacilities = new HashSet<string>(room.Facilities.Take(2));
+        uploadedFileName = "";
+        maintDescription = "";
         showMaintenanceModal = true;
     }
+
+    private void ToggleServicedFacility(string fac)
+    {
+        if (!selectedServicedFacilities.Remove(fac))
+        {
+            selectedServicedFacilities.Add(fac);
+        }
+    }
+
+    private void OnFileUpload(ChangeEventArgs e)
+    {
+        uploadedFileName = "foto_kerusakan_unit.png (1.2 MB)";
+    }
+
+    private void ConfirmSetMaintenance()
+    {
+        if (selectedRoom != null)
+        {
+            selectedRoom.Status = RoomCardStatus.Maintenance;
+            selectedRoom.MaintenanceSecondsRemaining = 2700; // 45 mins
+            selectedRoom.MaintenanceSelectedDuration = 30;
+            Toast.Success($"Ruangan '{selectedRoom.Name}' dialihkan ke mode Maintenance.");
+        }
+        showMaintenanceModal = false;
+    }
+
+    private void SetActiveDirect(RoomItem room)
+    {
+        room.Status = RoomCardStatus.Active;
+        room.IsJustFinished = false;
+        Toast.Success($"Ruangan '{room.Name}' kembali Aktif.");
+    }
+
+    private void QuickUpdateDuration(RoomItem room, int minutes)
+    {
+        room.MaintenanceSelectedDuration = minutes;
+        room.MaintenanceSecondsRemaining = minutes * 60;
+        Toast.Info($"Durasi maintenance '{room.Name}' diperbarui ke {minutes} Menit.");
+    }
+
+    private void PromptDelete(RoomItem room)
+    {
+        roomToDelete = room;
+        showDeleteModal = true;
+    }
+
+    private void ConfirmDelete()
+    {
+        if (roomToDelete != null)
+        {
+            rooms.Remove(roomToDelete);
+            Toast.Success($"Ruangan '{roomToDelete.Name}' berhasil dihapus.");
+        }
+        showDeleteModal = false;
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _countdownTimer?.Dispose();
+        _countdownTimer = null;
+    }
 }
+

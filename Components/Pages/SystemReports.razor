@@ -1,213 +1,389 @@
 @page "/reports"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Services
 @using ApexCharts
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Laporan Sistem" PageSubtitle="Analisis performa dan penggunaan sistem pemesanan ruangan secara menyeluruh." ShowGlobalSearch="true" ShowGlobalDate="false" />
+<TopBar Title="Laporan Sistem" Subtitle="Analisis performa dan penggunaan sistem pemesanan ruangan secara menyeluruh." ShowGlobalSearch="false" ShowDateFilter="false" />
 
-<div class="system-reports">
-    <div class="sr-filters">
-        <select class="sr-filter-select">
-            <option>Bulan Ini (Okt 2026)</option>
-            <option>Bulan Lalu</option>
-            <option>3 Bulan Terakhir</option>
-            <option>Tahun Ini</option>
-        </select>
-        <select class="sr-filter-select">
-            <option>Semua Departemen</option>
-            <option>IT & Digital</option>
-            <option>Operasional</option>
-            <option>Keuangan</option>
-        </select>
-        <select class="sr-filter-select">
-            <option>Semua Gedung</option>
-            <option>Gedung A</option>
-            <option>Gedung B</option>
-        </select>
-        <div style="flex:1"></div>
-        <button class="btn-export" @onclick="() => showExport = true">
+<div class="system-reports-page">
+    @* -- Bagian B: Baris Filter -- *@
+    <div class="sr-filter-bar">
+        <div class="sr-filter-group">
+            <label class="sr-filter-label">Periode:</label>
+            <select class="sr-select" @bind="filterPeriod" @bind:after="ApplyFilters">
+                <option value="this_month">Bulan Ini (Okt 2026)</option>
+                <option value="last_month">Bulan Lalu (Sep 2026)</option>
+                <option value="last_3_months">3 Bulan Terakhir</option>
+                <option value="this_year">Tahun 2026</option>
+            </select>
+        </div>
+
+        <div class="sr-filter-group">
+            <label class="sr-filter-label">Departemen:</label>
+            <select class="sr-select" @bind="filterDept" @bind:after="ApplyFilters">
+                <option value="All">Semua Departemen</option>
+                <option value="IT & Digital">IT & Digital</option>
+                <option value="Operasional">Operasional</option>
+                <option value="SDM">SDM</option>
+                <option value="Keuangan">Keuangan</option>
+                <option value="Marketing">Marketing</option>
+            </select>
+        </div>
+
+        <div class="sr-filter-group">
+            <label class="sr-filter-label">Gedung / Lokasi:</label>
+            <select class="sr-select" @bind="filterBuilding" @bind:after="ApplyFilters">
+                <option value="All">Semua Gedung</option>
+                <option value="Gedung A">Gedung A</option>
+                <option value="Gedung B">Gedung B</option>
+                <option value="Kantor Pusat">Kantor Pusat</option>
+            </select>
+        </div>
+
+        <div style="flex: 1;"></div>
+
+        <button type="button" class="btn-export-reports" @onclick="() => showExportModal = true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export Laporan
+            <span>Export Laporan</span>
         </button>
     </div>
 
-    @if (hasData)
+    @if (!hasFilteredData)
     {
-        <div class="sr-kpis">
-            <div class="sr-kpi-card">
-                <div class="kpi-title">Total Booking Periode Ini</div>
-                <div class="kpi-val-row">
-                    <div class="kpi-value">1,245</div>
-                    <div class="kpi-trend trend-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> 12%</div>
-                </div>
+        @* -- Bagian I: Empty State -- *@
+        <div class="empty-state">
+            <div class="empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.5" style="width: 48px; height: 48px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             </div>
-            <div class="sr-kpi-card">
-                <div class="kpi-title">Rata-rata Utilisasi</div>
-                <div class="kpi-val-row">
-                    <div class="kpi-value">68%</div>
-                    <div class="kpi-trend trend-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> 5%</div>
-                </div>
-            </div>
-            <div class="sr-kpi-card">
-                <div class="kpi-title">Tingkat No-Show</div>
-                <div class="kpi-val-row">
-                    <div class="kpi-value">4.2%</div>
-                    <div class="kpi-trend trend-down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> 1.1%</div>
-                </div>
-            </div>
-            <div class="sr-kpi-card">
-                <div class="kpi-title">Rata-rata Durasi Rapat</div>
-                <div class="kpi-val-row">
-                    <div class="kpi-value">1j 45m</div>
-                    <div class="kpi-trend trend-neutral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg> 0%</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="sr-charts-row">
-            <div class="sr-chart-container" style="flex: 2;">
-                <h3 class="sr-chart-title">Tren Booking (Harian)</h3>
-                <ApexChart TItem="ChartData" Height="300">
-                    <ApexPointSeries TItem="ChartData" Items="trendData" Name="Total Booking" SeriesType="SeriesType.Area" XValue="@(_ => _.Label)" YAggregate="@(_ => _.Sum(e => e.Value))" />
-                </ApexChart>
-            </div>
-            <div class="sr-chart-container" style="flex: 1;">
-                <h3 class="sr-chart-title">Booking per Departemen</h3>
-                <ApexChart TItem="ChartData" Height="300">
-                    <ApexPointSeries TItem="ChartData" Items="deptData" Name="Departemen" SeriesType="SeriesType.Donut" XValue="@(_ => _.Label)" YAggregate="@(_ => _.Sum(e => e.Value))" />
-                </ApexChart>
-            </div>
-        </div>
-
-        <div class="sr-charts-row">
-            <div class="sr-chart-container" style="flex: 2;">
-                <h3 class="sr-chart-title">Peta Jam Sibuk (Heatmap)</h3>
-                <ApexChart TItem="HeatmapData" Height="350">
-                    <ApexPointSeries TItem="HeatmapData" Items="heatmapMon" Name="Senin" SeriesType="SeriesType.Heatmap" XValue="@(_ => _.Hour)" YAggregate="@(_ => _.Sum(e => e.Intensity))" />
-                    <ApexPointSeries TItem="HeatmapData" Items="heatmapTue" Name="Selasa" SeriesType="SeriesType.Heatmap" XValue="@(_ => _.Hour)" YAggregate="@(_ => _.Sum(e => e.Intensity))" />
-                    <ApexPointSeries TItem="HeatmapData" Items="heatmapWed" Name="Rabu" SeriesType="SeriesType.Heatmap" XValue="@(_ => _.Hour)" YAggregate="@(_ => _.Sum(e => e.Intensity))" />
-                    <ApexPointSeries TItem="HeatmapData" Items="heatmapThu" Name="Kamis" SeriesType="SeriesType.Heatmap" XValue="@(_ => _.Hour)" YAggregate="@(_ => _.Sum(e => e.Intensity))" />
-                    <ApexPointSeries TItem="HeatmapData" Items="heatmapFri" Name="Jumat" SeriesType="SeriesType.Heatmap" XValue="@(_ => _.Hour)" YAggregate="@(_ => _.Sum(e => e.Intensity))" />
-                </ApexChart>
-            </div>
-            <div class="sr-chart-container" style="flex: 1;">
-                <h3 class="sr-chart-title">Utilisasi per Ruangan (Top 5)</h3>
-                <div class="sr-util-list">
-                    <div class="sr-util-item">
-                        <div class="sr-util-info"><span>Ruang Rapat A</span><span>85%</span></div>
-                        <div class="sr-util-bar-bg"><div class="sr-util-bar" style="width:85%; background:#2563EB;"></div></div>
-                    </div>
-                    <div class="sr-util-item">
-                        <div class="sr-util-info"><span>Ruang Rapat Utama</span><span>78%</span></div>
-                        <div class="sr-util-bar-bg"><div class="sr-util-bar" style="width:78%; background:#2563EB;"></div></div>
-                    </div>
-                    <div class="sr-util-item">
-                        <div class="sr-util-info"><span>Ruang Diskusi B</span><span>62%</span></div>
-                        <div class="sr-util-bar-bg"><div class="sr-util-bar" style="width:62%; background:#2563EB;"></div></div>
-                    </div>
-                    <div class="sr-util-item">
-                        <div class="sr-util-info"><span>Auditorium</span><span>45%</span></div>
-                        <div class="sr-util-bar-bg"><div class="sr-util-bar" style="width:45%; background:#F59E0B;"></div></div>
-                    </div>
-                    <div class="sr-util-item">
-                        <div class="sr-util-info"><span>Ruang Interview</span><span>30%</span></div>
-                        <div class="sr-util-bar-bg"><div class="sr-util-bar" style="width:30%; background:#EF4444;"></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="sr-table-section">
-            <h3 class="sr-chart-title">Detail Booking</h3>
-            <DataTable TItem="BookingDetail" Items="bookingDetails" Columns="bookingColumns" />
+            <h3 class="empty-title">Tidak Ada Data Laporan</h3>
+            <p class="empty-desc">Belum ada aktivitas pemesanan ruangan yang tercatat pada kombinasi filter yang Anda pilih.</p>
+            <button class="btn-primary-pill btn-yellow" @onclick="ResetFilters">Reset Filter</button>
         </div>
     }
     else
     {
-        <div class="empty-state">
-            <div class="empty-icon">??</div>
-            <h3 class="empty-title">Tidak Ada Data</h3>
-            <p class="empty-desc">Belum ada aktivitas booking pada rentang waktu atau filter yang Anda pilih.</p>
-            <button class="btn-primary" @onclick="ResetFilters">Reset Filter</button>
+        @* -- Bagian C: Baris KPI Ringkasan (4 Card) -- *@
+        <div class="sr-kpi-grid">
+            <div class="sr-kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Total Booking Periode Ini</span>
+                    <span class="kpi-badge badge-blue">Booking</span>
+                </div>
+                <div class="kpi-body">
+                    <span class="kpi-val">@currentKpi.TotalBookings.ToString("N0")</span>
+                    <span class="kpi-trend @(currentKpi.TotalBookingsTrend >= 0 ? "trend-up" : "trend-down")">
+                        @(currentKpi.TotalBookingsTrend >= 0 ? "?" : "?") @Math.Abs(currentKpi.TotalBookingsTrend)% vs lalu
+                    </span>
+                </div>
+            </div>
+
+            <div class="sr-kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Rata-rata Utilisasi Ruangan</span>
+                    <span class="kpi-badge badge-green">Efisiensi</span>
+                </div>
+                <div class="kpi-body">
+                    <span class="kpi-val">@currentKpi.AvgUtilization%</span>
+                    <span class="kpi-trend @(currentKpi.AvgUtilizationTrend >= 0 ? "trend-up" : "trend-down")">
+                        @(currentKpi.AvgUtilizationTrend >= 0 ? "?" : "?") @Math.Abs(currentKpi.AvgUtilizationTrend)% vs lalu
+                    </span>
+                </div>
+            </div>
+
+            <div class="sr-kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Tingkat No-Show (Batal Hadir)</span>
+                    <span class="kpi-badge badge-orange">No-Show</span>
+                </div>
+                <div class="kpi-body">
+                    <span class="kpi-val">@currentKpi.NoShowRate%</span>
+                    <span class="kpi-trend @(currentKpi.NoShowRateTrend <= 0 ? "trend-up" : "trend-down")">
+                        @(currentKpi.NoShowRateTrend <= 0 ? "?" : "?") @Math.Abs(currentKpi.NoShowRateTrend)% vs lalu
+                    </span>
+                </div>
+            </div>
+
+            <div class="sr-kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Rata-rata Durasi Rapat</span>
+                    <span class="kpi-badge badge-purple">Durasi</span>
+                </div>
+                <div class="kpi-body">
+                    <span class="kpi-val">@currentKpi.AvgDuration</span>
+                    <span class="kpi-trend trend-neutral">
+                        • Stabil
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @* -- Bagian D & E: Grafik Tren & Donut Departemen -- *@
+        <div class="sr-charts-row">
+            <div class="sr-chart-box chart-trend">
+                <div class="chart-header">
+                    <h3 class="chart-title">D. Tren Booking Harian</h3>
+                    <span class="chart-subtitle">Aktivitas pemesanan sepanjang periode terpilih</span>
+                </div>
+                <ApexChart TItem="ChartPoint" Height="@("280px")">
+                    <ApexPointSeries TItem="ChartPoint"
+                                     Items="trendPoints"
+                                     Name="Total Booking"
+                                     SeriesType="SeriesType.Area"
+                                     XValue="e => e.Label"
+                                     YValue="e => e.Value" />
+                </ApexChart>
+            </div>
+
+            <div class="sr-chart-box chart-dept">
+                <div class="chart-header">
+                    <h3 class="chart-title">E. Booking per Departemen</h3>
+                    <span class="chart-subtitle">Persentase distribusi pemakaian</span>
+                </div>
+                <ApexChart TItem="ChartPoint" Height="@("280px")">
+                    <ApexPointSeries TItem="ChartPoint"
+                                     Items="deptPoints"
+                                     Name="Departemen"
+                                     SeriesType="SeriesType.Donut"
+                                     XValue="e => e.Label"
+                                     YValue="e => e.Value" />
+                </ApexChart>
+            </div>
+        </div>
+
+        @* -- Bagian F & G: Heatmap Jam Sibuk & Utilisasi Ruangan -- *@
+        <div class="sr-charts-row">
+            <div class="sr-chart-box chart-heatmap">
+                <div class="chart-header">
+                    <h3 class="chart-title">F. Peta Jam Sibuk (Peak Hour Heatmap)</h3>
+                    <span class="chart-subtitle">Intensitas okupansi ruangan per jam & hari kerja</span>
+                </div>
+                <ApexChart TItem="HeatmapCell" Height="@("280px")">
+                    <ApexPointSeries TItem="HeatmapCell" Items="heatmapMon" Name="Senin" SeriesType="SeriesType.Heatmap" XValue="e => e.Hour" YValue="e => e.Score" />
+                    <ApexPointSeries TItem="HeatmapCell" Items="heatmapTue" Name="Selasa" SeriesType="SeriesType.Heatmap" XValue="e => e.Hour" YValue="e => e.Score" />
+                    <ApexPointSeries TItem="HeatmapCell" Items="heatmapWed" Name="Rabu" SeriesType="SeriesType.Heatmap" XValue="e => e.Hour" YValue="e => e.Score" />
+                    <ApexPointSeries TItem="HeatmapCell" Items="heatmapThu" Name="Kamis" SeriesType="SeriesType.Heatmap" XValue="e => e.Hour" YValue="e => e.Score" />
+                    <ApexPointSeries TItem="HeatmapCell" Items="heatmapFri" Name="Jumat" SeriesType="SeriesType.Heatmap" XValue="e => e.Hour" YValue="e => e.Score" />
+                </ApexChart>
+            </div>
+
+            <div class="sr-chart-box chart-util">
+                <div class="chart-header">
+                    <h3 class="chart-title">G. Utilisasi per Ruangan (Top 5)</h3>
+                    <span class="chart-subtitle">Diurutkan dari utilisasi tertinggi</span>
+                </div>
+                <div class="util-bar-list">
+                    @foreach (var room in roomUtilList)
+                    {
+                        <div class="util-bar-item">
+                            <div class="util-bar-meta">
+                                <span class="util-room-name">@room.Name</span>
+                                <span class="util-room-pct">@room.Percentage%</span>
+                            </div>
+                            <div class="util-progress-bg">
+                                <div class="util-progress-fill" style="width: @room.Percentage%; background: @room.Color;"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* -- Bagian H: Tabel Detail Booking -- *@
+        <div class="sr-table-box">
+            <div class="chart-header">
+                <h3 class="chart-title">H. Tabel Detail Booking</h3>
+                <span class="chart-subtitle">Menampilkan @displayedBookings.Count transaksi pemesanan</span>
+            </div>
+
+            <DataTable TItem="ReportBookingItem" Items="displayedBookings" Columns="reportColumns" TotalCount="@displayedBookings.Count" PageSize="5" CurrentPage="1">
+                <RowTemplate Context="item">
+                    <td><strong class="td-code">@item.BookingId</strong></td>
+                    <td><span class="td-primary">@item.Department</span></td>
+                    <td><span class="td-primary">@item.RoomName</span></td>
+                    <td><span class="td-secondary">@item.Schedule</span></td>
+                    <td><span class="td-primary">@item.Duration</span></td>
+                    <td><span class="td-secondary">@item.ApprovedBy</span></td>
+                    <td><StatusBadge Status="@item.Status" /></td>
+                </RowTemplate>
+            </DataTable>
         </div>
     }
 </div>
 
-<ExportModal IsOpen="showExport" IsOpenChanged="v => showExport = v" />
+@* -- Modal Export -- *@
+<ExportModal IsOpen="showExportModal"
+             IsOpenChanged="v => showExportModal = v"
+             ExportTitle="Laporan Sistem Pemesanan Ruangan"
+             Columns="exportColumns"
+             CurrentViewRows="displayedBookings.Cast<object>()"
+             AllRows="allReportBookings.Cast<object>()" />
 
 @code {
-    private bool hasData = true;
-    private bool showExport = false;
+    private string filterPeriod = "this_month";
+    private string filterDept = "All";
+    private string filterBuilding = "All";
+    private bool showExportModal = false;
 
-    public class ChartData { public string Label { get; set; } = ""; public int Value { get; set; } }
-    public class HeatmapData { public string Hour { get; set; } = ""; public int Intensity { get; set; } }
-
-    private List<ChartData> trendData = new()
+    public class KpiSummary
     {
-        new() { Label = "01 Okt", Value = 12 }, new() { Label = "02 Okt", Value = 25 },
-        new() { Label = "03 Okt", Value = 18 }, new() { Label = "04 Okt", Value = 30 },
-        new() { Label = "05 Okt", Value = 28 }, new() { Label = "06 Okt", Value = 45 },
-        new() { Label = "07 Okt", Value = 38 }
-    };
-
-    private List<ChartData> deptData = new()
-    {
-        new() { Label = "IT & Digital", Value = 35 }, new() { Label = "Operasional", Value = 25 },
-        new() { Label = "SDM", Value = 20 }, new() { Label = "Keuangan", Value = 15 },
-        new() { Label = "Lainnya", Value = 5 }
-    };
-
-    private List<HeatmapData> heatmapMon = new();
-    private List<HeatmapData> heatmapTue = new();
-    private List<HeatmapData> heatmapWed = new();
-    private List<HeatmapData> heatmapThu = new();
-    private List<HeatmapData> heatmapFri = new();
-
-    protected override void OnInitialized()
-    {
-        Random r = new Random();
-        string[] hours = { "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00" };
-        foreach(var h in hours) {
-            heatmapMon.Add(new() { Hour = h, Intensity = r.Next(10, 100) });
-            heatmapTue.Add(new() { Hour = h, Intensity = r.Next(10, 100) });
-            heatmapWed.Add(new() { Hour = h, Intensity = r.Next(10, 100) });
-            heatmapThu.Add(new() { Hour = h, Intensity = r.Next(10, 100) });
-            heatmapFri.Add(new() { Hour = h, Intensity = r.Next(10, 100) });
-        }
+        public int TotalBookings { get; set; } = 1245;
+        public int TotalBookingsTrend { get; set; } = 12;
+        public int AvgUtilization { get; set; } = 68;
+        public int AvgUtilizationTrend { get; set; } = 5;
+        public double NoShowRate { get; set; } = 4.2;
+        public double NoShowRateTrend { get; set; } = -1.1;
+        public string AvgDuration { get; set; } = "1j 45m";
     }
 
-    public class BookingDetail {
-        public string Id { get; set; } = "";
-        public string Dept { get; set; } = "";
-        public string Room { get; set; } = "";
+    public class ChartPoint { public string Label { get; set; } = ""; public int Value { get; set; } }
+    public class HeatmapCell { public string Hour { get; set; } = ""; public int Score { get; set; } }
+    public class RoomUtil { public string Name { get; set; } = ""; public int Percentage { get; set; } public string Color { get; set; } = "#2563EB"; }
+
+    public class ReportBookingItem
+    {
+        public string BookingId { get; set; } = "";
+        public string Department { get; set; } = "";
+        public string RoomName { get; set; } = "";
+        public string Building { get; set; } = "";
         public string Schedule { get; set; } = "";
         public string Duration { get; set; } = "";
-        public string Approver { get; set; } = "";
-        public string Status { get; set; } = "";
+        public string ApprovedBy { get; set; } = "";
+        public string Status { get; set; } = "approved";
     }
 
-    private List<BookingDetail> bookingDetails = new()
+    private KpiSummary currentKpi = new();
+    private List<ChartPoint> trendPoints = new();
+    private List<ChartPoint> deptPoints = new();
+    private List<HeatmapCell> heatmapMon = new();
+    private List<HeatmapCell> heatmapTue = new();
+    private List<HeatmapCell> heatmapWed = new();
+    private List<HeatmapCell> heatmapThu = new();
+    private List<HeatmapCell> heatmapFri = new();
+    private List<RoomUtil> roomUtilList = new();
+
+    private List<ReportBookingItem> allReportBookings = new();
+    private List<ReportBookingItem> displayedBookings = new();
+
+    private List<DataTable<ReportBookingItem>.DataTableColumn> reportColumns = new()
     {
-        new() { Id = "B-1001", Dept = "IT & Digital", Room = "Ruang Rapat A", Schedule = "01 Okt 2026 09:00", Duration = "2 Jam", Approver = "Wahyu", Status = "Selesai" },
-        new() { Id = "B-1002", Dept = "SDM", Room = "Ruang Interview", Schedule = "01 Okt 2026 10:00", Duration = "1 Jam", Approver = "Sarah", Status = "Selesai" },
-        new() { Id = "B-1003", Dept = "Operasional", Room = "Auditorium", Schedule = "02 Okt 2026 13:00", Duration = "4 Jam", Approver = "Wahyu", Status = "Selesai" }
+        new() { Header = "ID BOOKING", PropertyName = "BookingId" },
+        new() { Header = "DEPARTEMEN", PropertyName = "Department" },
+        new() { Header = "RUANGAN", PropertyName = "RoomName" },
+        new() { Header = "JADWAL", PropertyName = "Schedule" },
+        new() { Header = "DURASI", PropertyName = "Duration" },
+        new() { Header = "DISETUJUI OLEH", PropertyName = "ApprovedBy" },
+        new() { Header = "STATUS", PropertyName = "Status" }
     };
 
-    private List<DataTable<BookingDetail>.DataTableColumn> bookingColumns = new()
+    private List<ExportColumn> exportColumns = new()
     {
-        new() { Header = "ID Booking", PropertyName = "Id" },
-        new() { Header = "Departemen", PropertyName = "Dept" },
-        new() { Header = "Ruangan", PropertyName = "Room" },
+        new() { Header = "ID Booking", PropertyName = "BookingId" },
+        new() { Header = "Departemen", PropertyName = "Department" },
+        new() { Header = "Ruangan", PropertyName = "RoomName" },
         new() { Header = "Jadwal", PropertyName = "Schedule" },
         new() { Header = "Durasi", PropertyName = "Duration" },
-        new() { Header = "Disetujui Oleh", PropertyName = "Approver" },
+        new() { Header = "Disetujui Oleh", PropertyName = "ApprovedBy" },
         new() { Header = "Status", PropertyName = "Status" }
     };
 
+    private bool hasFilteredData => displayedBookings.Any();
+
+    protected override void OnInitialized()
+    {
+        GenerateBaseData();
+        ApplyFilters();
+    }
+
+    private void GenerateBaseData()
+    {
+        allReportBookings = new()
+        {
+            new() { BookingId = "BK-1042", Department = "IT & Digital", RoomName = "Ruang Rapat Utama", Building = "Gedung A", Schedule = "28 Okt 2026, 09:00", Duration = "2 Jam", ApprovedBy = "Admin Wahyu", Status = "approved" },
+            new() { BookingId = "BK-1041", Department = "Operasional", RoomName = "Ruang Diskusi B", Building = "Gedung B", Schedule = "28 Okt 2026, 11:00", Duration = "1 Jam", ApprovedBy = "Admin Sarah", Status = "approved" },
+            new() { BookingId = "BK-1040", Department = "SDM", RoomName = "Ruang Interview", Building = "Gedung A", Schedule = "28 Okt 2026, 13:30", Duration = "1.5 Jam", ApprovedBy = "Admin Wahyu", Status = "approved" },
+            new() { BookingId = "BK-1039", Department = "Keuangan", RoomName = "Ruang Dirantara VIP", Building = "Kantor Pusat", Schedule = "27 Okt 2026, 14:00", Duration = "3 Jam", ApprovedBy = "Admin Sarah", Status = "approved" },
+            new() { BookingId = "BK-1038", Department = "Marketing", RoomName = "Auditorium Serbaguna", Building = "Gedung A", Schedule = "27 Okt 2026, 10:00", Duration = "4 Jam", ApprovedBy = "Admin Wahyu", Status = "approved" },
+            new() { BookingId = "BK-1037", Department = "IT & Digital", RoomName = "Ruang Podcast / Studio", Building = "Gedung B", Schedule = "26 Okt 2026, 15:00", Duration = "2 Jam", ApprovedBy = "Admin Sarah", Status = "pending" },
+            new() { BookingId = "BK-1036", Department = "Operasional", RoomName = "Ruang Rapat Utama", Building = "Gedung A", Schedule = "25 Okt 2026, 08:30", Duration = "1 Jam", ApprovedBy = "Admin Wahyu", Status = "rejected_admin" }
+        };
+    }
+
+    private void ApplyFilters()
+    {
+        var q = allReportBookings.AsEnumerable();
+        if (filterDept != "All")
+        {
+            q = q.Where(b => b.Department == filterDept);
+        }
+        if (filterBuilding != "All")
+        {
+            q = q.Where(b => b.Building == filterBuilding);
+        }
+
+        displayedBookings = q.ToList();
+
+        // Update KPIs based on filter
+        int count = displayedBookings.Count;
+        currentKpi = new KpiSummary
+        {
+            TotalBookings = count * 180 + 120,
+            TotalBookingsTrend = filterDept == "IT & Digital" ? 18 : 12,
+            AvgUtilization = filterDept == "SDM" ? 54 : 68,
+            AvgUtilizationTrend = 5,
+            NoShowRate = 3.8,
+            NoShowRateTrend = -1.1,
+            AvgDuration = filterDept == "Marketing" ? "2j 30m" : "1j 45m"
+        };
+
+        // Update Trend Chart
+        trendPoints = new List<ChartPoint>
+        {
+            new() { Label = "01-05", Value = count * 15 + 20 },
+            new() { Label = "06-10", Value = count * 22 + 35 },
+            new() { Label = "11-15", Value = count * 18 + 28 },
+            new() { Label = "16-20", Value = count * 28 + 42 },
+            new() { Label = "21-25", Value = count * 35 + 50 },
+            new() { Label = "26-30", Value = count * 30 + 45 }
+        };
+
+        // Update Dept Chart
+        deptPoints = new List<ChartPoint>
+        {
+            new() { Label = "IT & Digital", Value = filterDept == "IT & Digital" ? 100 : 35 },
+            new() { Label = "Operasional", Value = filterDept == "Operasional" ? 100 : 25 },
+            new() { Label = "SDM", Value = filterDept == "SDM" ? 100 : 20 },
+            new() { Label = "Keuangan", Value = filterDept == "Keuangan" ? 100 : 12 },
+            new() { Label = "Marketing", Value = filterDept == "Marketing" ? 100 : 8 }
+        };
+
+        // Update Heatmap
+        string[] hours = { "08:00", "10:00", "12:00", "14:00", "16:00" };
+        heatmapMon = hours.Select(h => new HeatmapCell { Hour = h, Score = (h == "10:00" || h == "14:00") ? 85 : 40 }).ToList();
+        heatmapTue = hours.Select(h => new HeatmapCell { Hour = h, Score = (h == "10:00" || h == "14:00") ? 92 : 50 }).ToList();
+        heatmapWed = hours.Select(h => new HeatmapCell { Hour = h, Score = (h == "14:00" || h == "16:00") ? 78 : 35 }).ToList();
+        heatmapThu = hours.Select(h => new HeatmapCell { Hour = h, Score = (h == "10:00") ? 95 : 60 }).ToList();
+        heatmapFri = hours.Select(h => new HeatmapCell { Hour = h, Score = (h == "08:00" || h == "10:00") ? 65 : 25 }).ToList();
+
+        // Update Room Util List
+        roomUtilList = new List<RoomUtil>
+        {
+            new() { Name = "Ruang Rapat Utama", Percentage = 88, Color = "#1E3A8A" },
+            new() { Name = "Ruang Dirantara VIP", Percentage = 76, Color = "#2563EB" },
+            new() { Name = "Ruang Diskusi B", Percentage = 64, Color = "#3B82F6" },
+            new() { Name = "Auditorium Serbaguna", Percentage = 48, Color = "#F59E0B" },
+            new() { Name = "Ruang Interview", Percentage = 32, Color = "#10B981" }
+        };
+
+        StateHasChanged();
+    }
+
     private void ResetFilters()
     {
-        hasData = true;
+        filterPeriod = "this_month";
+        filterDept = "All";
+        filterBuilding = "All";
+        ApplyFilters();
     }
 }
-
-

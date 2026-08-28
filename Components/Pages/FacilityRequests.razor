@@ -5,7 +5,7 @@
 @using booking_room_admin.Components.Services
 
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Permintaan Fasilitas" PageSubtitle="Tinjau dan proses permintaan tambahan fasilitas." ShowGlobalSearch="true" ShowGlobalDate="true" />
+<TopBar Title="Permintaan Fasilitas" Subtitle="Tinjau dan proses permintaan tambahan fasilitas." ShowGlobalSearch="false" ShowDateFilter="false" />
 <div class="facility-requests">
     <div class="fr-toolbar">
         <div class="fr-tabs">
@@ -283,6 +283,7 @@
         new() { Header = "Status", PropertyName = "Status", CellType = ExportCellType.Text },
     };
 }
+
 
 
 

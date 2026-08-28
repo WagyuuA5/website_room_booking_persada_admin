@@ -17,12 +17,18 @@ public class LayoutStateService
 
     public event Action? OnChange;
 
-    public async Task InitThemeAsync()
+    public async Task InitStateAsync()
     {
         try
         {
-            var stored = await _js.InvokeAsync<string?>("localStorage.getItem", "theme-mode");
-            IsDarkMode = stored == "dark";
+            var storedTheme = await _js.InvokeAsync<string?>("localStorage.getItem", "theme-mode");
+            IsDarkMode = storedTheme == "dark";
+
+            var storedSidebar = await _js.InvokeAsync<string?>("localStorage.getItem", "sidebar-collapsed");
+            if (storedSidebar == "true")
+            {
+                IsSidebarCollapsed = true;
+            }
             Notify();
         }
         catch
@@ -31,10 +37,40 @@ public class LayoutStateService
         }
     }
 
+    public async Task InitThemeAsync()
+    {
+        await InitStateAsync();
+    }
+
     public void ToggleSidebar()
     {
         IsSidebarCollapsed = !IsSidebarCollapsed;
         Notify();
+        try
+        {
+            _js.InvokeVoidAsync("localStorage.setItem", "sidebar-collapsed", IsSidebarCollapsed ? "true" : "false");
+        }
+        catch
+        {
+            // Ignore JS errors during prerender
+        }
+    }
+
+    public void SetSidebarCollapsed(bool collapsed)
+    {
+        if (IsSidebarCollapsed != collapsed)
+        {
+            IsSidebarCollapsed = collapsed;
+            Notify();
+            try
+            {
+                _js.InvokeVoidAsync("localStorage.setItem", "sidebar-collapsed", IsSidebarCollapsed ? "true" : "false");
+            }
+            catch
+            {
+                // Ignore JS errors during prerender
+            }
+        }
     }
 
     public void ToggleTheme()

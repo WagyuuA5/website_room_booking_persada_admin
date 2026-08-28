@@ -3,7 +3,7 @@
 @using booking_room_admin.Components.Shared
 
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Pengaturan Sistem" PageSubtitle="Konfigurasi preferensi dan kebijakan aplikasi." ShowGlobalSearch="false" ShowGlobalDate="false" />
+<TopBar Title="Pengaturan Sistem" Subtitle="Konfigurasi preferensi dan kebijakan aplikasi." ShowGlobalSearch="true" ShowDateFilter="true" />
 <div class="settings-page">
     @* Security *@
     <div class="settings-section">
@@ -224,6 +224,7 @@
         _ => "Pengaturan"
     };
 }
+
 
 
 

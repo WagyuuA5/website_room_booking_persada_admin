@@ -4,8 +4,8 @@
 @using booking_room_admin.Components.Models
 
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Kalender Ruangan" PageSubtitle="Tinjauan jadwal semua ruangan dalam format kalender." ShowGlobalSearch="true" ShowGlobalDate="false">
-    <HeaderActions>
+<TopBar Title="Kalender Ruangan" Subtitle="Tinjauan jadwal semua ruangan dalam format kalender." ShowGlobalSearch="false" ShowDateFilter="false">
+    <RightSlot>
         <div class="rc-actions">
             <div class="rc-view-toggle">
                 <button class="@(isAdminView ? "active" : "")" @onclick="() => SetView(true)">Tampilan Admin</button>
@@ -19,8 +19,8 @@
                 </button>
             }
         </div>
-    </HeaderActions>
-</booking_room_admin.Components.Shared.AdminTopBar>
+    </RightSlot>
+</TopBar>
 <div class="room-calendar">
     
 
@@ -143,6 +143,8 @@
         showAddBlock = true;
     }
 }
+
+
 
 
 

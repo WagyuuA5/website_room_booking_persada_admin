@@ -5,14 +5,14 @@
 @inject booking_room_admin.Components.Services.IRoomService RoomService
 
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Manajemen Ruangan" PageSubtitle="Kelola daftar ruangan dan kapasitasnya." ShowGlobalSearch="false" ShowGlobalDate="true">
-    <HeaderActions>
+<TopBar Title="Manajemen Ruangan" Subtitle="Kelola daftar ruangan dan kapasitasnya." ShowGlobalSearch="false" ShowDateFilter="false">
+    <RightSlot>
         <button class="btn-primary-pill btn-yellow" @onclick="OpenAddRoom">
             <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
             <span>Tambah Ruangan</span>
         </button>
-    </HeaderActions>
-</booking_room_admin.Components.Shared.AdminTopBar>
+    </RightSlot>
+</TopBar>
 <div class="room-management">
     <div class="rm-breadcrumb">ADMINISTRASI</div>
     
@@ -183,6 +183,7 @@
         await LoadRooms();
     }
 }
+
 
 
 

@@ -5,14 +5,14 @@
 @inject booking_room_admin.Components.Services.IBookingService BookingService
 
 
-<booking_room_admin.Components.Shared.AdminTopBar PageTitle="Manajemen Booking" PageSubtitle="Kelola seluruh pemesanan ruangan perusahaan." ShowGlobalSearch="false" ShowGlobalDate="false">
-    <HeaderActions>
-        <button class="btn-primary bm-create-btn" @onclick="OpenManualBooking">
+<TopBar Title="Manajemen Booking" Subtitle="Kelola seluruh pemesanan ruangan perusahaan." ShowGlobalSearch="false" ShowDateFilter="false">
+    <RightSlot>
+        <button class="btn-primary-pill btn-yellow" @onclick="OpenManualBooking">
             <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
-            <span>Buat Booking Manual</span>
+            <span>+ Buat Booking Manual</span>
         </button>
-    </HeaderActions>
-</booking_room_admin.Components.Shared.AdminTopBar>
+    </RightSlot>
+</TopBar>
 <div class="booking-management">
     
 
@@ -272,6 +272,7 @@
         public List<Booking> Bookings { get; set; } = new();
     }
 }
+
 
 
 

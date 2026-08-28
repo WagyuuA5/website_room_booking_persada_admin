@@ -7,20 +7,36 @@
 <div class="admin-layout @(LayoutState.IsSidebarCollapsed ? "sidebar-collapsed" : "")">
     <aside class="admin-sidebar">
         <NavMenu IsCollapsed="@LayoutState.IsSidebarCollapsed" />
+        
+        <div class="sidebar-bottom-actions">
+            <button class="sidebar-collapse-btn" @onclick="LayoutState.ToggleSidebar" title="@(LayoutState.IsSidebarCollapsed ? "Perluas Sidebar" : "Ciutkan Sidebar")">
+                @if (LayoutState.IsSidebarCollapsed)
+                {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                }
+                else
+                {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                }
+            </button>
+        </div>
+
+        <div class="sidebar-drag-handle" title="Tarik untuk mengecilkan/membesarkan sidebar"></div>
     </aside>
-    
 
     <div class="admin-main">
         <article class="admin-content">
             @Body
         </article>
     </div>
+
+    <Toast />
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
     Terjadi kesalahan tak terduga.
     <a href="." class="reload">Muat Ulang</a>
-    <span class="dismiss">🗙</span>
+    <span class="dismiss">?</span>
 </div>
 
 @code {
@@ -29,7 +45,7 @@
     protected override async Task OnInitializedAsync()
     {
         LayoutState.OnChange += StateHasChanged;
-        await LayoutState.InitThemeAsync();
+        await LayoutState.InitStateAsync();
         try
         {
             await JSRuntime.InvokeVoidAsync("applyThemeMode", LayoutState.IsDarkMode);
@@ -68,4 +84,3 @@
         _objRef?.Dispose();
     }
 }
-
