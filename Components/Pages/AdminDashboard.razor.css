@@ -356,3 +356,28 @@
     .stats-grid { grid-template-columns: 1fr; }
     .summary-cards-grid { grid-template-columns: 1fr; }
 }
+.mini-table-header {
+    display: grid;
+    padding: 10px 20px;
+    background: var(--surface-alt, #F9FAFB);
+    border-bottom: 1px solid var(--border);
+}
+.mini-table-header-cell {
+    font: var(--text-caption);
+    letter-spacing: 0.04em;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+}
+.mini-table-row {
+    display: grid;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 120ms ease;
+}
+.mini-table-row:last-child {
+    border-bottom: none;
+}
+.mini-table-row:hover {
+    background: var(--surface-alt, #F9FAFB);
+}

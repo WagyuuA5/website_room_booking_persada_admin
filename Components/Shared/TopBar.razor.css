@@ -202,8 +202,10 @@
     border-radius: var(--radius-md, 12px);
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--color-border, #E5E7EB);
-    padding: 1.25rem;
-    width: 280px;
+    padding: 20px;
+    width: 320px;
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
     z-index: 201;
     animation: profilePopIn 0.15s ease-out;
 }
@@ -222,17 +224,35 @@
 .profile-details {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
     font-size: 0.8rem;
+    margin-top: 1rem;
 }
 
 .pd-row {
     display: flex;
     justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border, #E5E7EB);
 }
 
-.pd-row span { color: var(--color-text-muted, #6E6E73); }
-.pd-row strong { color: var(--color-text-strong, #0B1E39); }
+.pd-row:last-child {
+    border-bottom: none;
+}
+
+.pd-row span { 
+    color: var(--color-text-muted, #6E6E73); 
+    flex-shrink: 0;
+}
+.pd-row strong { 
+    color: var(--color-text-strong, #0B1E39); 
+    text-align: right;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 body.dark .topbar {
     background: rgba(19, 27, 44, 0.8);

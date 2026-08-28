@@ -37,11 +37,10 @@
     {
         return Status.ToLowerInvariant() switch
         {
-            "pending" or "baru" => "badge-pending",
-            "approved" or "confirmed" or "active" or "selesai" or "fulfilled" or "ready" => "badge-confirmed",
-            "rejected" or "rejected_admin" or "rejected_system" or "declined" or "cancelled" or "overdue" or "inactive" => "badge-rejected",
-            "preparing" or "diproses" => "badge-progress",
-            "maintenance" => "badge-maintenance",
+            "baru" => "badge-info",
+            "pending" or "preparing" or "diproses" or "maintenance" => "badge-warning",
+            "approved" or "confirmed" or "active" or "selesai" or "fulfilled" or "ready" => "badge-success",
+            "rejected" or "rejected_admin" or "rejected_system" or "declined" or "cancelled" or "overdue" or "inactive" => "badge-danger",
             _ => "badge-neutral"
         };
     }

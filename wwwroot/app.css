@@ -1,3 +1,4 @@
+* { box-sizing: border-box; }
 :root {
     /* -- Primary -- navy khas Persada (sidebar) */
     --color-primary: #0B1E39;
@@ -747,22 +748,22 @@ h1:focus {
     display: inline-block;
 }
 
-.badge-pending {
+.badge-warning {
     background: #fef3c7;
     color: #92400e;
 }
 
-.badge-progress {
+.badge-info {
     background: #dbeafe;
     color: #1e40af;
 }
 
-.badge-confirmed {
+.badge-success {
     background: #d1fae5;
     color: #065f46;
 }
 
-.badge-rejected {
+.badge-danger {
     background: #fee2e2;
     color: #991b1b;
 }
@@ -1095,3 +1096,13 @@ body.dark select.rc-filter-select {
 .p-3 { padding: 0.75rem !important; }
 
 
+
+.btn-primary-pill, .btn-outline-pill {
+    white-space: nowrap;
+    padding: 10px 20px;
+}
+@media (max-width: 768px) {
+    .btn-primary-pill span {
+        display: none;
+    }
+}

@@ -1,4 +1,4 @@
-@page "/dashboard"
+ï»¿@page "/dashboard"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using ApexCharts
 @using booking_room_admin.Components.Shared
@@ -130,8 +130,8 @@
             <div class="chart-header">
                 <h3>Tren Booking</h3>
                 <div class="chart-actions">
-                    <button class="chart-export-btn" title="Export" @onclick="() => showTrendExport = true">
-                        <img src="icon/icon_17_admin.svg" alt="Export" class="export-icon-white" />
+                    <button class="chart-export-btn" title="Unduh data" @onclick="() => showTrendExport = true">
+                        <Icon Name="download" Size="16" CssClass="export-icon-white" />
                     </button>
                 </div>
             </div>
@@ -148,8 +148,8 @@
             <div class="chart-header">
                 <h3>Ruangan Paling Sering Digunakan</h3>
                 <div class="chart-actions">
-                    <button class="chart-export-btn" title="Export" @onclick="() => showDonutExport = true">
-                        <img src="icon/icon_17_admin.svg" alt="Export" class="export-icon-white" />
+                    <button class="chart-export-btn" title="Unduh data" @onclick="() => showDonutExport = true">
+                        <Icon Name="download" Size="16" CssClass="export-icon-white" />
                     </button>
                 </div>
             </div>
@@ -169,26 +169,34 @@
         <div class="table-card">
             <div class="table-header">
                 <h3>Permintaan Terbaru</h3>
-                <a href="/facility-requests" class="table-link">LIHAT SEMUA DI REQUESTS HUB ?</a>
+                <a href="/facility-requests" class="table-link">LIHAT SEMUA DI REQUESTS HUB <Icon Name="chevron-right" Size="14" /></a>
             </div>
-            <DataTable TItem="RecentRequest" Items="recentRequests" Columns="requestColumns" TotalCount="@recentRequests.Count" PageSize="5" CurrentPage="1" OnRowClick="HandleRequestClick">
-                <RowTemplate Context="req">
-                    <td>
+            <div class="mini-table-header" style="grid-template-columns: 1.5fr 1.5fr 2fr 1fr;">
+                <div class="mini-table-header-cell">JENIS PERMINTAAN</div>
+                <div class="mini-table-header-cell">PEMOHON</div>
+                <div class="mini-table-header-cell">RINGKASAN</div>
+                <div class="mini-table-header-cell">STATUS</div>
+            </div>
+            <div class="mini-table-body">
+                @foreach (var req in recentRequests.Take(5))
+                {
+                    <div class="mini-table-row" style="grid-template-columns: 1.5fr 1.5fr 2fr 1fr; cursor: pointer;" @onclick="() => HandleRequestClick(req)">
                         <div class="req-type-cell">
                             @CategoryIcon(req.Type, req.TypeColor)
                             <span class="td-primary">@req.Type</span>
                         </div>
-                    </td>
-                    <td>
                         <div class="user-cell">
                             <UserAvatar Initials="@req.Initials" BgColor="@req.AvatarColor" Size="36px" />
-                            <div class="user-cell-info"><span class="td-primary">@req.RequesterName</span><span class="td-secondary">@req.Department</span></div>
+                            <div class="user-cell-info">
+                                <span class="td-primary">@req.RequesterName</span>
+                                <span class="td-secondary">@req.Department</span>
+                            </div>
                         </div>
-                    </td>
-                    <td>@req.Summary</td>
-                    <td><StatusBadge Status="@req.Status" /></td>
-                </RowTemplate>
-            </DataTable>
+                        <div class="td-primary" style="font-weight: 400; color: var(--text-muted); white-space: normal; line-height: 1.4;">@req.Summary</div>
+                        <div><StatusBadge Status="@req.Status" /></div>
+                    </div>
+                }
+            </div>
         </div>
 
         @* -- Bagian 5: History Bookings -- *@
@@ -196,25 +204,35 @@
             <div class="table-header">
                 <h3>Riwayat Booking</h3>
                 <div class="table-header-actions">
-                    <button class="chart-export-btn table-export-btn" title="Export" @onclick="() => showHistoryExport = true">
-                        <img src="icon/icon_17_admin.svg" alt="Export" class="export-icon-white" />
+                    <button class="chart-export-btn table-export-btn" title="Unduh data" @onclick="() => showHistoryExport = true">
+                        <Icon Name="download" Size="16" CssClass="export-icon-white" />
                     </button>
-                    <a href="/booking-management" class="table-link">SEMUA</a>
+                    <a href="/booking-management" class="table-link" style="display: inline-flex; align-items: center; gap: 4px;">LIHAT SEMUA <Icon Name="chevron-right" Size="14" /></a>
                 </div>
             </div>
-            <DataTable TItem="HistoryBooking" Items="historyBookings" Columns="bookingColumns" TotalCount="@historyBookings.Count" PageSize="5" CurrentPage="1">
-                <RowTemplate Context="booking">
-                    <td>
+            <div class="mini-table-header" style="grid-template-columns: 2fr 1.5fr 1.5fr 1fr;">
+                <div class="mini-table-header-cell">PENGGUNA</div>
+                <div class="mini-table-header-cell">RUANGAN</div>
+                <div class="mini-table-header-cell">JADWAL</div>
+                <div class="mini-table-header-cell">STATUS</div>
+            </div>
+            <div class="mini-table-body">
+                @foreach (var booking in historyBookings.Take(5))
+                {
+                    <div class="mini-table-row" style="grid-template-columns: 2fr 1.5fr 1.5fr 1fr;">
                         <div class="user-cell">
                             <UserAvatar Initials="@booking.Initials" BgColor="@booking.AvatarColor" Size="36px" />
-                            <div class="user-cell-info"><span class="td-primary">@booking.UserName</span><span class="td-secondary">@booking.Department</span></div>
+                            <div class="user-cell-info">
+                                <span class="td-primary">@booking.UserName</span>
+                                <span class="td-secondary">@booking.Department</span>
+                            </div>
                         </div>
-                    </td>
-                    <td><span class="td-primary">@booking.Room</span></td>
-                    <td>@booking.Schedule</td>
-                    <td><StatusBadge Status="@booking.Status" /></td>
-                </RowTemplate>
-            </DataTable>
+                        <div class="td-primary">@booking.Room</div>
+                        <div class="td-secondary" style="font-weight: 500; color: var(--text);">@booking.Schedule</div>
+                        <div><StatusBadge Status="@booking.Status" /></div>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </div>
@@ -355,23 +373,23 @@
     {
         facilityRequests = new()
         {
-            new("Permintaan Katering", "FAC-2241", "Rapat Direksi — 2 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
-            new("Peralatan AV", "FAC-2238", "Ruang Rapat A — 5 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
+            new("Permintaan Katering", "FAC-2241", "Rapat Direksi ï¿½ 2 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
+            new("Peralatan AV", "FAC-2238", "Ruang Rapat A ï¿½ 5 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
         };
         accountRequests = new()
         {
-            new("Sari Wulandari", "ACC-1102", "Karyawan resign — Menunggu", "#EF4444", "#FEE2E2", SvgAccount, "#991B1B"),
-            new("Rudi Hartono", "ACC-1099", "Mutasi cabang — Menunggu", "#F59E0B", "#FEF3C7", SvgAccount, "#92400E"),
+            new("Sari Wulandari", "ACC-1102", "Karyawan resign ï¿½ Menunggu", "#EF4444", "#FEE2E2", SvgAccount, "#991B1B"),
+            new("Rudi Hartono", "ACC-1099", "Mutasi cabang ï¿½ Menunggu", "#F59E0B", "#FEF3C7", SvgAccount, "#92400E"),
         };
         itRequests = new()
         {
-            new("Server Down", "IT-4421", "Server utama — 4 jam lalu", "#EF4444", "#FEE2E2", SvgIt, "#991B1B"),
+            new("Server Down", "IT-4421", "Server utama ï¿½ 4 jam lalu", "#EF4444", "#FEE2E2", SvgIt, "#991B1B"),
             new("Reset Email", "IT-4418", "Belum Ditugaskan", "#F59E0B", "#FEF3C7", SvgIt, "#92400E"),
         };
         bugRequests = new()
         {
-            new("Error 500 Submit Form", "BUG-102", "Form Booking — Kritis", "#EF4444", "#FEE2E2", SvgBug, "#991B1B"),
-            new("Kalender Tidak Sinkron", "BUG-099", "Modul Calendar — Medium", "#F59E0B", "#FEF3C7", SvgBug, "#92400E"),
+            new("Error 500 Submit Form", "BUG-102", "Form Booking ï¿½ Kritis", "#EF4444", "#FEE2E2", SvgBug, "#991B1B"),
+            new("Kalender Tidak Sinkron", "BUG-099", "Modul Calendar ï¿½ Medium", "#F59E0B", "#FEF3C7", SvgBug, "#92400E"),
         };
     }
 
