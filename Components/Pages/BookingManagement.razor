@@ -1,4 +1,4 @@
-@page "/booking-management"
+﻿@page "/booking-management"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
@@ -8,7 +8,7 @@
 <TopBar Title="Manajemen Booking" Subtitle="Kelola seluruh pemesanan ruangan perusahaan." ShowGlobalSearch="false" ShowDateFilter="false">
     <RightSlot>
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => showManualBooking = true">
-            <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
+            <Icon Name="plus" Size="14" />
             <span>+ Buat Booking Manual</span>
         </button>
     </RightSlot>
@@ -92,8 +92,8 @@
                                 <div class="bm-col-info">
                                     <h4 class="bm-meeting-title">@b.Title</h4>
                                     <div class="bm-meeting-meta">
-                                        <span class="bm-meta-room">?? @b.Room</span>
-                                        <span class="bm-meta-participants">?? @b.ParticipantsCount Peserta</span>
+                                        <span class="bm-meta-room"><Icon Name="map-pin" Size="13" /> @b.Room</span>
+                                        <span class="bm-meta-participants"><Icon Name="users" Size="13" /> @b.ParticipantsCount Peserta</span>
                                     </div>
                                 </div>
 
@@ -112,8 +112,8 @@
                                     @if (b.Status == "pending")
                                     {
                                         <div class="bm-quick-actions">
-                                            <button type="button" class="btn-quick-reject" @onclick="() => QuickReject(b)" title="Tolak Cepat">?</button>
-                                            <button type="button" class="btn-quick-approve" @onclick="() => QuickApprove(b)" title="Setujui Cepat">?</button>
+                                            <button type="button" class="btn-quick-reject" @onclick="() => QuickReject(b)" title="Tolak Cepat"><Icon Name="x" Size="14" /></button>
+                                            <button type="button" class="btn-quick-approve" @onclick="() => QuickApprove(b)" title="Setujui Cepat"><Icon Name="check" Size="14" /></button>
                                         </div>
                                     }
                                 </div>

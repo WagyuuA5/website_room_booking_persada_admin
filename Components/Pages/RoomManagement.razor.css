@@ -56,7 +56,7 @@
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
-    background: #000;
+    background: var(--color-background, #F7F8FA);
     overflow: hidden;
 }
 
@@ -198,7 +198,7 @@
     position: relative;
     border-radius: var(--radius-md, 12px);
     overflow: hidden;
-    background: #000;
+    background: var(--color-background, #F7F8FA);
     height: 100%;
     min-height: 300px;
 }

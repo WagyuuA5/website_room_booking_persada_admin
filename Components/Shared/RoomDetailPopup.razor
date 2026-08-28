@@ -1,14 +1,14 @@
-@using booking_room_admin.Components.Models
+﻿@using booking_room_admin.Components.Models
 
 <AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Size="large" OnClose="Close">
     <HeaderContent>
         <div class="dr-header-photo-container">
             <div class="dr-header-photo-placeholder">
-                <img src="icon/icon_1_admin.svg" alt="Ruangan" />
+                <Icon Name="building" Size="32" />
             </div>
             <div class="dr-header-overlay">
                 <h2 class="dr-title-overlay">@Room?.Name</h2>
-                <p class="dr-subtitle-overlay">@Room?.Floor · @Room?.Type</p>
+                <p class="dr-subtitle-overlay">@Room?.Floor - @Room?.Type</p>
                 <div class="dr-header-badges">
                     @if (Room?.Status == "maintenance")
                     {
@@ -37,7 +37,7 @@
                     @foreach (var tag in Room?.Facilities ?? new())
                     {
                         <div class="dr-facility-item">
-                            <img src="icon/check.svg" alt="Check" class="dr-facility-icon" style="width: 1rem; height: 1rem;" />
+                            <Icon Name="check" Size="14" />
                             <span>@tag</span>
                         </div>
                     }
@@ -62,7 +62,7 @@
     <FooterContent>
         <button class="btn-outline-pill" @onclick="Close">Tutup</button>
         <button class="btn-primary-pill btn-yellow" @onclick="EditRoom">
-            <img src="icon/icon_14_admin.svg" alt="Ubah" class="btn-icon" />
+            <Icon Name="edit" Size="14" />
             Ubah Ruangan
         </button>
     </FooterContent>

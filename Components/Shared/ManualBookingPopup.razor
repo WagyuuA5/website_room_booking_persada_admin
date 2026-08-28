@@ -1,4 +1,4 @@
-﻿@namespace booking_room_admin.Components.Shared
+@namespace booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
 @using booking_room_admin.Components.Services
 @inject ToastService Toast
@@ -132,7 +132,7 @@
                                 <span class="mb-att-name">@att.Name</span>
                                 @if (att.HasConflict)
                                 {
-                                    <span class="att-warn" title="Berpotensi bentrok jadwal">?</span>
+                                    <span class="att-warn" title="Berpotensi bentrok jadwal"><Icon Name="alert-triangle" Size="12" /></span>
                                 }
                                 <button type="button" class="mb-att-del" @onclick="() => RemoveAttendee(att)"><Icon Name="x" Size="14" /></button>
                             </div>

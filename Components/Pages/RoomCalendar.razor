@@ -1,4 +1,4 @@
-@page "/room-calendar"
+﻿@page "/room-calendar"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
@@ -14,14 +14,14 @@
             @if (isAdminView)
             {
                 <button class="btn-primary-pill" @onclick="OpenAddBlock">
-                    <img src="icon/plus.svg" alt="Add" class="btn-icon" />
+                    <Icon Name="plus" Size="14" />
                     <span>Tambah Blokir</span>
                 </button>
             }
         </div>
     </RightSlot>
 </TopBar>
-<div class="room-calendar">
+<div class="room-calendar">`r`n    <SectionEyebrow Text="KALENDER RUANGAN" />
     
 
     <div class="rc-toolbar">
@@ -32,9 +32,9 @@
         </select>
         
         <div class="rc-date-nav">
-            <button class="rc-nav-btn">&lt;</button>
+            <button class="rc-nav-btn"><Icon Name="chevron-left" Size="14" /></button>
             <span class="rc-current-date">Hari Ini, 27 Agu</span>
-            <button class="rc-nav-btn">&gt;</button>
+            <button class="rc-nav-btn"><Icon Name="chevron-right" Size="14" /></button>
         </div>
         
         <div class="rc-legend">

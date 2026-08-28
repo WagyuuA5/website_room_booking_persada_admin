@@ -77,7 +77,7 @@
     {
         <div class="table-pagination">
             <span class="pagination-info">
-                Menampilkan @(((CurrentPage - 1) * PageSize) + 1)–@Math.Min(CurrentPage * PageSize, TotalCount) dari @TotalCount
+                Menampilkan @(((CurrentPage - 1) * PageSize) + 1) - @Math.Min(CurrentPage * PageSize, TotalCount) dari @TotalCount
             </span>
             <div class="pagination-buttons">
                 <button class="page-btn" disabled="@(CurrentPage <= 1)" @onclick="() => GoToPage(CurrentPage - 1)"><Icon Name="chevron-left" Size="14" /></button>

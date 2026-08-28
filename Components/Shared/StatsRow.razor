@@ -1,11 +1,11 @@
-@using booking_room_admin.Components.Models
+﻿@using booking_room_admin.Components.Models
 
 <div class="stats-row">
     @foreach (var stat in Stats)
     {
         <div class="stat-card">
             <div class="stat-icon">
-                <img src="@stat.Icon" alt="@stat.Label" class="stat-icon-img" />
+                <Icon Name="@GetIconName(stat.Icon)" Size="22" />
             </div>
             <div class="stat-info">
                 <span class="stat-label">@stat.Label</span>
@@ -21,4 +21,20 @@
 
 @code {
     [Parameter] public List<StatItem> Stats { get; set; } = new();
+
+    private string GetIconName(string iconPath) => iconPath switch
+    {
+        var s when s.Contains("check") => "check",
+        var s when s.Contains("clock") => "clock",
+        var s when s.Contains("x.svg") => "x",
+        var s when s.Contains("coffee") => "coffee",
+        var s when s.Contains("icon_1_admin") => "building",
+        var s when s.Contains("icon_2_admin") => "users",
+        var s when s.Contains("icon_3_admin") => "activity",
+        var s when s.Contains("icon_4_admin") => "calendar",
+        var s when s.Contains("icon_9_admin") => "key",
+        var s when s.Contains("icon_10_admin") => "alert-triangle",
+        var s when s.Contains("icon_14_admin") => "edit",
+        _ => "bar-chart"
+    };
 }

@@ -1,4 +1,4 @@
-@page "/my-bookings"
+﻿@page "/my-bookings"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
@@ -9,13 +9,13 @@
 <TopBar Title="Status Booking Saya" Subtitle="Pantau status seluruh pengajuan booking ruangan yang telah Anda buat." ShowGlobalSearch="false" ShowDateFilter="false">
     <RightSlot>
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenNewBooking">
-            <img src="icon/plus.svg" alt="Plus" class="btn-icon" />
+            <Icon Name="plus" Size="14" />
             <span>+ Buat Booking Baru</span>
         </button>
     </RightSlot>
 </TopBar>
 
-<div class="my-bookings-page">
+<div class="my-bookings-page">`r`n    <SectionEyebrow Text="STATUS BOOKING SAYA" />
     @* -- Status Filter Pills -- *@
     <div class="mb-status-toolbar">
         <div class="mb-pills-list">
@@ -55,7 +55,7 @@
                 <div class="my-booking-card" @onclick="() => OpenDetail(b)">
                     <div class="card-top-row">
                         <div class="room-identity">
-                            <span class="room-icon-badge">??</span>
+                            <span class="room-icon-badge"><Icon Name="building" Size="18" /></span>
                             <div>
                                 <h4 class="room-title">@b.RoomName</h4>
                                 <span class="room-loc">@b.Location</span>
@@ -66,11 +66,11 @@
 
                     <div class="card-schedule-box">
                         <div class="sched-item">
-                            <span class="sched-icon">??</span>
+                            <span class="sched-icon"><Icon Name="calendar" Size="14" /></span>
                             <span>@b.Date.ToString("dd MMM yyyy")</span>
                         </div>
                         <div class="sched-item">
-                            <span class="sched-icon">?</span>
+                            <span class="sched-icon"><Icon Name="clock" Size="14" /></span>
                             <span>@b.StartTime - @b.EndTime (@b.Duration)</span>
                         </div>
                     </div>
@@ -81,7 +81,7 @@
                     }
 
                     <div class="card-bottom-row" @onclick:stopPropagation="true">
-                        <span class="participants-badge">?? @b.ParticipantsCount Peserta</span>
+                        <span class="participants-badge"><Icon Name="users" Size="12" /> @b.ParticipantsCount Peserta</span>
                         @if (b.Status == "pending")
                         {
                             <button type="button" class="btn-cancel-req" @onclick="() => ConfirmCancel(b)">
@@ -134,7 +134,7 @@
                 @if (selectedBooking.Status == "rejected" && !string.IsNullOrWhiteSpace(selectedBooking.RejectReason))
                 {
                     <div class="rejection-box">
-                        <span class="rejection-title">?? Alasan Penolakan:</span>
+                        <span class="rejection-title"><Icon Name="alert-triangle" Size="14" /> Alasan Penolakan:</span>
                         <p class="rejection-desc">@selectedBooking.RejectReason</p>
                     </div>
                 }
@@ -144,7 +144,7 @@
                     <h5 class="timeline-heading">Status Pengajuan</h5>
                     <div class="status-timeline">
                         <div class="tl-step step-done">
-                            <div class="tl-bullet">?</div>
+                            <div class="tl-bullet"><Icon Name="check" Size="10" /></div>
                             <div class="tl-content">
                                 <strong>Diajukan</strong>
                                 <span>@selectedBooking.SubmittedAt.ToString("dd MMM yyyy, HH:mm")</span>
@@ -152,7 +152,7 @@
                         </div>
                         <div class="tl-connector @(selectedBooking.Status != "pending" ? "conn-active" : "")"></div>
                         <div class="tl-step @(selectedBooking.Status != "pending" ? "step-done" : "step-active")">
-                            <div class="tl-bullet">@(selectedBooking.Status != "pending" ? "?" : "?")</div>
+                            <div class="tl-bullet">@if (selectedBooking.Status != "pending") { <Icon Name="check" Size="10" /> } else { <span class="tl-dot"></span> }</div>
                             <div class="tl-content">
                                 <strong>Sedang Ditinjau Admin</strong>
                                 <span>Verifikasi ketersediaan jadwal</span>
@@ -160,7 +160,7 @@
                         </div>
                         <div class="tl-connector @(selectedBooking.Status == "approved" || selectedBooking.Status == "completed" || selectedBooking.Status == "rejected" ? "conn-active" : "")"></div>
                         <div class="tl-step @(selectedBooking.Status == "approved" || selectedBooking.Status == "completed" ? "step-done" : selectedBooking.Status == "rejected" ? "step-rejected" : "step-pending")">
-                            <div class="tl-bullet">@(selectedBooking.Status == "rejected" ? "?" : selectedBooking.Status == "approved" || selectedBooking.Status == "completed" ? "?" : "?")</div>
+                            <div class="tl-bullet">@if (selectedBooking.Status == "rejected") { <Icon Name="x" Size="10" /> } else if (selectedBooking.Status == "approved" || selectedBooking.Status == "completed") { <Icon Name="check" Size="10" /> } else { <span class="tl-dot"></span> }</div>
                             <div class="tl-content">
                                 <strong>@(selectedBooking.Status == "rejected" ? "Ditolak oleh Admin" : selectedBooking.Status == "completed" ? "Selesai" : "Disetujui")</strong>
                                 <span>@(string.IsNullOrEmpty(selectedBooking.ApprovedBy) ? "Menunggu persetujuan" : $"Oleh {selectedBooking.ApprovedBy}")</span>

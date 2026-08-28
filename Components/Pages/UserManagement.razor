@@ -13,19 +13,19 @@
             <span>Import CSV</span>
         </button>
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
-            <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
+            <Icon Name="plus" Size="14" />
             <span>+ Tambah User</span>
         </button>
     </RightSlot>
 </TopBar>
 
 <div class="user-management-page">
-    <div class="um-eyebrow">ADMINISTRASI</div>
+    <SectionEyebrow Text="MANAJEMEN USER" />
 
     @* -- Search & Filter Bar -- *@
     <div class="um-toolbar">
         <div class="um-search-box">
-            <img src="icon/search.svg" alt="Cari" class="um-search-icon" />
+            <Icon Name="search" Size="16" CssClass="um-search-icon" />
             <input type="text" placeholder="Cari berdasarkan nama, email, atau ID user..." @bind="searchQuery" @bind:event="oninput" @onkeyup="HandleSearchKey" />
         </div>
         <select class="um-filter-select" @bind="departmentFilter" @bind:after="LoadUsers">
@@ -47,7 +47,7 @@
     @if (hasError)
     {
         <div class="error-state">
-            <div class="error-icon">??</div>
+            <div class="error-icon"><Icon Name="alert-triangle" Size="36" CssClass="text-danger" /></div>
             <h3 class="error-title">Tidak dapat memuat data user</h3>
             <p class="error-desc">Terjadi kendala saat menghubungkan ke database pengguna. Silakan coba kembali.</p>
             <button class="btn-primary-pill btn-yellow" @onclick="LoadUsers">Coba Lagi</button>
@@ -66,7 +66,7 @@
     else if (!users.Any())
     {
         <div class="empty-state">
-            <div class="empty-icon">??</div>
+            <div class="empty-icon"><Icon Name="users" Size="36" CssClass="text-muted" /></div>
             <h3 class="empty-title">Tidak ada user ditemukan</h3>
             <p class="empty-desc">Tidak ada akun pengguna yang cocok dengan kriteria pencarian atau filter yang dipilih.</p>
             <button class="btn-primary-pill btn-yellow" @onclick="ResetFilters">Reset Filter</button>
@@ -104,7 +104,7 @@
                     <td>
                         <span class="um-status-pill @(u.Status.ToLower() == "active" ? "status-active" : "status-inactive")">
                             <span class="status-dot"></span>
-                            @(u.Status.ToLower() == "active" ? "Aktif" : "Nonaktif")
+                            @(u.Status.ToLower() == "active" ? "Aktif" : "Tidak Aktif")
                         </span>
                     </td>
                     <td>
@@ -200,7 +200,7 @@
                 <label class="form-label">Status Akun</label>
                 <select class="form-input" @bind="formModel.Status">
                     <option value="active">Aktif</option>
-                    <option value="inactive">Nonaktif</option>
+                    <option value="inactive">Tidak Aktif</option>
                 </select>
             </div>
         </div>
@@ -279,7 +279,7 @@
                 <label class="form-label">Status Akun</label>
                 <select class="form-input" @bind="editModel.Status">
                     <option value="active">Aktif</option>
-                    <option value="inactive">Nonaktif</option>
+                    <option value="inactive">Tidak Aktif</option>
                 </select>
             </div>
         </div>
@@ -321,7 +321,7 @@
 
         <div class="csv-drop-zone">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="csv-upload-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
-            <div class="csv-drop-text">Upload CSV � Drag & Drop atau <label class="csv-browse"><input type="file" style="display:none" @onchange="SimulateCsvLoad" accept=".csv" />pilih file</label></div>
+            <div class="csv-drop-text">Upload CSV - Drag & Drop atau <label class="csv-browse"><input type="file" style="display:none" @onchange="SimulateCsvLoad" accept=".csv" />pilih file</label></div>
             <span class="csv-hint">Format kolom: Nama, Email, Department, Role, User ID</span>
         </div>
 
@@ -400,11 +400,11 @@
 
     private List<DataTable<User>.DataTableColumn> columns = new()
     {
-        new() { Header = "USER", PropertyName = "FullName", Sortable = true },
-        new() { Header = "DEPARTMENT", PropertyName = "Department", Sortable = true },
+        new() { Header = "PENGGUNA", PropertyName = "FullName", Sortable = true },
+        new() { Header = "DEPARTEMEN", PropertyName = "Department", Sortable = true },
         new() { Header = "TOTAL BOOKING", PropertyName = "TotalBookings", Sortable = true },
         new() { Header = "STATUS", PropertyName = "Status", Sortable = true },
-        new() { Header = "ACTION", PropertyName = "" }
+        new() { Header = "AKSI", PropertyName = "" }
     };
 
     private List<ExportColumn> exportColumns = new()

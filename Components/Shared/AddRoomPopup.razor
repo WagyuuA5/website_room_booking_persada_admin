@@ -1,4 +1,4 @@
-@using booking_room_admin.Components.Models
+﻿@using booking_room_admin.Components.Models
 
 <AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Tambah Ruangan" Size="medium" OnClose="Close">
     <ChildContent>
@@ -44,7 +44,7 @@
                     <label class="ar-label">Foto Ruangan (Seret & Lepas)</label>
                     <div class="ar-file-upload">
                         <div class="ar-file-upload-inner">
-                            <img src="icon/image.svg" alt="Upload" />
+                            <Icon Name="image" Size="24" />
                             <p>Seret dan lepas file di sini, atau <span>pilih file</span></p>
                             <span class="ar-file-upload-hint">Maks. 5MB (SVG, PNG, JPG)</span>
                         </div>
@@ -69,7 +69,7 @@
     <FooterContent>
         <button class="btn-outline-pill" @onclick="Close">Batal</button>
         <button class="btn-primary-pill btn-yellow" disabled="@(!IsValid())" @onclick="CreateRoom">
-            <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
+            <Icon Name="plus" Size="14" />
             Tambah Ruangan
         </button>
     </FooterContent>

@@ -1,0 +1,12 @@
+﻿@namespace booking_room_admin.Components.Shared
+
+<div class="room-photo-fallback @CssClass">
+    <Icon Name="image-off" Size="@IconSize" CssClass="text-muted" />
+    <span>@Text</span>
+</div>
+
+@code {
+    [Parameter] public string Text { get; set; } = "Foto tidak tersedia";
+    [Parameter] public int IconSize { get; set; } = 32;
+    [Parameter] public string CssClass { get; set; } = "";
+}

@@ -1,4 +1,4 @@
-@using booking_room_admin.Components.Models
+﻿@using booking_room_admin.Components.Models
 
 <AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Ubah Ruangan" Size="medium" OnClose="Close">
     <ChildContent>
@@ -54,7 +54,7 @@
     <FooterContent>
         <button class="btn-outline-pill" @onclick="Close">Batal</button>
         <button class="btn-primary-pill btn-yellow" disabled="@(!IsValid())" @onclick="SaveChanges">
-            <img src="icon/check.svg" alt="Simpan" class="btn-icon" />
+            <Icon Name="check" Size="14" />
             Simpan Perubahan
         </button>
     </FooterContent>

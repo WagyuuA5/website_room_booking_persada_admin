@@ -1,4 +1,4 @@
-@page "/facility-requests"
+ï»¿@page "/facility-requests"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
@@ -14,7 +14,7 @@
     </RightSlot>
 </TopBar>
 
-<div class="facility-requests-page">
+<div class="facility-requests-page">`r`n    <SectionEyebrow Text="PERMINTAAN FASILITAS" />
     @* -- Top Search Bar -- *@
     <div class="fr-search-bar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fr-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -148,24 +148,24 @@
                     <div class="fr-req-avatar" style="background: @selectedRequest.AvatarBg;">@selectedRequest.RequesterInitials</div>
                     <div class="fr-req-info">
                         <strong class="fr-req-name">@selectedRequest.RequesterName</strong>
-                        <span class="fr-req-role">@selectedRequest.Department • @selectedRequest.RequesterEmail</span>
+                        <span class="fr-req-role">@selectedRequest.Department - @selectedRequest.RequesterEmail</span>
                     </div>
                     <div class="fr-room-pin-badge">
-                        <span>?? @selectedRequest.RoomName</span>
+                        <span><Icon Name="map-pin" Size="14" /> @selectedRequest.RoomName</span>
                     </div>
                     <div class="fr-date-badge">
-                        <span>?? @selectedRequest.BookingDate.ToString("dd MMM yyyy, HH:mm")</span>
+                        <span><Icon Name="clock" Size="14" /> @selectedRequest.BookingDate.ToString("dd MMM yyyy, HH:mm")</span>
                     </div>
                 </div>
 
                 @* Requested Items Section *@
                 <div class="fr-section">
-                    <h5 class="fr-section-title">Requested Items</h5>
+                    <h5 class="fr-section-title">Item Permintaan</h5>
                     <div class="fr-items-list">
                         @foreach (var item in selectedRequest.Items)
                         {
                             <div class="fr-item-row">
-                                <div class="fr-item-icon">??</div>
+                                <div class="fr-item-icon"><Icon Name="package" Size="18" /></div>
                                 <div class="fr-item-text">
                                     <strong>@item.Category</strong>
                                     <span>@item.Description</span>
@@ -180,7 +180,7 @@
                 {
                     <div class="fr-note-box">
                         <div class="fr-note-header">
-                            <span>?? Catatan Pemohon</span>
+                            <span><Icon Name="file-text" Size="14" /> Catatan Pemohon</span>
                         </div>
                         <p class="fr-note-text">@selectedRequest.RequesterNote</p>
                     </div>
@@ -189,7 +189,7 @@
                 @* Action Fields: Assign To & Internal Notes *@
                 <div class="fr-action-fields-grid">
                     <div class="fr-field">
-                        <label class="fr-field-label">Assign To (PIC)</label>
+                        <label class="fr-field-label">Tugaskan Ke (PIC)</label>
                         <select class="fr-modal-input" @bind="selectedRequest.Assignee">
                             <option value="">Pilih Tim / PIC</option>
                             <option value="Sarah Jenkins (General Affairs)">Sarah Jenkins (General Affairs)</option>
@@ -199,14 +199,14 @@
                         </select>
                     </div>
                     <div class="fr-field">
-                        <label class="fr-field-label">Internal Notes (Private / Admin Only)</label>
+                        <label class="fr-field-label">Catatan Internal (Khusus Admin)</label>
                         <textarea class="fr-modal-textarea" rows="2" placeholder="Catatan internal tim operasional..." @bind="selectedRequest.InternalNotes"></textarea>
                     </div>
                 </div>
 
                 @* Activity Log Timeline *@
                 <div class="fr-section">
-                    <h5 class="fr-section-title">Activity Log</h5>
+                    <h5 class="fr-section-title">Riwayat Aktivitas</h5>
                     <div class="fr-timeline">
                         @foreach (var act in selectedRequest.ActivityLogs)
                         {
@@ -298,7 +298,7 @@
                 AvatarBg = "#0B1E39",
                 IsUrgent = true,
                 Status = "pending",
-                ItemsSummary = "Catering & Furniture — Executive Lunch (x12), Extra Chairs (x2)",
+                ItemsSummary = "Catering & Furniture - Executive Lunch (x12), Extra Chairs (x2)",
                 RequesterNote = "Mohon setup sound system dan proyektor siap 15 menit sebelum acara dimulai.",
                 Assignee = "Sarah Jenkins (General Affairs)",
                 InternalNotes = "Sudah dikoordinasikan dengan vendor katering.",
@@ -326,7 +326,7 @@
                 AvatarBg = "#16A34A",
                 IsUrgent = false,
                 Status = "preparing",
-                ItemsSummary = "Furniture & Stationeries — 4 Kursi Tambahan, Spidol Papan Tulis",
+                ItemsSummary = "Furniture & Stationeries - 4 Kursi Tambahan, Spidol Papan Tulis",
                 RequesterNote = "Butuh kursi tambahan karena ada tamu auditor eksternal.",
                 Assignee = "Budi Santoso (Facility Team)",
                 Items = new List<RequestItemDetail>
@@ -354,7 +354,7 @@
                 AvatarBg = "#F59E0B",
                 IsUrgent = true,
                 Status = "ready",
-                ItemsSummary = "AV & Stage — Live Streaming 4K Cam, Lighting, Stage Podium",
+                ItemsSummary = "AV & Stage - Live Streaming 4K Cam, Lighting, Stage Podium",
                 RequesterNote = "Townhall Q4 seluruh perusahaan, disiarkan langsung ke cabang Surabaya & Bandung.",
                 Assignee = "Rian Wahyu (IT Support)",
                 Items = new List<RequestItemDetail>
@@ -382,7 +382,7 @@
                 AvatarBg = "#9333EA",
                 IsUrgent = false,
                 Status = "fulfilled",
-                ItemsSummary = "Catering — Premium Coffee & Pastry (8 pax)",
+                ItemsSummary = "Catering - Premium Coffee & Pastry (8 pax)",
                 RequesterNote = "Interview Direksi.",
                 Assignee = "Catering Service PIC",
                 Items = new List<RequestItemDetail>

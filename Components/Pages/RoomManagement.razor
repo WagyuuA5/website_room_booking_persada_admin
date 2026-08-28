@@ -1,4 +1,4 @@
-@page "/rooms"
+﻿@page "/rooms"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
@@ -8,7 +8,7 @@
 <TopBar Title="Manajemen Ruangan" Subtitle="@($"Kelola informasi, kapasitas, dan fasilitas {rooms.Count} ruang meeting.")" ShowGlobalSearch="true" ShowDateFilter="false">
     <RightSlot>
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
-            <img src="icon/plus.svg" alt="Tambah" class="btn-icon" />
+            <Icon Name="plus" Size="14" />
             <span>+ Tambah Ruangan</span>
         </button>
     </RightSlot>
@@ -128,10 +128,10 @@
                             <div class="rm-amenities-section">
                                 <h5 class="rm-section-label">FASILITAS TERSEDIA</h5>
                                 <div class="rm-amenities-2col-grid">
-                                    <div class="rm-amenity-tile"><span>??</span> <span>Wi-Fi Kecepatan Tinggi</span></div>
-                                    <div class="rm-amenity-tile"><span>???</span> <span>Layar 85 inci</span></div>
-                                    <div class="rm-amenity-tile"><span>??</span> <span>Konferensi Video</span></div>
-                                    <div class="rm-amenity-tile"><span>??</span> <span>Hingga @selectedRoom.Capacity Orang</span></div>
+                                    <div class="rm-amenity-tile"><Icon Name="wifi" Size="16" /> <span>Wi-Fi Kecepatan Tinggi</span></div>
+                                    <div class="rm-amenity-tile"><Icon Name="monitor" Size="16" /> <span>Layar 85 inci</span></div>
+                                    <div class="rm-amenity-tile"><Icon Name="video" Size="16" /> <span>Konferensi Video</span></div>
+                                    <div class="rm-amenity-tile"><Icon Name="users" Size="16" /> <span>Hingga @selectedRoom.Capacity Orang</span></div>
                                 </div>
                             </div>
                         </div>

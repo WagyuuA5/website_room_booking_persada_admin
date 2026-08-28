@@ -1,4 +1,4 @@
-@using booking_room_admin.Components.Models
+﻿@using booking_room_admin.Components.Models
 
 <div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
     <div class="popup-card edit-user-card" @onclick:stopPropagation="true">
@@ -52,7 +52,7 @@
                         <label class="eu-label">Departemen</label>
                         <button class="eu-input eu-dept-btn" @onclick="() => OnSelectDepartment.InvokeAsync()">
                             @User.Department
-                            <img src="icon/calendar.svg" alt="Pilih" class="eu-dept-icon" />
+                            <Icon Name="calendar" Size="14" />
                         </button>
                     </div>
                 </div>

@@ -1,0 +1,10 @@
+﻿@namespace booking_room_admin.Components.Shared
+
+<div class="section-eyebrow-row">
+    <span class="section-eyebrow-bullet"></span>
+    <span class="section-eyebrow-text">@Text?.ToUpperInvariant()</span>
+</div>
+
+@code {
+    [Parameter] public string Text { get; set; } = string.Empty;
+}

@@ -20,7 +20,7 @@
     </RightSlot>
 </TopBar>
 
-<div class="system-reports-container">
+<div class="system-reports-container">`r`n    <SectionEyebrow Text="LAPORAN SISTEM" />
     @* -- Tab Navigation -- *@
     <div class="sr-tab-nav">
         <button type="button" class="sr-tab-link @(activeTab == "booking" ? "active" : "")" @onclick='() => SetTab("booking")'>
@@ -106,7 +106,7 @@
 </div>
 
 <DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => showDatePicker = v)" IsRangeMode="true" OnRangeSelected="OnRangeSelected" />
-<ExportModal IsOpen="@showExportModal" IsOpenChanged="@((bool v) => showExportModal = v)" ExportTitle="@($"Laporan Sistem � {GetTabTitle()}")" Columns="exportColumns" CurrentViewRows="GetExportRows()" AllRows="GetExportRows()" />
+<ExportModal IsOpen="@showExportModal" IsOpenChanged="@((bool v) => showExportModal = v)" ExportTitle="@($"Laporan Sistem - {GetTabTitle()}")" Columns="exportColumns" CurrentViewRows="GetExportRows()" AllRows="GetExportRows()" />
 
 @code {
     private string activeTab = "booking";

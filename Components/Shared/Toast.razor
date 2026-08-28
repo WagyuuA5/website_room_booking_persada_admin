@@ -7,9 +7,9 @@
     {
         <div class="toast @t.Type">
             <span class="toast-icon">
-                @if (t.Type == "success") { <text>?</text> }
-                else if (t.Type == "error") { <text>?</text> }
-                else { <text>?</text> }
+                @if (t.Type == "success") { <Icon Name="check" Size="16" /> }
+                else if (t.Type == "error") { <Icon Name="alert-triangle" Size="16" /> }
+                else { <Icon Name="bell" Size="16" /> }
             </span>
             <span class="toast-message">@t.Message</span>
         </div>

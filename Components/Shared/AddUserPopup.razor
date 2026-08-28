@@ -1,4 +1,4 @@
-@using booking_room_admin.Components.Models
+﻿@using booking_room_admin.Components.Models
 
 <div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
     <div class="popup-card add-user-card" @onclick:stopPropagation="true">
@@ -41,7 +41,7 @@
                     <label class="au-label">Departemen</label>
                     <button class="au-input au-dept-btn" @onclick="() => OnSelectDepartment.InvokeAsync()">
                         @(string.IsNullOrWhiteSpace(form.Department) ? "Pilih Departemen" : form.Department)
-                        <img src="icon/calendar.svg" alt="Pilih" class="au-dept-icon" />
+                        <Icon Name="calendar" Size="14" />
                     </button>
                 </div>
             </div>
@@ -70,7 +70,7 @@
         <div class="au-footer">
             <button class="btn-outline-pill" @onclick="Close">Batal</button>
             <button class="btn-primary-pill btn-yellow" disabled="@(!IsFormValid())" @onclick="CreateAccount">
-                <img src="icon/people.svg" alt="Buat" class="btn-icon" />
+                <Icon Name="user-plus" Size="14" />
                 Buat Akun
             </button>
         </div>

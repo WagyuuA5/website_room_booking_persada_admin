@@ -1,4 +1,4 @@
-@using booking_room_admin.Components.Models
+﻿@using booking_room_admin.Components.Models
 
 <AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Size="large">
     <HeaderContent>
@@ -13,11 +13,11 @@
             <p class="bd-room-desc">@GetRoomDescription(Booking?.Room)</p>
             <div class="bd-room-pills">
                 <span class="bd-pill">
-                    <img src="icon/people.svg" alt="Peserta" class="bd-pill-icon" />
+                    <Icon Name="users" Size="14" />
                     @Booking?.ParticipantsCount Peserta
                 </span>
                 <span class="bd-pill">
-                    <img src="icon/clock.svg" alt="Lokasi" class="bd-pill-icon" />
+                    <Icon Name="clock" Size="14" />
                     Sayap Eksekutif, Lt. 14
                 </span>
             </div>
@@ -27,15 +27,15 @@
             <div class="bd-fac-title">Fasilitas Ruangan</div>
             <div class="bd-fac-list">
                 <span class="bd-fac-item">
-                    <img src="icon/video.svg" alt="Video Conf" class="bd-fac-icon" />
+                    <Icon Name="video" Size="14" />
                     Video Conf
                 </span>
                 <span class="bd-fac-item">
-                    <img src="icon/wifi.svg" alt="WiFi" class="bd-fac-icon" />
+                    <Icon Name="wifi" Size="14" />
                     WiFi
                 </span>
                 <span class="bd-fac-item">
-                    <img src="icon/coffee.svg" alt="Katering" class="bd-fac-icon" />
+                    <Icon Name="coffee" Size="14" />
                     Katering
                 </span>
             </div>

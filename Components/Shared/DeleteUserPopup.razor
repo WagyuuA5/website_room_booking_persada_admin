@@ -1,4 +1,4 @@
-@using booking_room_admin.Components.Models
+﻿@using booking_room_admin.Components.Models
 
 <div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
     <div class="popup-card delete-user-card" @onclick:stopPropagation="true">
@@ -19,7 +19,7 @@
                 </div>
 
                 <div class="du-warning">
-                    <img src="icon/icon_10_admin.svg" alt="Peringatan" class="du-warning-icon" />
+                    <Icon Name="alert-triangle" Size="24" CssClass="text-danger" />
                     <p>User ini masih memiliki <strong>2 booking aktif</strong>. Booking tersebut akan otomatis dibatalkan jika akun dihapus atau dinonaktifkan.</p>
                 </div>
 
