@@ -807,6 +807,19 @@ h1:focus {
     background: #f9fafb;
 }
 
+.btn-danger {
+    background: var(--color-danger);
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+.text-danger {
+    color: var(--color-danger);
+}
+
 .popup-title {
     font-size: 1.25rem;
     font-weight: 700;

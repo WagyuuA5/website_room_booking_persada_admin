@@ -308,14 +308,14 @@
                 },
                 ActivityLogs = new List<RequestActivityLog>
                 {
-                    new() { Title = "Request Created", Timestamp = DateTime.Now.AddHours(-2) },
-                    new() { Title = "Awaiting Assignment", Timestamp = DateTime.Now.AddHours(-1) }
+                    new() { Title = "Permintaan Dibuat", Timestamp = DateTime.Now.AddHours(-2) },
+                    new() { Title = "Menunggu Penugasan", Timestamp = DateTime.Now.AddHours(-1) }
                 }
             },
             new()
             {
                 RequestId = "FAC-902",
-                Title = "Extra Chairs & Whiteboard Markers",
+                Title = "Kursi Tambahan & Spidol Papan Tulis",
                 RoomName = "Ruang Diskusi B",
                 BookingDate = DateTime.Today.AddHours(14),
                 RequesterName = "Dewi Lestari",
@@ -325,25 +325,25 @@
                 AvatarBg = "#16A34A",
                 IsUrgent = false,
                 Status = "preparing",
-                ItemsSummary = "Furniture & Stationeries - 4 Kursi Tambahan, Spidol Papan Tulis",
+                ItemsSummary = "Perlengkapan Ruangan - 4 Kursi Tambahan, Spidol Papan Tulis",
                 RequesterNote = "Butuh kursi tambahan karena ada tamu auditor eksternal.",
                 Assignee = "Budi Santoso (Facility Team)",
                 Items = new List<RequestItemDetail>
                 {
-                    new() { Category = "Furniture", Description = "Kursi Rapat Ergonomis (4 buah)" },
-                    new() { Category = "Stationeries", Description = "Marker Board 3 Warna + Penghapus" }
+                    new() { Category = "Perabotan", Description = "Kursi Rapat Ergonomis (4 buah)" },
+                    new() { Category = "Alat Tulis", Description = "Spidol Whiteboard 3 Warna + Penghapus" }
                 },
                 ActivityLogs = new List<RequestActivityLog>
                 {
-                    new() { Title = "Request Created", Timestamp = DateTime.Now.AddHours(-3) },
-                    new() { Title = "Assigned to Budi Santoso", Timestamp = DateTime.Now.AddHours(-2) },
-                    new() { Title = "Status Changed to Preparing", Timestamp = DateTime.Now.AddMinutes(-45) }
+                    new() { Title = "Permintaan Dibuat", Timestamp = DateTime.Now.AddHours(-3) },
+                    new() { Title = "Ditugaskan ke Budi Santoso", Timestamp = DateTime.Now.AddHours(-2) },
+                    new() { Title = "Status Diubah menjadi Diproses", Timestamp = DateTime.Now.AddMinutes(-45) }
                 }
             },
             new()
             {
                 RequestId = "FAC-903",
-                Title = "Townhall Streaming & Stage Setup",
+                Title = "Live Streaming Townhall & Setup Panggung",
                 RoomName = "Auditorium Serbaguna",
                 BookingDate = DateTime.Today.AddDays(1).AddHours(10),
                 RequesterName = "Rudi Hartono",
@@ -353,25 +353,25 @@
                 AvatarBg = "#F59E0B",
                 IsUrgent = true,
                 Status = "ready",
-                ItemsSummary = "AV & Stage - Live Streaming 4K Cam, Lighting, Stage Podium",
+                ItemsSummary = "Peralatan AV & Panggung - Kamera Live Streaming 4K, Lighting, Podium",
                 RequesterNote = "Townhall Q4 seluruh perusahaan, disiarkan langsung ke cabang Surabaya & Bandung.",
                 Assignee = "Rian Wahyu (IT Support)",
                 Items = new List<RequestItemDetail>
                 {
-                    new() { Category = "AV Setup", Description = "Dual Camera 4K + OBS Live Studio Switcher" },
-                    new() { Category = "Lighting", Description = "Stage Warm Light (4 Bar)" }
+                    new() { Category = "Peralatan AV", Description = "Dual Camera 4K + OBS Live Studio Switcher" },
+                    new() { Category = "Pencahayaan", Description = "Lampu Panggung Warm Light (4 Bar)" }
                 },
                 ActivityLogs = new List<RequestActivityLog>
                 {
-                    new() { Title = "Request Created", Timestamp = DateTime.Now.AddDays(-1) },
-                    new() { Title = "Technical Rehearsal Completed", Timestamp = DateTime.Now.AddHours(-4) },
-                    new() { Title = "Status Changed to Ready", Timestamp = DateTime.Now.AddHours(-1) }
+                    new() { Title = "Permintaan Dibuat", Timestamp = DateTime.Now.AddDays(-1) },
+                    new() { Title = "Gladi Bersih Teknis Selesai", Timestamp = DateTime.Now.AddHours(-4) },
+                    new() { Title = "Status Diubah menjadi Siap", Timestamp = DateTime.Now.AddHours(-1) }
                 }
             },
             new()
             {
                 RequestId = "FAC-904",
-                Title = "Coffee Break & Tea Service",
+                Title = "Coffee Break & Layanan Teh",
                 RoomName = "Ruang Dirantara VIP",
                 BookingDate = DateTime.Today.AddHours(-2),
                 RequesterName = "Siti Rahma",
@@ -381,18 +381,18 @@
                 AvatarBg = "#9333EA",
                 IsUrgent = false,
                 Status = "fulfilled",
-                ItemsSummary = "Catering - Premium Coffee & Pastry (8 pax)",
+                ItemsSummary = "Katering - Kopi Premium & Pastry (8 pax)",
                 RequesterNote = "Interview Direksi.",
                 Assignee = "Catering Service PIC",
                 Items = new List<RequestItemDetail>
                 {
-                    new() { Category = "Catering", Description = "Arabica Coffee Machine + Croissant Basket" }
+                    new() { Category = "Katering", Description = "Mesin Kopi Arabika + Keranjang Croissant" }
                 },
                 ActivityLogs = new List<RequestActivityLog>
                 {
-                    new() { Title = "Request Created", Timestamp = DateTime.Now.AddHours(-5) },
-                    new() { Title = "Delivered to Room", Timestamp = DateTime.Now.AddHours(-3) },
-                    new() { Title = "Marked as Fulfilled", Timestamp = DateTime.Now.AddHours(-2) }
+                    new() { Title = "Permintaan Dibuat", Timestamp = DateTime.Now.AddHours(-5) },
+                    new() { Title = "Diantar ke Ruangan", Timestamp = DateTime.Now.AddHours(-3) },
+                    new() { Title = "Ditandai Selesai", Timestamp = DateTime.Now.AddHours(-2) }
                 }
             }
         };
@@ -444,7 +444,7 @@
             selectedRequest.Status = selectedRequest.Status == "pending" ? "preparing" : "ready";
             selectedRequest.ActivityLogs.Add(new RequestActivityLog
             {
-                Title = $"Status updated to {selectedRequest.Status.ToUpper()} by Admin",
+                Title = $"Status diperbarui menjadi {selectedRequest.Status.ToUpper()} oleh Admin",
                 Timestamp = DateTime.Now
             });
             Toast.Success($"Permintaan #{selectedRequest.RequestId} berhasil diproses.");
@@ -459,7 +459,7 @@
             selectedRequest.Status = "rejected";
             selectedRequest.ActivityLogs.Add(new RequestActivityLog
             {
-                Title = "Request Rejected by Admin",
+                Title = "Permintaan Ditolak oleh Admin",
                 Timestamp = DateTime.Now
             });
             Toast.Error($"Permintaan #{selectedRequest.RequestId} telah ditolak.");
