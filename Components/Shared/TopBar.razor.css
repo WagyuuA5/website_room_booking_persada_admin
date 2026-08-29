@@ -1,4 +1,4 @@
-.topbar {
+﻿.topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -211,16 +211,46 @@
     position: fixed;
     top: 70px;
     right: 2rem;
-    background: var(--color-surface, #FFFFFF);
-    border-radius: var(--radius-md, 12px);
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--color-border, #E5E7EB);
-    padding: 20px;
     width: 320px;
     max-width: calc(100vw - 32px);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: var(--radius-lg, 20px);
+    box-shadow: var(--shadow-lg);
+    padding: 20px;
     box-sizing: border-box;
     z-index: 201;
     animation: profilePopIn 0.15s ease-out;
+}
+
+.profile-avatar-container {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-upload-btn {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 24px;
+    height: 24px;
+    background: var(--color-primary, #0B1E39);
+    border: 2px solid var(--color-surface, #FFFFFF);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+.avatar-upload-btn:hover {
+    transform: scale(1.1);
+}
+.avatar-upload-input {
+    display: none;
 }
 
 @keyframes profilePopIn {
@@ -274,12 +304,41 @@ body.dark .topbar {
 
 body.dark .topbar-search,
 body.dark .topbar-date-btn,
-body.dark .profile-popup {
-    background: #131B2C;
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #F5F5F7;
+
+
+.profile-avatar-container {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-upload-btn {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 24px;
+    height: 24px;
+    background: var(--color-primary, #0B1E39);
+    border: 2px solid var(--color-surface, #FFFFFF);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+.avatar-upload-btn:hover {
+    transform: scale(1.1);
+}
+.avatar-upload-input {
+    display: none;
 }
 
 body.dark .topbar-utilities-group {
     border-left-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .profile-popup {
+    background: rgba(19, 27, 44, 0.75);
+    border-color: rgba(255, 255, 255, 0.08);
 }

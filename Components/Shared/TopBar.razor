@@ -1,4 +1,4 @@
-@namespace booking_room_admin.Components.Shared
+﻿@namespace booking_room_admin.Components.Shared
 @inject booking_room_admin.Components.Services.LayoutStateService LayoutState
 @inject NavigationManager Navigation
 
@@ -78,7 +78,13 @@
     <div class="profile-popup-overlay" @onclick="() => showProfilePopup = false">
         <div class="profile-popup" @onclick:stopPropagation="true">
             <div class="profile-header">
-                <UserAvatar Initials="WA" BgColor="#0B1E39" Size="48px" />
+                <div class="profile-avatar-container">
+                    <UserAvatar Initials="WA" BgColor="#0B1E39" Size="48px" />
+                    <label class="avatar-upload-btn" title="Ubah Foto Profil">
+                        <Icon Name="camera" Size="12" />
+                        <InputFile class="avatar-upload-input" OnChange="HandleAvatarUpload" accept="image/png, image/jpeg" />
+                    </label>
+                </div>
                 <div>
                     <strong>Admin Wahyu</strong>
                     <div class="text-sm text-gray">wahyu.admin@persada.co.id</div>
@@ -143,7 +149,13 @@
             dateRangeLabel = date.Value.ToString("dd MMM yyyy");
             OnDateSelectedCallback.InvokeAsync(date.Value);
         }
-        showDatePicker = false;
-        StateHasChanged();
+}
+    private async Task HandleAvatarUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null && file.Size <= 5242880 && (file.ContentType == "image/jpeg" || file.ContentType == "image/png"))
+        {
+            await Task.Delay(500);
+        }
     }
 }
