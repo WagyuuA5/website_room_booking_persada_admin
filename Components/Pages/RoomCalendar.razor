@@ -7,14 +7,14 @@
 <TopBar Title="Kalender Ruangan" Subtitle="Tinjauan jadwal semua ruangan dalam format kalender." ShowGlobalSearch="false" ShowDateFilter="false" />
 <div class="room-calendar">
     @* -- Baris Aksi: View Toggle + CTA -- *@
-    <div style="display:flex; align-items:center; gap:12px; padding:12px 0; flex-wrap:wrap;">
+    <div class="action-row">
         <div class="rc-view-toggle">
             <button class="@(isAdminView ? "active" : "")" @onclick="() => SetView(true)">Tampilan Admin</button>
             <button class="@(!isAdminView ? "active" : "")" @onclick="() => SetView(false)">Tampilan Pengguna</button>
         </div>
         @if (isAdminView)
         {
-            <button class="btn-primary-pill btn-yellow" style="white-space:nowrap; margin-left:auto;" @onclick="OpenAddBlock">
+            <button class="btn-primary-pill btn-yellow" @onclick="OpenAddBlock">
                 <Icon Name="plus" Size="14" />
                 <span>Tambah Blokir</span>
             </button>

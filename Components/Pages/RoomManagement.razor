@@ -9,12 +9,12 @@
 
 <div class="room-management-page">
     @* -- Baris Aksi: search lokal + CTA -- *@
-    <div class="rm-action-row" style="display:flex; align-items:center; gap:12px; padding:16px 0; flex-wrap:wrap;">
-        <div class="bm-search-bar" style="flex:1 1 auto; min-width:200px; max-width:400px;">
+    <div class="rm-action-row action-row">
+        <div class="bm-search-bar search-bar" style="flex:1 1 auto; min-width:200px; max-width:400px;">
             <Icon Name="search" Size="15" CssClass="bm-search-icon" />
             <input type="text" class="bm-search-input" placeholder="Cari ruangan..." @bind="searchQuery" @bind:event="oninput" />
         </div>
-        <button type="button" class="btn-primary-pill btn-yellow" style="white-space:nowrap; margin-left:auto;" @onclick="OpenAddModal">
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
             <Icon Name="plus" Size="14" />
             <span>Tambah Ruangan</span>
         </button>
@@ -102,7 +102,7 @@
                     }
                     else
                     {
-                        <div class="room-photo-fallback rm-split-photo" style="border-radius: var(--radius-md, 12px);">
+                         <div class="room-photo-fallback rm-split-photo">
                             <Icon Name="image-off" Size="32" CssClass="text-muted" />
                             <span>Foto tidak tersedia</span>
                         </div>
@@ -162,7 +162,7 @@
                                     {
                                         <button type="button" class="rm-select-chip @(editForm.Amenities.Contains(am) ? "selected" : "")"
                                                 @onclick="() => ToggleAmenity(am)">
-                                            @(editForm.Amenities.Contains(am) ? "?" : "+") @am
+                                            <Icon Name="@(editForm.Amenities.Contains(am) ? "check" : "plus")" Size="14" /> @am
                                         </button>
                                     }
                                 </div>
@@ -189,9 +189,9 @@
         <FooterContent>
             @if (!isEditMode)
             {
-                <button type="button" class="btn-primary-pill" style="background:#0B1E39; color:#fff;" @onclick="() => isEditMode = true">
-                    <span>Edit ?</span>
-                </button>
+                    <button type="button" class="btn-primary-pill" style="background:#0B1E39; color:#fff;" @onclick="() => isEditMode = true">
+                        <Icon Name="pencil" Size="14" /> Edit Detail Ruangan
+                    </button>
                 <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Batal</button>
             }
             else
@@ -216,7 +216,7 @@
         <ChildContent>
             <div class="rm-split-layout">
                 <div class="rm-split-photo-col">
-                    <div class="room-photo-fallback rm-split-photo" style="border-radius: var(--radius-md, 12px);">
+                     <div class="room-photo-fallback rm-split-photo">
                         <Icon Name="image" Size="32" CssClass="text-muted" />
                         <span>Preview Foto</span>
                     </div>
@@ -246,7 +246,7 @@
                                 {
                                     <button type="button" class="rm-select-chip @(newRoomForm.Amenities.Contains(am) ? "selected" : "")"
                                             @onclick="() => ToggleNewAmenity(am)">
-                                        @(newRoomForm.Amenities.Contains(am) ? "?" : "+") @am
+                                        <Icon Name="@(newRoomForm.Amenities.Contains(am) ? "check" : "plus")" Size="14" /> @am
                                     </button>
                                 }
                             </div>

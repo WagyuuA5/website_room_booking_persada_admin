@@ -18,7 +18,7 @@
             <Icon Name="calendar" Size="15" />
             <span>@filterDateLabel</span>
         </button>
-        <button type="button" class="btn-primary-pill btn-yellow" style="white-space:nowrap;" @onclick="() => showManualBooking = true">
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => showManualBooking = true">
             <Icon Name="plus" Size="14" />
             <span>Buat Booking Manual</span>
         </button>
@@ -137,20 +137,20 @@
             <div class="bm-modal-body">
                 <p class="bm-room-desc">Ruang meeting eksekutif premium untuk sesi strategi, koordinasi tim, dan presentasi tingkat tinggi.</p>
 
-                <div class="bm-chips-row">
-                    <span class="bm-spec-chip">?? @selectedBooking.ParticipantsCount Peserta</span>
-                    <span class="bm-spec-chip">?? Gedung Pusat, Lantai 14</span>
-                </div>
-
-                <div class="bm-section">
-                    <h5 class="bm-section-title">FASILITAS RUANGAN</h5>
-                    <div class="bm-amenities-grid">
-                        <span class="bm-amenity-item">?? Wi-Fi Cepat</span>
-                        <span class="bm-amenity-item">??? Layar 85 Inci</span>
-                        <span class="bm-amenity-item">?? Video Konferensi</span>
-                        <span class="bm-amenity-item">? Katering / Minuman</span>
+                    <div class="bm-chips-row">
+                        <span class="bm-spec-chip"><Icon Name="users" Size="14" /> @selectedBooking.ParticipantsCount Peserta</span>
+                        <span class="bm-spec-chip"><Icon Name="map-pin" Size="14" /> Gedung Pusat, Lantai 14</span>
                     </div>
-                </div>
+
+                    <div class="bm-section">
+                        <h5 class="bm-section-title">FASILITAS RUANGAN</h5>
+                        <div class="bm-amenities-grid">
+                            <span class="bm-amenity-item"><Icon Name="wifi" Size="14" /> Wi-Fi Cepat</span>
+                            <span class="bm-amenity-item"><Icon Name="monitor" Size="14" /> Layar 85 Inci</span>
+                            <span class="bm-amenity-item"><Icon Name="video" Size="14" /> Video Konferensi</span>
+                            <span class="bm-amenity-item"><Icon Name="coffee" Size="14" /> Katering / Minuman</span>
+                        </div>
+                    </div>
 
                 <div class="bm-detail-box">
                     <div class="bm-box-row">
@@ -177,7 +177,7 @@
                 @if (selectedBooking.Status != "pending" && !string.IsNullOrEmpty(selectedBooking.ProcessedBy))
                 {
                     <div class="bm-processed-info">
-                        <span>?? @selectedBooking.ProcessedBy, @selectedBooking.ProcessedAt</span>
+                        <span><Icon Name="check" Size="14" /> @selectedBooking.ProcessedBy, @selectedBooking.ProcessedAt</span>
                     </div>
                 }
             </div>

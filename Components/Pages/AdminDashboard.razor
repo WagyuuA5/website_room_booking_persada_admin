@@ -1,9 +1,10 @@
-﻿@page "/dashboard"
+@page "/dashboard"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using ApexCharts
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Services
 @inject NavigationManager Navigation
+@inject ToastService Toast
 
 <TopBar Title="Dashboard Admin" Subtitle="Ringkasan performa sistem pemesanan ruangan perusahaan." ShowGlobalSearch="true" ShowDateFilter="true" />
 <div class="dashboard">
@@ -21,7 +22,7 @@
             <div class="stat-info">
                 <span class="stat-label">Total Pengguna<br>Terdaftar</span>
                 <span class="stat-value">124</span>
-                <span class="stat-trend up">? +12%</span>
+                <span class="stat-trend up"><Icon Name="trending-up" Size="14" /> +12%</span>
             </div>
         </div>
         <div class="stat-card">
@@ -29,7 +30,7 @@
             <div class="stat-info">
                 <span class="stat-label">Total Pengguna<br>Booking</span>
                 <span class="stat-value">86</span>
-                <span class="stat-trend up">? +8%</span>
+                <span class="stat-trend up"><Icon Name="trending-up" Size="14" /> +8%</span>
             </div>
         </div>
         <div class="stat-card">
@@ -37,17 +38,17 @@
             <div class="stat-info">
                 <span class="stat-label">Rata-rata<br>Utilisasi</span>
                 <span class="stat-value">72%</span>
-                <span class="stat-trend up">? +5%</span>
+                <span class="stat-trend up"><Icon Name="trending-up" Size="14" /> +5%</span>
             </div>
         </div>
     </div>
 
-    @* -- Bagian 2: Requests Overview dengan ActionCard -- *@
+    @* -- Bagian 2: Requests Overview Cards -- *@
     <div class="section-header">
-        <h3 class="section-title">Requests Overview</h3>
+        <h3 class="section-title">Ringkasan Permintaan</h3>
     </div>
     <div class="summary-cards-grid">
-        <div class="summary-card clickable" @onclick='() => OpenRequestModal("facility")'>
+        <div class="summary-card clickable" @onclick='() => OpenRequestModal("facility")' title="Lihat daftar permintaan fasilitas">
             <div class="summary-card-header">
                 <div class="summary-icon-title">
                     <div class="icon-badge" style="background:#FCE7F3;color:#BE185D;">
@@ -62,15 +63,15 @@
             </div>
             <div class="summary-card-body">
                 <h2>@facilityRequests.Count</h2>
-                <span class="summary-status">PENDING</span>
+                <span class="summary-status">MENUNGGU</span>
             </div>
         </div>
 
-        <div class="summary-card clickable" @onclick='() => OpenRequestModal("account")'>
+        <div class="summary-card clickable" @onclick='() => OpenRequestModal("account")' title="Lihat daftar permohonan penghapusan akun">
             <div class="summary-card-header">
                 <div class="summary-icon-title">
                     <div class="icon-badge" style="background:#FEF3C7;color:#D97706;">
-                        @((MarkupString)SvgAccount)
+                        <Icon Name="user-x" Size="18" />
                     </div>
                     <span>Penghapusan Akun</span>
                 </div>
@@ -81,15 +82,15 @@
             </div>
             <div class="summary-card-body">
                 <h2>@accountRequests.Count</h2>
-                <span class="summary-status">PENDING</span>
+                <span class="summary-status">MENUNGGU</span>
             </div>
         </div>
 
-        <div class="summary-card clickable" @onclick='() => OpenRequestModal("it")'>
+        <div class="summary-card clickable" @onclick='() => OpenRequestModal("it")' title="Lihat daftar tiket IT support">
             <div class="summary-card-header">
                 <div class="summary-icon-title">
                     <div class="icon-badge" style="background:#DBEAFE;color:#1D4ED8;">
-                        @((MarkupString)SvgIt)
+                        <Icon Name="wrench" Size="18" />
                     </div>
                     <span>Tiket IT Support</span>
                 </div>
@@ -100,15 +101,15 @@
             </div>
             <div class="summary-card-body">
                 <h2>@itRequests.Count</h2>
-                <span class="summary-status">PENDING</span>
+                <span class="summary-status">MENUNGGU</span>
             </div>
         </div>
 
-        <div class="summary-card clickable" @onclick='() => OpenRequestModal("bug")'>
+        <div class="summary-card clickable" @onclick='() => OpenRequestModal("bug")' title="Lihat daftar laporan bug">
             <div class="summary-card-header">
                 <div class="summary-icon-title">
                     <div class="icon-badge" style="background:#FEE2E2;color:#B91C1C;">
-                        @((MarkupString)SvgBug)
+                        <Icon Name="bug" Size="18" />
                     </div>
                     <span>Laporan Bug</span>
                 </div>
@@ -119,7 +120,7 @@
             </div>
             <div class="summary-card-body">
                 <h2>@bugRequests.Count</h2>
-                <span class="summary-status">PENDING</span>
+                <span class="summary-status">MENUNGGU</span>
             </div>
         </div>
     </div>
@@ -128,17 +129,18 @@
     <div class="charts-row">
         <div class="chart-card">
             <div class="chart-header">
-                <h3>Tren Booking</h3>
+                <h3>Tren Pemesanan Ruangan</h3>
                 <div class="chart-actions">
-                    <button class="chart-export-btn" title="Unduh data" @onclick="() => showTrendExport = true">
-                        <Icon Name="download" Size="16" CssClass="export-icon-white" />
+                    <button class="chart-export-btn" title="Unduh data tren" @onclick="() => showTrendExport = true">
+                        <Icon Name="download" Size="15" />
+                        <span>Ekspor</span>
                     </button>
                 </div>
             </div>
             <ApexChart TItem="TrendPoint" Options="_trendOptions" Height="@("250px")">
                 <ApexPointSeries TItem="TrendPoint"
                                  Items="_trendData"
-                                 Name="Booking"
+                                 Name="Pemesanan"
                                  SeriesType="SeriesType.Area"
                                  XValue="e => e.Bulan"
                                  YValue="e => e.Jumlah" />
@@ -148,8 +150,9 @@
             <div class="chart-header">
                 <h3>Ruangan Paling Sering Digunakan</h3>
                 <div class="chart-actions">
-                    <button class="chart-export-btn" title="Unduh data" @onclick="() => showDonutExport = true">
-                        <Icon Name="download" Size="16" CssClass="export-icon-white" />
+                    <button class="chart-export-btn" title="Unduh data ruangan" @onclick="() => showDonutExport = true">
+                        <Icon Name="download" Size="15" />
+                        <span>Ekspor</span>
                     </button>
                 </div>
             </div>
@@ -164,143 +167,433 @@
         </div>
     </div>
 
-    @* -- Bagian 4: Recent Requests -- *@
+    @* -- Bagian 4: Tables Row (Permintaan Terbaru & Riwayat Booking) -- *@
     <div class="tables-row">
+        @* Tabel Permintaan Terbaru *@
         <div class="table-card">
             <div class="table-header">
-                <h3>Permintaan Terbaru</h3>
-                <a href="/facility-requests" class="table-link">LIHAT SEMUA DI REQUESTS HUB <Icon Name="chevron-right" Size="14" /></a>
+                <div>
+                    <h3 class="table-title">Permintaan Terbaru</h3>
+                    <span class="table-subtitle">Klik baris pemohon untuk melihat detail permintaan</span>
+                </div>
+                <div class="table-header-actions">
+                    <a href="/facility-requests" class="table-link">
+                        <span>Lihat Semua di Requests Hub</span>
+                        <Icon Name="chevron-right" Size="14" />
+                    </a>
+                </div>
             </div>
-            <div class="mini-table-header" style="grid-template-columns: 1.5fr 1.5fr 2fr 1fr;">
-                <div class="mini-table-header-cell">JENIS PERMINTAAN</div>
-                <div class="mini-table-header-cell">PEMOHON</div>
-                <div class="mini-table-header-cell">RINGKASAN</div>
-                <div class="mini-table-header-cell">STATUS</div>
-            </div>
-            <div class="mini-table-body">
-                @foreach (var req in recentRequests.Take(5))
-                {
-                    <div class="mini-table-row" style="grid-template-columns: 1.5fr 1.5fr 2fr 1fr; cursor: pointer;" @onclick="() => HandleRequestClick(req)">
-                        <div class="req-type-cell">
-                            @CategoryIcon(req.Type, req.TypeColor)
-                            <span class="td-primary">@req.Type</span>
-                        </div>
-                        <div class="user-cell">
-                            <UserAvatar Initials="@req.Initials" BgColor="@req.AvatarColor" Size="36px" />
-                            <div class="user-cell-info">
-                                <span class="td-primary">@req.RequesterName</span>
-                                <span class="td-secondary">@req.Department</span>
+            <div class="mini-table-container">
+                <div class="mini-table-header" style="grid-template-columns: 1.4fr 1.6fr 2fr 1fr;">
+                    <div class="mini-table-header-cell">JENIS PERMINTAAN</div>
+                    <div class="mini-table-header-cell">PEMOHON</div>
+                    <div class="mini-table-header-cell">RINGKASAN</div>
+                    <div class="mini-table-header-cell text-right">STATUS</div>
+                </div>
+                <div class="mini-table-body">
+                    @foreach (var req in recentRequests.Take(5))
+                    {
+                        <div class="mini-table-row clickable-row" style="grid-template-columns: 1.4fr 1.6fr 2fr 1fr;" @onclick="() => HandleRecentRequestClick(req)" title="Klik untuk membuka detail @req.RequesterName">
+                            <div class="req-type-cell">
+                                <div class="cat-icon-badge" style="background:@req.TypeVisual.BgColor; color:@req.TypeVisual.TextColor;">
+                                    <Icon Name="@req.TypeVisual.IconName" Size="15" />
+                                </div>
+                                <span class="td-primary" title="@req.TypeLabel">@req.TypeLabel</span>
                             </div>
+                            <div class="user-cell">
+                                <UserAvatar Initials="@req.Initials" BgColor="@req.AvatarColor" Size="34px" />
+                                <div class="user-cell-info" title="@($"{req.RequesterName} ({req.Department})")">
+                                    <span class="td-primary user-name-truncate">@req.RequesterName</span>
+                                    <span class="td-secondary">@req.Department</span>
+                                </div>
+                            </div>
+                            <div class="td-summary" title="@req.Summary">@req.Summary</div>
+                            <div class="text-right"><StatusBadge Status="@req.Status" /></div>
                         </div>
-                        <div class="td-primary" style="font-weight: 400; color: var(--text-muted); white-space: normal; line-height: 1.4;">@req.Summary</div>
-                        <div><StatusBadge Status="@req.Status" /></div>
-                    </div>
-                }
+                    }
+                </div>
             </div>
         </div>
 
-        @* -- Bagian 5: History Bookings -- *@
+        @* Tabel Riwayat Booking *@
         <div class="table-card">
             <div class="table-header">
-                <h3>Riwayat Booking</h3>
+                <div>
+                    <h3 class="table-title">Riwayat Booking</h3>
+                    <span class="table-subtitle">Aktivitas pemesanan ruangan terbaru</span>
+                </div>
                 <div class="table-header-actions">
-                    <button class="chart-export-btn table-export-btn" title="Unduh data" @onclick="() => showHistoryExport = true">
-                        <Icon Name="download" Size="16" CssClass="export-icon-white" />
-                    </button>
-                    <a href="/booking-management" class="table-link" style="display: inline-flex; align-items: center; gap: 4px;">LIHAT SEMUA <Icon Name="chevron-right" Size="14" /></a>
+                    <a href="/booking-management" class="table-link">
+                        <span>Lihat Semua</span>
+                        <Icon Name="chevron-right" Size="14" />
+                    </a>
                 </div>
             </div>
-            <div class="mini-table-header" style="grid-template-columns: 2fr 1.5fr 1.5fr 1fr;">
-                <div class="mini-table-header-cell">PENGGUNA</div>
-                <div class="mini-table-header-cell">RUANGAN</div>
-                <div class="mini-table-header-cell">JADWAL</div>
-                <div class="mini-table-header-cell">STATUS</div>
-            </div>
-            <div class="mini-table-body">
-                @foreach (var booking in historyBookings.Take(5))
-                {
-                    <div class="mini-table-row" style="grid-template-columns: 2fr 1.5fr 1.5fr 1fr;">
-                        <div class="user-cell">
-                            <UserAvatar Initials="@booking.Initials" BgColor="@booking.AvatarColor" Size="36px" />
-                            <div class="user-cell-info">
-                                <span class="td-primary">@booking.UserName</span>
-                                <span class="td-secondary">@booking.Department</span>
+            <div class="mini-table-container">
+                <div class="mini-table-header" style="grid-template-columns: 1.8fr 1.4fr 1.6fr 1fr;">
+                    <div class="mini-table-header-cell">PENGGUNA</div>
+                    <div class="mini-table-header-cell">RUANGAN</div>
+                    <div class="mini-table-header-cell">JADWAL</div>
+                    <div class="mini-table-header-cell text-right">STATUS</div>
+                </div>
+                <div class="mini-table-body">
+                    @foreach (var booking in historyBookings.Take(5))
+                    {
+                        <div class="mini-table-row" style="grid-template-columns: 1.8fr 1.4fr 1.6fr 1fr;">
+                            <div class="user-cell">
+                                <UserAvatar Initials="@booking.Initials" BgColor="@booking.AvatarColor" Size="34px" />
+                                <div class="user-cell-info" title="@($"{booking.UserName} ({booking.Department})")">
+                                    <span class="td-primary user-name-truncate">@booking.UserName</span>
+                                    <span class="td-secondary">@booking.Department</span>
+                                </div>
                             </div>
+                            <div class="td-primary" title="@booking.Room">@booking.Room</div>
+                            <div class="schedule-cell">
+                                <span class="td-primary" style="font-weight: 500;">@booking.ScheduleDate</span>
+                                <span class="td-secondary">@booking.ScheduleTime</span>
+                            </div>
+                            <div class="text-right"><StatusBadge Status="@booking.Status" /></div>
                         </div>
-                        <div class="td-primary">@booking.Room</div>
-                        <div class="td-secondary" style="font-weight: 500; color: var(--text);">@booking.Schedule</div>
-                        <div><StatusBadge Status="@booking.Status" /></div>
-                    </div>
-                }
+                    }
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-@* -- Request detail modals (Case 5) -- *@
-<AppModal IsOpen="@(_activeRequestModal == "facility")" IsOpenChanged="@(CloseRequestModal)" Title="Permintaan Fasilitas" Size="medium">
+@* ==========================================
+   MODAL DAFTAR RINGKASAN PERMINTAAN (Level 1)
+   ========================================== *@
+
+@* 1. Modal List Permintaan Fasilitas *@
+<AppModal IsOpen="@(_activeRequestModal == "facility")" IsOpenChanged="@(CloseRequestModal)" Title="Daftar Permintaan Fasilitas" Size="medium">
     <ChildContent>
         <div class="request-detail-list">
             @foreach (var r in facilityRequests)
             {
-                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconContent="@(b => b.AddMarkupContent(0, r.Icon))"
-                            Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
-                            ActionLabel="Proses" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
-                            OnActionClick="@(() => NavigateTo("/facility-requests"))" />
+                <div class="custom-action-card" style="border-left-color: #F59E0B;">
+                    <div class="custom-card-avatar">
+                        <UserAvatar Initials="@r.Initials" BgColor="@r.AvatarColor" Size="42px" />
+                    </div>
+                    <div class="custom-card-content">
+                        <div class="custom-card-title-row">
+                            <strong class="custom-card-title">@r.Title</strong>
+                            <span class="custom-card-id">#@StripId(r.Id)</span>
+                        </div>
+                        <div class="custom-card-requester">@r.RequesterName • @r.Department</div>
+                        <div class="custom-card-subtitle">@r.Room • @r.SubmittedAt</div>
+                    </div>
+                    <div class="custom-card-action">
+                        <button type="button" class="btn-process-action" @onclick="() => OpenFacilityDetail(r)">
+                            Proses
+                        </button>
+                    </div>
+                </div>
             }
         </div>
     </ChildContent>
-    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Lihat Semua</a></FooterContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Buka Requests Hub</a></FooterContent>
 </AppModal>
 
-<AppModal IsOpen="@(_activeRequestModal == "account")" IsOpenChanged="@(CloseRequestModal)" Title="Penghapusan Akun" Size="medium">
+@* 2. Modal List Penghapusan Akun *@
+<AppModal IsOpen="@(_activeRequestModal == "account")" IsOpenChanged="@(CloseRequestModal)" Title="Daftar Penghapusan Akun" Size="medium">
     <ChildContent>
         <div class="request-detail-list">
             @foreach (var r in accountRequests)
             {
-                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconContent="@(b => b.AddMarkupContent(0, r.Icon))"
-                            Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
-                            ActionLabel="Tinjau" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
-                            OnActionClick="@(() => NavigateTo("/users"))" />
+                <div class="custom-action-card" style="border-left-color: #EF4444;">
+                    <div class="custom-card-avatar">
+                        <UserAvatar Initials="@r.Initials" BgColor="@r.AvatarColor" Size="42px" />
+                    </div>
+                    <div class="custom-card-content">
+                        <div class="custom-card-title-row">
+                            <strong class="custom-card-title">@r.UserName</strong>
+                            <span class="custom-card-id">#@StripId(r.Id)</span>
+                        </div>
+                        <div class="custom-card-requester">ID: @r.UserId • @r.Department</div>
+                        <div class="custom-card-subtitle" style="color: #DC2626; font-weight: 600;">@r.Reason</div>
+                    </div>
+                    <div class="custom-card-action">
+                        <button type="button" class="btn-process-action" @onclick="() => OpenAccountDetail(r)">
+                            Tinjau
+                        </button>
+                    </div>
+                </div>
             }
         </div>
     </ChildContent>
-    <FooterContent><a class="btn-primary-pill btn-yellow" href="/users">Lihat Semua</a></FooterContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/users">Kelola User</a></FooterContent>
 </AppModal>
 
-<AppModal IsOpen="@(_activeRequestModal == "it")" IsOpenChanged="@(CloseRequestModal)" Title="Tiket IT Support" Size="medium">
+@* 3. Modal List Tiket IT Support *@
+<AppModal IsOpen="@(_activeRequestModal == "it")" IsOpenChanged="@(CloseRequestModal)" Title="Daftar Tiket IT Support" Size="medium">
     <ChildContent>
         <div class="request-detail-list">
             @foreach (var r in itRequests)
             {
-                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconContent="@(b => b.AddMarkupContent(0, r.Icon))"
-                            Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
-                            ActionLabel="Perbaiki" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
-                            OnActionClick="@(() => NavigateTo("/facility-requests"))" />
+                var visual = IssueIconHelper.GetVisual(r.Title);
+                <div class="custom-action-card" style="border-left-color: @visual.BorderColor;">
+                    <div class="custom-card-icon" style="background: @visual.BgColor; color: @visual.TextColor;">
+                        <Icon Name="@visual.IconName" Size="20" />
+                    </div>
+                    <div class="custom-card-content">
+                        <div class="custom-card-title-row">
+                            <strong class="custom-card-title">@r.Title</strong>
+                            <span class="custom-card-id">#@StripId(r.Id)</span>
+                        </div>
+                        <div class="custom-card-requester">@r.RequesterName • @r.Department</div>
+                        <div class="custom-card-subtitle">@r.Category • @r.Urgency</div>
+                    </div>
+                    <div class="custom-card-action">
+                        <button type="button" class="btn-process-action" @onclick="() => OpenITDetail(r)">
+                            Perbaiki
+                        </button>
+                    </div>
+                </div>
             }
         </div>
     </ChildContent>
-    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Lihat Semua</a></FooterContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Buka Requests Hub</a></FooterContent>
 </AppModal>
 
-<AppModal IsOpen="@(_activeRequestModal == "bug")" IsOpenChanged="@(CloseRequestModal)" Title="Laporan Bug" Size="medium">
+@* 4. Modal List Laporan Bug *@
+<AppModal IsOpen="@(_activeRequestModal == "bug")" IsOpenChanged="@(CloseRequestModal)" Title="Daftar Laporan Bug" Size="medium">
     <ChildContent>
         <div class="request-detail-list">
             @foreach (var r in bugRequests)
             {
-                <ActionCard BorderColor="@r.Color" IconBgColor="@r.IconBg" IconContent="@(b => b.AddMarkupContent(0, r.Icon))"
-                            Title="@r.Title" ReferenceId="@StripId(r.Id)" Subtitle="@r.Subtitle" SubtitleColor="@r.SubColor"
-                            ActionLabel="Investigasi" ButtonBgColor="#2563EB" ButtonTextColor="#ffffff"
-                            OnActionClick="@(() => NavigateTo("/facility-requests"))" />
+                var visual = IssueIconHelper.GetVisual(r.Title);
+                <div class="custom-action-card" style="border-left-color: @visual.BorderColor;">
+                    <div class="custom-card-icon" style="background: @visual.BgColor; color: @visual.TextColor;">
+                        <Icon Name="@visual.IconName" Size="20" />
+                    </div>
+                    <div class="custom-card-content">
+                        <div class="custom-card-title-row">
+                            <strong class="custom-card-title">@r.Title</strong>
+                            <span class="custom-card-id">#@StripId(r.Id)</span>
+                        </div>
+                        <div class="custom-card-requester">@r.ReporterName • @r.Department</div>
+                        <div class="custom-card-subtitle" style="color: @(r.Urgency == "Kritis" ? "#DC2626" : "#D97706"); font-weight:600;">@r.Module • @r.Urgency</div>
+                    </div>
+                    <div class="custom-card-action">
+                        <button type="button" class="btn-process-action" @onclick="() => OpenBugDetail(r)">
+                            Investigasi
+                        </button>
+                    </div>
+                </div>
             }
         </div>
     </ChildContent>
-    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Lihat Semua</a></FooterContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Buka Requests Hub</a></FooterContent>
 </AppModal>
 
-@* -- Export modals (Case 6) -- *@
+@* ==========================================
+   MODAL DETAIL SPESIFIK (Level 2)
+   ========================================== *@
+
+@* A. Detail Permintaan Fasilitas *@
+@if (selectedFacilityDetail != null)
+{
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) selectedFacilityDetail = null; })" Title="Detail Permintaan Fasilitas" Size="medium">
+        <HeaderContent>
+            <div class="modal-detail-header-row">
+                <div>
+                    <h3 class="modal-detail-title">@selectedFacilityDetail.Title</h3>
+                    <span class="modal-detail-id">#@selectedFacilityDetail.Id</span>
+                </div>
+                <StatusBadge Status="@selectedFacilityDetail.Status" />
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <div class="modal-detail-body">
+                @* Info Pemohon *@
+                <div class="modal-info-card">
+                    <UserAvatar Initials="@selectedFacilityDetail.Initials" BgColor="@selectedFacilityDetail.AvatarColor" Size="48px" />
+                    <div class="modal-info-text">
+                        <strong class="modal-user-name">@selectedFacilityDetail.RequesterName</strong>
+                        <span class="modal-user-dept">@selectedFacilityDetail.Department</span>
+                        <span class="modal-user-meta"><Icon Name="map-pin" Size="13" /> @selectedFacilityDetail.Room • <Icon Name="clock" Size="13" /> @selectedFacilityDetail.SubmittedAt</span>
+                    </div>
+                </div>
+
+                @* Kebutuhan & Deskripsi *@
+                <div class="modal-section-box">
+                    <span class="modal-section-label">JENIS PERMINTAAN</span>
+                    <strong class="modal-section-val">@selectedFacilityDetail.RequestType</strong>
+                </div>
+
+                <div class="modal-section-box">
+                    <span class="modal-section-label">ITEM YANG DIBUTUHKAN</span>
+                    <strong class="modal-section-val">@selectedFacilityDetail.ItemsSummary</strong>
+                </div>
+
+                <div class="modal-section-box">
+                    <span class="modal-section-label">DESKRIPSI LENGKAP</span>
+                    <p class="modal-desc-text">@selectedFacilityDetail.Description</p>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => RejectFacility(selectedFacilityDetail)">Tolak Permintaan</button>
+            <button type="button" class="btn-primary-pill btn-blue" @onclick="() => ApproveFacility(selectedFacilityDetail)">Setujui & Proses</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@* B. Detail Penghapusan Akun *@
+@if (selectedAccountDetail != null)
+{
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) selectedAccountDetail = null; })" Title="Detail Permohonan Penghapusan Akun" Size="medium">
+        <HeaderContent>
+            <div class="modal-detail-header-row">
+                <div>
+                    <h3 class="modal-detail-title">Permohonan Penghapusan Akun</h3>
+                    <span class="modal-detail-id">#@selectedAccountDetail.Id</span>
+                </div>
+                <StatusBadge Status="@selectedAccountDetail.Status" />
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <div class="modal-detail-body">
+                @* Info User *@
+                <div class="modal-info-card">
+                    <UserAvatar Initials="@selectedAccountDetail.Initials" BgColor="@selectedAccountDetail.AvatarColor" Size="48px" />
+                    <div class="modal-info-text">
+                        <strong class="modal-user-name">@selectedAccountDetail.UserName</strong>
+                        <span class="modal-user-dept">ID Karyawan: @selectedAccountDetail.UserId • @selectedAccountDetail.Department</span>
+                        <span class="modal-user-meta"><Icon Name="calendar" Size="13" /> Tanggal Efektif: @selectedAccountDetail.EffectiveDate</span>
+                    </div>
+                </div>
+
+                <div class="modal-section-box alert-box-red">
+                    <span class="modal-section-label" style="color: #991B1B;">ALASAN PENGHAPUSAN AKUN</span>
+                    <strong class="modal-section-val" style="color: #B91C1C;">@selectedAccountDetail.Reason</strong>
+                </div>
+
+                <div class="modal-section-box">
+                    <span class="modal-section-label">CATATAN HRD & VERIFIKASI</span>
+                    <p class="modal-desc-text">@selectedAccountDetail.HrNotes</p>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => RejectAccountDeletion(selectedAccountDetail)">Tolak Permohonan</button>
+            <button type="button" class="btn-primary-pill btn-danger" @onclick="() => ApproveAccountDeletion(selectedAccountDetail)">Setujui Penghapusan</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@* C. Detail Investigasi Laporan Bug *@
+@if (selectedBugDetail != null)
+{
+    var visual = IssueIconHelper.GetVisual(selectedBugDetail.Title);
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) selectedBugDetail = null; })" Title="Investigasi Laporan Bug" Size="large">
+        <HeaderContent>
+            <div class="modal-detail-header-row">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="cat-icon-badge" style="background:@visual.BgColor; color:@visual.TextColor; width:34px; height:34px;">
+                        <Icon Name="@visual.IconName" Size="18" />
+                    </div>
+                    <div>
+                        <h3 class="modal-detail-title">@selectedBugDetail.Title</h3>
+                        <span class="modal-detail-id">#@selectedBugDetail.Id • @selectedBugDetail.Module</span>
+                    </div>
+                </div>
+                <span class="badge-urgency @(selectedBugDetail.Urgency == "Kritis" ? "urgent-critical" : "urgent-medium")">
+                    @selectedBugDetail.Urgency.ToUpper()
+                </span>
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <div class="modal-detail-body">
+                @* Info Pelapor *@
+                <div class="modal-info-card">
+                    <UserAvatar Initials="@selectedBugDetail.ReporterInitials" BgColor="@selectedBugDetail.AvatarColor" Size="42px" />
+                    <div class="modal-info-text">
+                        <strong class="modal-user-name">@selectedBugDetail.ReporterName</strong>
+                        <span class="modal-user-dept">Pelapor • @selectedBugDetail.Department</span>
+                    </div>
+                </div>
+
+                @* Detail Error *@
+                <div class="modal-section-box">
+                    <span class="modal-section-label">DESKRIPSI & GEJALA BUG</span>
+                    <p class="modal-desc-text">@selectedBugDetail.Description</p>
+                </div>
+
+                @* Form Penanganan Admin Langsung *@
+                <div class="modal-admin-action-box">
+                    <h5 class="admin-box-title">TINDAKAN INVESTIGASI ADMIN</h5>
+                    <div class="admin-form-row">
+                        <div class="form-group-col">
+                            <label class="form-label">Status Investigasi Saat Ini</label>
+                            <select class="admin-select-input" @bind="selectedBugDetail.Status">
+                                <option value="Diinvestigasi">Diinvestigasi</option>
+                                <option value="Sedang Ditangani">Sedang Ditangani</option>
+                                <option value="Selesai">Selesai</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group-col">
+                        <label class="form-label">Catatan Penanganan Admin / Resolusi Teknis</label>
+                        <textarea class="admin-textarea-input" rows="3" placeholder="Tuliskan temuan analisis, langkah perbaikan, atau catatan eskalasi..." @bind="selectedBugDetail.AdminNotes"></textarea>
+                    </div>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => EscalateBug(selectedBugDetail)">Eskalasi ke Engineering</button>
+            <button type="button" class="btn-primary-pill btn-blue" @onclick="() => SaveBugInvestigation(selectedBugDetail)">Simpan & Tandai Selesai</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@* D. Detail Tiket IT Support *@
+@if (selectedITDetail != null)
+{
+    var visual = IssueIconHelper.GetVisual(selectedITDetail.Title);
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) selectedITDetail = null; })" Title="Detail Tiket IT Support" Size="medium">
+        <HeaderContent>
+            <div class="modal-detail-header-row">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="cat-icon-badge" style="background:@visual.BgColor; color:@visual.TextColor; width:34px; height:34px;">
+                        <Icon Name="@visual.IconName" Size="18" />
+                    </div>
+                    <div>
+                        <h3 class="modal-detail-title">@selectedITDetail.Title</h3>
+                        <span class="modal-detail-id">#@selectedITDetail.Id • @selectedITDetail.Category</span>
+                    </div>
+                </div>
+                <StatusBadge Status="@selectedITDetail.Status" />
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <div class="modal-detail-body">
+                <div class="modal-info-card">
+                    <UserAvatar Initials="@selectedITDetail.RequesterInitials" BgColor="@selectedITDetail.AvatarColor" Size="48px" />
+                    <div class="modal-info-text">
+                        <strong class="modal-user-name">@selectedITDetail.RequesterName</strong>
+                        <span class="modal-user-dept">Pemohon • @selectedITDetail.Department</span>
+                        <span class="modal-user-meta">Prioritas: @selectedITDetail.Urgency</span>
+                    </div>
+                </div>
+
+                <div class="modal-section-box">
+                    <span class="modal-section-label">DESKRIPSI MASALAH</span>
+                    <p class="modal-desc-text">@selectedITDetail.Description</p>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => RejectIT(selectedITDetail)">Tolak Tiket</button>
+            <button type="button" class="btn-primary-pill btn-blue" @onclick="() => CompleteIT(selectedITDetail)">Tugaskan & Selesaikan</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@* -- Modals Ekspor Grafik & Riwayat -- *@
 <ExportModal IsOpen="@showTrendExport" IsOpenChanged="@(v => { showTrendExport = v; StateHasChanged(); })"
-             ExportTitle="Tren Booking" Columns="@_trendColumns"
+             ExportTitle="Tren Pemesanan Ruangan" Columns="@_trendColumns"
              CurrentViewRows="@(_trendData.Cast<object>())" AllRows="@(_trendData.Cast<object>())" />
 
 <ExportModal IsOpen="@showDonutExport" IsOpenChanged="@(v => { showDonutExport = v; StateHasChanged(); })"
@@ -308,7 +601,7 @@
              CurrentViewRows="@(_donutData.Cast<object>())" AllRows="@(_donutData.Cast<object>())" />
 
 <ExportModal IsOpen="@showHistoryExport" IsOpenChanged="@(v => { showHistoryExport = v; StateHasChanged(); })"
-             ExportTitle="Riwayat Booking" Columns="@_historyColumns"
+             ExportTitle="Riwayat Pemesanan Ruangan" Columns="@_historyColumns"
              CurrentViewRows="@(historyBookings.Cast<object>())" AllRows="@(historyBookings.Cast<object>())" />
 
 @code {
@@ -318,20 +611,23 @@
     private List<RoomUsagePoint> _donutData = new();
     private ApexChartOptions<RoomUsagePoint> _donutOptions = new();
 
-    // -- Request overview data (ActionCard) --
-    private List<RequestItem> facilityRequests = new();
-    private List<RequestItem> accountRequests = new();
-    private List<RequestItem> itRequests = new();
-    private List<RequestItem> bugRequests = new();
+    // -- Request lists data --
+    private List<FacilityRequestData> facilityRequests = new();
+    private List<AccountRequestData> accountRequests = new();
+    private List<ITRequestData> itRequests = new();
+    private List<BugRequestData> bugRequests = new();
 
     // -- Table data --
-    private List<RecentRequest> recentRequests = new();
-    private List<HistoryBooking> historyBookings = new();
-    private List<DataTable<RecentRequest>.DataTableColumn> requestColumns = new();
-    private List<DataTable<HistoryBooking>.DataTableColumn> bookingColumns = new();
+    private List<RecentRequestItem> recentRequests = new();
+    private List<HistoryBookingItem> historyBookings = new();
 
-    // -- Modal state --
+    // -- Modal active states --
     private string? _activeRequestModal;
+    private FacilityRequestData? selectedFacilityDetail;
+    private AccountRequestData? selectedAccountDetail;
+    private BugRequestData? selectedBugDetail;
+    private ITRequestData? selectedITDetail;
+
     private bool showTrendExport;
     private bool showDonutExport;
     private bool showHistoryExport;
@@ -342,9 +638,8 @@
 
     protected override void OnInitialized()
     {
-        InitRequestOverview();
+        InitData();
         InitCharts();
-        InitTables();
         InitExportColumns();
     }
 
@@ -353,7 +648,7 @@
         _trendColumns = new()
         {
             new() { Header = "Bulan", PropertyName = "Bulan", CellType = ExportCellType.Text },
-            new() { Header = "Jumlah Booking", PropertyName = "Jumlah", CellType = ExportCellType.Number },
+            new() { Header = "Jumlah Pemesanan", PropertyName = "Jumlah", CellType = ExportCellType.Number },
         };
         _donutColumns = new()
         {
@@ -363,33 +658,215 @@
         _historyColumns = new()
         {
             new() { Header = "Pengguna", PropertyName = "UserName", CellType = ExportCellType.Text },
+            new() { Header = "Departemen", PropertyName = "Department", CellType = ExportCellType.Text },
             new() { Header = "Ruangan", PropertyName = "Room", CellType = ExportCellType.Text },
-            new() { Header = "Jadwal", PropertyName = "Schedule", CellType = ExportCellType.Text },
+            new() { Header = "Tanggal", PropertyName = "ScheduleDate", CellType = ExportCellType.Text },
+            new() { Header = "Waktu", PropertyName = "ScheduleTime", CellType = ExportCellType.Text },
             new() { Header = "Status", PropertyName = "Status", CellType = ExportCellType.Text },
         };
     }
 
-    private void InitRequestOverview()
+    private void InitData()
     {
         facilityRequests = new()
         {
-            new("Permintaan Katering", "FAC-2241", "Rapat Direksi - 2 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
-            new("Peralatan AV", "FAC-2238", "Ruang Rapat A - 5 jam lalu", "#F59E0B", "#FEF3C7", SvgFacility, "#92400E"),
+            new FacilityRequestData
+            {
+                Id = "FAC-2241",
+                Title = "Permintaan Katering",
+                RequesterName = "Rina Kartika",
+                Initials = "RK",
+                AvatarColor = "#2563EB",
+                Department = "Direksi & Eksekutif",
+                Room = "Ruang Rapat Utama (Lt. 14)",
+                SubmittedAt = "Hari ini, 10:15 WIB (2 jam lalu)",
+                RequestType = "Katering Makanan & Minuman",
+                ItemsSummary = "12x Executive Lunch Box + Snack Sore & Mesin Kopi",
+                Description = "Permintaan katering 12 porsi paket makan siang eksekutif beserta coffee break untuk rapat koordinasi direksi triwulan.",
+                Status = "Menunggu"
+            },
+            new FacilityRequestData
+            {
+                Id = "FAC-2238",
+                Title = "Peralatan AV & Sound",
+                RequesterName = "Andi Saputra",
+                Initials = "AS",
+                AvatarColor = "#7C3AED",
+                Department = "IT Dept",
+                Room = "Ruang Dirantara A",
+                SubmittedAt = "Hari ini, 08:30 WIB (5 jam lalu)",
+                RequestType = "Peralatan Audio Visual & Proyektor",
+                ItemsSummary = "2x Wireless Mic, 1x Proyektor 4K, 1x Pointer",
+                Description = "Kebutuhan perangkat proyektor resolusi 4K dan 2 unit mic nirkabel untuk workshop internal engineering.",
+                Status = "Menunggu"
+            }
         };
+
         accountRequests = new()
         {
-            new("Sari Wulandari", "ACC-1102", "Karyawan resign - Menunggu", "#EF4444", "#FEE2E2", SvgAccount, "#991B1B"),
-            new("Rudi Hartono", "ACC-1099", "Mutasi cabang - Menunggu", "#F59E0B", "#FEF3C7", SvgAccount, "#92400E"),
+            new AccountRequestData
+            {
+                Id = "ACC-1102",
+                UserName = "Sari Wulandari",
+                Initials = "SW",
+                AvatarColor = "#F59E0B",
+                UserId = "EMP-4091",
+                Department = "Marketing & Komunikasi",
+                Reason = "Karyawan resign (Akhir masa kerja)",
+                EffectiveDate = "31 Oktober 2026",
+                HrNotes = "Proses serah terima inventaris dan clearance form HRD telah lengkap disetujui.",
+                Status = "Menunggu"
+            },
+            new AccountRequestData
+            {
+                Id = "ACC-1099",
+                UserName = "Rudi Hartono",
+                Initials = "RH",
+                AvatarColor = "#10B981",
+                UserId = "EMP-3882",
+                Department = "Operasional Lapangan",
+                Reason = "Mutasi cabang ke Kantor Regional Surabaya",
+                EffectiveDate = "15 November 2026",
+                HrNotes = "Surat Keputusan mutasi nomor SK-194/HRD/X/2026 telah terbit.",
+                Status = "Menunggu"
+            }
         };
+
         itRequests = new()
         {
-            new("Server Down", "IT-4421", "Server utama - 4 jam lalu", "#EF4444", "#FEE2E2", SvgIt, "#991B1B"),
-            new("Reset Email", "IT-4418", "Belum Ditugaskan", "#F59E0B", "#FEF3C7", SvgIt, "#92400E"),
+            new ITRequestData
+            {
+                Id = "IT-4421",
+                Title = "Server Down",
+                Category = "Infrastruktur & Jaringan",
+                Urgency = "Kritis",
+                RequesterName = "Budi Santoso",
+                RequesterInitials = "BS",
+                AvatarColor = "#10B981",
+                Department = "Operasional IT",
+                Description = "Server database cluster node 2 mengalami lonjakan beban dan connection timeout pada sistem internal.",
+                Status = "Menunggu"
+            },
+            new ITRequestData
+            {
+                Id = "IT-4418",
+                Title = "Reset Email",
+                Category = "Akses Akun & Email",
+                Urgency = "Normal",
+                RequesterName = "Siti Rahma",
+                RequesterInitials = "SR",
+                AvatarColor = "#9333EA",
+                Department = "Human Resources",
+                Description = "Permintaan reset password email korporat dan pembaharuan token autentikasi 2FA.",
+                Status = "Menunggu"
+            }
         };
+
         bugRequests = new()
         {
-            new("Error 500 Submit Form", "BUG-102", "Form Booking - Kritis", "#EF4444", "#FEE2E2", SvgBug, "#991B1B"),
-            new("Kalender Tidak Sinkron", "BUG-099", "Modul Calendar - Medium", "#F59E0B", "#FEF3C7", SvgBug, "#92400E"),
+            new BugRequestData
+            {
+                Id = "BUG-102",
+                Title = "Error 500 Submit Form",
+                Category = "Form Booking",
+                Module = "Modul Form Booking",
+                Urgency = "Kritis",
+                ReporterName = "Dimas Prasetyo",
+                ReporterInitials = "DP",
+                AvatarColor = "#EF4444",
+                Department = "Engineering Tim",
+                Description = "Terjadi HTTP 500 Internal Server Error saat admin mencoba melakukan submit form booking dengan kapasitas di atas 20 peserta.",
+                Status = "Diinvestigasi",
+                AdminNotes = "Sedang menganalisis payload request pada endpoint API booking-service."
+            },
+            new BugRequestData
+            {
+                Id = "BUG-099",
+                Title = "Kalender Tidak Sinkron",
+                Category = "Kalender & Sync",
+                Module = "Modul Calendar Sync",
+                Urgency = "Medium",
+                ReporterName = "Dewi Lestari",
+                ReporterInitials = "DL",
+                AvatarColor = "#16A34A",
+                Department = "Finance & Accounting",
+                Description = "Jadwal booking yang baru disetujui tidak langsung muncul pada tampilan kalender mingguan tanpa me-refresh browser secara manual.",
+                Status = "Diinvestigasi",
+                AdminNotes = "Pengecekan event bus SignalR untuk notifikasi update kalender."
+            }
+        };
+
+        recentRequests = new()
+        {
+            new RecentRequestItem
+            {
+                RawCategory = "Facility",
+                TypeLabel = "Fasilitas",
+                RequesterName = "Rina Kartika",
+                Initials = "RK",
+                AvatarColor = "#2563EB",
+                Department = "Direksi & Eksekutif",
+                Summary = "Peminjaman proyektor & katering ruang rapat lt 14",
+                Status = "baru",
+                FacilityData = facilityRequests[0]
+            },
+            new RecentRequestItem
+            {
+                RawCategory = "Bug",
+                TypeLabel = "Laporan Bug",
+                RequesterName = "Dimas Prasetyo",
+                Initials = "DP",
+                AvatarColor = "#EF4444",
+                Department = "Engineering Tim",
+                Summary = "Error 500 saat submit form booking ruangan",
+                Status = "diproses",
+                BugData = bugRequests[0]
+            },
+            new RecentRequestItem
+            {
+                RawCategory = "Account",
+                TypeLabel = "Penghapusan Akun",
+                RequesterName = "Sari Wulandari",
+                Initials = "SW",
+                AvatarColor = "#F59E0B",
+                Department = "Marketing & Komunikasi",
+                Summary = "Penghapusan akun karyawan resign (akhir masa kerja)",
+                Status = "diproses",
+                AccountData = accountRequests[0]
+            },
+            new RecentRequestItem
+            {
+                RawCategory = "IT",
+                TypeLabel = "IT Support",
+                RequesterName = "Budi Santoso",
+                Initials = "BS",
+                AvatarColor = "#10B981",
+                Department = "HR Dept",
+                Summary = "Reset password email korporat & token autentikasi",
+                Status = "selesai",
+                ITData = itRequests[1]
+            },
+            new RecentRequestItem
+            {
+                RawCategory = "Facility",
+                TypeLabel = "Fasilitas",
+                RequesterName = "Andi Saputra",
+                Initials = "AS",
+                AvatarColor = "#7C3AED",
+                Department = "IT Dept",
+                Summary = "Request peralatan AV & Sound workshop internal",
+                Status = "baru",
+                FacilityData = facilityRequests[1]
+            }
+        };
+
+        historyBookings = new()
+        {
+            new HistoryBookingItem("Andi Saputra", "AS", "#2563EB", "IT Dept", "Ruang Dirantara (B)", "24 Okt 2026", "09:00 - 11:00", "pending"),
+            new HistoryBookingItem("Budi Santoso", "BS", "#10B981", "HR Dept", "Ruang Rapat Utama (D)", "24 Okt 2026", "13:00 - 15:00", "confirmed"),
+            new HistoryBookingItem("Dian Pertiwi", "DP", "#F59E0B", "Marketing", "Ruang Diskusi (C)", "25 Okt 2026", "14:00 - 16:00", "rejected"),
+            new HistoryBookingItem("Eko Prasetyo", "EP", "#6366F1", "Operasional", "Auditorium Serbaguna", "26 Okt 2026", "10:00 - 12:00", "confirmed"),
+            new HistoryBookingItem("Mega Utami", "MU", "#EC4899", "Finance", "Ruang Dirantara (A)", "27 Okt 2026", "08:30 - 10:30", "cancelled")
         };
     }
 
@@ -418,7 +895,7 @@
         _donutOptions = new()
         {
             Chart = new Chart { Type = ChartType.Donut, Height = "200px", Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 } },
-            PlotOptions = new PlotOptions { Pie = new PlotOptionsPie { Donut = new PlotOptionsDonut { Size = "65%", Labels = new DonutLabels { Show = true, Value = new DonutLabelValue { Show = true, FontSize = "24px", FontWeight = "700", Color = "#1F3B5B" }, Total = new DonutLabelTotal { Show = true, Label = "TOTAL", FontSize = "10px", FontWeight = "600", Color = "#8A97A6", ShowAlways = true } } } } },
+            PlotOptions = new PlotOptions { Pie = new PlotOptionsPie { Donut = new PlotOptionsDonut { Size = "65%", Labels = new DonutLabels { Show = true, Value = new DonutLabelValue { Show = true, FontSize = "24px", FontWeight = "700", Color = "#1F3B5B" }, Total = new DonutLabelTotal { Show = true, Label = "TOTAL RUANGAN", FontSize = "10px", FontWeight = "600", Color = "#8A97A6", ShowAlways = true } } } } },
             DataLabels = new DataLabels { Enabled = false },
             Legend = new Legend { Position = LegendPosition.Bottom, FontSize = "11px", FontWeight = "500", Markers = new LegendMarkers { Width = 8, Height = 8, Radius = 2 }, ItemMargin = new LegendItemMargin { Horizontal = 8, Vertical = 4 } },
             Colors = new List<string> { "#152F4A", "#2563EB", "#94A3B8" },
@@ -427,76 +904,180 @@
         };
     }
 
-    private void InitTables()
-    {
-        requestColumns = new()
-        {
-            new() { Header = "JENIS PERMINTAAN", PropertyName = "Type" },
-            new() { Header = "PEMOHON", PropertyName = "RequesterName" },
-            new() { Header = "RINGKASAN", PropertyName = "Summary" },
-            new() { Header = "STATUS", PropertyName = "Status" },
-        };
-
-        recentRequests = new()
-        {
-            new("Facility", SvgFacility, "#DBEAFE", "Rina Kartika", "RK", "#2563EB", "IT Dept", "Peminjaman proyektor ruang meeting lt 3", "baru"),
-            new("Bug", SvgBug, "#FEE2E2", "Dimas Prasetyo", "DP", "#EF4444", "Engineering", "Error 500 saat submit form booking", "diproses"),
-            new("Account", SvgAccount, "#FED7AA", "Sari Wulandari", "SW", "#F59E0B", "Marketing", "Penghapusan akun karyawan resign", "diproses"),
-            new("IT", SvgIt, "#D1FAE5", "Budi Santoso", "BS", "#10B981", "HR Dept", "Reset password email korporat", "selesai"),
-            new("Facility", SvgFacility, "#DBEAFE", "Andi Saputra", "AS", "#2563EB", "IT Dept", "Request catering rapat direksi", "baru"),
-        };
-
-        bookingColumns = new()
-        {
-            new() { Header = "PENGGUNA", PropertyName = "UserName" },
-            new() { Header = "RUANGAN", PropertyName = "Room" },
-            new() { Header = "JADWAL", PropertyName = "Schedule" },
-            new() { Header = "STATUS", PropertyName = "Status" },
-        };
-
-        historyBookings = new()
-        {
-            new("Andi Saputra", "AS", "#2563EB", "IT Dept", "R. (B)", "24-10-23, 09:00 - 11:00", "pending"),
-            new("Budi Santoso", "BS", "#10B981", "HR Dept", "R. (D)", "24-10-23, 13:00 - 15:00", "confirmed"),
-            new("Dian Pertiwi", "DP", "#F59E0B", "Marketing", "R. (C)", "25-10-23, 14:00 - 16:00", "rejected"),
-        };
-    }
-
     private void OpenRequestModal(string category) => _activeRequestModal = category;
     private void CloseRequestModal(bool v) { if (!v) _activeRequestModal = null; StateHasChanged(); }
-    private void NavigateTo(string url) { Navigation.NavigateTo(url); }
     private static string StripId(string id) => id.Contains('-') ? id.Split('-').Last() : id;
 
-    private void HandleRequestClick(RecentRequest req) { }
-
-    // -- Vector category icons (Case 7) --
-    private const string SvgFacility = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><path d=\"M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z\"/><polyline points=\"3.27 6.96 12 12.01 20.73 6.96\"/><line x1=\"12\" y1=\"22.08\" x2=\"12\" y2=\"12\"/></svg>";
-    private const string SvgBug = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><rect x=\"8\" y=\"6\" width=\"8\" height=\"14\" rx=\"4\"/><path d=\"M19 7l-3 2\"/><path d=\"M5 7l3 2\"/><path d=\"M19 13h-3\"/><path d=\"M5 13h3\"/><path d=\"M19 19l-3-2\"/><path d=\"M5 19l3-2\"/><path d=\"M12 2v4\"/></svg>";
-    private const string SvgAccount = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><path d=\"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/></svg>";
-    private const string SvgIt = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"cat-svg\"><path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\"/></svg>";
-
-    private string CatSvg(string type) => type switch
+    // -- Handlers for opening detail popups --
+    private void OpenFacilityDetail(FacilityRequestData data)
     {
-        "Facility" => SvgFacility,
-        "Bug" => SvgBug,
-        "Account" => SvgAccount,
-        "IT" => SvgIt,
-        _ => SvgAccount
-    };
+        _activeRequestModal = null;
+        selectedFacilityDetail = data;
+    }
 
-    private RenderFragment CategoryIcon(string type, string bg) =>
-        @<span class="req-type-icon" style="background:@bg">@((MarkupString)CatSvg(type))</span>;
+    private void OpenAccountDetail(AccountRequestData data)
+    {
+        _activeRequestModal = null;
+        selectedAccountDetail = data;
+    }
 
-    // -- Records --
+    private void OpenBugDetail(BugRequestData data)
+    {
+        _activeRequestModal = null;
+        selectedBugDetail = data;
+    }
+
+    private void OpenITDetail(ITRequestData data)
+    {
+        _activeRequestModal = null;
+        selectedITDetail = data;
+    }
+
+    private void HandleRecentRequestClick(RecentRequestItem req)
+    {
+        if (req.FacilityData != null) OpenFacilityDetail(req.FacilityData);
+        else if (req.AccountData != null) OpenAccountDetail(req.AccountData);
+        else if (req.BugData != null) OpenBugDetail(req.BugData);
+        else if (req.ITData != null) OpenITDetail(req.ITData);
+    }
+
+    // -- Action handlers for detail popups --
+    private void ApproveFacility(FacilityRequestData data)
+    {
+        data.Status = "Disetujui";
+        Toast.Success($"Permintaan Fasilitas #{data.Id} berhasil disetujui dan diproses.");
+        selectedFacilityDetail = null;
+    }
+
+    private void RejectFacility(FacilityRequestData data)
+    {
+        data.Status = "Ditolak";
+        Toast.Error($"Permintaan Fasilitas #{data.Id} telah ditolak.");
+        selectedFacilityDetail = null;
+    }
+
+    private void ApproveAccountDeletion(AccountRequestData data)
+    {
+        data.Status = "Disetujui";
+        Toast.Success($"Penghapusan akun '{data.UserName}' ({data.UserId}) telah disetujui.");
+        selectedAccountDetail = null;
+    }
+
+    private void RejectAccountDeletion(AccountRequestData data)
+    {
+        data.Status = "Ditolak";
+        Toast.Error($"Permohonan penghapusan akun '{data.UserName}' ditolak.");
+        selectedAccountDetail = null;
+    }
+
+    private void SaveBugInvestigation(BugRequestData data)
+    {
+        Toast.Success($"Catatan investigasi bug #{data.Id} berhasil disimpan.");
+        selectedBugDetail = null;
+    }
+
+    private void EscalateBug(BugRequestData data)
+    {
+        data.Status = "Dieskalasi";
+        Toast.Success($"Laporan bug #{data.Id} berhasil dieskalasi ke Tim Engineering.");
+        selectedBugDetail = null;
+    }
+
+    private void CompleteIT(ITRequestData data)
+    {
+        data.Status = "Selesai";
+        Toast.Success($"Tiket IT Support #{data.Id} berhasil ditugaskan dan diselesaikan.");
+        selectedITDetail = null;
+    }
+
+    private void RejectIT(ITRequestData data)
+    {
+        data.Status = "Ditolak";
+        Toast.Error($"Tiket IT Support #{data.Id} telah ditolak.");
+        selectedITDetail = null;
+    }
+
+    // -- Models --
     public record TrendPoint(string Bulan, int Jumlah);
     public record RoomUsagePoint(string NamaRuangan, int Jumlah);
-    public record RequestItem(string Title, string Id, string Subtitle, string Color, string IconBg, string Icon, string SubColor);
-    public record RecentRequest(string Type, string TypeIcon, string TypeColor, string RequesterName, string Initials, string AvatarColor, string Department, string Summary, string Status);
-    public record HistoryBooking(string UserName, string Initials, string AvatarColor, string Department, string Room, string Schedule, string Status);
+
+    public class FacilityRequestData
+    {
+        public string Id { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string RequesterName { get; set; } = "";
+        public string Initials { get; set; } = "";
+        public string AvatarColor { get; set; } = "#2563EB";
+        public string Department { get; set; } = "";
+        public string Room { get; set; } = "";
+        public string SubmittedAt { get; set; } = "";
+        public string RequestType { get; set; } = "";
+        public string ItemsSummary { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Status { get; set; } = "Menunggu";
+    }
+
+    public class AccountRequestData
+    {
+        public string Id { get; set; } = "";
+        public string UserName { get; set; } = "";
+        public string Initials { get; set; } = "";
+        public string AvatarColor { get; set; } = "#F59E0B";
+        public string UserId { get; set; } = "";
+        public string Department { get; set; } = "";
+        public string Reason { get; set; } = "";
+        public string EffectiveDate { get; set; } = "";
+        public string HrNotes { get; set; } = "";
+        public string Status { get; set; } = "Menunggu";
+    }
+
+    public class ITRequestData
+    {
+        public string Id { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Category { get; set; } = "";
+        public string Urgency { get; set; } = "Normal";
+        public string RequesterName { get; set; } = "";
+        public string RequesterInitials { get; set; } = "";
+        public string AvatarColor { get; set; } = "#10B981";
+        public string Department { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Status { get; set; } = "Menunggu";
+    }
+
+    public class BugRequestData
+    {
+        public string Id { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Category { get; set; } = "";
+        public string Module { get; set; } = "";
+        public string Urgency { get; set; } = "Kritis";
+        public string ReporterName { get; set; } = "";
+        public string ReporterInitials { get; set; } = "";
+        public string AvatarColor { get; set; } = "#EF4444";
+        public string Department { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Status { get; set; } = "Diinvestigasi";
+        public string AdminNotes { get; set; } = "";
+    }
+
+    public class RecentRequestItem
+    {
+        public string RawCategory { get; set; } = "";
+        public string TypeLabel { get; set; } = "";
+        public string RequesterName { get; set; } = "";
+        public string Initials { get; set; } = "";
+        public string AvatarColor { get; set; } = "#2563EB";
+        public string Department { get; set; } = "";
+        public string Summary { get; set; } = "";
+        public string Status { get; set; } = "baru";
+        public IssueIconHelper.IssueVisual TypeVisual => IssueIconHelper.GetVisual(Summary + " " + TypeLabel + " " + RawCategory);
+
+        public FacilityRequestData? FacilityData { get; set; }
+        public AccountRequestData? AccountData { get; set; }
+        public BugRequestData? BugData { get; set; }
+        public ITRequestData? ITData { get; set; }
+    }
+
+    public record HistoryBookingItem(string UserName, string Initials, string AvatarColor, string Department, string Room, string ScheduleDate, string ScheduleTime, string Status);
 }
-
-
-
-
-
-

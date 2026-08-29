@@ -34,7 +34,7 @@
             <Icon Name="upload" Size="14" />
             <span>Import CSV</span>
         </button>
-        <button type="button" class="btn-primary-pill btn-yellow" style="white-space:nowrap;" @onclick="OpenAddModal">
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
             <Icon Name="plus" Size="14" />
             <span>Tambah User</span>
         </button>
@@ -95,7 +95,7 @@
                         <span class="um-dept-text">@u.Department</span>
                     </td>
                     <td>
-                        <span class="um-bookings-text">@u.TotalBookings Rooms</span>
+                        <span class="um-bookings-text">@u.TotalBookings Booking</span>
                     </td>
                     <td>
                         <span class="um-status-pill @(u.Status.ToLower() == "active" ? "status-active" : "status-inactive")">
@@ -311,7 +311,7 @@
 </AppModal>
 
 @* -- Modal 4: Import CSV -- *@
-<AppModal IsOpen="showImportModal" IsOpenChanged="v => showImportModal = v" Title="Import User" Size="large">
+<AppModal IsOpen="showImportModal" IsOpenChanged="v => showImportModal = v" Title="Import Pengguna" Size="large">
     <ChildContent>
         <p class="modal-subtitle-text">Upload file CSV untuk menambahkan beberapa user sekaligus.</p>
 
@@ -324,7 +324,7 @@
         @if (csvPreviewList.Any())
         {
             <div class="csv-summary-bar">
-                <span class="csv-valid-badge">? @csvPreviewList.Count data valid siap diimpor</span>
+                <span class="csv-valid-badge"><Icon Name="check" Size="14" /> @csvPreviewList.Count data valid siap diimpor</span>
             </div>
 
             <div class="csv-preview-table-wrap">

@@ -33,7 +33,7 @@
                     {
                         <span style="padding:0.25rem 0.5rem; background:#f3f4f6; border-radius:1rem; font-size:0.85rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.25rem;" @onclick="() => facilitiesServiced.Remove(fac)">@fac <Icon Name="x" Size="12" /></span>
                     }
-                    <button style="padding:0.25rem 0.5rem; background:#e5e7eb; border:none; border-radius:1rem; font-size:0.85rem; cursor:pointer;" @onclick="AddCustomFacility">+ Tambah</button>
+                    <button class="btn-outline-pill btn-sm" @onclick="AddCustomFacility"><Icon Name="plus" Size="14" /> Tambah</button>
                 </div>
                 @if(showAddFacility)
                 {

@@ -120,14 +120,14 @@
                             {
                                 <div class="action-group-items">
                                     <label><input type="checkbox" checked="@selectedActions.Contains("Ubah Pengaturan")" @onchange='e => ToggleAction("Ubah Pengaturan", (bool)(e.Value ?? false))' /> Ubah Pengaturan</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Export Data")" @onchange='e => ToggleAction("Export Data", (bool)(e.Value ?? false))' /> Export Data</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Ekspor Data")" @onchange='e => ToggleAction("Ekspor Data", (bool)(e.Value ?? false))' /> Ekspor Data</label>
                                 </div>
                             }
                         </div>
                     </div>
                     <div class="island-footer">
                         <button type="button" class="island-link-clear" @onclick="ClearActionFilter">Hapus Semua</button>
-                        <button type="button" class="island-btn-apply" @onclick='() => ToggleIsland("")'>Terapkan Filter ?</button>
+                        <button type="button" class="island-btn-apply" @onclick='() => ToggleIsland("")'>Terapkan Filter</button>
                     </div>
                 </div>
             }
@@ -146,7 +146,7 @@
             <button type="button" class="btn-clear-island-filters" @onclick="ResetAllFilters" title="Reset Semua Filter"><Icon Name="x" Size="12" /> Reset Filter</button>
         }
 
-        <button type="button" class="btn-primary-pill btn-yellow" style="white-space:nowrap; margin-left:auto;" @onclick="@(() => showExportModal = true)">
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="@(() => showExportModal = true)">
             <Icon Name="download" Size="14" />
             <span>Ekspor CSV</span>
         </button>
@@ -158,7 +158,7 @@
         {
             @for (int i = 0; i < 8; i++)
             {
-                <div style="display:flex; gap:0.75rem; padding:0.75rem; border-bottom:1px solid var(--color-border);">
+                    <div class="skeleton-row">
                     <SkeletonBlock Width="32px" Height="32px" CssClass="rounded-circle" />
                     <SkeletonBlock Width="20%" Height="16px" />
                     <SkeletonBlock Width="15%" Height="16px" />
@@ -255,7 +255,7 @@
             new() { Id = 4, Timestamp = DateTime.Now.AddHours(-4), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#16A34A", ActionType = "Tolak Booking", TargetName = "Auditorium Serbaguna (#BK-1035)", Detail = "Jadwal bentrok dengan Townhall Perusahaan" },
             new() { Id = 5, Timestamp = DateTime.Now.AddDays(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Edit Ruangan", TargetName = "Ruang Diskusi B", Detail = "Kapasitas ruangan diperbarui dari 6 menjadi 8 orang" },
             new() { Id = 6, Timestamp = DateTime.Now.AddDays(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Reset Password", TargetName = "Ahmad Fauzi (IT)", Detail = "Reset password dikirimkan via email" },
-            new() { Id = 7, Timestamp = DateTime.Now.AddDays(-3), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#F59E0B", ActionType = "Export Data", TargetName = "Laporan Keuangan Q3", Detail = "Export laporan format XLSX" }
+            new() { Id = 7, Timestamp = DateTime.Now.AddDays(-3), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#F59E0B", ActionType = "Ekspor Data", TargetName = "Laporan Keuangan Q3", Detail = "Ekspor laporan format XLSX" }
         };
     }
 

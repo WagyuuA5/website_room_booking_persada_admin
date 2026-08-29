@@ -10,7 +10,7 @@
 
 <div class="room-status-page">
     @* -- Baris Aksi: Ringkasan Status + Search Lokal -- *@
-    <div style="display:flex; align-items:center; gap:16px; padding:12px 0; flex-wrap:wrap;">
+    <div class="action-row">
         <div class="rs-header-summary">
             <span class="rs-sum-dot dot-active"><span class="status-dot bg-success"></span> Aktif (@GetCount("active"))</span>
             <span class="rs-sum-dot dot-maint"><span class="status-dot bg-warning"></span> Maintenance (@GetCount("maintenance"))</span>
@@ -225,12 +225,10 @@
 {
     <AppModal IsOpen="@showDeleteModal" IsOpenChanged="@((bool v) => showDeleteModal = v)" Size="small">
         <HeaderContent>
-            <h3 style="margin:0; font-size:1.125rem; font-weight:600;">Hapus Ruangan</h3>
+            <h3 class="rm-modal-title text-danger">Hapus Ruangan</h3>
         </HeaderContent>
         <ChildContent>
-            <p style="margin:0; font-size:0.875rem; color:#6E6E73;">
-                Apakah Anda yakin ingin menghapus ruangan <strong>@roomToDelete.Name</strong>? Aksi ini tidak dapat dibatalkan.
-            </p>
+            <p class="text-muted text-sm">Apakah Anda yakin ingin menghapus ruangan <strong>@roomToDelete.Name</strong>? Aksi ini tidak dapat dibatalkan.</p>
         </ChildContent>
         <FooterContent>
             <button type="button" class="btn-outline-pill" @onclick="() => showDeleteModal = false">Batal</button>

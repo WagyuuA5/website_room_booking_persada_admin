@@ -9,12 +9,12 @@
 
 <div class="system-reports-container">
     @* -- Baris Aksi: Date Range + Ekspor Laporan -- *@
-    <div style="display:flex; align-items:center; gap:12px; padding:12px 0; flex-wrap:wrap;">
+    <div class="action-row">
         <button type="button" class="btn-date-range-pill" @onclick="() => showDatePicker = true">
             <Icon Name="calendar" Size="15" />
             <span>@dateRangeLabel</span>
         </button>
-        <button type="button" class="btn-primary-pill btn-yellow" style="white-space:nowrap; margin-left:auto;" @onclick="() => showExportModal = true">
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => showExportModal = true">
             <Icon Name="download" Size="14" />
             <span>Ekspor Laporan</span>
         </button>
@@ -46,7 +46,7 @@
     <div class="sr-filter-bar">
         <div class="sr-filter-item">
             <select class="sr-pill-select" @bind="filterRoom" @bind:after="OnFilterChanged">
-                <option value="All">All Rooms ?</option>
+                <option value="All">Semua Ruangan</option>
                 <option value="Ruang Rapat Utama">Ruang Rapat Utama</option>
                 <option value="Ruang Dirantara VIP">Ruang Dirantara VIP</option>
                 <option value="Ruang Diskusi B">Ruang Diskusi B</option>
@@ -55,7 +55,7 @@
         </div>
         <div class="sr-filter-item">
             <select class="sr-pill-select" @bind="filterDept" @bind:after="OnFilterChanged">
-                <option value="All">All Divisions ?</option>
+                <option value="All">Semua Departemen</option>
                 <option value="IT & Digital">IT & Digital</option>
                 <option value="Operasional">Operasional</option>
                 <option value="Human Resources">Human Resources</option>
@@ -65,14 +65,13 @@
         </div>
         <div class="sr-filter-item">
             <select class="sr-pill-select" @bind="filterStatus" @bind:after="OnFilterChanged">
-                <option value="All">All Status ?</option>
+                <option value="All">Semua Status</option>
                 <option value="approved">Disetujui</option>
                 <option value="pending">Menunggu</option>
                 <option value="rejected">Ditolak</option>
             </select>
         </div>
-        <div style="flex:1;"></div>
-        <button type="button" class="btn-reset-link" @onclick="ResetFilters">Reset Filter</button>
+        <button type="button" class="btn-reset-link" style="margin-left:auto;" @onclick="ResetFilters">Reset Filter</button>
     </div>
 
     @* -- Multi-Tab Views with Smooth Transition -- *@

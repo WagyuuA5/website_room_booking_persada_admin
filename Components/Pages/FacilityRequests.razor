@@ -9,12 +9,12 @@
 
 <div class="facility-requests-page">
     @* -- Baris Aksi: Search + Ekspor -- *@
-    <div style="display:flex; align-items:center; gap:12px; padding:12px 0; flex-wrap:wrap;">
-        <div class="fr-search-bar" style="flex:1 1 auto; min-width:200px;">
+    <div class="action-row">
+        <div class="fr-search-bar search-bar">
             <Icon Name="search" Size="15" CssClass="fr-search-icon" />
             <input type="text" class="fr-search-input" placeholder="Cari fasilitas, permintaan, atau pengguna..." @bind="searchQuery" @bind:event="oninput" />
         </div>
-        <button type="button" class="btn-outline-pill" style="white-space:nowrap; margin-left:auto;" @onclick="@(() => showExportModal = true)">
+        <button type="button" class="btn-outline-pill" @onclick="@(() => showExportModal = true)">
             <Icon Name="download" Size="14" />
             <span>Ekspor</span>
         </button>
@@ -91,7 +91,7 @@
                                 <h4 class="fr-card-title">@req.Title</h4>
                                 @if (req.IsUrgent)
                                 {
-                                    <span class="badge-urgent">URGENT</span>
+                                    <span class="badge-urgent">MENDESAK</span>
                                 }
                             </div>
                             <div class="fr-card-meta">
@@ -135,7 +135,7 @@
                     <StatusBadge Status="@selectedRequest.Status" />
                     @if (selectedRequest.IsUrgent)
                     {
-                        <span class="badge-urgent">URGENT</span>
+                        <span class="badge-urgent">MENDESAK</span>
                     }
                 </div>
             </div>
@@ -222,8 +222,8 @@
             </div>
         </ChildContent>
         <FooterContent>
-            <button type="button" class="btn-outline-pill btn-reject" @onclick="RejectRequest">Reject</button>
-            <button type="button" class="btn-primary-pill btn-yellow" @onclick="ProcessRequest">Assign & Process</button>
+            <button type="button" class="btn-outline-pill btn-reject" @onclick="RejectRequest">Tolak</button>
+            <button type="button" class="btn-primary-pill btn-yellow" @onclick="ProcessRequest">Tugaskan & Proses</button>
         </FooterContent>
     </AppModal>
 }

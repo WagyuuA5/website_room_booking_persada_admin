@@ -1,73 +1,79 @@
-﻿@namespace booking_room_admin.Components.Shared
+@namespace booking_room_admin.Components.Shared
 @inject booking_room_admin.Components.Services.LayoutStateService LayoutState
 @inject NavigationManager Navigation
 
 <header class="topbar">
-    <div class="topbar-title-group">
-        <h1 class="topbar-title">@Title</h1>
-        @if (!string.IsNullOrWhiteSpace(Subtitle))
-        {
-            <p class="topbar-subtitle">@Subtitle</p>
-        }
-    </div>
-
-    <div class="topbar-controls">
-        @if (LocalSearchSlot != null)
-        {
-            @LocalSearchSlot
-        }
-        else if (ShowGlobalSearch)
-        {
-            <div class="topbar-search" title="Cari menu, ruangan, atau pengguna">
-                <Icon Name="search" Size="15" CssClass="search-icon" />
-                <input type="text" placeholder="@SearchPlaceholder" />
-            </div>
-        }
-
-        @if (ShowDateFilter)
-        {
-            <button type="button" class="topbar-date-btn" @onclick="ToggleDatePicker" title="Pilih rentang tanggal">
-                <Icon Name="calendar" Size="15" />
-                <span>@dateRangeLabel</span>
-            </button>
-        }
-
-        @if (RightSlot != null)
-        {
-            <div class="topbar-right-slot">
-                @RightSlot
-            </div>
-        }
-
-        <div class="topbar-utility-group">
-            <button type="button" class="topbar-icon-btn theme-toggle" @onclick="ToggleTheme" title="@(LayoutState.IsDarkMode ? "Ganti ke Mode Terang" : "Ganti ke Mode Gelap")">
-                @if (LayoutState.IsDarkMode)
-                {
-                    <Icon Name="sun" Size="18" />
-                }
-                else
-                {
-                    <Icon Name="moon" Size="18" />
-                }
-            </button>
-
-            <button type="button" class="topbar-icon-btn notification-btn" @onclick="ToggleNotification" title="@($"Notifikasi ({unreadCount} belum dibaca)")">
-                <Icon Name="bell" Size="18" />
-                @if (unreadCount > 0)
-                {
-                    <span class="notification-badge">@unreadCount</span>
-                }
-            </button>
-
-            <button type="button" class="admin-profile-btn" @onclick="ToggleProfilePopup" title="Buka menu akun">
-                <UserAvatar Initials="WA" BgColor="#0B1E39" Size="36px" />
-                <div class="admin-info">
-                    <span class="admin-name">Admin Wahyu</span>
-                    <span class="admin-role">PENGONTROL SISTEM</span>
+    <div class="topbar-nav-row">
+        <div class="topbar-nav-left"></div>
+        <div class="topbar-controls">
+            @if (LocalSearchSlot != null)
+            {
+                @LocalSearchSlot
+            }
+            else if (ShowGlobalSearch)
+            {
+                <div class="topbar-search" title="Cari menu, ruangan, atau pengguna">
+                    <Icon Name="search" Size="15" CssClass="search-icon" />
+                    <input type="text" placeholder="@SearchPlaceholder" />
                 </div>
-            </button>
+            }
+
+            @if (ShowDateFilter)
+            {
+                <button type="button" class="topbar-date-btn" @onclick="ToggleDatePicker" title="Pilih rentang tanggal">
+                    <Icon Name="calendar" Size="15" />
+                    <span>@dateRangeLabel</span>
+                </button>
+            }
+
+            @if (RightSlot != null)
+            {
+                <div class="topbar-right-slot">
+                    @RightSlot
+                </div>
+            }
+
+            <div class="topbar-utility-group">
+                <button type="button" class="topbar-icon-btn theme-toggle" @onclick="ToggleTheme" title="@(LayoutState.IsDarkMode ? "Ganti ke Mode Terang" : "Ganti ke Mode Gelap")">
+                    @if (LayoutState.IsDarkMode)
+                    {
+                        <Icon Name="sun" Size="18" />
+                    }
+                    else
+                    {
+                        <Icon Name="moon" Size="18" />
+                    }
+                </button>
+
+                <button type="button" class="topbar-icon-btn notification-btn" @onclick="ToggleNotification" title="@($"Notifikasi ({unreadCount} belum dibaca)")">
+                    <Icon Name="bell" Size="18" />
+                    @if (unreadCount > 0)
+                    {
+                        <span class="notification-badge">@unreadCount</span>
+                    }
+                </button>
+
+                <button type="button" class="admin-profile-btn" @onclick="ToggleProfilePopup" title="Buka menu akun">
+                    <UserAvatar Initials="WA" BgColor="#0B1E39" Size="36px" />
+                    <div class="admin-info">
+                        <span class="admin-name">Admin Wahyu</span>
+                        <span class="admin-role">PENGONTROL SISTEM</span>
+                    </div>
+                </button>
+            </div>
         </div>
     </div>
+
+    @if (!string.IsNullOrWhiteSpace(Title))
+    {
+        <div class="topbar-title-section">
+            <h1 class="topbar-title">@Title</h1>
+            @if (!string.IsNullOrWhiteSpace(Subtitle))
+            {
+                <p class="topbar-subtitle">@Subtitle</p>
+            }
+        </div>
+    }
 </header>
 
 <DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => { showDatePicker = v; StateHasChanged(); })" OnDateSelected="OnDateSelected" />

@@ -50,8 +50,8 @@
                                 </span>
                             </div>
                             <div class="mb-rc-meta">
-                                <span>?? Kap: @r.Capacity Pax</span>
-                                <span>?? @r.Location</span>
+                                <span><Icon Name="users" Size="14" /> Kap: @r.Capacity Pax</span>
+                                <span><Icon Name="map-pin" Size="14" /> @r.Location</span>
                             </div>
                             <div class="mb-rc-amenities">
                                 <span>@r.AmenitiesSummary</span>
@@ -114,7 +114,7 @@
                                     </div>
                                     @if (s.HasConflict)
                                     {
-                                        <span class="badge-conflict-sm">? Berpotensi bentrok jadwal</span>
+                                        <span class="badge-conflict-sm"><Icon Name="alert-triangle" Size="14" /> Berpotensi bentrok jadwal</span>
                                     }
                                 </div>
                             }
