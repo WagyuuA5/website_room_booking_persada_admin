@@ -10,12 +10,13 @@
 
 <div class="room-status-page">
     @* -- Baris Aksi: Ringkasan Status + Search Lokal -- *@
-    <div class="action-row">
+    <div class="action-row" style="justify-content: space-between; width: 100%;">
         <div class="rs-header-summary">
             <span class="rs-sum-dot dot-active"><span class="status-dot bg-success"></span> Aktif (@GetCount("active"))</span>
             <span class="rs-sum-dot dot-maint"><span class="status-dot bg-warning"></span> Dalam Perawatan (@GetCount("maintenance"))</span>
             <span class="rs-sum-dot dot-inactive"><span class="status-dot bg-muted"></span> Tidak Aktif (@GetCount("inactive"))</span>
         </div>
+        <DateFilter OnDateSelectedCallback="HandleDateChanged" />
     </div>
 
     @* -- Cards Grid -- *@
@@ -79,7 +80,7 @@
                     <div class="rs-card-body">
                         <div class="rs-top-header-row">
                             <div class="rs-title-wrap">
-                                <h4 class="rs-room-title">@room.Name</h4>
+                                <h4 class="rs-room-title" title="@room.Name">@room.Name</h4>
                                 <span class="rs-room-loc"><Icon Name="map-pin" Size="14" /> @room.Location</span>
                             </div>
                             <div class="rs-toggle-block">
@@ -95,12 +96,15 @@
 
                         @if (room.Status == "inactive")
                         {
-                            <p class="rs-placeholder-text">Menunggu setup & konfigurasi admin...</p>
+                            <p class="rs-placeholder-text">
+                                <span style="display:inline-block; padding:2px 6px; background:#F3F4F6; color:#4B5563; font-size:0.7rem; font-weight:700; border-radius:4px; margin-bottom:8px;">BELUM DIKONFIGURASI</span><br>
+                                Menunggu setup & konfigurasi admin...
+                            </p>
                         }
                         else if (room.Status == "maintenance")
                         {
                             <div class="rs-schedule-box">
-                                <span class="rs-sched-label">Jadwal Maintenance</span>
+                                <span class="rs-sched-label">Jadwal Perawatan</span>
                                 <div class="rs-duration-chips">
                                     <button type="button" class="rs-dur-chip @(room.SelectedDurationMinutes == 20 ? "active" : "")" @onclick="() => SetDuration(room, 20)">20 Menit</button>
                                     <button type="button" class="rs-dur-chip @(room.SelectedDurationMinutes == 30 ? "active" : "")" @onclick="() => SetDuration(room, 30)">30 Menit</button>
@@ -134,7 +138,7 @@
                     @if (room.Status == "maintenance")
                     {
                         <div class="rs-yellow-bar">
-                            <span><Icon Name="alert-triangle" Size="14" /> Maintenance</span>
+                            <span><Icon Name="alert-triangle" Size="14" /> Dalam Perawatan</span>
                         </div>
                     }
                 </div>
@@ -149,7 +153,7 @@
     <AppModal IsOpen="@showMaintModal" IsOpenChanged="@((bool v) => showMaintModal = v)" Size="medium">
         <HeaderContent>
             <div class="rs-modal-maint-header">
-                <h3 class="rs-maint-modal-title"><Icon Name="wrench" Size="20" /> MAINTENANCE</h3>
+                <h3 class="rs-maint-modal-title"><Icon Name="wrench" Size="20" /> PERAWATAN</h3>
                 <span class="rs-maint-room-pill"><Icon Name="building" Size="14" /> @activeMaintenanceRoom.Name &middot; @activeMaintenanceRoom.Location</span>
             </div>
         </HeaderContent>
@@ -157,7 +161,7 @@
             <div class="rs-maint-form">
                 <div class="rs-row-2col">
                     <div class="rs-field">
-                        <label class="rs-label">Kategori Maintenance</label>
+                        <label class="rs-label">Kategori Perawatan</label>
                         <select class="rs-select" @bind="maintForm.Category">
                             <option value="HVAC">HVAC</option>
                             <option value="Perbaikan Peralatan">Perbaikan Peralatan</option>
@@ -381,6 +385,11 @@
         };
     }
 
+    private void HandleDateChanged(DateTime? date)
+    {
+        StateHasChanged();
+    }
+
     private void StartCountdownTimer()
     {
         _countdownTimer = new System.Threading.Timer(_ =>
@@ -456,7 +465,7 @@
             activeMaintenanceRoom.RemainingSeconds = 30 * 60;
             activeMaintenanceRoom.SelectedDurationMinutes = 30;
             activeMaintenanceRoom.JustFinished = false;
-            Toast.Success("Ruangan berhasil ditandai maintenance.");
+            Toast.Success("Ruangan berhasil ditandai dalam perawatan.");
             showMaintModal = false;
         }
     }
@@ -485,7 +494,7 @@
     private string GetStatusLabel(string status) => status switch
     {
         "active" => "AKTIF",
-        "maintenance" => "MAINTENANCE",
+        "maintenance" => "PERAWATAN",
         "inactive" => "TIDAK AKTIF",
         _ => status.ToUpperInvariant()
     };

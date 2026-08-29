@@ -1,0 +1,31 @@
+@namespace booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Shared
+
+<div class="date-filter-wrapper" style="position: relative; display: inline-block;">
+    <button type="button" class="topbar-date-btn" @onclick="ToggleDatePicker" title="Pilih rentang tanggal">
+        <Icon Name="calendar" Size="15" />
+        <span>@dateRangeLabel</span>
+    </button>
+    <DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => { showDatePicker = v; StateHasChanged(); })" OnDateSelected="OnDateSelected" />
+</div>
+
+@code {
+    [Parameter] public EventCallback<DateTime?> OnDateSelectedCallback { get; set; }
+    
+    private bool showDatePicker = false;
+    private string dateRangeLabel = "01 Okt - 31 Okt 2026";
+    
+    private void ToggleDatePicker()
+    {
+        showDatePicker = !showDatePicker;
+    }
+    
+    private void OnDateSelected(DateTime? date)
+    {
+        if (date.HasValue)
+        {
+            dateRangeLabel = date.Value.ToString("dd MMM yyyy");
+            OnDateSelectedCallback.InvokeAsync(date.Value);
+        }
+    }
+}

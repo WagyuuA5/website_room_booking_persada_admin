@@ -5,19 +5,33 @@
     width: 100%;
     min-height: 64px;
     padding: 10px 24px;
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-bottom: 1px solid var(--color-border, rgba(229, 231, 235, 0.6));
+    border-bottom: 1px solid transparent;
     position: sticky;
     top: 0;
     z-index: 90;
-    transition: background 0.3s ease, border-color 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+.topbar-glass-nav.scrolled {
+    min-height: 52px;
+    padding: 6px 24px;
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid var(--color-border, rgba(229, 231, 235, 0.8));
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 body.dark .topbar-glass-nav {
-    background: rgba(19, 27, 44, 0.8);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
+    background: rgba(19, 27, 44, 0.6);
+    border-bottom-color: transparent;
+}
+
+body.dark .topbar-glass-nav.scrolled {
+    background: rgba(19, 27, 44, 0.85);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .topbar-nav-left {
@@ -261,7 +275,13 @@ body.dark .topbar-glass-nav {
     transform: scale(1.1);
 }
 .avatar-upload-input {
-    display: none;
+    opacity: 0;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 10;
 }
 
 @keyframes profilePopIn {

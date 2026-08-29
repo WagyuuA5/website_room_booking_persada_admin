@@ -112,3 +112,14 @@ window.downloadBase64File = function (fileName, base64, mimeType) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 };
+
+window.addEventListener('scroll', function() {
+    var topbar = document.querySelector('.topbar-glass-nav');
+    if (topbar) {
+        if (window.scrollY > 10) {
+            topbar.classList.add('scrolled');
+        } else {
+            topbar.classList.remove('scrolled');
+        }
+    }
+});

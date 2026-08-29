@@ -360,3 +360,15 @@ body.dark .mb-suggestions-drop {
 body.dark .mb-room-card.selected {
     background: #2E2711;
 }
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    vertical-align: middle;
+    display: block;
+}
+input[type="time"] {
+    align-items: center;
+    display: flex;
+}

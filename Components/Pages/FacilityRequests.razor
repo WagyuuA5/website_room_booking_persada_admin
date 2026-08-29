@@ -10,10 +10,11 @@
 <div class="facility-requests-page">
     @* -- Baris Aksi: Search + Ekspor -- *@
     <div class="action-row">
-        <div class="fr-search-bar search-bar">
-            <Icon Name="search" Size="15" CssClass="fr-search-icon" />
-            <input type="text" class="fr-search-input" placeholder="Cari fasilitas, permintaan, atau pengguna..." @bind="searchQuery" @bind:event="oninput" />
+        <div class="page-search-bar" style="max-width: 400px;">
+            <Icon Name="search" Size="15" CssClass="search-icon" />
+            <input type="text" placeholder="Cari fasilitas, permintaan, atau pengguna..." @bind="searchQuery" @bind:event="oninput" />
         </div>
+        <DateFilter OnDateSelectedCallback="HandleDateChanged" />
         <button type="button" class="btn-outline-pill" @onclick="@(() => showExportModal = true)">
             <Icon Name="download" Size="14" />
             <span>Ekspor</span>
@@ -268,6 +269,11 @@
 
     private FacilityRequestItem? selectedRequest;
     private List<FacilityRequestItem> allRequests = new();
+
+    private void HandleDateChanged(DateTime? date)
+    {
+        StateHasChanged();
+    }
 
     private List<ExportColumn> exportColumns = new()
     {

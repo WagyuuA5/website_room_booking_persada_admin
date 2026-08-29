@@ -6,7 +6,11 @@
 @inject NavigationManager Navigation
 @inject ToastService Toast
 
-<TopBar Title="Dashboard Admin" Subtitle="Ringkasan performa sistem pemesanan ruangan perusahaan." ShowGlobalSearch="true" ShowDateFilter="true" />
+<TopBar Title="Dashboard Admin" Subtitle="Ringkasan performa sistem pemesanan ruangan perusahaan.">
+    <RightSlot>
+        <DateFilter OnDateSelectedCallback="HandleDateChanged" />
+    </RightSlot>
+</TopBar>
 <div class="dashboard">
     @* -- Bagian 1: Ringkasan Statistik -- *@
     <div class="stats-grid">
@@ -1080,4 +1084,8 @@
     }
 
     public record HistoryBookingItem(string UserName, string Initials, string AvatarColor, string Department, string Room, string ScheduleDate, string ScheduleTime, string Status);
+}
+
+@code {
+    private void HandleDateChanged(DateTime? date) { StateHasChanged(); }
 }

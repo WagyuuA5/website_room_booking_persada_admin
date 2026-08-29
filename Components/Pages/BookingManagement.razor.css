@@ -34,36 +34,37 @@
 }
 
 .bm-search-bar {
-    position: relative;
-    flex: 1;
-}
-
-.bm-search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 17px;
-    height: 17px;
-    color: var(--color-text-muted, #6E6E73);
-}
-
-.bm-search-input {
-    width: 100%;
-    padding: 0.7rem 1rem 0.7rem 2.75rem;
-    border-radius: var(--radius-md, 12px);
-    border: 1px solid var(--color-border, #E5E7EB);
+    display: flex;
+    align-items: center;
+    gap: 8px;
     background: var(--color-surface, #FFFFFF);
-    color: var(--color-text, #1D1D1F);
-    font-size: 0.9rem;
-    outline: none;
+    border: 1px solid var(--color-border, #E5E7EB);
+    border-radius: var(--radius-md, 12px);
+    padding: 0.5rem 1rem;
+    flex: 1;
     box-shadow: var(--shadow-sm);
     transition: all 0.2s ease;
 }
 
-.bm-search-input:focus {
+.bm-search-bar:focus-within {
     border-color: var(--color-primary, #0B1E39);
     box-shadow: 0 0 0 3px var(--color-primary-soft, #E8EDF5);
+}
+
+.bm-search-icon {
+    width: 17px;
+    height: 17px;
+    color: var(--color-text-muted, #6E6E73);
+    flex-shrink: 0;
+}
+
+.bm-search-input {
+    width: 100%;
+    border: none;
+    background: none;
+    outline: none;
+    color: var(--color-text, #1D1D1F);
+    font-size: 0.9rem;
 }
 
 .bm-date-pill {

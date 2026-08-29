@@ -1285,3 +1285,43 @@ body.dark .room-photo-fallback {
     background: #131B2C;
     color: #94A3B8;
 }
+
+.page-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--color-surface, #FFFFFF);
+    border: 1px solid var(--color-border, #E5E7EB);
+    border-radius: var(--radius-md, 12px);
+    padding: 0.5rem 1rem;
+    flex: 1 1 auto;
+    min-width: 200px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+.page-search-bar:focus-within {
+    border-color: var(--color-primary, #0B1E39);
+    box-shadow: 0 0 0 3px var(--color-primary-soft, #E8EDF5);
+}
+.page-search-bar .search-icon {
+    color: var(--color-text-muted, #6E6E73);
+    flex-shrink: 0;
+}
+.page-search-bar input {
+    width: 100%;
+    border: none;
+    background: none;
+    outline: none;
+    color: var(--color-text, #1D1D1F);
+    font-size: 0.9rem;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    transform: none !important;
+    margin: auto 0 !important;
+    padding: 0 !important;
+    vertical-align: middle;
+}
+input[type="time"] {
+    align-items: center;
+}

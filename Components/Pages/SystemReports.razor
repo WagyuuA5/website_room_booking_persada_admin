@@ -10,10 +10,7 @@
 <div class="system-reports-container">
     @* -- Baris Aksi: Date Range + Ekspor Laporan -- *@
     <div class="action-row">
-        <button type="button" class="btn-date-range-pill" @onclick="() => showDatePicker = true">
-            <Icon Name="calendar" Size="15" />
-            <span>@dateRangeLabel</span>
-        </button>
+        <DateFilter OnDateSelectedCallback="HandleDateChanged" />
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => showExportModal = true">
             <Icon Name="download" Size="14" />
             <span>Ekspor Laporan</span>
@@ -103,14 +100,17 @@
     </div>
 </div>
 
-<DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => showDatePicker = v)" IsRangeMode="true" OnRangeSelected="OnRangeSelected" />
 <ExportModal IsOpen="@showExportModal" IsOpenChanged="@((bool v) => showExportModal = v)" ExportTitle="@($"Laporan Sistem - {GetTabTitle()}")" Columns="exportColumns" CurrentViewRows="GetExportRows()" AllRows="GetExportRows()" />
 
 @code {
     private string activeTab = "booking";
     private string dateRangeLabel = "01 Okt - 31 Okt 2026";
-    private bool showDatePicker = false;
     private bool showExportModal = false;
+
+    private void HandleDateChanged(DateTime? date)
+    {
+        StateHasChanged();
+    }
 
     private string filterRoom = "All";
     private string filterDept = "All";

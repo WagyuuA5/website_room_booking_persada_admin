@@ -5,26 +5,6 @@
 <header class="topbar-glass-nav">
     <div class="topbar-nav-left"></div>
     <div class="topbar-controls">
-        @if (LocalSearchSlot != null)
-        {
-            @LocalSearchSlot
-        }
-        else if (ShowGlobalSearch)
-        {
-            <div class="topbar-search" title="Cari menu, ruangan, atau pengguna">
-                <Icon Name="search" Size="15" CssClass="search-icon" />
-                <input type="text" placeholder="@SearchPlaceholder" />
-            </div>
-        }
-
-        @if (ShowDateFilter)
-        {
-            <button type="button" class="topbar-date-btn" @onclick="ToggleDatePicker" title="Pilih rentang tanggal">
-                <Icon Name="calendar" Size="15" />
-                <span>@dateRangeLabel</span>
-            </button>
-        }
-
         @if (RightSlot != null)
         {
             <div class="topbar-right-slot">
@@ -74,7 +54,6 @@
     </div>
 }
 
-<DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => { showDatePicker = v; StateHasChanged(); })" OnDateSelected="OnDateSelected" />
 <NotificationPopup IsOpen="@showNotification" IsOpenChanged="@((bool v) => { showNotification = v; StateHasChanged(); })" />
 
 @if (showProfilePopup)
@@ -108,18 +87,10 @@
 @code {
     [Parameter] public string Title { get; set; } = "Dashboard";
     [Parameter] public string Subtitle { get; set; } = string.Empty;
-    [Parameter] public bool ShowGlobalSearch { get; set; } = true;
-    [Parameter] public bool ShowDateFilter { get; set; } = true;
-    [Parameter] public string SearchPlaceholder { get; set; } = "Cari...";
-    [Parameter] public RenderFragment? LocalSearchSlot { get; set; }
     [Parameter] public RenderFragment? RightSlot { get; set; }
 
-    [Parameter] public EventCallback<DateTime?> OnDateSelectedCallback { get; set; }
-
-    private bool showDatePicker = false;
     private bool showNotification = false;
     private bool showProfilePopup = false;
-    private string dateRangeLabel = "01 Okt - 31 Okt 2026";
     private int unreadCount = 3;
 
     private void ToggleTheme()
@@ -128,32 +99,18 @@
         StateHasChanged();
     }
 
-    private void ToggleDatePicker()
-    {
-        showDatePicker = !showDatePicker;
-        if (showDatePicker) { showNotification = false; showProfilePopup = false; }
-    }
-
     private void ToggleNotification()
     {
         showNotification = !showNotification;
-        if (showNotification) { showDatePicker = false; showProfilePopup = false; }
+        if (showNotification) { showProfilePopup = false; }
     }
 
     private void ToggleProfilePopup()
     {
         showProfilePopup = !showProfilePopup;
-        if (showProfilePopup) { showDatePicker = false; showNotification = false; }
+        if (showProfilePopup) { showNotification = false; }
     }
 
-    private void OnDateSelected(DateTime? date)
-    {
-        if (date.HasValue)
-        {
-            dateRangeLabel = date.Value.ToString("dd MMM yyyy");
-            OnDateSelectedCallback.InvokeAsync(date.Value);
-        }
-}
     private async Task HandleAvatarUpload(InputFileChangeEventArgs e)
     {
         var file = e.File;

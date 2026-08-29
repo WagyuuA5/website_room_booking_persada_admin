@@ -132,13 +132,9 @@
         </div>
 
         @* 3. Date Range Preset Trigger *@
-        <select class="audit-date-preset-select" @bind="selectedDateRange">
-            <option value="7">7 Hari Terakhir</option>
-            <option value="30">30 Hari Terakhir</option>
-            <option value="90">90 Hari Terakhir</option>
-            <option value="0">Semua Waktu</option>
-        </select>
+        <DateFilter OnDateSelectedCallback="HandleDateChanged" />
 
+        <div style="flex:1;"></div>
         @if (!string.IsNullOrEmpty(selectedActor) || selectedActions.Any() || selectedDateRange != "7")
         {
             <button type="button" class="btn-clear-island-filters" @onclick="ResetAllFilters" title="Reset Semua Filter"><Icon Name="x" Size="12" /> Reset Filter</button>
@@ -279,9 +275,14 @@
     private IEnumerable<AuditLogEntry> PagedLogs =>
         FilteredLogs.Skip((currentPage - 1) * pageSize).Take(pageSize);
 
-    private void ToggleIsland(string name)
+    private void HandleDateChanged(DateTime? date)
     {
-        openIsland = openIsland == name ? "" : name;
+        StateHasChanged();
+    }
+
+    private void ToggleIsland(string island)
+    {
+        openIsland = openIsland == island ? "" : island;
     }
 
     private void SelectActor(string name, bool isChecked)

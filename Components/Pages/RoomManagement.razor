@@ -10,10 +10,11 @@
 <div class="room-management-page">
     @* -- Baris Aksi: search lokal + CTA -- *@
     <div class="rm-action-row action-row">
-        <div class="bm-search-bar search-bar" style="flex:1 1 auto; min-width:200px; max-width:400px;">
-            <Icon Name="search" Size="15" CssClass="bm-search-icon" />
-            <input type="text" class="bm-search-input" placeholder="Cari ruangan..." @bind="searchQuery" @bind:event="oninput" />
+        <div class="page-search-bar" style="max-width: 400px;">
+            <Icon Name="search" Size="15" CssClass="search-icon" />
+            <input type="text" placeholder="Cari ruangan..." @bind="searchQuery" @bind:event="oninput" />
         </div>
+        <DateFilter OnDateSelectedCallback="HandleDateChanged" />
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
             <Icon Name="plus" Size="14" />
             <span>Tambah Ruangan</span>
@@ -395,8 +396,8 @@
                 Name = "Ruang Gamma",
                 Location = "Lantai 3, Sayap VIP",
                 Capacity = 20,
-                Amenities = new List<string> { "Dual Proyektor", "Smart Board", "Sound System" },
-                Description = "Boardroom kapasitas besar dilengkapi konferensi audio video berstandar enterprise.",
+                Amenities = new List<string> { "Layar Proyektor Ganda", "Papan Tulis Kaca", "Konferensi Video", "Peralatan Audio Canggih" },
+                Description = "Ruang Rapat Besar dilengkapi konferensi audio video berstandar enterprise.",
                 PhotoUrl = "images/room3.jpg",
                 IsMaintenance = true
             },
@@ -423,6 +424,13 @@
                 IsMaintenance = false
             }
         };
+    }
+
+    private void HandleDateChanged(DateTime? date)
+    {
+        // This is a placeholder since RoomManagement doesn't strictly filter by date
+        // but adding it for UI consistency as requested.
+        StateHasChanged();
     }
 
     private void OpenDetailModal(RoomMaster room)
