@@ -1,4 +1,4 @@
-﻿@using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Models
 
 <AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Size="large" OnClose="Close">
     <HeaderContent>
@@ -21,7 +21,6 @@
                     <StatusBadge Text="@($"{Room?.Capacity} Orang")" Type="StatusBadge.BadgeType.Indigo" />
                 </div>
             </div>
-            <button class="modal-close" @onclick="Close" title="Tutup" style="position: absolute; top: 1rem; right: 1rem; color: #fff; background: rgba(0,0,0,0.3); border-radius: 50%; padding: 0.5rem;"><Icon Name="x" Size="18" /></button>
         </div>
     </HeaderContent>
     <ChildContent>

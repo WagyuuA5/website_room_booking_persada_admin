@@ -1,4 +1,4 @@
-﻿@using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Models
 
 <div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
     <div class="popup-card add-user-card" @onclick:stopPropagation="true">
@@ -7,7 +7,6 @@
                 <h2 class="au-title">Tambah Akun User Baru</h2>
                 <p class="au-subtitle">Buat akun manual untuk karyawan saat pendaftaran standar tidak tersedia.</p>
             </div>
-            <button class="popup-close" @onclick="Close">&times;</button>
         </div>
 
         <div class="au-body">

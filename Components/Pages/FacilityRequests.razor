@@ -81,20 +81,22 @@
         }
         else
         {
-            @foreach (var req in FilteredRequests)
+            @foreach (var req in PagedRequests)
             {
-                <div class="fr-card" @onclick="() => OpenDetail(req)">
+                <div class="fr-request-card @(req.IsUrgent ? "card-urgent" : "")" @onclick="() => OpenDetail(req)">
                     <div class="fr-card-left">
-                        <div class="fr-avatar" style="background: @req.AvatarBg;">@req.RequesterInitials</div>
-                        <div class="fr-card-details">
-                            <div class="fr-card-header-row">
+                        <div class="fr-avatar-col">
+                            <div class="fr-avatar" style="background: @req.AvatarBg;">@req.RequesterInitials</div>
+                        </div>
+                        <div class="fr-main-col">
+                            <div class="fr-card-top-row">
                                 <h4 class="fr-card-title">@req.Title</h4>
                                 @if (req.IsUrgent)
                                 {
-                                    <span class="badge-urgent">MENDESAK</span>
+                                    <span class="badge-urgent-pill"><Icon Name="alert-triangle" Size="12" /> Mendesak</span>
                                 }
                             </div>
-                            <div class="fr-card-meta">
+                            <div class="fr-card-meta-row">
                                 <span class="fr-meta-item">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fr-meta-icon"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                                     @req.RoomName
@@ -119,6 +121,8 @@
                     </div>
                 </div>
             }
+
+            <Pagination CurrentPage="@currentPage" TotalItems="@FilteredRequests.Count()" PageSize="@pageSize" OnPageChanged="HandlePageChanged" />
         }
     </div>
 </div>
@@ -417,11 +421,24 @@
         }
     }
 
+    private int currentPage = 1;
+    private int pageSize = 5;
+
+    private IEnumerable<FacilityRequestItem> PagedRequests =>
+        FilteredRequests.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+    private void HandlePageChanged(int page)
+    {
+        currentPage = page;
+        StateHasChanged();
+    }
+
     private int GetCount(string status) => allRequests.Count(r => r.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
 
     private void SelectTab(string tab)
     {
         selectedTab = tab;
+        currentPage = 1;
     }
 
     private void ResetFilters()

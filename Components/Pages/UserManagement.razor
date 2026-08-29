@@ -6,7 +6,7 @@
 @inject IUserService UserService
 @inject ToastService Toast
 
-<TopBar Title="Manajemen User" Subtitle="Kelola akses, profil, dan hak pengguna sistem booking ruangan." ShowGlobalSearch="false" ShowDateFilter="false" />
+<TopBar Title="Manajemen Pengguna" Subtitle="Kelola akses, profil, dan hak pengguna sistem pemesanan ruangan." ShowGlobalSearch="false" ShowDateFilter="false" />
 
 <div class="user-management-page">
 
@@ -14,7 +14,7 @@
     <div class="um-toolbar">
         <div class="um-search-box">
             <Icon Name="search" Size="16" CssClass="um-search-icon" />
-            <input type="text" placeholder="Cari berdasarkan nama, email, atau ID user..." @bind="searchQuery" @bind:event="oninput" @onkeyup="HandleSearchKey" />
+            <input type="text" placeholder="Cari berdasarkan nama, email, atau ID pengguna..." @bind="searchQuery" @bind:event="oninput" @onkeyup="HandleSearchKey" />
         </div>
         <select class="um-filter-select" @bind="departmentFilter" @bind:after="LoadUsers">
             <option value="All">Semua Departemen</option>
@@ -32,11 +32,11 @@
         </button>
         <button type="button" class="btn-outline-pill" @onclick="() => showImportModal = true">
             <Icon Name="upload" Size="14" />
-            <span>Import CSV</span>
+            <span>Impor CSV</span>
         </button>
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
             <Icon Name="plus" Size="14" />
-            <span>Tambah User</span>
+            <span>Tambah Pengguna</span>
         </button>
     </div>
 
@@ -105,7 +105,7 @@
                     </td>
                     <td>
                         <div class="um-actions">
-                            <button type="button" class="btn-action-edit" title="Edit User" @onclick="() => OpenEditModal(u)">
+                            <button type="button" class="btn-action-edit" title="Edit Pengguna" @onclick="() => OpenEditModal(u)">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
                             <button type="button" class="btn-action-delete" title="Hapus User" @onclick="() => OpenDeleteModal(u)">
@@ -218,7 +218,7 @@
 </AppModal>
 
 @* -- Modal 2: Edit User -- *@
-<AppModal IsOpen="showEditModal" IsOpenChanged="v => showEditModal = v" Title="Edit User" Size="medium">
+<AppModal IsOpen="showEditModal" IsOpenChanged="v => showEditModal = v" Title="Edit Pengguna" Size="medium">
     <ChildContent>
         <p class="modal-subtitle-text">Perbarui data dan hak akses pengguna sistem.</p>
 

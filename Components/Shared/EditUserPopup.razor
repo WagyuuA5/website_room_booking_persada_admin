@@ -1,4 +1,4 @@
-﻿@using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Models
 
 <div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
     <div class="popup-card edit-user-card" @onclick:stopPropagation="true">
@@ -7,7 +7,6 @@
                 <h2 class="eu-title">Ubah Profil User</h2>
                 <p class="eu-subtitle">Perbarui detail akun dan tingkat akses.</p>
             </div>
-            <button class="popup-close" @onclick="Close">&times;</button>
         </div>
 
         @if (User != null)

@@ -1,11 +1,10 @@
-﻿<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
+<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
     <div class="popup-card select-dept-card" @onclick:stopPropagation="true">
         <div class="sd-header">
             <div>
                 <h2 class="sd-title">Pilih Departemen</h2>
                 <p class="sd-subtitle">PT PERSADA - Manajemen Personalia</p>
             </div>
-            <button class="popup-close" @onclick="Close">&times;</button>
         </div>
 
         <div class="sd-search">

@@ -1,4 +1,11 @@
 * { box-sizing: border-box; }
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
 :root {
     /* -- Primary -- navy khas Persada (sidebar) */
     --color-primary: #0B1E39;
@@ -224,6 +231,74 @@ body.dark, .dark {
     background: var(--color-background);
     border-color: var(--color-primary);
 }
+
+/* -- Standard Reusable Numbered Pagination -- */
+.app-pagination-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.25rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md, 12px);
+    margin-top: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.app-pagination-info {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.app-pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.app-page-btn {
+    min-width: 2.1rem;
+    height: 2.1rem;
+    padding: 0 0.4rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.app-page-btn:hover:not(:disabled) {
+    background: var(--color-primary-soft, #E8EDF5);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.app-page-btn.active {
+    background: var(--color-primary, #0B1E39);
+    color: #FFFFFF;
+    border-color: var(--color-primary, #0B1E39);
+    box-shadow: 0 2px 6px rgba(11, 30, 57, 0.25);
+}
+
+.app-page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.app-page-ellipsis {
+    padding: 0 0.35rem;
+    color: var(--color-text-muted);
+    font-weight: 700;
+}
+
 
 /* -- Screen reader only accessibility helper -- */
 .sr-only {
@@ -816,7 +891,46 @@ h1:focus {
     background: #b91c1c;
 }
 
+.btn-navy {
+    background: var(--color-primary);
+    color: #ffffff;
+}
+
+.btn-navy:hover {
+    background: var(--color-primary-hover);
+}
+
 .text-danger {
+    color: var(--color-danger);
+}
+
+.icon-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.icon-badge-facility {
+    background: var(--color-warning-soft);
+    color: var(--color-warning);
+}
+
+.icon-badge-account {
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+}
+
+.icon-badge-it {
+    background: var(--color-info-soft);
+    color: var(--color-info);
+}
+
+.icon-badge-bug {
+    background: var(--color-danger-soft);
     color: var(--color-danger);
 }
 

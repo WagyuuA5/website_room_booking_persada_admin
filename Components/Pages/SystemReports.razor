@@ -23,7 +23,7 @@
     @* -- Tab Navigation -- *@
     <div class="sr-tab-nav">
         <button type="button" class="sr-tab-link @(activeTab == "booking" ? "active" : "")" @onclick='() => SetTab("booking")'>
-            Booking Ruangan
+            Pemesanan Ruangan
         </button>
         <button type="button" class="sr-tab-link @(activeTab == "facility" ? "active" : "")" @onclick='() => SetTab("facility")'>
             Permintaan Fasilitas
@@ -38,7 +38,7 @@
             Laporan Bug
         </button>
         <button type="button" class="sr-tab-link @(activeTab == "all" ? "active" : "")" @onclick='() => SetTab("all")'>
-            All
+            Semua
         </button>
     </div>
 

@@ -13,7 +13,7 @@
     <div class="action-row">
         <div class="rs-header-summary">
             <span class="rs-sum-dot dot-active"><span class="status-dot bg-success"></span> Aktif (@GetCount("active"))</span>
-            <span class="rs-sum-dot dot-maint"><span class="status-dot bg-warning"></span> Maintenance (@GetCount("maintenance"))</span>
+            <span class="rs-sum-dot dot-maint"><span class="status-dot bg-warning"></span> Dalam Perawatan (@GetCount("maintenance"))</span>
             <span class="rs-sum-dot dot-inactive"><span class="status-dot bg-muted"></span> Tidak Aktif (@GetCount("inactive"))</span>
         </div>
     </div>
@@ -64,8 +64,8 @@
                         @if (room.Status == "maintenance")
                         {
                             <div class="rs-maint-overlay">
-                                <span class="rs-maint-icon"><Icon Name="wrench" Size="24" CssClass="text-white" /></span>
-                                <span class="rs-maint-timer">Maintenance (@FormatTime(room.RemainingSeconds))</span>
+                                <span class="rs-maint-icon"><Icon Name="tool" Size="24" CssClass="text-white" /></span>
+                                <span class="rs-maint-timer">Perawatan (@FormatTime(room.RemainingSeconds))</span>
                             </div>
 
                             @if (room.QueueCount > 0)
@@ -291,21 +291,21 @@
             new()
             {
                 Id = 1,
-                Name = "Gamma Room",
-                Location = "Lantai 3, VIP Wing",
+                Name = "Ruang Gamma",
+                Location = "Lantai 3, Sayap VIP",
                 Capacity = 20,
                 Status = "maintenance",
                 RemainingSeconds = 45 * 60,
                 SelectedDurationMinutes = 30,
                 QueueCount = 0,
-                Amenities = new() { "Dual Projector", "Smart Board" },
+                Amenities = new() { "Dual Proyektor", "Smart Board" },
                 PhotoUrl = "images/room3.jpg"
             },
             new()
             {
                 Id = 2,
-                Name = "Delta Room",
-                Location = "Lantai 1, Wing Timur",
+                Name = "Ruang Delta",
+                Location = "Lantai 1, Sayap Timur",
                 Capacity = 6,
                 Status = "active",
                 Amenities = new() { "Webcam" },
@@ -314,8 +314,8 @@
             new()
             {
                 Id = 3,
-                Name = "Ghost Room (Placeholder)",
-                Location = "Lantai 3, VIP Wing",
+                Name = "Ruang Cadangan (Placeholder)",
+                Location = "Lantai 3, Sayap VIP",
                 Capacity = 0,
                 Status = "inactive",
                 Amenities = new(),
@@ -324,8 +324,8 @@
             new()
             {
                 Id = 4,
-                Name = "Dry Room",
-                Location = "Lantai 1, Wing Timur",
+                Name = "Ruang Diskusi C",
+                Location = "Lantai 1, Sayap Timur",
                 Capacity = 6,
                 Status = "active",
                 Amenities = new() { "Webcam", "Soundproof" },
@@ -334,48 +334,48 @@
             new()
             {
                 Id = 5,
-                Name = "Hut Room",
-                Location = "Lantai 1, Wing Timur",
+                Name = "Ruang Epsilon",
+                Location = "Lantai 1, Sayap Timur",
                 Capacity = 6,
                 Status = "active",
-                Amenities = new() { "Projector 4K", "Webcam", "AC Central" },
+                Amenities = new() { "Proyektor 4K", "Webcam", "AC Central" },
                 PhotoUrl = "images/room5.jpg"
             },
             new()
             {
                 Id = 6,
-                Name = "Beta Room",
-                Location = "Lantai 2, Wing B",
+                Name = "Ruang Beta",
+                Location = "Lantai 2, Sayap B",
                 Capacity = 20,
                 Status = "maintenance",
                 RemainingSeconds = 45 * 60,
                 SelectedDurationMinutes = 30,
                 QueueCount = 5,
-                Amenities = new() { "TV 65\"", "AC Split" },
+                Amenities = new() { "TV 65 Inci", "AC Split" },
                 PhotoUrl = "images/room2.jpg"
             },
             new()
             {
                 Id = 7,
-                Name = "Angsa Room",
-                Location = "Lantai 1, Wing Timur",
+                Name = "Ruang Dirantara",
+                Location = "Lantai 1, Sayap Timur",
                 Capacity = 6,
                 Status = "active",
                 JustFinished = true,
-                Amenities = new() { "Projector 4K", "Webcam", "AC Central", "Video Conf" },
+                Amenities = new() { "Proyektor 4K", "Webcam", "AC Central", "Konferensi Video" },
                 PhotoUrl = "images/room4.jpg"
             },
             new()
             {
                 Id = 8,
-                Name = "Alpha Room",
-                Location = "Lantai 3, VIP Wing",
+                Name = "Ruang Alpha",
+                Location = "Lantai 3, Sayap VIP",
                 Capacity = 20,
                 Status = "maintenance",
                 RemainingSeconds = 45 * 60,
                 SelectedDurationMinutes = 30,
                 QueueCount = 2,
-                Amenities = new() { "Dual Screen", "Polycom" },
+                Amenities = new() { "Dual Screen", "Konferensi Video" },
                 PhotoUrl = "images/room1.jpg"
             }
         };

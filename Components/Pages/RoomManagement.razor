@@ -22,7 +22,7 @@
 
     @* -- Room Cards Grid -- *@
     <div class="rm-cards-grid">
-        @foreach (var room in rooms)
+        @foreach (var room in PagedRooms)
         {
             <div class="rm-card" @onclick="() => OpenDetailModal(room)">
                 @* 16:9 Photo Container *@
@@ -42,7 +42,7 @@
                     <span class="rm-cap-badge"><Icon Name="users" Size="14" /> @room.Capacity Orang</span>
                     @if (room.IsMaintenance)
                     {
-                        <span class="rm-maint-badge"><Icon Name="alert-triangle" Size="14" /> Maintenance</span>
+                        <span class="rm-maint-badge"><Icon Name="tool" Size="14" /> Dalam Perawatan</span>
                     }
                 </div>
 
@@ -76,6 +76,8 @@
             </div>
         }
     </div>
+
+    <Pagination CurrentPage="@currentPage" TotalItems="@FilteredRooms.Count()" PageSize="@pageSize" OnPageChanged="HandlePageChanged" />
 </div>
 
 @* -- Modal Detail / Edit Ruangan (Split 2-Column) -- *@
@@ -86,7 +88,7 @@
             @if (isEditMode)
             {
                 <div class="rm-modal-title-group">
-                    <h3 class="rm-modal-title">Edit Detail Ruangan</h3>
+                    <h3 class="rm-modal-title">Ubah Detail Ruangan</h3>
                     <p class="rm-modal-subtitle">Perbarui konfigurasi ruang kerja ini.</p>
                 </div>
             }
@@ -107,7 +109,14 @@
                             <span>Foto tidak tersedia</span>
                         </div>
                     }
-                    <span class="rm-badge-available"><Icon Name="check" Size="14" /> Tersedia Sekarang</span>
+                    @if (selectedRoom.IsMaintenance)
+                    {
+                        <span class="rm-badge-maint"><Icon Name="tool" Size="14" /> Dalam Perawatan</span>
+                    }
+                    else
+                    {
+                        <span class="rm-badge-available"><Icon Name="check" Size="14" /> Tersedia Sekarang</span>
+                    }
                 </div>
 
                 @* Right Column: Detail View or Edit Form *@
@@ -170,7 +179,7 @@
 
                             <div class="rm-field">
                                 <label class="rm-label">DESKRIPSI RUANGAN</label>
-                                <textarea class="rm-textarea" rows="3" @bind="editForm.Description"></textarea>
+                                <textarea class="rm-textarea" rows="4" @bind="editForm.Description"></textarea>
                             </div>
 
                             <div class="rm-field">
@@ -189,10 +198,10 @@
         <FooterContent>
             @if (!isEditMode)
             {
-                    <button type="button" class="btn-primary-pill" style="background:#0B1E39; color:#fff;" @onclick="() => isEditMode = true">
-                        <Icon Name="pencil" Size="14" /> Edit Detail Ruangan
-                    </button>
-                <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Batal</button>
+                <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Tutup</button>
+                <button type="button" class="btn-primary-pill btn-navy" @onclick="() => isEditMode = true">
+                    <Icon Name="edit" Size="14" /> Ubah Detail Ruangan
+                </button>
             }
             else
             {
@@ -288,7 +297,7 @@
         </ChildContent>
         <FooterContent>
             <button type="button" class="btn-outline-pill" @onclick="() => showDeleteModal = false">Batal</button>
-            <button type="button" class="btn-primary-pill" style="background:#DC2626; color:#fff;" @onclick="ExecuteDelete">Hapus</button>
+            <button type="button" class="btn-primary-pill btn-danger" @onclick="ExecuteDelete">Hapus</button>
         </FooterContent>
     </AppModal>
 }
@@ -325,6 +334,30 @@
         "AC Central", "Whiteboard Glass", "Sound System", "Dual Projector", "Smart Board", "TV 4K"
     };
 
+    private int currentPage = 1;
+    private int pageSize = 6;
+
+    private IEnumerable<RoomMaster> FilteredRooms
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery)) return rooms;
+            var q = searchQuery.ToLowerInvariant();
+            return rooms.Where(r => r.Name.ToLowerInvariant().Contains(q) ||
+                                    r.Location.ToLowerInvariant().Contains(q) ||
+                                    r.Description.ToLowerInvariant().Contains(q));
+        }
+    }
+
+    private IEnumerable<RoomMaster> PagedRooms =>
+        FilteredRooms.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+    private void HandlePageChanged(int page)
+    {
+        currentPage = page;
+        StateHasChanged();
+    }
+
     protected override void OnInitialized()
     {
         InitRooms();
@@ -337,10 +370,10 @@
             new()
             {
                 Id = 1,
-                Name = "Alpha Room",
-                Location = "Lantai 2, Wing A",
+                Name = "Ruang Alpha",
+                Location = "Lantai 2, Sayap A",
                 Capacity = 12,
-                Amenities = new List<string> { "Projector 4K", "AC Central", "Whiteboard Glass", "Video Conf" },
+                Amenities = new List<string> { "Proyektor 4K", "AC Central", "Papan Tulis Kaca", "Konferensi Video" },
                 Description = "Ruang meeting eksekutif dirancang untuk presentasi penting dan rapat koordinasi strategis.",
                 PhotoUrl = "images/room1.jpg",
                 IsMaintenance = false
@@ -348,10 +381,10 @@
             new()
             {
                 Id = 2,
-                Name = "Beta Room",
-                Location = "Lantai 2, Wing B",
+                Name = "Ruang Beta",
+                Location = "Lantai 2, Sayap B",
                 Capacity = 8,
-                Amenities = new List<string> { "TV 65\"", "AC Split", "Whiteboard" },
+                Amenities = new List<string> { "TV 65 Inci", "AC Split", "Papan Tulis" },
                 Description = "Ruang rapat tim semi-formal dengan pencahayaan alami dan fasilitas meeting modern.",
                 PhotoUrl = "images/room2.jpg",
                 IsMaintenance = false
@@ -359,10 +392,10 @@
             new()
             {
                 Id = 3,
-                Name = "Gamma Room",
-                Location = "Lantai 3, VIP Wing",
+                Name = "Ruang Gamma",
+                Location = "Lantai 3, Sayap VIP",
                 Capacity = 20,
-                Amenities = new List<string> { "Dual Projector", "Smart Board", "Sound System" },
+                Amenities = new List<string> { "Dual Proyektor", "Smart Board", "Sound System" },
                 Description = "Boardroom kapasitas besar dilengkapi konferensi audio video berstandar enterprise.",
                 PhotoUrl = "images/room3.jpg",
                 IsMaintenance = true
@@ -370,10 +403,10 @@
             new()
             {
                 Id = 4,
-                Name = "Delta Room",
-                Location = "Lantai 3, Wing A",
+                Name = "Ruang Delta",
+                Location = "Lantai 3, Sayap A",
                 Capacity = 15,
-                Amenities = new List<string> { "TV 4K", "Glass Wall", "Polycom" },
+                Amenities = new List<string> { "TV 4K", "Dinding Kaca", "Konferensi Video" },
                 Description = "Ruang kolaborasi dinamis untuk lokakarya, sesi brainstorming, dan diskusi antar divisi.",
                 PhotoUrl = "images/room4.jpg",
                 IsMaintenance = false
@@ -381,10 +414,10 @@
             new()
             {
                 Id = 5,
-                Name = "Epsilon Room",
-                Location = "Lantai 4, HR Wing",
+                Name = "Ruang Epsilon",
+                Location = "Lantai 4, Sayap SDM",
                 Capacity = 4,
-                Amenities = new List<string> { "Monitor 32\"", "AC Split" },
+                Amenities = new List<string> { "Monitor 32 Inci", "AC Split" },
                 Description = "Ruang pertemuan privat ideal untuk sesi wawancara, konsultasi, dan evaluasi 1-on-1.",
                 PhotoUrl = "images/room5.jpg",
                 IsMaintenance = false

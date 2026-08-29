@@ -24,7 +24,6 @@
                 <div class="island-popup-card actor-island">
                     <div class="island-header">
                         <span class="island-title">Filter berdasarkan Aktor</span>
-                        <button type="button" class="island-close" @onclick='() => ToggleIsland("")'><Icon Name="x" Size="16" /></button>
                     </div>
                     <div class="island-search">
                         <input type="text" placeholder="Cari aktor..." class="island-input" @bind="actorSearchQuery" @bind:event="oninput" />
@@ -62,25 +61,24 @@
                 <div class="island-popup-card action-island">
                     <div class="island-header">
                         <span class="island-title">Filter berdasarkan Jenis Aksi</span>
-                        <button type="button" class="island-close" @onclick='() => ToggleIsland("")'><Icon Name="x" Size="16" /></button>
                     </div>
                     <div class="island-categories-list scroll-area">
-                        @* Group: Booking *@
+                        @* Group: Pemesanan *@
                         <div class="action-group">
                             <div class="action-group-header" @onclick="() => isBookingGroupOpen = !isBookingGroupOpen">
-                                <span>@if (isBookingGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Booking</span>
+                                <span>@if (isBookingGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Pemesanan</span>
                             </div>
                             @if (isBookingGroupOpen)
                             {
                                 <div class="action-group-items">
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Setujui Booking")" @onchange='e => ToggleAction("Setujui Booking", (bool)(e.Value ?? false))' /> Setujui Booking</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Tolak Booking")" @onchange='e => ToggleAction("Tolak Booking", (bool)(e.Value ?? false))' /> Tolak Booking</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Batalkan Booking")" @onchange='e => ToggleAction("Batalkan Booking", (bool)(e.Value ?? false))' /> Batalkan Booking</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Setujui Pemesanan")" @onchange='e => ToggleAction("Setujui Pemesanan", (bool)(e.Value ?? false))' /> Setujui Pemesanan</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Tolak Pemesanan")" @onchange='e => ToggleAction("Tolak Pemesanan", (bool)(e.Value ?? false))' /> Tolak Pemesanan</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Batalkan Pemesanan")" @onchange='e => ToggleAction("Batalkan Pemesanan", (bool)(e.Value ?? false))' /> Batalkan Pemesanan</label>
                                 </div>
                             }
                         </div>
 
-                        @* Group: Room *@
+                        @* Group: Ruangan *@
                         <div class="action-group">
                             <div class="action-group-header" @onclick="() => isRoomGroupOpen = !isRoomGroupOpen">
                                 <span>@if (isRoomGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Ruangan</span>
@@ -89,29 +87,29 @@
                             {
                                 <div class="action-group-items">
                                     <label><input type="checkbox" checked="@selectedActions.Contains("Tambah Ruangan")" @onchange='e => ToggleAction("Tambah Ruangan", (bool)(e.Value ?? false))' /> Tambah Ruangan</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Edit Ruangan")" @onchange='e => ToggleAction("Edit Ruangan", (bool)(e.Value ?? false))' /> Edit Ruangan</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Atur Maintenance")" @onchange='e => ToggleAction("Atur Maintenance", (bool)(e.Value ?? false))' /> Atur Maintenance</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Ubah Ruangan")" @onchange='e => ToggleAction("Ubah Ruangan", (bool)(e.Value ?? false))' /> Ubah Ruangan</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Atur Perawatan")" @onchange='e => ToggleAction("Atur Perawatan", (bool)(e.Value ?? false))' /> Atur Perawatan</label>
                                 </div>
                             }
                         </div>
 
-                        @* Group: User *@
+                        @* Group: Pengguna *@
                         <div class="action-group">
                             <div class="action-group-header" @onclick="() => isUserGroupOpen = !isUserGroupOpen">
-                                <span>@if (isUserGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } User</span>
+                                <span>@if (isUserGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Pengguna</span>
                             </div>
                             @if (isUserGroupOpen)
                             {
                                 <div class="action-group-items">
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Tambah User")" @onchange='e => ToggleAction("Tambah User", (bool)(e.Value ?? false))' /> Tambah User</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Edit User")" @onchange='e => ToggleAction("Edit User", (bool)(e.Value ?? false))' /> Edit User</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Nonaktifkan User")" @onchange='e => ToggleAction("Nonaktifkan User", (bool)(e.Value ?? false))' /> Nonaktifkan User</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Reset Password")" @onchange='e => ToggleAction("Reset Password", (bool)(e.Value ?? false))' /> Reset Password</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Tambah Pengguna")" @onchange='e => ToggleAction("Tambah Pengguna", (bool)(e.Value ?? false))' /> Tambah Pengguna</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Ubah Pengguna")" @onchange='e => ToggleAction("Ubah Pengguna", (bool)(e.Value ?? false))' /> Ubah Pengguna</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Nonaktifkan Pengguna")" @onchange='e => ToggleAction("Nonaktifkan Pengguna", (bool)(e.Value ?? false))' /> Nonaktifkan Pengguna</label>
+                                    <label><input type="checkbox" checked="@selectedActions.Contains("Reset Kata Sandi")" @onchange='e => ToggleAction("Reset Kata Sandi", (bool)(e.Value ?? false))' /> Reset Kata Sandi</label>
                                 </div>
                             }
                         </div>
 
-                        @* Group: System *@
+                        @* Group: Sistem *@
                         <div class="action-group">
                             <div class="action-group-header" @onclick="() => isSystemGroupOpen = !isSystemGroupOpen">
                                 <span>@if (isSystemGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Sistem</span>

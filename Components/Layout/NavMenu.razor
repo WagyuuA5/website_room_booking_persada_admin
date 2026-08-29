@@ -1,4 +1,4 @@
-﻿@inject NavigationManager Navigation
+@inject NavigationManager Navigation
 @using booking_room_admin.Components.Shared
 
 <div class="sidebar-header">
@@ -22,11 +22,11 @@
             </NavLink>
         </div>
         <div class="nav-item">
-            <NavLink class="nav-link" href="booking-management" Match="NavLinkMatch.All" title="Manajemen Booking">
+            <NavLink class="nav-link" href="booking-management" Match="NavLinkMatch.All" title="Manajemen Pemesanan">
                 <Icon Name="calendar" Size="18" CssClass="nav-icon" />
                 @if (!IsCollapsed)
                 {
-                    <span>Manajemen Booking</span>
+                    <span>Manajemen Pemesanan</span>
                 }
             </NavLink>
         </div>
@@ -57,11 +57,11 @@
 
     <nav class="nav flex-column">
         <div class="nav-item">
-            <NavLink class="nav-link" href="users" Match="NavLinkMatch.All" title="Manajemen User">
+            <NavLink class="nav-link" href="users" Match="NavLinkMatch.All" title="Manajemen Pengguna">
                 <Icon Name="users" Size="18" CssClass="nav-icon" />
                 @if (!IsCollapsed)
                 {
-                    <span>Manajemen User</span>
+                    <span>Manajemen Pengguna</span>
                 }
             </NavLink>
         </div>

@@ -51,7 +51,7 @@
         <div class="summary-card clickable" @onclick='() => OpenRequestModal("facility")' title="Lihat daftar permintaan fasilitas">
             <div class="summary-card-header">
                 <div class="summary-icon-title">
-                    <div class="icon-badge" style="background:#FCE7F3;color:#BE185D;">
+                    <div class="icon-badge icon-badge-facility">
                         <Icon Name="coffee" Size="18" />
                     </div>
                     <span>Permintaan Fasilitas</span>
@@ -70,7 +70,7 @@
         <div class="summary-card clickable" @onclick='() => OpenRequestModal("account")' title="Lihat daftar permohonan penghapusan akun">
             <div class="summary-card-header">
                 <div class="summary-icon-title">
-                    <div class="icon-badge" style="background:#FEF3C7;color:#D97706;">
+                    <div class="icon-badge icon-badge-account">
                         <Icon Name="user-x" Size="18" />
                     </div>
                     <span>Penghapusan Akun</span>
@@ -89,7 +89,7 @@
         <div class="summary-card clickable" @onclick='() => OpenRequestModal("it")' title="Lihat daftar tiket IT support">
             <div class="summary-card-header">
                 <div class="summary-icon-title">
-                    <div class="icon-badge" style="background:#DBEAFE;color:#1D4ED8;">
+                    <div class="icon-badge icon-badge-it">
                         <Icon Name="wrench" Size="18" />
                     </div>
                     <span>Tiket IT Support</span>
@@ -108,7 +108,7 @@
         <div class="summary-card clickable" @onclick='() => OpenRequestModal("bug")' title="Lihat daftar laporan bug">
             <div class="summary-card-header">
                 <div class="summary-icon-title">
-                    <div class="icon-badge" style="background:#FEE2E2;color:#B91C1C;">
+                    <div class="icon-badge icon-badge-bug">
                         <Icon Name="bug" Size="18" />
                     </div>
                     <span>Laporan Bug</span>
@@ -178,7 +178,7 @@
                 </div>
                 <div class="table-header-actions">
                     <a href="/facility-requests" class="table-link">
-                        <span>Lihat Semua di Requests Hub</span>
+                        <span>Lihat Semua</span>
                         <Icon Name="chevron-right" Size="14" />
                     </a>
                 </div>
@@ -215,11 +215,11 @@
             </div>
         </div>
 
-        @* Tabel Riwayat Booking *@
+        @* Tabel Riwayat Pemesanan *@
         <div class="table-card">
             <div class="table-header">
                 <div>
-                    <h3 class="table-title">Riwayat Booking</h3>
+                    <h3 class="table-title">Riwayat Pemesanan</h3>
                     <span class="table-subtitle">Aktivitas pemesanan ruangan terbaru</span>
                 </div>
                 <div class="table-header-actions">
@@ -292,7 +292,7 @@
             }
         </div>
     </ChildContent>
-    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Buka Requests Hub</a></FooterContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Lihat Semua Permintaan</a></FooterContent>
 </AppModal>
 
 @* 2. Modal List Penghapusan Akun *@
@@ -322,7 +322,7 @@
             }
         </div>
     </ChildContent>
-    <FooterContent><a class="btn-primary-pill btn-yellow" href="/users">Kelola User</a></FooterContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/users">Kelola Pengguna</a></FooterContent>
 </AppModal>
 
 @* 3. Modal List Tiket IT Support *@
@@ -353,7 +353,7 @@
             }
         </div>
     </ChildContent>
-    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Buka Requests Hub</a></FooterContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Lihat Semua Permintaan</a></FooterContent>
 </AppModal>
 
 @* 4. Modal List Laporan Bug *@
@@ -384,7 +384,7 @@
             }
         </div>
     </ChildContent>
-    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Buka Requests Hub</a></FooterContent>
+    <FooterContent><a class="btn-primary-pill btn-yellow" href="/facility-requests">Lihat Semua Permintaan</a></FooterContent>
 </AppModal>
 
 @* ==========================================
@@ -854,7 +854,7 @@
                 Initials = "AS",
                 AvatarColor = "#7C3AED",
                 Department = "IT Dept",
-                Summary = "Request peralatan AV & Sound workshop internal",
+                Summary = "Permintaan peralatan AV & Sound workshop internal",
                 Status = "baru",
                 FacilityData = facilityRequests[1]
             }

@@ -5,7 +5,7 @@
 @using booking_room_admin.Components.Services
 @inject ToastService Toast
 
-<TopBar Title="Manajemen Booking" Subtitle="Kelola seluruh pemesanan ruangan perusahaan." ShowGlobalSearch="false" ShowDateFilter="false" />
+<TopBar Title="Manajemen Pemesanan" Subtitle="Kelola seluruh pemesanan ruangan perusahaan." ShowGlobalSearch="false" ShowDateFilter="false" />
 
 <div class="booking-management-page">
     @* -- Baris Aksi: search lokal + filter tanggal + CTA -- *@
@@ -20,7 +20,7 @@
         </button>
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => showManualBooking = true">
             <Icon Name="plus" Size="14" />
-            <span>Buat Booking Manual</span>
+            <span>+ Buat Pemesanan Manual</span>
         </button>
     </div>
 
@@ -54,11 +54,11 @@
     <div class="bm-cards-container">
         @if (!GroupedBookings.Any())
         {
-            <EmptyState Title="Tidak Ada Booking Ditemukan" Description="Tidak ada jadwal booking yang cocok dengan filter dan kata kunci pencarian Anda." ActionLabel="Reset Filter" OnAction="ResetFilters" />
+            <EmptyState Title="Tidak Ada Pemesanan Ditemukan" Description="Tidak ada jadwal pemesanan yang cocok dengan filter dan kata kunci pencarian Anda." ActionLabel="Reset Filter" OnAction="ResetFilters" />
         }
         else
         {
-            @foreach (var group in GroupedBookings)
+            @foreach (var group in PagedGroupedBookings)
             {
                 <div class="bm-date-group">
                     <div class="bm-date-header">
@@ -114,9 +114,7 @@
                 </div>
             }
 
-            <div class="bm-list-footer">
-                <span class="bm-footer-count">Menampilkan @FilteredBookings.Count() dari @allBookings.Count booking</span>
-            </div>
+            <Pagination CurrentPage="@currentPage" TotalItems="@FilteredBookings.Count()" PageSize="@pageSize" OnPageChanged="HandlePageChanged" />
         }
     </div>
 </div>
@@ -186,7 +184,7 @@
             @if (selectedBooking.Status == "pending")
             {
                 <button type="button" class="btn-outline-pill" @onclick="() => RejectBooking(selectedBooking)">Tolak</button>
-                <button type="button" class="btn-primary-pill" style="background:#0B1E39; color:#fff;" @onclick="() => ApproveBooking(selectedBooking)">Setujui</button>
+                <button type="button" class="btn-primary-pill btn-navy" @onclick="() => ApproveBooking(selectedBooking)">Setujui</button>
             }
             else
             {
@@ -372,14 +370,30 @@
         }
     }
 
+    private int currentPage = 1;
+    private int pageSize = 4;
+
     private IEnumerable<IGrouping<DateTime, BookingExtendedItem>> GroupedBookings =>
         FilteredBookings.OrderBy(b => b.Date).ThenBy(b => b.StartTime).GroupBy(b => b.Date.Date);
 
+    private IEnumerable<IGrouping<DateTime, BookingExtendedItem>> PagedGroupedBookings =>
+        FilteredBookings.OrderBy(b => b.Date).ThenBy(b => b.StartTime)
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .GroupBy(b => b.Date.Date);
+
     private int GetCount(string status) => allBookings.Count(b => b.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
+
+    private void HandlePageChanged(int page)
+    {
+        currentPage = page;
+        StateHasChanged();
+    }
 
     private void SelectTab(string tab)
     {
         selectedTab = tab;
+        currentPage = 1;
     }
 
     private void OnDatePicked(DateTime? d)

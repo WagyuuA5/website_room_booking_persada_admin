@@ -1,10 +1,9 @@
-﻿@using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Models
 
 <div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
     <div class="popup-card delete-user-card" @onclick:stopPropagation="true">
         <div class="du-header">
             <h2 class="du-title">Hapus User Ini?</h2>
-            <button class="popup-close" @onclick="Close">&times;</button>
         </div>
 
         @if (User != null)
