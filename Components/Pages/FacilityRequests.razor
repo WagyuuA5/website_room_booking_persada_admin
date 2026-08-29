@@ -1,24 +1,23 @@
-﻿@page "/facility-requests"
+@page "/facility-requests"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
 @using booking_room_admin.Components.Services
 @inject ToastService Toast
 
-<TopBar Title="Permintaan Fasilitas" Subtitle="Kelola permintaan catering, AV, dan tata ruang yang masuk." ShowGlobalSearch="false" ShowDateFilter="false">
-    <RightSlot>
-        <button type="button" class="btn-outline-pill" @onclick="@(() => showExportModal = true)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-sm"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+<TopBar Title="Permintaan Fasilitas" Subtitle="Kelola permintaan catering, AV, dan tata ruang yang masuk." ShowGlobalSearch="false" ShowDateFilter="false" />
+
+<div class="facility-requests-page">
+    @* -- Baris Aksi: Search + Ekspor -- *@
+    <div style="display:flex; align-items:center; gap:12px; padding:12px 0; flex-wrap:wrap;">
+        <div class="fr-search-bar" style="flex:1 1 auto; min-width:200px;">
+            <Icon Name="search" Size="15" CssClass="fr-search-icon" />
+            <input type="text" class="fr-search-input" placeholder="Cari fasilitas, permintaan, atau pengguna..." @bind="searchQuery" @bind:event="oninput" />
+        </div>
+        <button type="button" class="btn-outline-pill" style="white-space:nowrap; margin-left:auto;" @onclick="@(() => showExportModal = true)">
+            <Icon Name="download" Size="14" />
             <span>Ekspor</span>
         </button>
-    </RightSlot>
-</TopBar>
-
-<div class="facility-requests-page">`r`n    
-    @* -- Top Search Bar -- *@
-    <div class="fr-search-bar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fr-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" class="fr-search-input" placeholder="Cari fasilitas, permintaan, atau pengguna..." @bind="searchQuery" @bind:event="oninput" />
     </div>
 
     @* -- Status Filter Pills & Dept Dropdown -- *@

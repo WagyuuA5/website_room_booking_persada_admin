@@ -1,4 +1,4 @@
-﻿@page "/users"
+@page "/users"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
@@ -6,22 +6,11 @@
 @inject IUserService UserService
 @inject ToastService Toast
 
-<TopBar Title="Manajemen User" Subtitle="Kelola akses, profil, dan hak pengguna sistem booking ruangan." ShowGlobalSearch="false" ShowDateFilter="false">
-    <RightSlot>
-        <button type="button" class="btn-outline-pill" @onclick="() => showImportModal = true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <span>Import CSV</span>
-        </button>
-        <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
-            <Icon Name="plus" Size="14" />
-            <span>+ Tambah User</span>
-        </button>
-    </RightSlot>
-</TopBar>
+<TopBar Title="Manajemen User" Subtitle="Kelola akses, profil, dan hak pengguna sistem booking ruangan." ShowGlobalSearch="false" ShowDateFilter="false" />
 
 <div class="user-management-page">
 
-    @* -- Search & Filter Bar -- *@
+    @* -- Baris Aksi: search + filter + ekspor + import + CTA -- *@
     <div class="um-toolbar">
         <div class="um-search-box">
             <Icon Name="search" Size="16" CssClass="um-search-icon" />
@@ -38,8 +27,16 @@
             <option value="General Affairs">General Affairs</option>
         </select>
         <button type="button" class="btn-export-um" @onclick="OpenExportModal">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <Icon Name="download" Size="14" />
             <span>Ekspor</span>
+        </button>
+        <button type="button" class="btn-outline-pill" @onclick="() => showImportModal = true">
+            <Icon Name="upload" Size="14" />
+            <span>Import CSV</span>
+        </button>
+        <button type="button" class="btn-primary-pill btn-yellow" style="white-space:nowrap;" @onclick="OpenAddModal">
+            <Icon Name="plus" Size="14" />
+            <span>Tambah User</span>
         </button>
     </div>
 

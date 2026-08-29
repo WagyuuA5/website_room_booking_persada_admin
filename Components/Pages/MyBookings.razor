@@ -1,4 +1,4 @@
-﻿@page "/my-bookings"
+@page "/my-bookings"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
@@ -6,16 +6,17 @@
 @inject ToastService Toast
 @implements IDisposable
 
-<TopBar Title="Status Booking Saya" Subtitle="Pantau status seluruh pengajuan booking ruangan yang telah Anda buat." ShowGlobalSearch="false" ShowDateFilter="false">
-    <RightSlot>
-        <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenNewBooking">
-            <Icon Name="plus" Size="14" />
-            <span>+ Buat Booking Baru</span>
-        </button>
-    </RightSlot>
-</TopBar>
+<TopBar Title="Status Booking Saya" Subtitle="Pantau status seluruh pengajuan booking ruangan yang telah Anda buat." ShowGlobalSearch="false" ShowDateFilter="false" />
 
-<div class="my-bookings-page">`r`n    
+<div class="my-bookings-page">
+    @* -- Baris Aksi: CTA -- *@
+    <div style="display:flex; align-items:center; justify-content:flex-end; padding:16px 0;">
+        <button type="button" class="btn-primary-pill btn-yellow" style="white-space:nowrap;" @onclick="OpenNewBooking">
+            <Icon Name="plus" Size="14" />
+            <span>Buat Booking Baru</span>
+        </button>
+    </div>
+
     @* -- Status Filter Pills -- *@
     <div class="mb-status-toolbar">
         <div class="mb-pills-list">

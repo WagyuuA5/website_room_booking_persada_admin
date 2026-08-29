@@ -1,4 +1,4 @@
-﻿@page "/rooms/status"
+@page "/rooms/status"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
@@ -6,20 +6,19 @@
 @inject ToastService Toast
 @implements IDisposable
 
-<TopBar Title="Status Ruangan" Subtitle="Pantau dan kelola ketersediaan serta status operasional ruangan." ShowGlobalSearch="true" ShowDateFilter="false">
-    <RightSlot>
+<TopBar Title="Status Ruangan" Subtitle="Pantau dan kelola ketersediaan serta status operasional ruangan." ShowGlobalSearch="false" ShowDateFilter="false" />
+
+<div class="room-status-page">
+    @* -- Baris Aksi: Ringkasan Status + Search Lokal -- *@
+    <div style="display:flex; align-items:center; gap:16px; padding:12px 0; flex-wrap:wrap;">
         <div class="rs-header-summary">
             <span class="rs-sum-dot dot-active"><span class="status-dot bg-success"></span> Aktif (@GetCount("active"))</span>
             <span class="rs-sum-dot dot-maint"><span class="status-dot bg-warning"></span> Maintenance (@GetCount("maintenance"))</span>
             <span class="rs-sum-dot dot-inactive"><span class="status-dot bg-muted"></span> Tidak Aktif (@GetCount("inactive"))</span>
         </div>
-    </RightSlot>
-</TopBar>
+    </div>
 
-<div class="room-status-page">
-    @* -- Eyebrow -- *@
-
-    @* -- 4-Columns Cards Grid -- *@
+    @* -- Cards Grid -- *@
     @if (isLoading)
     {
         <div class="rs-cards-grid">

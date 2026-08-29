@@ -1,27 +1,26 @@
-﻿@page "/rooms"
+@page "/rooms"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
 @using booking_room_admin.Components.Services
 @inject ToastService Toast
 
-<TopBar Title="Manajemen Ruangan" Subtitle="@($"Kelola informasi, kapasitas, dan fasilitas {rooms.Count} ruang meeting.")" ShowGlobalSearch="true" ShowDateFilter="false">
-    <RightSlot>
-        <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
-            <Icon Name="plus" Size="14" />
-            <span>+ Tambah Ruangan</span>
-        </button>
-    </RightSlot>
-</TopBar>
+<TopBar Title="Manajemen Ruangan" Subtitle="@($"Kelola informasi, kapasitas, dan fasilitas {rooms.Count} ruang meeting.")" ShowGlobalSearch="false" ShowDateFilter="false" />
 
 <div class="room-management-page">
-    @* -- Eyebrow -- *@
-    <div class="rm-eyebrow-row">
-        <span class="rm-bullet" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--color-brand-yellow,#F2B705);vertical-align:middle;margin-right:6px;"></span>
-        <span class="rm-eyebrow">MANAJEMEN RUANGAN</span>
+    @* -- Baris Aksi: search lokal + CTA -- *@
+    <div class="rm-action-row" style="display:flex; align-items:center; gap:12px; padding:16px 0; flex-wrap:wrap;">
+        <div class="bm-search-bar" style="flex:1 1 auto; min-width:200px; max-width:400px;">
+            <Icon Name="search" Size="15" CssClass="bm-search-icon" />
+            <input type="text" class="bm-search-input" placeholder="Cari ruangan..." @bind="searchQuery" @bind:event="oninput" />
+        </div>
+        <button type="button" class="btn-primary-pill btn-yellow" style="white-space:nowrap; margin-left:auto;" @onclick="OpenAddModal">
+            <Icon Name="plus" Size="14" />
+            <span>Tambah Ruangan</span>
+        </button>
     </div>
 
-    @* -- Room Cards Grid (3 Columns) -- *@
+    @* -- Room Cards Grid -- *@
     <div class="rm-cards-grid">
         @foreach (var room in rooms)
         {
@@ -308,6 +307,7 @@
         public bool ImageFailed { get; set; }
     }
 
+    private string searchQuery = "";
     private List<RoomMaster> rooms = new();
     private RoomMaster? selectedRoom;
     private RoomMaster? roomToDelete;
