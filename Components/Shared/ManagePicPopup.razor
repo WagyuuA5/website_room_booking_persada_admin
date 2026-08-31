@@ -1,0 +1,130 @@
+@namespace booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Services
+@inject ToastService Toast
+
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Kelola Tim PIC" Size="medium">
+    <ChildContent>
+        <div class="pic-manager">
+            <div class="pic-add-form">
+                <input type="text" class="pic-input" placeholder="Nama PIC baru..." @bind="newPicName" @bind:event="oninput" @onkeyup="HandleKeyUp" />
+                <button type="button" class="btn-primary-pill btn-yellow" @onclick="AddPic" disabled="@string.IsNullOrWhiteSpace(newPicName)">
+                    <Icon Name="plus" Size="14" /> Tambah
+                </button>
+            </div>
+
+            <div class="pic-list">
+                @if (PicList == null || !PicList.Any())
+                {
+                    <div class="pic-empty">Belum ada PIC terdaftar.</div>
+                }
+                else
+                {
+                    @foreach (var pic in PicList)
+                    {
+                        var activeCount = GetActiveAssignmentCount(pic);
+                        <div class="pic-item">
+                            <div style="display: flex; flex-direction: column; gap: 2px; flex: 1;">
+                                <span class="pic-name">@pic</span>
+                                @if (activeCount > 0)
+                                {
+                                    <span style="font-size: 0.75rem; color: #F59E0B;">@activeCount tugas aktif</span>
+                                }
+                            </div>
+                            <button type="button" class="btn-delete-pic" @onclick="() => TryDelete(pic)">
+                                <Icon Name="trash-2" Size="14" />
+                            </button>
+                        </div>
+                    }
+                }
+            </div>
+
+            @if (showDeleteConfirm)
+            {
+                <div class="pic-delete-warning" style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 12px; margin-top: 0.5rem;">
+                    <p style="font-size: 0.85rem; color: #DC2626; font-weight: 600; margin: 0 0 8px 0;">
+                        <Icon Name="alert-triangle" Size="14" /> PIC "@pendingDeletePic" masih memiliki @GetActiveAssignmentCount(pendingDeletePic) tugas aktif. Yakin ingin menghapus?
+                    </p>
+                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                        <button type="button" class="btn-outline-pill" style="font-size: 0.8rem; padding: 4px 12px;" @onclick="CancelDelete">Batal</button>
+                        <button type="button" class="btn-primary-pill" style="font-size: 0.8rem; padding: 4px 12px; background: #DC2626;" @onclick="ForceDelete">Hapus Paksa</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-primary-pill" @onclick="Close">Selesai</button>
+    </FooterContent>
+</AppModal>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public List<string> PicList { get; set; } = new();
+    [Parameter] public EventCallback<List<string>> PicListChanged { get; set; }
+    [Parameter] public EventCallback<string> OnPicDeleted { get; set; }
+    [Parameter] public List<string> ActiveAssignees { get; set; } = new();
+
+    private string newPicName = "";
+    private bool showDeleteConfirm = false;
+    private string pendingDeletePic = "";
+
+    private int GetActiveAssignmentCount(string pic)
+    {
+        return ActiveAssignees.Count(a => a.Equals(pic, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task AddPic()
+    {
+        if (string.IsNullOrWhiteSpace(newPicName)) return;
+        var trimmed = newPicName.Trim();
+        if (!PicList.Contains(trimmed, StringComparer.OrdinalIgnoreCase))
+        {
+            PicList.Add(trimmed);
+            await PicListChanged.InvokeAsync(PicList);
+        }
+        newPicName = "";
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await AddPic();
+    }
+
+    private void TryDelete(string pic)
+    {
+        var activeCount = GetActiveAssignmentCount(pic);
+        if (activeCount > 0)
+        {
+            pendingDeletePic = pic;
+            showDeleteConfirm = true;
+        }
+        else
+        {
+            _ = DoDelete(pic);
+        }
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirm = false;
+        pendingDeletePic = "";
+    }
+
+    private async Task ForceDelete()
+    {
+        showDeleteConfirm = false;
+        await DoDelete(pendingDeletePic);
+        pendingDeletePic = "";
+    }
+
+    private async Task DoDelete(string pic)
+    {
+        PicList.Remove(pic);
+        await PicListChanged.InvokeAsync(PicList);
+        await OnPicDeleted.InvokeAsync(pic);
+        Toast.Success($"PIC \"{pic}\" berhasil dihapus.");
+    }
+
+    private Task Close() => IsOpenChanged.InvokeAsync(false);
+}

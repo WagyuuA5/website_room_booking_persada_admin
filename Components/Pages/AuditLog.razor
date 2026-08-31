@@ -33,7 +33,7 @@
                         {
                             <label class="island-actor-item">
                                 <input type="checkbox" checked="@(selectedActor == act.Name)" @onchange="@((ChangeEventArgs e) => SelectActor(act.Name, (bool)(e.Value ?? false)))" />
-                                <div class="actor-mini-avatar" style="background: @act.AvatarBg;">@act.Initials</div>
+                                <UserAvatar Name="@act.Name" Initials="@act.Initials" BgColor="@act.AvatarBg" Size="28px" />
                                 <div class="actor-info">
                                     <strong class="actor-name">@act.Name</strong>
                                     <span class="actor-role">@act.Role</span>
@@ -171,7 +171,7 @@
                     </td>
                     <td>
                         <div class="actor-cell">
-                            <div class="actor-avatar" style="background: @log.ActorBg;">@log.ActorInitials</div>
+                            <UserAvatar Name="@log.ActorName" Initials="@log.ActorInitials" BgColor="@log.ActorBg" Size="32px" />
                             <span class="actor-name">@log.ActorName</span>
                         </div>
                     </td>
@@ -194,9 +194,7 @@
             <div class="audit-detail-wrapper" style="display: flex; flex-direction: column; gap: 16px;">
                 @* Actor Header Box *@
                 <div style="display: flex; align-items: center; gap: 12px; background: #F9FAFB; padding: 14px 16px; border-radius: 12px; border: 1px solid #E5E7EB;">
-                    <div class="actor-avatar" style="width: 44px; height: 44px; font-size: 1rem; background: @selectedLogForDetail.ActorBg;">
-                        @selectedLogForDetail.ActorInitials
-                    </div>
+                    <UserAvatar Name="@selectedLogForDetail.ActorName" Initials="@selectedLogForDetail.ActorInitials" BgColor="@selectedLogForDetail.ActorBg" Size="44px" />
                     <div style="display: flex; flex-direction: column; flex: 1;">
                         <strong style="font-size: 0.95rem; color: #0B1E39;">@selectedLogForDetail.ActorName</strong>
                         <span style="font-size: 0.8rem; color: #6E6E73;">Admin Sistem &middot; Hak Akses Penuh</span>

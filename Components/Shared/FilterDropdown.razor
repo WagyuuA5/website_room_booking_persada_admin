@@ -1,0 +1,31 @@
+@namespace booking_room_admin.Components.Shared
+
+<div class="filter-dropdown-wrapper">
+    <select class="filter-dropdown-select" value="@Value" @onchange="HandleChange">
+        <option value="">@DefaultLabel</option>
+        @foreach (var opt in Options)
+        {
+            <option value="@opt">@opt</option>
+        }
+    </select>
+    <div class="filter-dropdown-icon">
+        <Icon Name="chevron-down" Size="16" />
+    </div>
+    @if (!string.IsNullOrEmpty(Value) && Value != "All" && Value != "all")
+    {
+        <div class="filter-dropdown-indicator"></div>
+    }
+</div>
+
+@code {
+    [Parameter] public string DefaultLabel { get; set; } = "Semua";
+    [Parameter] public IEnumerable<string> Options { get; set; } = Array.Empty<string>();
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString() ?? "";
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

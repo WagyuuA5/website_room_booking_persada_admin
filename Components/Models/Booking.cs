@@ -15,5 +15,8 @@ public class Booking
     public int ParticipantsCount { get; set; }
     public string Status { get; set; } = string.Empty;
     public bool IsRecurring { get; set; }
+    public string? RecurringGroupId { get; set; }
+    public int RecurringSequence { get; set; } = 1;
+    public int RecurringTotal { get; set; } = 1;
     public string AccentColor { get; set; } = "warning";
 }

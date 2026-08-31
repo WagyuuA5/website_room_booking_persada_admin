@@ -77,6 +77,39 @@
                 </div>
             </div>
 
+            @* Recurring Booking (CASE 6) *@
+            <div class="mb-field mb-toggle-row" style="margin-top: 0.5rem;">
+                <label class="mb-toggle-switch">
+                    <input type="checkbox" @bind="form.IsRecurring" />
+                    <span class="mb-slider"></span>
+                </label>
+                <span class="mb-toggle-label" style="font-weight: 600; color: #1D1D1F;">Ulangi Pemesanan (Recurring Booking)</span>
+            </div>
+
+            @if (form.IsRecurring)
+            {
+                <div class="mb-recurring-box" style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="mb-field">
+                        <label class="mb-label">Pola Pengulangan</label>
+                        <select class="mb-select" @bind="form.RecurringType">
+                            <option value="Harian">Harian (Setiap Hari)</option>
+                            <option value="Mingguan">Mingguan (Hari yang Sama)</option>
+                            <option value="Bulanan">Bulanan (Tanggal yang Sama)</option>
+                        </select>
+                    </div>
+                    <div class="mb-field">
+                        <label class="mb-label">Hingga Kapan (Jumlah Pengulangan)</label>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="number" class="mb-input" style="width: 80px;" min="1" max="20" @bind="form.RepeatCount" />
+                            <span style="font-size: 0.85rem; color: #6E6E73;">kali ke depan</span>
+                        </div>
+                    </div>
+                    <div class="mb-recurring-preview" style="grid-column: 1 / -1; font-size: 0.8rem; color: #059669; background: #ECFDF5; padding: 8px 12px; border-radius: 6px; border-left: 3px solid #10B981;">
+                        <Icon Name="refresh-cw" Size="14" /> Pemesanan ini akan dibuat sebanyak <strong>@(form.RepeatCount + 1) kali</strong> (termasuk tanggal awal) secara <strong>@form.RecurringType.ToLower()</strong>.
+                    </div>
+                </div>
+            }
+
             @* 4. Undang Peserta & Capacity Bar *@
             <div class="mb-field">
                 <div class="mb-attendee-header-row">
@@ -184,6 +217,7 @@
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
     [Parameter] public EventCallback<Booking> OnBookingCreated { get; set; }
+    [Parameter] public EventCallback<List<Booking>> OnBookingsCreated { get; set; }
 
     public class ManualBookingForm
     {
@@ -193,6 +227,9 @@
         public DateTime? Date { get; set; }
         public TimeOnly? StartTime { get; set; }
         public TimeOnly? EndTime { get; set; }
+        public bool IsRecurring { get; set; }
+        public string RecurringType { get; set; } = "Mingguan";
+        public int RepeatCount { get; set; } = 3;
         public List<AttendeeSuggestion> Attendees { get; set; } = new();
         public bool InviteExternal { get; set; }
         public string ExternalGuests { get; set; } = "";
@@ -310,24 +347,67 @@
 
         await Task.Delay(300);
 
-        var booking = new Booking
-        {
-            Id = new Random().Next(1000, 9999),
-            Title = string.IsNullOrWhiteSpace(form.Notes) ? $"Pertemuan {form.Division}" : form.Notes.Substring(0, Math.Min(35, form.Notes.Length)),
-            Room = selectedRoom.Name,
-            Date = form.Date.Value,
-            StartTime = form.StartTime.Value.ToString("HH:mm"),
-            EndTime = form.EndTime.Value.ToString("HH:mm"),
-            Duration = $"{Math.Round((form.EndTime.Value - form.StartTime.Value).TotalHours, 1)} Jam",
-            RequesterName = form.FullName,
-            RequesterDivision = form.Division,
-            RequesterInitials = form.FullName.Length >= 2 ? form.FullName.Substring(0, 2).ToUpper() : "WA",
-            ParticipantsCount = Math.Max(1, form.Attendees.Count),
-            Status = "approved"
-        };
+        var bookingsToCreate = new List<Booking>();
+        var groupId = form.IsRecurring ? Guid.NewGuid().ToString("N")[..8] : null;
+        int totalSessions = form.IsRecurring ? Math.Max(1, form.RepeatCount + 1) : 1;
 
-        Toast.Success("Booking berhasil dibuat.");
-        await OnBookingCreated.InvokeAsync(booking);
+        for (int i = 0; i < totalSessions; i++)
+        {
+            var bookingDate = form.Date.Value;
+            if (form.IsRecurring)
+            {
+                bookingDate = form.RecurringType switch
+                {
+                    "Harian" => form.Date.Value.AddDays(i),
+                    "Mingguan" => form.Date.Value.AddDays(i * 7),
+                    "Bulanan" => form.Date.Value.AddMonths(i),
+                    _ => form.Date.Value.AddDays(i * 7)
+                };
+            }
+
+            var booking = new Booking
+            {
+                Id = new Random().Next(1000, 9999) + i,
+                Title = string.IsNullOrWhiteSpace(form.Notes) ? $"Pertemuan {form.Division}" : form.Notes.Substring(0, Math.Min(35, form.Notes.Length)),
+                Room = selectedRoom.Name,
+                Date = bookingDate,
+                StartTime = form.StartTime.Value.ToString("HH:mm"),
+                EndTime = form.EndTime.Value.ToString("HH:mm"),
+                Duration = $"{Math.Round((form.EndTime.Value - form.StartTime.Value).TotalHours, 1)} Jam",
+                RequesterName = form.FullName,
+                RequesterDivision = form.Division,
+                RequesterInitials = form.FullName.Length >= 2 ? form.FullName.Substring(0, 2).ToUpper() : "WA",
+                ParticipantsCount = Math.Max(1, form.Attendees.Count),
+                Status = "approved",
+                IsRecurring = form.IsRecurring,
+                RecurringGroupId = groupId,
+                RecurringSequence = i + 1,
+                RecurringTotal = totalSessions
+            };
+            bookingsToCreate.Add(booking);
+        }
+
+        if (form.IsRecurring)
+        {
+            Toast.Success($"Berhasil membuat {totalSessions} sesi pemesanan berulang.");
+        }
+        else
+        {
+            Toast.Success("Booking berhasil dibuat.");
+        }
+
+        if (OnBookingsCreated.HasDelegate)
+        {
+            await OnBookingsCreated.InvokeAsync(bookingsToCreate);
+        }
+        else if (OnBookingCreated.HasDelegate)
+        {
+            foreach (var b in bookingsToCreate)
+            {
+                await OnBookingCreated.InvokeAsync(b);
+            }
+        }
+
         Close();
     }
 

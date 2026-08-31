@@ -47,14 +47,10 @@
         </div>
 
         <div class="fr-dept-select-wrap">
-            <select class="sr-pill-select" @bind="selectedDept">
-                <option value="">Filter berdasarkan Departemen</option>
-                <option value="IT & Digital">IT & Digital</option>
-                <option value="Operasional">Operasional</option>
-                <option value="Human Resources">Human Resources</option>
-                <option value="Finance">Finance</option>
-                <option value="Marketing">Marketing</option>
-            </select>
+            <FilterDropdown 
+                DefaultLabel="Semua Divisi"
+                Options="@(new[] { "IT & Digital", "Operasional", "Human Resources", "Finance", "Marketing" })"
+                @bind-Value="selectedDept" />
         </div>
     </div>
 
@@ -87,7 +83,7 @@
                 <div class="fr-request-card @(req.IsUrgent ? "card-urgent" : "")" @onclick="() => OpenDetail(req)">
                     @* Line 1: Header (Avatar + Title + Urgency) *@
                     <div class="fr-card-header-row">
-                        <div class="fr-avatar" style="background: @req.AvatarBg;">@req.RequesterInitials</div>
+                        <UserAvatar Name="@req.RequesterName" Initials="@req.RequesterInitials" BgColor="@req.AvatarBg" Size="32px" />
                         <h4 class="fr-card-title">@req.Title</h4>
                         @if (req.IsUrgent)
                         {
@@ -154,7 +150,7 @@
             <div class="fr-modal-body-grid">
                 @* Requester Info Box *@
                 <div class="fr-requester-box">
-                    <div class="fr-req-avatar" style="background: @selectedRequest.AvatarBg;">@selectedRequest.RequesterInitials</div>
+                    <UserAvatar Name="@selectedRequest.RequesterName" Initials="@selectedRequest.RequesterInitials" BgColor="@selectedRequest.AvatarBg" Size="40px" />
                     <div class="fr-req-info">
                         <strong class="fr-req-name">@selectedRequest.RequesterName</strong>
                         <span class="fr-req-role">@selectedRequest.Department - @selectedRequest.RequesterEmail</span>
@@ -174,7 +170,12 @@
                         @foreach (var item in selectedRequest.Items)
                         {
                             <div class="fr-item-row">
-                                <div class="fr-item-icon"><Icon Name="@IconHelper.GetFacilityIcon(item.Category + " " + item.Description)" Size="18" /></div>
+                                <div class="fr-item-icon" style="display: flex; gap: 4px;">
+                                    @foreach (var iconName in IconHelper.GetRequestItemIcons(item.Category + " " + item.Description))
+                                    {
+                                        <Icon Name="@iconName" Size="18" />
+                                    }
+                                </div>
                                 <div class="fr-item-text">
                                     <strong>@item.Category</strong>
                                     <span>@item.Description</span>
@@ -199,12 +200,13 @@
                 <div class="fr-action-fields-grid">
                     <div class="fr-field">
                         <label class="fr-field-label">Tugaskan Ke (PIC)</label>
-                        <select class="fr-modal-input" @bind="selectedRequest.Assignee">
+                        <select class="fr-modal-input" @bind="selectedPicValue">
                             <option value="">Pilih Tim / PIC</option>
-                            <option value="Sarah Jenkins (General Affairs)">Sarah Jenkins (General Affairs)</option>
-                            <option value="Rian Wahyu (IT Support)">Rian Wahyu (IT Support)</option>
-                            <option value="Budi Santoso (Facility Team)">Budi Santoso (Facility Team)</option>
-                            <option value="Catering Service PIC">Catering Service PIC</option>
+                            @foreach(var pic in picList)
+                            {
+                                <option value="@pic">@pic</option>
+                            }
+                            <option value="[MANAGE]" style="font-weight: bold; color: #0B1E39;">+ Kelola Daftar PIC...</option>
                         </select>
                     </div>
                     <div class="fr-field">
@@ -240,6 +242,7 @@
 }
 
 <ExportModal IsOpen="@showExportModal" IsOpenChanged="@((bool v) => showExportModal = v)" ExportTitle="Permintaan Fasilitas" Columns="exportColumns" CurrentViewRows="FilteredRequests.Cast<object>()" AllRows="allRequests.Cast<object>()" />
+    <ManagePicPopup @bind-IsOpen="showPicManager" @bind-PicList="picList" OnPicDeleted="HandlePicDeleted" ActiveAssignees="@allRequests.Where(r => !string.IsNullOrEmpty(r.Assignee) && r.Status != "fulfilled" && r.Status != "rejected").Select(r => r.Assignee).ToList()" />
 
 @code {
     private string searchQuery = "";
@@ -248,6 +251,36 @@
     private bool showDetailModal = false;
     private bool showExportModal = false;
     private bool isLoading = false;
+    
+    private bool showPicManager = false;
+    private List<string> picList = new() { "Sarah Jenkins (General Affairs)", "Rian Wahyu (IT Support)", "Budi Santoso (Facility Team)", "Catering Service PIC" };
+
+    private string _selectedPicValue = "";
+    private string selectedPicValue
+    {
+        get => _selectedPicValue;
+        set
+        {
+            if (value == "[MANAGE]")
+            {
+                showPicManager = true;
+            }
+            else
+            {
+                _selectedPicValue = value;
+                if (selectedRequest != null) selectedRequest.Assignee = value;
+            }
+        }
+    }
+
+    private void HandlePicDeleted(string deletedPic)
+    {
+        if (_selectedPicValue == deletedPic)
+        {
+            _selectedPicValue = "";
+            if (selectedRequest != null) selectedRequest.Assignee = "";
+        }
+    }
 
     public class RequestItemDetail { public string Category { get; set; } = ""; public string Description { get; set; } = ""; }
     public class RequestActivityLog { public string Title { get; set; } = ""; public DateTime Timestamp { get; set; } }

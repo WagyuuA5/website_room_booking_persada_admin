@@ -17,13 +17,11 @@
             <Icon Name="search" Size="16" CssClass="um-search-icon" />
             <input type="text" placeholder="Cari berdasarkan nama, email, atau ID pengguna..." @bind="searchQuery" @bind:event="oninput" @onkeyup="HandleSearchKey" />
         </div>
-        <select class="um-filter-select" @bind="departmentFilter" @bind:after="LoadUsers">
-            <option value="All">Semua Divisi</option>
-            @foreach (var dept in persadaDepartments)
-            {
-                <option value="@dept">@dept</option>
-            }
-        </select>
+        <FilterDropdown 
+            DefaultLabel="Semua Divisi"
+            Options="@persadaDepartments"
+            Value="@departmentFilter"
+            ValueChanged="@((string val) => { departmentFilter = val; _ = LoadUsers(); })" />
         <button type="button" class="btn-export-um" @onclick="OpenExportModal">
             <Icon Name="download" Size="14" />
             <span>Ekspor</span>

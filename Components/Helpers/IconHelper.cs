@@ -51,6 +51,43 @@ namespace booking_room_admin.Components.Helpers
             return "package";
         }
 
+        public static string GetRequestItemIcon(string categoryAndDescription)
+        {
+            var nama = categoryAndDescription?.ToLowerInvariant().Trim() ?? "";
+
+            if (nama.Contains("katering") || nama.Contains("catering") || nama.Contains("makanan") || nama.Contains("minuman") || nama.Contains("kopi") || nama.Contains("snack")) return "coffee";
+            if (nama.Contains("kursi") || nama.Contains("sofa") || nama.Contains("tempat duduk")) return "armchair";
+            if (nama.Contains("meja") || nama.Contains("desk") || nama.Contains("table")) return "table-2";
+            if (nama.Contains("spidol") || nama.Contains("alat tulis") || nama.Contains("penghapus") || nama.Contains("flipchart") || nama.Contains("papan tulis")) return "pen-tool";
+            if (nama.Contains("kamera") || nama.Contains("video") || nama.Contains("streaming") || nama.Contains("av") || nama.Contains("obs")) return "video";
+            if (nama.Contains("pencahayaan") || nama.Contains("lighting") || nama.Contains("lampu")) return "lightbulb";
+            if (nama.Contains("sound") || nama.Contains("audio") || nama.Contains("mic") || nama.Contains("speaker")) return "speaker";
+            if (nama.Contains("proyektor") || nama.Contains("projector")) return "projector";
+            if (nama.Contains("ac") || nama.Contains("pendingin")) return "wind";
+            if (nama.Contains("perabot") || nama.Contains("furniture")) return "armchair";
+
+            return "package";
+        }
+
+        /// <summary>
+        /// Returns multiple icons for multi-category requests (e.g. "Catering &amp; Furniture" → ["coffee", "armchair"]).
+        /// Splits on "&amp;" or "/" separators and maps each part independently.
+        /// </summary>
+        public static List<string> GetRequestItemIcons(string categoryAndDescription)
+        {
+            var text = categoryAndDescription ?? "";
+            var parts = text.Split(new[] { '&', '/' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length <= 1) return new List<string> { GetRequestItemIcon(text) };
+
+            var icons = new List<string>();
+            foreach (var part in parts)
+            {
+                var icon = GetRequestItemIcon(part.Trim());
+                if (!icons.Contains(icon)) icons.Add(icon);
+            }
+            return icons;
+        }
+
         public static string GetNotificationIcon(string type)
         {
             var t = type?.ToLowerInvariant() ?? "";

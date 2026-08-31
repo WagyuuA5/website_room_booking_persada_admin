@@ -78,7 +78,15 @@
 
                                 @* Col 2: Info *@
                                 <div class="bm-col-info">
-                                    <h4 class="bm-meeting-title">@b.Title</h4>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <h4 class="bm-meeting-title">@b.Title</h4>
+                                        @if (b.IsRecurring)
+                                        {
+                                            <span class="badge-recurring-pill" style="font-size: 0.72rem; color: #0284C7; background: #E0F2FE; border-radius: 999px; padding: 2px 8px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
+                                                <Icon Name="refresh-cw" Size="11" /> Berulang (@b.RecurringSequence/@b.RecurringTotal)
+                                            </span>
+                                        }
+                                    </div>
                                     <div class="bm-meeting-meta">
                                         <span class="bm-meta-room"><Icon Name="map-pin" Size="13" /> @b.Room</span>
                                         <span class="bm-meta-participants"><Icon Name="users" Size="13" /> @b.ParticipantsCount Peserta</span>
@@ -87,7 +95,7 @@
 
                                 @* Col 3: Requester *@
                                 <div class="bm-col-requester">
-                                    <div class="bm-avatar" style="background: @b.AvatarBg;">@b.RequesterInitials</div>
+                                    <UserAvatar Name="@b.RequesterName" Initials="@b.RequesterInitials" BgColor="@b.AvatarBg" Size="36px" />
                                     <div class="bm-req-info">
                                         <strong class="bm-req-name">@b.RequesterName</strong>
                                         <span class="bm-req-dept">@b.RequesterDivision</span>
@@ -156,7 +164,7 @@
                     <div class="bm-box-row">
                         <span class="bm-box-label">PEMOHON:</span>
                         <div class="bm-box-user">
-                            <div class="bm-avatar-sm" style="background: @selectedBooking.AvatarBg;">@selectedBooking.RequesterInitials</div>
+                            <UserAvatar Name="@selectedBooking.RequesterName" Initials="@selectedBooking.RequesterInitials" BgColor="@selectedBooking.AvatarBg" Size="32px" />
                             <strong>@selectedBooking.RequesterName (@selectedBooking.RequesterDivision)</strong>
                         </div>
                     </div>
@@ -179,6 +187,16 @@
                                      PinX="@GetRoomPinX(selectedBooking.Room)"
                                      PinY="@GetRoomPinY(selectedBooking.Room)" />
 
+                @if (selectedBooking.IsRecurring)
+                {
+                    <div class="bm-recurring-notice" style="background: #F0F9FF; border: 1px solid #BAE6FD; border-left: 4px solid #0284C7; padding: 10px 14px; border-radius: 8px; margin-top: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 8px; color: #0369A1; font-size: 0.85rem; font-weight: 600;">
+                            <Icon Name="refresh-cw" Size="16" />
+                            <span>Bagian dari pemesanan berulang (Sesi @selectedBooking.RecurringSequence dari @selectedBooking.RecurringTotal)</span>
+                        </div>
+                    </div>
+                }
+
                 @if (selectedBooking.Status != "pending" && !string.IsNullOrEmpty(selectedBooking.ProcessedBy))
                 {
                     <div class="bm-processed-info">
@@ -195,13 +213,18 @@
             }
             else
             {
+                @if (selectedBooking.IsRecurring && selectedBooking.Status != "cancelled" && selectedBooking.Status != "rejected")
+                {
+                    <button type="button" class="btn-outline-pill" style="color: #DC2626; border-color: #FECACA;" @onclick="() => CancelSingleSession(selectedBooking)">Batalkan Sesi Ini Saja</button>
+                    <button type="button" class="btn-outline-pill" style="color: #B91C1C; background: #FEF2F2; border-color: #FCA5A5;" @onclick="() => CancelEntireSeries(selectedBooking)">Batalkan Seluruh Rangkaian</button>
+                }
                 <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Tutup</button>
             }
         </FooterContent>
     </AppModal>
 }
 
-<ManualBookingPopup @bind-IsOpen="showManualBooking" OnBookingCreated="HandleBookingCreated" />
+<ManualBookingPopup @bind-IsOpen="showManualBooking" OnBookingCreated="HandleBookingCreated" OnBookingsCreated="HandleBookingsCreated" />
 
 @code {
     private string searchQuery = "";
@@ -225,6 +248,10 @@
         public string AvatarBg { get; set; } = "#0B1E39";
         public int ParticipantsCount { get; set; }
         public string Status { get; set; } = "pending";
+        public bool IsRecurring { get; set; }
+        public string? RecurringGroupId { get; set; }
+        public int RecurringSequence { get; set; } = 1;
+        public int RecurringTotal { get; set; } = 1;
         public bool HasConflict { get; set; }
         public string ProcessedBy { get; set; } = "";
         public string ProcessedAt { get; set; } = "";
@@ -474,9 +501,52 @@
             RequesterInitials = b.RequesterInitials,
             ParticipantsCount = b.ParticipantsCount,
             Status = "approved",
+            IsRecurring = b.IsRecurring,
+            RecurringGroupId = b.RecurringGroupId,
+            RecurringSequence = b.RecurringSequence,
+            RecurringTotal = b.RecurringTotal,
             ProcessedBy = "Dibuat Manual oleh Admin Wahyu",
             ProcessedAt = DateTime.Now.ToString("dd MMM yyyy, HH:mm")
         });
+        StateHasChanged();
+    }
+
+    private void HandleBookingsCreated(List<Booking> bookings)
+    {
+        foreach (var b in bookings.AsEnumerable().Reverse())
+        {
+            HandleBookingCreated(b);
+        }
+    }
+
+    private void CancelSingleSession(BookingExtendedItem b)
+    {
+        b.Status = "cancelled";
+        b.ProcessedBy = "Dibatalkan oleh Admin Wahyu (Sesi Tunggal)";
+        b.ProcessedAt = DateTime.Now.ToString("dd MMM yyyy, HH:mm");
+        Toast.Success($"Sesi #{b.RecurringSequence} dari '{b.Title}' berhasil dibatalkan.");
+        showDetailModal = false;
+        StateHasChanged();
+    }
+
+    private void CancelEntireSeries(BookingExtendedItem b)
+    {
+        if (!string.IsNullOrEmpty(b.RecurringGroupId))
+        {
+            var series = allBookings.Where(x => x.RecurringGroupId == b.RecurringGroupId).ToList();
+            foreach (var item in series)
+            {
+                item.Status = "cancelled";
+                item.ProcessedBy = "Dibatalkan oleh Admin Wahyu (Seluruh Rangkaian)";
+                item.ProcessedAt = DateTime.Now.ToString("dd MMM yyyy, HH:mm");
+            }
+            Toast.Success($"Seluruh rangkaian ({series.Count} sesi) dari '{b.Title}' berhasil dibatalkan.");
+        }
+        else
+        {
+            CancelSingleSession(b);
+        }
+        showDetailModal = false;
         StateHasChanged();
     }
 

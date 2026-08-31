@@ -4,10 +4,10 @@
 @inject IRoomService RoomService
 @inject ToastService Toast
 
-<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Tambah Blokir Jadwal Ruangan" Size="medium">
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Blokir Ketersediaan Ruangan" Size="medium">
     <ChildContent>
         <div class="ab-form" style="display: flex; flex-direction: column; gap: 1rem;">
-            @* 1. Ruangan Dinamis (CASE 16) *@
+            @* 1. Pilih Ruangan *@
             <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
                 <label style="font-size: 0.82rem; font-weight: 600; color: #1D1D1F;">Pilih Ruangan <span style="color: #DC2626;">*</span></label>
                 <select class="ab-input" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #D1D5DB; border-radius: 8px; font-size: 0.85rem;" @bind="selectedRoomId">
@@ -17,6 +17,25 @@
                     }
                 </select>
             </div>
+
+            @* Room Info Summary Card *@
+            @if (currentSelectedRoom != null)
+            {
+                <div class="ab-room-summary" style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: #0B1E39; color: #fff; display: flex; align-items: center; justify-content: center;">
+                            <Icon Name="building" Size="18" />
+                        </div>
+                        <div>
+                            <strong style="color: #0B1E39; display: block;">@currentSelectedRoom.Name</strong>
+                            <span style="color: #6E6E73;">@currentSelectedRoom.Floor &middot; Kapasitas @currentSelectedRoom.Capacity Orang</span>
+                        </div>
+                    </div>
+                    <span style="color: #059669; font-weight: 600; background: #ECFDF5; padding: 2px 8px; border-radius: 999px; font-size: 0.75rem;">
+                        Tersedia
+                    </span>
+                </div>
+            }
 
             @* 2. Tanggal & Rentang Waktu *@
             <div class="ab-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -34,7 +53,40 @@
                 </div>
             </div>
 
-            @* 3. Alasan Blokir & Bantuan "Lainnya" (CASE 15) *@
+            @* 3. Ulangi Blokir Ini (Recurring Block) *@
+            <div class="ab-field" style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="chkRepeatBlock" @bind="isRecurring" style="width: 16px; height: 16px; accent-color: #0B1E39;" />
+                <label for="chkRepeatBlock" style="font-size: 0.82rem; font-weight: 600; color: #1D1D1F; cursor: pointer;">
+                    Ulangi Blokir Ini (Pola Pemblokiran Berulang)
+                </label>
+            </div>
+
+            @if (isRecurring)
+            {
+                <div class="ab-recurring-settings" style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 0.8rem; font-weight: 600; color: #1D1D1F;">Pola Pengulangan</label>
+                        <select class="ab-input" style="padding: 0.4rem 0.6rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" @bind="recurringPattern">
+                            <option value="Harian">Harian (Setiap Hari)</option>
+                            <option value="Mingguan">Mingguan (Hari yang Sama)</option>
+                            <option value="Bulanan">Bulanan (Tanggal yang Sama)</option>
+                        </select>
+                    </div>
+                    <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 0.8rem; font-weight: 600; color: #1D1D1F;">Jumlah Pengulangan</label>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <input type="number" class="ab-input" style="width: 70px; padding: 0.4rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" min="1" max="12" @bind="repeatCount" />
+                            <span style="font-size: 0.8rem; color: #6E6E73;">kali ke depan</span>
+                        </div>
+                    </div>
+                    <div style="grid-column: 1 / -1; font-size: 0.78rem; color: #0284C7; background: #E0F2FE; padding: 6px 10px; border-radius: 6px; border-left: 3px solid #0284C7; display: flex; align-items: center; gap: 6px;">
+                        <Icon Name="refresh-cw" Size="13" />
+                        <span>Blokir akan dijadwalkan sebanyak <strong>@(repeatCount + 1) sesi</strong> secara <strong>@recurringPattern.ToLower()</strong>.</span>
+                    </div>
+                </div>
+            }
+
+            @* 4. Alasan Blokir & Bantuan "Lainnya" *@
             <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
                 <label style="font-size: 0.82rem; font-weight: 600; color: #1D1D1F;">Alasan Pemblokiran <span style="color: #DC2626;">*</span></label>
                 <select class="ab-input" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #D1D5DB; border-radius: 8px; font-size: 0.85rem;" @bind="selectedReason">
@@ -47,12 +99,12 @@
                 @if (selectedReason == "Lainnya")
                 {
                     <div class="ab-helper-text" style="font-size: 0.78rem; color: #854D0E; background: #FEF9C3; border-left: 3px solid #EAB308; padding: 6px 10px; border-radius: 4px; margin-top: 4px; line-height: 1.4;">
-                        Pilih 'Lainnya' jika alasan pemblokiran tidak tercakup dalam kategori standar (Perbaikan, Acara Internal, dll). Jelaskan alasan spesifik pada kolom Catatan di bawah.
+                        Pilih 'Lainnya' jika alasan pemblokiran tidak tercakup dalam kategori standar. Jelaskan alasan spesifik pada kolom Catatan di bawah.
                     </div>
                 }
             </div>
 
-            @* 4. Catatan (Wajib jika "Lainnya") *@
+            @* 5. Catatan (Wajib jika "Lainnya") *@
             <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
                 <label style="font-size: 0.82rem; font-weight: 600; color: #1D1D1F;">
                     Catatan Detail
@@ -75,7 +127,7 @@
     </ChildContent>
     <FooterContent>
         <button type="button" class="btn-outline-pill" @onclick="Close">Batal</button>
-        <button type="button" class="btn-primary-pill btn-yellow" @onclick="ConfirmBlock">Blokir Jadwal</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="ConfirmBlock">Konfirmasi & Blokir Ruangan</button>
     </FooterContent>
 </AppModal>
 
@@ -92,6 +144,12 @@
     private string selectedReason = "Pemeliharaan";
     private string notes = "";
     private bool hasSubmitted = false;
+
+    private bool isRecurring = false;
+    private string recurringPattern = "Mingguan";
+    private int repeatCount = 3;
+
+    private Room? currentSelectedRoom => availableRooms.FirstOrDefault(r => r.Id == selectedRoomId);
 
     protected override async Task OnInitializedAsync()
     {
@@ -126,7 +184,15 @@
 
         var room = availableRooms.FirstOrDefault(r => r.Id == selectedRoomId);
         var roomName = room?.Name ?? "Ruangan";
-        Toast.Success($"Jadwal {roomName} berhasil diblokir untuk {selectedReason}.");
+
+        if (isRecurring)
+        {
+            Toast.Success($"Jadwal {roomName} berhasil diblokir sebanyak {repeatCount + 1} sesi untuk {selectedReason}.");
+        }
+        else
+        {
+            Toast.Success($"Jadwal {roomName} berhasil diblokir untuk {selectedReason}.");
+        }
         
         await OnBlockCreated.InvokeAsync();
         await Close();
@@ -137,6 +203,7 @@
         hasSubmitted = false;
         notes = "";
         selectedReason = "Pemeliharaan";
+        isRecurring = false;
         IsOpen = false;
         await IsOpenChanged.InvokeAsync(false);
     }

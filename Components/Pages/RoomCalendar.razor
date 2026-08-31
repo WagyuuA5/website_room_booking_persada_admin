@@ -34,17 +34,14 @@
     @* -- Toolbar: Room Filter, Date Navigator, Legend -- *@
     <div class="rc-toolbar-card">
         <div class="rc-toolbar-left">
-            <select class="sr-pill-select" @bind="selectedRoomFilter">
-                <option value="all">Semua Ruangan</option>
-                <option value="Ruang Rapat Utama">Ruang Rapat Utama</option>
-                <option value="Ruang Dirantara VIP">Ruang Dirantara VIP</option>
-                <option value="Ruang Diskusi B">Ruang Diskusi B</option>
-                <option value="Auditorium Serbaguna">Auditorium Serbaguna</option>
-            </select>
+            <FilterDropdown 
+                DefaultLabel="Semua Ruangan"
+                Options="@(new[] { "Ruang Rapat Utama", "Ruang Dirantara VIP", "Ruang Diskusi B", "Auditorium Serbaguna" })"
+                @bind-Value="selectedRoomFilter" />
 
             <div class="rc-date-nav">
                 <button type="button" class="rc-nav-arrow" @onclick="PrevDate" title="Sebelumnya"><Icon Name="chevron-left" Size="14" /></button>
-                <span class="rc-current-date">@currentDate.ToString("dd MMMM yyyy")</span>
+                <span class="rc-current-date">@GetRelativeDateLabel(currentDate) &middot; @currentDate.ToString("dd MMMM yyyy")</span>
                 <button type="button" class="rc-nav-arrow" @onclick="NextDate" title="Berikutnya"><Icon Name="chevron-right" Size="14" /></button>
                 <button type="button" class="btn-today-pill" @onclick="GoToday">Hari Ini</button>
             </div>
@@ -90,7 +87,13 @@
                                     int span = booking.SpanHours;
                                     <td colspan="@span" class="cell-event @GetCellClass(booking.Status)" @onclick="() => OpenBookingDetail(booking)">
                                         <div class="rc-event-pill">
-                                            <strong class="rc-event-title">@booking.Title</strong>
+                                            <div style="display: flex; align-items: center; gap: 4px;">
+                                                @if (booking.IsRecurring)
+                                                {
+                                                    <Icon Name="refresh-cw" Size="10" />
+                                                }
+                                                <strong class="rc-event-title">@booking.Title</strong>
+                                            </div>
                                             <span class="rc-event-user">@booking.RequesterName (@booking.StartTime - @booking.EndTime)</span>
                                         </div>
                                     </td>
@@ -274,6 +277,7 @@
         public string EndTime { get; set; } = "11:00";
         public int ParticipantsCount { get; set; } = 8;
         public string Status { get; set; } = "approved";
+        public bool IsRecurring { get; set; }
         public string FacilitiesNote { get; set; } = "Proyektor, Mic Wireless, Katering";
     }
 
@@ -294,7 +298,7 @@
     };
 
     private IEnumerable<CalendarRoomItem> DisplayedRooms =>
-        selectedRoomFilter == "all"
+        string.IsNullOrEmpty(selectedRoomFilter) || selectedRoomFilter == "all"
             ? allRooms
             : allRooms.Where(r => r.Name == selectedRoomFilter);
 
@@ -339,6 +343,32 @@
     private void GoToday()
     {
         currentDate = DateTime.Today;
+    }
+
+    private string GetRelativeDateLabel(DateTime date)
+    {
+        if (calendarMode == "month")
+        {
+            var diffMonths = ((date.Year - DateTime.Today.Year) * 12) + date.Month - DateTime.Today.Month;
+            if (diffMonths == 0) return "Bulan Ini";
+            if (diffMonths == 1) return "Bulan Depan";
+            if (diffMonths == -1) return "Bulan Lalu";
+            return "";
+        }
+        else if (calendarMode == "week")
+        {
+            return "Minggu Ini"; // Simplified for week view
+        }
+        
+        var diff = (date.Date - DateTime.Today).TotalDays;
+        if (diff == 0) return "Hari Ini";
+        if (diff == 1) return "Besok";
+        if (diff == -1) return "Kemarin";
+        if (diff > 1 && diff <= 7) return "Minggu Depan";
+        if (diff < -1 && diff >= -7) return "Minggu Lalu";
+        
+        var culture = new System.Globalization.CultureInfo("id-ID");
+        return culture.DateTimeFormat.GetDayName(date.DayOfWeek);
     }
 
     private void OpenBookingDetail(CalendarEventItem ev)

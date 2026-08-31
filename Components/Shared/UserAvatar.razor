@@ -1,3 +1,5 @@
+@namespace booking_room_admin.Components.Shared
+
 <div class="user-avatar avatar-circle @CssClass" style="@StyleString">
     @if (!string.IsNullOrEmpty(PhotoUrl))
     {
@@ -5,26 +7,68 @@
     }
     else
     {
-        <span>@Initials</span>
+        <span>@ComputedInitials</span>
     }
 </div>
 
 @code {
-    [Parameter] public string Initials { get; set; } = "U";
+    [Parameter] public string Initials { get; set; } = "";
+    [Parameter] public string? Name { get; set; }
     [Parameter] public string? PhotoUrl { get; set; }
-    [Parameter] public string BgColor { get; set; } = "#1e3a8a";
+    [Parameter] public string BgColor { get; set; } = "";
     [Parameter] public string CssClass { get; set; } = "";
     [Parameter] public string Size { get; set; } = "36px";
+
+    private string ComputedInitials
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(Initials)) return Initials;
+            if (string.IsNullOrEmpty(Name)) return "U";
+            var parts = Name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length >= 2)
+                return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+            return parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant();
+        }
+    }
+
+    private string ComputedBgColor
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(BgColor)) return BgColor;
+            var source = Name ?? Initials ?? "U";
+            return GetColorFromName(source);
+        }
+    }
+
+    private static readonly string[] AvatarColors = {
+        "#0B1E39", "#2563EB", "#16A34A", "#F59E0B", "#9333EA",
+        "#EC4899", "#EF4444", "#14B8A6", "#F97316", "#6366F1"
+    };
+
+    private static string GetColorFromName(string name)
+    {
+        int hash = 0;
+        foreach (char c in name) hash = hash * 31 + c;
+        return AvatarColors[Math.Abs(hash) % AvatarColors.Length];
+    }
 
     private string StyleString
     {
         get
         {
+            var fontSize = $"font-size: {GetFontSize()}px;";
             if (!string.IsNullOrEmpty(PhotoUrl))
-            {
-                return $"width: {Size}; height: {Size};";
-            }
-            return $"width: {Size}; height: {Size}; background-color: {BgColor}; color: white;";
+                return $"width: {Size}; height: {Size}; {fontSize}";
+            return $"width: {Size}; height: {Size}; background-color: {ComputedBgColor}; color: white; {fontSize}";
         }
+    }
+
+    private int GetFontSize()
+    {
+        if (int.TryParse(Size.Replace("px", ""), out int px))
+            return Math.Max(10, px / 3);
+        return 13;
     }
 }
