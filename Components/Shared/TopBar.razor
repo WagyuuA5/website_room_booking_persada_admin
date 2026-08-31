@@ -87,7 +87,12 @@
 @code {
     [Parameter] public string Title { get; set; } = "Dashboard";
     [Parameter] public string Subtitle { get; set; } = string.Empty;
+    [Parameter] public bool ShowGlobalSearch { get; set; } = false;
+    [Parameter] public bool ShowDateFilter { get; set; } = false;
+    [Parameter] public string SearchPlaceholder { get; set; } = string.Empty;
+    [Parameter] public EventCallback<DateTime?> OnDateSelectedCallback { get; set; }
     [Parameter] public RenderFragment? RightSlot { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
     private bool showNotification = false;
     private bool showProfilePopup = false;

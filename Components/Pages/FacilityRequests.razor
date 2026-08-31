@@ -5,7 +5,7 @@
 @using booking_room_admin.Components.Services
 @inject ToastService Toast
 
-<TopBar Title="Permintaan Fasilitas" Subtitle="Kelola permintaan catering, AV, dan tata ruang yang masuk." ShowGlobalSearch="false" ShowDateFilter="false" />
+<TopBar Title="Permintaan Fasilitas" Subtitle="Kelola permintaan catering, AV, dan tata ruang yang masuk." />
 
 <div class="facility-requests-page">
     @* -- Baris Aksi: Search + Ekspor -- *@
@@ -227,6 +227,7 @@
             </div>
         </ChildContent>
         <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Tutup</button>
             <button type="button" class="btn-outline-pill btn-reject" @onclick="RejectRequest">Tolak</button>
             <button type="button" class="btn-primary-pill btn-yellow" @onclick="ProcessRequest">Tugaskan & Proses</button>
         </FooterContent>

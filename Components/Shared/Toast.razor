@@ -7,11 +7,14 @@
     {
         <div class="toast @t.Type">
             <span class="toast-icon">
-                @if (t.Type == "success") { <Icon Name="check" Size="16" /> }
-                else if (t.Type == "error") { <Icon Name="alert-triangle" Size="16" /> }
+                @if (t.Type == "success") { <Icon Name="check-circle" Size="16" /> }
+                else if (t.Type == "error") { <Icon Name="x-circle" Size="16" /> }
                 else { <Icon Name="bell" Size="16" /> }
             </span>
             <span class="toast-message">@t.Message</span>
+            <button type="button" class="toast-close" @onclick="() => DismissToast(t)" title="Tutup notifikasi">
+                <Icon Name="x" Size="12" />
+            </button>
         </div>
     }
 </div>
@@ -39,6 +42,12 @@
         };
         _timer.AutoReset = false;
         _timer.Start();
+    }
+
+    private void DismissToast((string Message, string Type) t)
+    {
+        _toasts.Remove(t);
+        StateHasChanged();
     }
 
     public void Dispose()

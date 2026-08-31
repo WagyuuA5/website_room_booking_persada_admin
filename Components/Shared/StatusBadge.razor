@@ -9,38 +9,51 @@
     /// <summary>Override label teks (jika null, pakai default mapping)</summary>
     [Parameter] public string? CustomLabel { get; set; }
 
+    /// <summary>Alias untuk CustomLabel / Status</summary>
+    [Parameter] public string? Text { get; set; }
+
+    /// <summary>Alias untuk Status / Type</summary>
+    [Parameter] public string? Type { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string EffectiveStatus => !string.IsNullOrEmpty(Status) ? Status : (!string.IsNullOrEmpty(Type) ? Type : (!string.IsNullOrEmpty(Text) ? Text : ""));
+
     private string GetLabel()
     {
         if (!string.IsNullOrEmpty(CustomLabel)) return CustomLabel;
+        if (!string.IsNullOrEmpty(Text)) return Text;
 
-        return Status.ToLowerInvariant() switch
+        return EffectiveStatus.ToLowerInvariant() switch
         {
-            "pending" => "Menunggu",
-            "approved" or "confirmed" => "Disetujui",
-            "rejected" or "rejected_admin" => "Ditolak",
+            "pending" or "menunggu" => "Menunggu",
+            "approved" or "confirmed" or "disetujui" => "Disetujui",
+            "rejected" or "rejected_admin" or "ditolak" => "Ditolak",
             "rejected_system" => "Ditolak Sistem",
             "declined" => "Ditolak",
             "preparing" or "diproses" => "Diproses",
             "fulfilled" or "selesai" => "Selesai",
-            "ready" => "Siap",
-            "active" => "Aktif",
-            "inactive" => "Tidak Aktif",
-            "baru" => "Baru",
-            "cancelled" => "Dibatalkan",
-            "maintenance" => "Maintenance",
-            "overdue" => "Terlambat",
-            _ => Status
+            "ready" or "siap" => "Siap",
+            "active" or "aktif" => "Aktif",
+            "inactive" or "tidak aktif" => "Tidak Aktif",
+            "baru" or "new" => "Baru",
+            "cancelled" or "dibatalkan" => "Dibatalkan",
+            "maintenance" or "perawatan" => "Dalam Perawatan",
+            "overdue" or "terlambat" => "Terlambat",
+            "tersedia" or "available" => "Tersedia",
+            "diblokir" or "blocked" => "Diblokir",
+            _ => EffectiveStatus
         };
     }
 
     private string GetBadgeClass()
     {
-        return Status.ToLowerInvariant() switch
+        return EffectiveStatus.ToLowerInvariant() switch
         {
-            "baru" => "badge-info",
-            "pending" or "preparing" or "diproses" or "maintenance" => "badge-warning",
-            "approved" or "confirmed" or "active" or "selesai" or "fulfilled" or "ready" => "badge-success",
-            "rejected" or "rejected_admin" or "rejected_system" or "declined" or "cancelled" or "overdue" or "inactive" => "badge-danger",
+            "baru" or "new" or "info" => "badge-info",
+            "pending" or "menunggu" or "preparing" or "diproses" or "maintenance" or "perawatan" or "draft" => "badge-warning",
+            "approved" or "confirmed" or "disetujui" or "active" or "aktif" or "selesai" or "fulfilled" or "ready" or "siap" or "tersedia" or "available" => "badge-success",
+            "rejected" or "rejected_admin" or "rejected_system" or "declined" or "ditolak" or "cancelled" or "dibatalkan" or "overdue" or "terlambat" or "inactive" or "tidak aktif" or "diblokir" or "blocked" => "badge-danger",
             _ => "badge-neutral"
         };
     }

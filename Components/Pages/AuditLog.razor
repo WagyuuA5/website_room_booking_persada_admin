@@ -5,7 +5,7 @@
 @using booking_room_admin.Components.Services
 @inject ToastService Toast
 
-<TopBar Title="Audit Log" Subtitle="Riwayat seluruh aktivitas admin pada sistem - permanen dan tidak dapat diubah." ShowGlobalSearch="false" ShowDateFilter="false" />
+<TopBar Title="Audit Log" Subtitle="Riwayat seluruh aktivitas admin pada sistem - permanen dan tidak dapat diubah." />
 
 <div class="audit-log-page">
     @* -- Filter Island Toolbar + Ekspor -- *@
@@ -323,10 +323,10 @@
 
     private string GetActionStatus(string action)
     {
-        if (action.Contains("Setujui") || action.Contains("Tambah")) return "approved";
+        if (action.Contains("Setujui") || action.Contains("Tambah") || action.Contains("Aktifkan")) return "approved";
         if (action.Contains("Tolak") || action.Contains("Hapus") || action.Contains("Nonaktifkan")) return "rejected";
-        if (action.Contains("Maintenance") || action.Contains("Reset") || action.Contains("Atur")) return "pending";
-        return "neutral";
+        if (action.Contains("Ubah") || action.Contains("Perawatan") || action.Contains("Reset") || action.Contains("Atur")) return "pending";
+        return "info";
     }
 }
 

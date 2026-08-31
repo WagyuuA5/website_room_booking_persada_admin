@@ -34,20 +34,20 @@
 }
 
 .rm-card {
-    background: var(--color-surface, #FFFFFF);
-    border: 1px solid var(--color-border, #E5E7EB);
-    border-radius: var(--radius-md, 12px);
+    background: var(--color-surface-0, #FFFFFF);
+    border: 1px solid var(--color-border, #E3E6EC);
+    border-radius: var(--radius-md, 16px);
     overflow: hidden;
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-sm, 0 2px 8px rgba(20,23,31,0.06));
     transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .rm-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md, 0 8px 24px rgba(20,23,31,0.10));
     border-color: var(--color-border-strong, #D1D5DB);
 }
 
@@ -56,7 +56,7 @@
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
-    background: var(--color-background, #F7F8FA);
+    background: var(--color-surface-1, #F7F8FA);
     overflow: hidden;
 }
 
@@ -73,32 +73,38 @@
 
 .rm-cap-badge {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(11, 30, 57, 0.85);
+    top: 12px;
+    left: 12px;
+    background: rgba(20, 23, 31, 0.85);
     backdrop-filter: blur(4px);
     color: #FFFFFF;
     font-size: 0.75rem;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 6px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill, 999px);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .rm-maint-badge {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(220, 38, 38, 0.9);
+    top: 12px;
+    right: 12px;
+    background: var(--color-warning, #E0A215);
     backdrop-filter: blur(4px);
     color: #FFFFFF;
     font-size: 0.72rem;
     font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 6px;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill, 999px);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .rm-card-content {
-    padding: 1.15rem;
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -107,8 +113,8 @@
 
 .rm-card-name {
     font-size: 1.1rem;
-    font-weight: 800;
-    color: var(--color-text-strong, #0B1E39);
+    font-weight: 700;
+    color: var(--color-ink-900, #14171F);
     margin: 0;
 }
 
@@ -116,8 +122,8 @@
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    font-size: 0.8rem;
-    color: var(--color-text-muted, #6E6E73);
+    font-size: 0.82rem;
+    color: var(--color-ink-500, #6B7080);
 }
 
 .rm-pin-icon {
@@ -133,24 +139,24 @@
 }
 
 .rm-chip {
-    font-size: 0.72rem;
-    font-weight: 600;
-    background: var(--color-background, #F7F8FA);
-    border: 1px solid var(--color-border, #E5E7EB);
-    color: var(--color-text, #1D1D1F);
-    padding: 2px 7px;
-    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: var(--color-surface-2, #EFF1F5);
+    border: 1px solid var(--color-border, #E3E6EC);
+    color: var(--color-ink-700, #3D4250);
+    padding: 3px 8px;
+    border-radius: var(--radius-xs, 6px);
 }
 
 .rm-chip-more {
-    color: var(--color-text-muted, #6E6E73);
+    color: var(--color-ink-500, #6B7080);
 }
 
 .rm-card-desc {
-    font-size: 0.82rem;
-    color: var(--color-text-muted, #6E6E73);
+    font-size: 0.85rem;
+    color: var(--color-ink-500, #6B7080);
     margin: 0;
-    line-height: 1.4;
+    line-height: 1.5;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

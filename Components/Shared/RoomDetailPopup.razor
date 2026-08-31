@@ -12,13 +12,13 @@
                 <div class="dr-header-badges">
                     @if (Room?.Status == "maintenance")
                     {
-                        <StatusBadge Text="Perawatan" Type="StatusBadge.BadgeType.Amber" />
+                        <StatusBadge Status="maintenance" CustomLabel="Perawatan" />
                     }
                     else
                     {
-                        <StatusBadge Text="Aktif" Type="StatusBadge.BadgeType.Green" />
+                        <StatusBadge Status="active" CustomLabel="Aktif" />
                     }
-                    <StatusBadge Text="@($"{Room?.Capacity} Orang")" Type="StatusBadge.BadgeType.Indigo" />
+                    <StatusBadge Status="info" CustomLabel="@($"{Room?.Capacity} Orang")" />
                 </div>
             </div>
         </div>

@@ -2,6 +2,7 @@
     <div class="popup-card notification-popup" @onclick:stopPropagation="true">
         <div class="popup-header">
             <h4>Notifikasi</h4>
+            <span class="unread-pill-count">@(AllNotifications.Count(n => !n.IsRead)) Baru</span>
         </div>
         <div class="popup-tabs">
             <button class="tab-btn @(ActiveTab == "all" ? "active" : "")" @onclick='() => SetTab("all")'>Semua</button>
@@ -11,17 +12,33 @@
         <div class="popup-actions">
             <button class="text-btn" @onclick="MarkAllRead">Tandai Semua Dibaca</button>
         </div>
-        <div class="popup-body">
-            @foreach (var item in FilteredNotifications)
+        <div class="popup-body scroll-area">
+            @if (!FilteredNotifications.Any())
             {
-                <div class="notification-item @(item.IsRead ? "read" : "unread")">
-                    <div class="notification-icon">@((MarkupString)item.Icon)</div>
-                    <div class="notification-content">
-                        <div class="notification-title">@item.Title</div>
-                        <div class="notification-text">@item.Message</div>
-                        <div class="notification-time">@item.TimeAgo</div>
-                    </div>
+                <div class="notif-empty">
+                    <Icon Name="bell" Size="24" CssClass="text-muted" />
+                    <span>Tidak ada notifikasi</span>
                 </div>
+            }
+            else
+            {
+                @foreach (var item in FilteredNotifications)
+                {
+                    <div class="notification-item @(item.IsRead ? "read" : "unread")" @onclick="() => item.IsRead = true">
+                        <div class="notification-icon-wrap">
+                            <Icon Name="@item.IconName" Size="16" />
+                            @if (!item.IsRead)
+                            {
+                                <span class="unread-dot"></span>
+                            }
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">@item.Title</div>
+                            <div class="notification-text">@item.Message</div>
+                            <div class="notification-time">@item.TimeAgo</div>
+                        </div>
+                    </div>
+                }
             }
         </div>
     </div>
@@ -30,21 +47,22 @@
 @code {
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
     private string ActiveTab = "all";
 
     private List<NotificationItem> AllNotifications = new()
     {
-        new NotificationItem { Title = "Persetujuan Ruang Rapat Utama", Message = "Permintaan booking ruang rapat utama telah disetujui.", TimeAgo = "2 menit lalu", IsRead = false, Icon = "<Icon Name=\"clipboard\" Size=\"16\" />" },
-        new NotificationItem { Title = "Pembaruan Kata Sandi Berhasil", Message = "Kata sandi akun Anda berhasil diperbarui.", TimeAgo = "15 menit lalu", IsRead = false, Icon = "<Icon Name=\"lock\" Size=\"16\" />" },
-        new NotificationItem { Title = "Laporan Mingguan Siap", Message = "Laporan penggunaan ruangan minggu ini sudah tersedia.", TimeAgo = "1 jam lalu", IsRead = true, Icon = "<Icon Name=\"bar-chart-2\" Size=\"16\" />" },
-        new NotificationItem { Title = "Beban Trafik Tinggi", Message = "Sistem menerima permintaan booking di luar jam sibuk.", TimeAgo = "2 jam lalu", IsRead = true, Icon = "<Icon Name=\"zap\" Size=\"16\" />" }
+        new NotificationItem { Title = "Persetujuan Ruang Rapat Utama", Message = "Permintaan booking ruang rapat utama telah disetujui.", TimeAgo = "2 menit lalu", IsRead = false, IconName = "check-circle" },
+        new NotificationItem { Title = "Pembaruan Kata Sandi Berhasil", Message = "Kata sandi akun Anda berhasil diperbarui.", TimeAgo = "15 menit lalu", IsRead = false, IconName = "shield" },
+        new NotificationItem { Title = "Laporan Mingguan Siap", Message = "Laporan penggunaan ruangan minggu ini sudah tersedia.", TimeAgo = "1 jam lalu", IsRead = true, IconName = "file-text" },
+        new NotificationItem { Title = "Jadwal Perawatan Ruangan", Message = "Ruang Diskusi B dijadwalkan perawatan besok.", TimeAgo = "2 jam lalu", IsRead = true, IconName = "wrench" }
     };
 
     private IEnumerable<NotificationItem> FilteredNotifications => ActiveTab switch
     {
         "unread" => AllNotifications.Where(n => !n.IsRead),
-        "system" => AllNotifications.Where(n => n.Title.Contains("Sistem") || n.Title.Contains("Trafik")),
+        "system" => AllNotifications.Where(n => n.Title.Contains("Sistem") || n.Title.Contains("Pembaruan") || n.Title.Contains("Perawatan")),
         _ => AllNotifications
     };
 
@@ -73,6 +91,6 @@
         public string Message { get; set; } = string.Empty;
         public string TimeAgo { get; set; } = string.Empty;
         public bool IsRead { get; set; }
-        public string Icon { get; set; } = string.Empty;
+        public string IconName { get; set; } = "bell";
     }
 }

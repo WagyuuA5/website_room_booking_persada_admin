@@ -1,0 +1,104 @@
+﻿@namespace booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Size="small" OnClose="HandleClose">
+    <ChildContent>
+        <div class="bs-container">
+            @* Animated Success Icon *@
+            <div class="bs-icon-wrapper">
+                <div class="bs-icon-circle">
+                    <svg class="bs-checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+            <h3 class="bs-title">Pemesanan Berhasil Diajukan!</h3>
+            <p class="bs-subtitle">Pengajuan pemesanan ruangan Anda telah diterima dan sedang menunggu persetujuan admin.</p>
+
+            @if (Booking != null)
+            {
+                <div class="bs-card">
+                    <div class="bs-card-header">
+                        <div class="bs-room-info">
+                            <span class="bs-room-icon"><Icon Name="building" Size="16" /></span>
+                            <span class="bs-room-name">@Booking.Room</span>
+                        </div>
+                        <StatusBadge Status="pending" CustomLabel="Menunggu Persetujuan" />
+                    </div>
+
+                    <div class="bs-card-divider"></div>
+
+                    <div class="bs-card-details">
+                        <div class="bs-detail-row">
+                            <span class="bs-label"><Icon Name="calendar" Size="14" /> Tanggal:</span>
+                            <strong class="bs-val">@Booking.Date.ToString("dd MMMM yyyy")</strong>
+                        </div>
+                        <div class="bs-detail-row">
+                            <span class="bs-label"><Icon Name="clock" Size="14" /> Waktu:</span>
+                            <strong class="bs-val">@Booking.StartTime - @Booking.EndTime</strong>
+                        </div>
+                        <div class="bs-detail-row">
+                            <span class="bs-label"><Icon Name="users" Size="14" /> Peserta:</span>
+                            <strong class="bs-val">@Booking.ParticipantsCount Orang</strong>
+                        </div>
+                        <div class="bs-detail-row">
+                            <span class="bs-label"><Icon Name="file-text" Size="14" /> Acara:</span>
+                            <strong class="bs-val">@Booking.Title</strong>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="bs-actions">
+                <button type="button" class="btn-primary-pill btn-yellow w-100" @onclick="GoToMyBookings">
+                    <Icon Name="check-circle" Size="16" />
+                    <span>Lihat Detail Pemesanan Saya</span>
+                </button>
+                <button type="button" class="btn-outline-pill w-100" @onclick="CreateAnother">
+                    <Icon Name="plus" Size="14" />
+                    <span>Buat Pemesanan Lain</span>
+                </button>
+            </div>
+        </div>
+    </ChildContent>
+</AppModal>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public Booking? Booking { get; set; }
+    [Parameter] public EventCallback OnCreateAnother { get; set; }
+    [Parameter] public EventCallback OnViewMyBookings { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    @inject NavigationManager Navigation
+
+    private async Task HandleClose()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private async Task GoToMyBookings()
+    {
+        await HandleClose();
+        if (OnViewMyBookings.HasDelegate)
+        {
+            await OnViewMyBookings.InvokeAsync();
+        }
+        else
+        {
+            Navigation.NavigateTo("/my-bookings");
+        }
+    }
+
+    private async Task CreateAnother()
+    {
+        await HandleClose();
+        if (OnCreateAnother.HasDelegate)
+        {
+            await OnCreateAnother.InvokeAsync();
+        }
+    }
+}

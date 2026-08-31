@@ -58,6 +58,8 @@
     /// <summary>Allow closing by clicking overlay</summary>
     [Parameter] public bool CloseOnOverlay { get; set; } = true;
 
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
     private ElementReference _overlayRef;
     private bool _prevIsOpen = false;
 

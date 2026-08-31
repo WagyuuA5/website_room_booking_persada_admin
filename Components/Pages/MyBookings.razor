@@ -6,7 +6,7 @@
 @inject ToastService Toast
 @implements IDisposable
 
-<TopBar Title="Status Booking Saya" Subtitle="Pantau status seluruh pengajuan booking ruangan yang telah Anda buat." ShowGlobalSearch="false" ShowDateFilter="false" />
+<TopBar Title="Status Booking Saya" Subtitle="Pantau status seluruh pengajuan booking ruangan yang telah Anda buat." />
 
 <div class="my-bookings-page">
     @* -- Baris Aksi: CTA -- *@
@@ -182,11 +182,14 @@
 }
 
 <ManualBookingPopup @bind-IsOpen="showManualBookingModal" OnBookingCreated="HandleBookingCreated" />
+<BookingSuccessModal @bind-IsOpen="showSuccessModal" Booking="justCreatedBooking" OnCreateAnother="OpenNewBooking" OnViewMyBookings="HandleViewCreatedBooking" />
 
 @code {
     private string selectedTab = "all";
     private bool showDetailModal = false;
     private bool showManualBookingModal = false;
+    private bool showSuccessModal = false;
+    private Booking? justCreatedBooking;
     private UserBookingItem? selectedBooking;
     private System.Threading.Timer? _pollTimer;
 
@@ -306,11 +309,12 @@
 
     private void HandleBookingCreated(Booking b)
     {
-        myBookings.Insert(0, new UserBookingItem
+        justCreatedBooking = b;
+        var newItem = new UserBookingItem
         {
             Id = b.Id,
             RoomName = b.Room,
-            Location = "Gedung Utama",
+            Location = "Gedung Utama, Lantai 2",
             Date = b.Date,
             StartTime = b.StartTime,
             EndTime = b.EndTime,
@@ -319,8 +323,23 @@
             ParticipantsCount = b.ParticipantsCount,
             Status = "pending",
             SubmittedAt = DateTime.Now
-        });
+        };
+        myBookings.Insert(0, newItem);
+        showSuccessModal = true;
         StateHasChanged();
+    }
+
+    private void HandleViewCreatedBooking()
+    {
+        showSuccessModal = false;
+        if (justCreatedBooking != null)
+        {
+            selectedBooking = myBookings.FirstOrDefault(x => x.Id == justCreatedBooking.Id);
+            if (selectedBooking != null)
+            {
+                showDetailModal = true;
+            }
+        }
     }
 
     private void OpenDetail(UserBookingItem b)

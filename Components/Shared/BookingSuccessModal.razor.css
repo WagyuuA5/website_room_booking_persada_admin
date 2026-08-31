@@ -1,0 +1,144 @@
+﻿.bs-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.5rem 0;
+}
+
+.bs-icon-wrapper {
+    margin-bottom: 1.25rem;
+}
+
+.bs-icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-circle, 50%);
+    background: var(--color-success-soft, #E4F7EF);
+    color: var(--color-success, #1BA672);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    animation: scaleCheckmark 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 0 8px rgba(27, 166, 114, 0.1);
+}
+
+.bs-checkmark {
+    width: 32px;
+    height: 32px;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: drawCheckmark 0.4s 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleCheckmark {
+    0% { transform: scale(0.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes drawCheckmark {
+    100% { stroke-dashoffset: 0; }
+}
+
+.bs-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--color-ink-900, #14171F);
+    margin: 0 0 0.4rem 0;
+}
+
+.bs-subtitle {
+    font-size: 0.88rem;
+    color: var(--color-ink-500, #6B7080);
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+    max-width: 360px;
+}
+
+.bs-card {
+    width: 100%;
+    background: var(--color-surface-1, #F7F8FA);
+    border: 1px solid var(--color-border, #E3E6EC);
+    border-radius: var(--radius-md, 16px);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.bs-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.bs-room-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bs-room-icon {
+    color: var(--color-primary, #F5A623);
+    display: flex;
+}
+
+.bs-room-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-ink-900, #14171F);
+}
+
+.bs-card-divider {
+    height: 1px;
+    background: var(--color-border, #E3E6EC);
+    margin: 0.85rem 0;
+}
+
+.bs-card-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.bs-detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.82rem;
+}
+
+.bs-label {
+    color: var(--color-ink-500, #6B7080);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.bs-val {
+    color: var(--color-ink-900, #14171F);
+    font-weight: 600;
+    text-align: right;
+}
+
+.bs-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.w-100 {
+    width: 100%;
+    justify-content: center;
+}
+
+body.dark .bs-card {
+    background: var(--color-surface-2, #232630);
+    border-color: var(--color-border, rgba(255, 255, 255, 0.08));
+}
+
+body.dark .bs-icon-circle {
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.15);
+}

@@ -5,13 +5,13 @@
 @using booking_room_admin.Components.Models
 @using booking_room_admin.Components.Services
 
-<TopBar Title="Laporan Sistem" Subtitle="Wawasan menyeluruh tentang penggunaan ruangan, permintaan fasilitas, dan dukungan IT." ShowGlobalSearch="false" ShowDateFilter="false" />
+<TopBar Title="Laporan Sistem" Subtitle="Wawasan menyeluruh tentang penggunaan ruangan, permintaan fasilitas, dan dukungan IT." />
 
 <div class="system-reports-container">
     @* -- Baris Aksi: Date Range + Ekspor Laporan -- *@
     <div class="action-row">
         <DateFilter OnDateSelectedCallback="HandleDateChanged" />
-        <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => showExportModal = true">
+        <button type="button" class="btn-outline-pill" @onclick="() => showExportModal = true">
             <Icon Name="download" Size="14" />
             <span>Ekspor Laporan</span>
         </button>
