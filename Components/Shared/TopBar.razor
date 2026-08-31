@@ -60,11 +60,14 @@
 {
     <div class="profile-popup-overlay" @onclick="() => showProfilePopup = false">
         <div class="profile-popup" @onclick:stopPropagation="true">
+            <button type="button" class="profile-popup-close-btn" @onclick="() => showProfilePopup = false" title="Tutup">
+                <Icon Name="x" Size="16" />
+            </button>
             <div class="profile-header-redesign">
-                <ProfileAvatarUploader Initials="WA" BgColor="#0B1E39" Size="80px" CameraIconSize="16" @bind-AvatarUrl="adminAvatarUrl" />
+                <ProfileAvatarUploader Initials="WA" BgColor="#0B1E39" Size="64px" CameraIconSize="14" @bind-AvatarUrl="adminAvatarUrl" />
             </div>
             
-            <div class="profile-body-redesign">
+            <div class="profile-body-2col">
                 <div class="pbr-info-group">
                     <label>Nama Lengkap</label>
                     <strong>Admin Wahyu</strong>
@@ -79,7 +82,7 @@
                 </div>
                 <div class="pbr-info-group">
                     <label>Email</label>
-                    <strong>wahyu.admin@persada.co.id</strong>
+                    <strong title="wahyu.admin@persada.co.id">wahyu.admin@persada.co.id</strong>
                 </div>
                 <div class="pbr-info-group">
                     <label>Lokasi Kantor</label>
@@ -92,8 +95,7 @@
             </div>
 
             <div class="profile-footer-redesign">
-                <button type="button" class="btn-outline-pill" @onclick="() => showProfilePopup = false">Tutup</button>
-                <button type="button" class="btn-primary-pill" @onclick="GoToProfile">Edit Profil</button>
+                <button type="button" class="btn-primary-pill btn-yellow" style="width: 100%; justify-content: center;" @onclick="GoToProfile">Edit Profil</button>
             </div>
         </div>
     </div>
@@ -135,6 +137,8 @@
     private void GoToProfile()
     {
         showProfilePopup = false;
-        Navigation.NavigateTo("/profile");
+        var uri = new Uri(Navigation.Uri);
+        var path = uri.PathAndQuery;
+        Navigation.NavigateTo($"/profile?returnUrl={Uri.EscapeDataString(path)}");
     }
 }

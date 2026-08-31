@@ -14,7 +14,7 @@
     <nav class="nav flex-column">
         <div class="nav-item">
             <NavLink class="nav-link" href="dashboard" Match="NavLinkMatch.All" title="Dashboard">
-                <Icon Name="layers" Size="24" CssClass="nav-icon" />
+                <Icon Name="layout-grid" Size="24" CssClass="nav-icon" />
                 @if (!IsCollapsed)
                 {
                     <span>Dashboard</span>
@@ -116,7 +116,7 @@
 <div class="sidebar-footer">
     <div class="nav-item">
         <a class="nav-link footer-link logout-link" href="#" @onclick="HandleLogout" @onclick:preventDefault title="Keluar">
-            <Icon Name="user-x" Size="24" CssClass="nav-icon logout-icon" />
+            <Icon Name="log-out" Size="20" CssClass="nav-icon logout-icon" />
             @if (!IsCollapsed)
             {
                 <span>Keluar</span>

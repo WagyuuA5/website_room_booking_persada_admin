@@ -268,13 +268,28 @@
                 <div class="rs-row-2col">
                     <div class="rs-field">
                         <label class="rs-label">Kategori Perawatan</label>
-                        <select class="rs-select" @bind="maintForm.Category">
-                            <option value="HVAC">HVAC / Pendingin Ruangan</option>
-                            <option value="Perbaikan Peralatan">Perbaikan Peralatan</option>
-                            <option value="Instalasi Fasilitas">Instalasi Fasilitas</option>
-                            <option value="Pembersihan Rutin">Pembersihan Rutin</option>
-                            <option value="Pemulihan Sistem">Pemulihan Sistem Audio/Visual</option>
-                        </select>
+                        @if (isAddingNewCategory)
+                        {
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" class="rs-select" style="flex: 1;" placeholder="Nama kategori..." @bind="newCategoryText" @bind:event="oninput" />
+                                <button type="button" class="btn-primary-pill btn-sm" @onclick="ConfirmAddNewCategory" title="Simpan">
+                                    <Icon Name="check" Size="14" />
+                                </button>
+                                <button type="button" class="btn-outline-pill btn-sm" @onclick="() => isAddingNewCategory = false" title="Batal">
+                                    <Icon Name="x" Size="14" />
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <select class="rs-select" @bind="maintForm.Category" @bind:after="OnCategoryDropdownChanged">
+                                @foreach (var cat in maintenanceCategories)
+                                {
+                                    <option value="@cat">@cat</option>
+                                }
+                                <option value="__NEW__" style="color: #2563EB; font-weight: 600;">+ Tambah Kategori Baru...</option>
+                            </select>
+                        }
                     </div>
                     <div class="rs-field">
                         <label class="rs-label">Tingkat Prioritas</label>
@@ -289,32 +304,36 @@
 
                 <div class="rs-field">
                     <label class="rs-label">Fasilitas yang Diservis</label>
-                    <div class="rs-chips-row">
+                    <div class="rs-chips-row" style="align-items: center;">
                         @foreach (var f in availableServiceFacilities)
                         {
-                            <button type="button" class="rs-serv-chip @(maintForm.ServicedFacilities.Contains(f) ? "selected" : "")"
+                            var isSelected = maintForm.ServicedFacilities.Contains(f);
+                            <button type="button" class="rs-serv-chip @(isSelected ? "selected" : "")"
                                     @onclick="() => ToggleServicedFacility(f)">
-                                @if (maintForm.ServicedFacilities.Contains(f))
-                                {
-                                    <Icon Name="check" Size="12" />
-                                }
-                                else
-                                {
-                                    @("+ ")
-                                }
-                                @f
+                                <Icon Name="@(isSelected ? "check" : IconHelper.GetFacilityIcon(f))" Size="13" />
+                                <span>@f</span>
                             </button>
                         }
+                        <button type="button" class="btn-outline-pill btn-sm" @onclick="() => showAddFacilityInput = !showAddFacilityInput">
+                            <Icon Name="plus" Size="13" /> Tambah
+                        </button>
                     </div>
+
+                    @if (showAddFacilityInput)
+                    {
+                        <div style="margin-top: 0.6rem; display: flex; gap: 0.5rem; align-items: center;">
+                            <div style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 6px; background: #F3F4F6; color: var(--color-primary, #0B1E39); border: 1px solid #D1D5DB;">
+                                <Icon Name="@(string.IsNullOrWhiteSpace(newFacilityText) ? "tag" : IconHelper.GetFacilityIcon(newFacilityText))" Size="16" />
+                            </div>
+                            <input type="text" class="rs-select" style="flex: 1;" placeholder="Nama fasilitas diservis..." @bind="newFacilityText" @bind:event="oninput" />
+                            <button type="button" class="btn-primary-pill btn-yellow btn-sm" @onclick="ConfirmAddCustomFacility">Tambah</button>
+                        </div>
+                    }
                 </div>
 
                 <div class="rs-field">
                     <label class="rs-label">Dokumentasi Foto</label>
-                    <div class="rs-dropzone">
-                        <Icon Name="upload" Size="24" CssClass="text-muted" />
-                        <strong>Klik untuk unggah atau seret & lepas</strong>
-                        <span>PNG, JPG atau WEBP (maks. 5MB)</span>
-                    </div>
+                    <ImageUploadBox OnImageUploaded="(url) => maintForm.PhotoUrl = url" />
                 </div>
 
                 <div class="rs-field">
@@ -370,6 +389,7 @@
         public string Priority { get; set; } = "Tinggi";
         public List<string> ServicedFacilities { get; set; } = new() { "AC Unit" };
         public string Description { get; set; } = "";
+        public string PhotoUrl { get; set; } = "";
     }
 
     private bool isLoading = true;
@@ -382,7 +402,13 @@
     private bool showDeleteModal = false;
     private System.Threading.Timer? _countdownTimer;
 
+    private List<string> maintenanceCategories = new() { "HVAC", "Perbaikan Peralatan", "Instalasi Fasilitas", "Pembersihan Rutin", "Pemulihan Sistem Audio/Visual" };
+    private bool isAddingNewCategory = false;
+    private string newCategoryText = "";
+
     private List<string> availableServiceFacilities = new() { "AC Unit", "Lighting/Pencahayaan", "Furniture/Perabotan", "Sound System", "Proyektor" };
+    private bool showAddFacilityInput = false;
+    private string newFacilityText = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -557,10 +583,53 @@
         StateHasChanged();
     }
 
+    private void OnCategoryDropdownChanged()
+    {
+        if (maintForm.Category == "__NEW__")
+        {
+            isAddingNewCategory = true;
+            newCategoryText = "";
+            maintForm.Category = "";
+        }
+    }
+
+    private void ConfirmAddNewCategory()
+    {
+        if (!string.IsNullOrWhiteSpace(newCategoryText))
+        {
+            var trimmed = newCategoryText.Trim();
+            if (!maintenanceCategories.Contains(trimmed))
+            {
+                maintenanceCategories.Add(trimmed);
+            }
+            maintForm.Category = trimmed;
+        }
+        isAddingNewCategory = false;
+        newCategoryText = "";
+    }
+
     private void ToggleServicedFacility(string f)
     {
         if (maintForm.ServicedFacilities.Contains(f)) maintForm.ServicedFacilities.Remove(f);
         else maintForm.ServicedFacilities.Add(f);
+    }
+
+    private void ConfirmAddCustomFacility()
+    {
+        if (!string.IsNullOrWhiteSpace(newFacilityText))
+        {
+            var trimmed = newFacilityText.Trim();
+            if (!availableServiceFacilities.Contains(trimmed))
+            {
+                availableServiceFacilities.Add(trimmed);
+            }
+            if (!maintForm.ServicedFacilities.Contains(trimmed))
+            {
+                maintForm.ServicedFacilities.Add(trimmed);
+            }
+        }
+        newFacilityText = "";
+        showAddFacilityInput = false;
     }
 
     private void ConfirmSetMaintenance()

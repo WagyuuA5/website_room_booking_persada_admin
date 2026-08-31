@@ -1,0 +1,100 @@
+@namespace booking_room_admin.Components.Shared
+@inject booking_room_admin.Components.Services.ToastService Toast
+
+<div class="image-upload-box @CssClass @(isDragging ? "dragging" : "")"
+     @ondragenter="() => isDragging = true"
+     @ondragleave="() => isDragging = false"
+     @ondragover:preventDefault
+     @ondrop="() => isDragging = false">
+
+    <InputFile id="@inputId"
+               accept="@AcceptedFormats"
+               multiple="@Multiple"
+               OnChange="HandleFileSelected"
+               class="hidden-file-input"
+               style="display: none !important;" />
+
+    <label for="@inputId" class="upload-dropzone-label">
+        <div class="upload-icon-circle">
+            <Icon Name="upload" Size="20" />
+        </div>
+        <div class="upload-primary-text">
+            <strong>Klik untuk unggah</strong> atau seret & lepas
+        </div>
+        <span class="upload-hint-text">@HintText</span>
+    </label>
+</div>
+
+@code {
+    private readonly string inputId = "img-upload-" + Guid.NewGuid().ToString("N");
+    private bool isDragging = false;
+
+    [Parameter] public string AcceptedFormats { get; set; } = ".png,.jpg,.jpeg,.webp";
+    [Parameter] public int MaxSizeMB { get; set; } = 5;
+    [Parameter] public bool Multiple { get; set; } = false;
+    [Parameter] public string HintText { get; set; } = "PNG, JPG atau WEBP (maks. 5MB)";
+    [Parameter] public EventCallback<string> OnImageUploaded { get; set; }
+    [Parameter] public EventCallback<List<string>> OnMultipleImagesUploaded { get; set; }
+    [Parameter] public string CssClass { get; set; } = "";
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        isDragging = false;
+        try
+        {
+            if (Multiple)
+            {
+                var files = e.GetMultipleFiles(10);
+                var results = new List<string>();
+                foreach (var file in files)
+                {
+                    if (file.Size > MaxSizeMB * 1024 * 1024)
+                    {
+                        Toast.Error($"Ukuran file '{file.Name}' melebihi {MaxSizeMB}MB.");
+                        continue;
+                    }
+
+                    using var stream = file.OpenReadStream(MaxSizeMB * 1024 * 1024);
+                    using var ms = new MemoryStream();
+                    await stream.CopyToAsync(ms);
+                    var base64 = Convert.ToBase64String(ms.ToArray());
+                    results.Add($"data:{file.ContentType};base64,{base64}");
+                }
+
+                if (results.Any())
+                {
+                    await OnMultipleImagesUploaded.InvokeAsync(results);
+                    if (OnImageUploaded.HasDelegate)
+                    {
+                        await OnImageUploaded.InvokeAsync(results.First());
+                    }
+                    Toast.Success($"{results.Count} foto berhasil diunggah.");
+                }
+            }
+            else
+            {
+                var file = e.File;
+                if (file != null)
+                {
+                    if (file.Size > MaxSizeMB * 1024 * 1024)
+                    {
+                        Toast.Error($"Ukuran file melebihi {MaxSizeMB}MB.");
+                        return;
+                    }
+
+                    using var stream = file.OpenReadStream(MaxSizeMB * 1024 * 1024);
+                    using var ms = new MemoryStream();
+                    await stream.CopyToAsync(ms);
+                    var base64 = Convert.ToBase64String(ms.ToArray());
+                    var url = $"data:{file.ContentType};base64,{base64}";
+                    await OnImageUploaded.InvokeAsync(url);
+                    Toast.Success("Foto berhasil diunggah.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Toast.Error("Gagal mengunggah foto: " + ex.Message);
+        }
+    }
+}

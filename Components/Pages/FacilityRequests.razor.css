@@ -102,66 +102,89 @@
 .count-ready { color: #8B5CF6; }
 .count-fulfilled { color: var(--color-success, #16A34A); }
 
-/* -- Vertical Card List -- */
+/* -- Vertical Card List (CASE 14 Redesign) -- */
 .fr-cards-list {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 14px;
 }
 
-.fr-card {
+.fr-request-card {
     background: var(--color-surface, #FFFFFF);
     border: 1px solid var(--color-border, #E5E7EB);
     border-radius: var(--radius-md, 12px);
-    padding: 1.1rem 1.4rem;
+    padding: 20px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.25rem;
+    flex-direction: column;
+    gap: 10px;
     cursor: pointer;
     box-shadow: var(--shadow-sm);
     transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-.fr-card:hover {
+.fr-request-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
     border-color: var(--color-border-strong, #D1D5DB);
 }
 
-.fr-card-left {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    flex: 1;
-    min-width: 0;
-}
-
-.fr-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    color: #FFFFFF;
-    font-weight: 700;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.fr-card-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    flex: 1;
-    min-width: 0;
-}
-
 .fr-card-header-row {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 12px;
+}
+
+.fr-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-strong, #0B1E39);
+    margin: 0;
+    flex: 1;
+}
+
+.badge-urgent-pill {
+    background: #FEE2E2;
+    color: #DC2626;
+    border: 1px solid #FCA5A5;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.fr-card-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--color-text-muted, #6E6E73);
+    flex-wrap: wrap;
+}
+
+.fr-meta-dot {
+    color: #D1D5DB;
+    font-weight: 700;
+}
+
+.fr-card-items-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--color-text, #1D1D1F);
+    font-weight: 500;
+}
+
+.fr-card-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--color-border, #E5E7EB);
+    padding-top: 12px;
+    margin-top: 4px;
 }
 
 .fr-card-title {
@@ -448,7 +471,7 @@
 .fr-timeline {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 16px;
     padding-left: 0.5rem;
 }
 

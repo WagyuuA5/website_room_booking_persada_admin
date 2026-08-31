@@ -98,13 +98,48 @@
     height: 15px;
 }
 
-/* -- Table Container & Cells -- */
+/* -- Table Container & Cells (CASE 7 Precision) -- */
 .um-table-container {
     background: var(--surface);
     border-radius: 12px;
     border: 1px solid var(--border);
     box-shadow: var(--card-shadow);
     overflow: hidden;
+}
+
+.um-table-container ::deep .data-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.um-table-container ::deep .data-table th:nth-child(1),
+.col-user {
+    width: 30%;
+}
+
+.um-table-container ::deep .data-table th:nth-child(2),
+.col-dept {
+    width: 22%;
+}
+
+.um-table-container ::deep .data-table th:nth-child(3),
+.col-bookings {
+    width: 16%;
+}
+
+.um-table-container ::deep .data-table th:nth-child(4),
+.col-status {
+    width: 14%;
+}
+
+.um-table-container ::deep .data-table th:nth-child(5),
+.col-actions {
+    width: 18%;
+}
+
+.um-table-container ::deep .data-table td {
+    padding: 16px 20px !important;
+    vertical-align: middle;
 }
 
 .user-row-cell {
@@ -157,6 +192,11 @@
     font-size: 0.82rem;
     font-weight: 500;
     color: var(--text-strong);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
 }
 
 .um-bookings-text {
@@ -168,11 +208,15 @@
 .um-status-pill {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    padding: 3px 10px;
+    padding: 4px 10px;
     border-radius: 9999px;
     font-size: 0.72rem;
     font-weight: 700;
+    min-width: 90px;
+    text-align: center;
+    box-sizing: border-box;
 }
 
 .status-active {
@@ -199,7 +243,9 @@
 .um-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-right: 8px;
 }
 
 .btn-action-edit, .btn-action-delete {

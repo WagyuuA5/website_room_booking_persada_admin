@@ -19,17 +19,10 @@
         </div>
         <select class="um-filter-select" @bind="departmentFilter" @bind:after="LoadUsers">
             <option value="All">Semua Divisi</option>
-            <option value="IT & Digital">IT & Digital</option>
-            <option value="Operasional">Operasional</option>
-            <option value="Sumber Daya Manusia (SDM)">Sumber Daya Manusia (SDM)</option>
-            <option value="Keuangan">Keuangan</option>
-            <option value="Marketing & Komunikasi">Marketing & Komunikasi</option>
-            <option value="Legal & Kepatuhan">Legal & Kepatuhan</option>
-            <option value="General Affairs (GA)">General Affairs (GA)</option>
-            <option value="Layanan Keamanan">Layanan Keamanan</option>
-            <option value="Call Center & Layanan Pelanggan">Call Center & Layanan Pelanggan</option>
-            <option value="Layanan Perkantoran">Layanan Perkantoran</option>
-            <option value="Teknikal & Pemeliharaan Telekomunikasi">Teknikal & Pemeliharaan Telekomunikasi</option>
+            @foreach (var dept in persadaDepartments)
+            {
+                <option value="@dept">@dept</option>
+            }
         </select>
         <button type="button" class="btn-export-um" @onclick="OpenExportModal">
             <Icon Name="download" Size="14" />
@@ -86,7 +79,7 @@
                        OnRowClick="OpenDetailModal"
                        ShowCheckbox="false">
                 <RowTemplate Context="u">
-                    <td>
+                    <td class="col-user">
                         <div class="user-row-cell">
                             <div class="user-avatar-circle" style="background: @GetAvatarColor(u.FullName)">
                                 @u.Initials
@@ -97,19 +90,19 @@
                             </div>
                         </div>
                     </td>
-                    <td>
-                        <span class="um-dept-text">@u.Department</span>
+                    <td class="col-dept">
+                        <span class="um-dept-text" title="@u.Department">@u.Department</span>
                     </td>
-                    <td>
+                    <td class="col-bookings">
                         <span class="um-bookings-text">@u.TotalBookings Booking</span>
                     </td>
-                    <td>
+                    <td class="col-status">
                         <span class="um-status-pill @(u.Status.ToLower() == "active" ? "status-active" : "status-inactive")">
                             <span class="status-dot"></span>
                             @(u.Status.ToLower() == "active" ? "Aktif" : "Tidak Aktif")
                         </span>
                     </td>
-                    <td>
+                    <td class="col-actions">
                         <div class="um-actions" @onclick:stopPropagation="true">
                             <button type="button" class="btn-action-edit" title="Edit Pengguna" @onclick="() => OpenEditModal(u)">
                                 <Icon Name="pencil" Size="15" />
@@ -170,8 +163,7 @@
                     <label class="form-label">Role <span class="req">*</span></label>
                     <select class="form-input" @bind="formModel.Role">
                         <option value="Admin">Admin</option>
-                        <option value="Manager">Manager</option>
-                        <option value="User">User</option>
+                        <option value="Pengguna">Pengguna</option>
                     </select>
                 </div>
             </div>
@@ -200,7 +192,7 @@
                             <Icon Name="@(showPassword ? "eye-off" : "eye")" Size="18" />
                         </button>
                     </div>
-                    <button type="button" class="btn-sq-action" @onclick="GeneratePassword" title="Buat Password Otomatis">
+                    <button type="button" class="btn-sq-action" @onclick="GeneratePassword" title="Buat Password Otomatis Kuat">
                         <Icon Name="refresh-cw" Size="18" />
                     </button>
                     <button type="button" class="btn-sq-action" @onclick="CopyPassword" title="Salin Password">
@@ -230,7 +222,7 @@
     </ChildContent>
     <FooterContent>
         <button type="button" class="btn-outline-pill" @onclick="() => showAddModal = false" disabled="@isFormSubmitting">Batal</button>
-        <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveNewUser" disabled="@isFormSubmitting">
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveNewUser" disabled="@(isFormSubmitting || (!string.IsNullOrEmpty(newPasswordInput) && GetPasswordStrength(newPasswordInput) < 3))">
             @if (isFormSubmitting)
             {
                 <span class="spinner-sm"></span>
@@ -285,8 +277,7 @@
                         <label class="form-label">Role <span class="req">*</span></label>
                         <select class="form-input" @bind="editModel.Role">
                             <option value="Admin">Admin</option>
-                            <option value="Manager">Manager</option>
-                            <option value="User">User</option>
+                            <option value="Pengguna">Pengguna</option>
                         </select>
                     </div>
                 </div>
@@ -443,7 +434,7 @@
                             <Icon Name="@(showPassword ? "eye-off" : "eye")" Size="18" />
                         </button>
                     </div>
-                    <button type="button" class="btn-sq-action" @onclick="GeneratePassword" title="Buat Password Otomatis">
+                    <button type="button" class="btn-sq-action" @onclick="GeneratePassword" title="Buat Password Otomatis Kuat">
                         <Icon Name="refresh-cw" Size="18" />
                     </button>
                     <button type="button" class="btn-sq-action" @onclick="CopyPassword" title="Salin Password">
@@ -473,7 +464,7 @@
     </ChildContent>
     <FooterContent>
         <button type="button" class="btn-outline-pill" @onclick="() => showResetPasswordModal = false">Batal</button>
-        <button type="button" class="btn-primary-pill btn-yellow" @onclick="SubmitResetPassword" disabled="@string.IsNullOrWhiteSpace(newPasswordInput)">Simpan Password</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="SubmitResetPassword" disabled="@(string.IsNullOrWhiteSpace(newPasswordInput) || GetPasswordStrength(newPasswordInput) < 3)">Simpan Password</button>
     </FooterContent>
 </AppModal>
 
@@ -660,15 +651,13 @@
         formModel = new User
         {
             Department = "IT & Digital",
-            Role = "User",
+            Role = "Pengguna",
             Status = "active",
             EmployeeId = $"PSD-{new Random().Next(1050, 9999)}"
         };
         hasAddSubmitted = false;
         isFormSubmitting = false;
-        newPasswordInput = "";
-        showPassword = false;
-        forceChangePassword = true;
+        GeneratePassword(); // Auto-generate high strength password
         showAddModal = true;
     }
 
@@ -677,6 +666,12 @@
         hasAddSubmitted = true;
         if (string.IsNullOrWhiteSpace(formModel.FullName) || !IsValidEmail(formModel.Email) || string.IsNullOrWhiteSpace(formModel.EmployeeId))
         {
+            return;
+        }
+
+        if (GetPasswordStrength(newPasswordInput) < 3)
+        {
+            Toast.Error("Password belum memenuhi syarat kekuatan 'Kuat'.");
             return;
         }
 
@@ -689,13 +684,13 @@
 
         if (success)
         {
-            Toast.Success($"User '{formModel.FullName}' berhasil ditambahkan.");
+            Toast.Success($"Pengguna '{formModel.FullName}' berhasil ditambahkan.");
             currentPage = 1;
             await LoadUsers();
         }
         else
         {
-            Toast.Error("Gagal menambahkan user. NIK atau Email sudah terdaftar.");
+            Toast.Error("Gagal menambahkan pengguna. NIK atau Email sudah terdaftar.");
         }
     }
 
@@ -728,12 +723,12 @@
 
         if (success)
         {
-            Toast.Success("Data user berhasil diperbarui.");
+            Toast.Success("Data pengguna berhasil diperbarui.");
             await LoadUsers();
         }
         else
         {
-            Toast.Error("Gagal memperbarui data user.");
+            Toast.Error("Gagal memperbarui data pengguna.");
         }
     }
 
@@ -766,7 +761,7 @@
         if (userToDelete != null)
         {
             await UserService.DeleteUserAsync(userToDelete.Id);
-            Toast.Success("User berhasil dihapus.");
+            Toast.Success("Pengguna berhasil dihapus.");
             showDeleteModal = false;
             await LoadUsers();
         }
@@ -782,8 +777,8 @@
     {
         csvPreviewList = new List<User>
         {
-            new() { FullName = "Anton Kurniawan", Email = "anton.k@ptpersada.co.id", Department = "Operasional", Role = "User", EmployeeId = "PSD-2001", Status = "active" },
-            new() { FullName = "Rina Susanti", Email = "rina.s@ptpersada.co.id", Department = "Keuangan", Role = "Manager", EmployeeId = "PSD-2002", Status = "active" },
+            new() { FullName = "Anton Kurniawan", Email = "anton.k@ptpersada.co.id", Department = "Operasional", Role = "Pengguna", EmployeeId = "PSD-2001", Status = "active" },
+            new() { FullName = "Rina Susanti", Email = "rina.s@ptpersada.co.id", Department = "Keuangan", Role = "Pengguna", EmployeeId = "PSD-2002", Status = "active" },
             new() { FullName = "Doni Ramadhan", Email = "doni.r@ptpersada.co.id", Department = "IT & Digital", Role = "Admin", EmployeeId = "PSD-2003", Status = "active" }
         };
     }
@@ -793,7 +788,7 @@
         if (csvPreviewList.Any())
         {
             var count = await UserService.ImportUsersAsync(csvPreviewList);
-            Toast.Success($"{count} user baru berhasil diimpor dari CSV.");
+            Toast.Success($"{count} pengguna baru berhasil diimpor dari CSV.");
             csvPreviewList.Clear();
             showImportModal = false;
             await LoadUsers();
@@ -809,18 +804,70 @@
     private void OpenResetPasswordModal()
     {
         userToReset = editModel ?? selectedUserForDetail;
-        newPasswordInput = "";
-        showPassword = false;
-        forceChangePassword = true;
+        GeneratePassword();
         showResetPasswordModal = true;
     }
 
     private void GeneratePassword()
     {
-        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
-        var random = new Random();
-        newPasswordInput = new string(Enumerable.Repeat(chars, 10).Select(s => s[random.Next(s.Length)]).ToArray());
+        string pwd;
+        do
+        {
+            pwd = GenerateRandomCandidate(14);
+        } while (!IsPasswordStrongEnough(pwd));
+
+        newPasswordInput = pwd;
         showPassword = true;
+    }
+
+    private static string GenerateRandomCandidate(int length)
+    {
+        const string uppers = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        const string lowers = "abcdefghijkmnopqrstuvwxyz";
+        const string digits = "23456789";
+        const string symbols = "!@#$%^&*";
+        const string all = uppers + lowers + digits + symbols;
+        var random = new Random();
+        
+        var chars = new List<char>
+        {
+            uppers[random.Next(uppers.Length)],
+            uppers[random.Next(uppers.Length)],
+            lowers[random.Next(lowers.Length)],
+            lowers[random.Next(lowers.Length)],
+            digits[random.Next(digits.Length)],
+            digits[random.Next(digits.Length)],
+            symbols[random.Next(symbols.Length)],
+            symbols[random.Next(symbols.Length)]
+        };
+        while (chars.Count < length)
+        {
+            chars.Add(all[random.Next(all.Length)]);
+        }
+        return new string(chars.OrderBy(_ => random.Next()).ToArray());
+    }
+
+    private static bool IsPasswordStrongEnough(string pwd)
+    {
+        if (string.IsNullOrEmpty(pwd) || pwd.Length < 14) return false;
+        bool hasUpper = pwd.Any(char.IsUpper);
+        bool hasLower = pwd.Any(char.IsLower);
+        bool hasDigit = pwd.Any(char.IsDigit);
+        bool hasSymbol = pwd.Any(ch => !char.IsLetterOrDigit(ch));
+        if (!hasUpper || !hasLower || !hasDigit || !hasSymbol) return false;
+
+        // No 3+ sequential (e.g. abc, 123)
+        for (int i = 0; i < pwd.Length - 2; i++)
+        {
+            if (pwd[i+1] == pwd[i] + 1 && pwd[i+2] == pwd[i] + 2) return false;
+            if (pwd[i+1] == pwd[i] - 1 && pwd[i+2] == pwd[i] - 2) return false;
+        }
+        // No 3+ repeated (e.g. aaa, 111)
+        for (int i = 0; i < pwd.Length - 2; i++)
+        {
+            if (pwd[i] == pwd[i+1] && pwd[i] == pwd[i+2]) return false;
+        }
+        return true;
     }
 
     private async Task CopyPassword()
@@ -835,6 +882,11 @@
     private async Task SubmitResetPassword()
     {
         if (string.IsNullOrWhiteSpace(newPasswordInput)) return;
+        if (GetPasswordStrength(newPasswordInput) < 3)
+        {
+            Toast.Error("Password belum memenuhi syarat kekuatan 'Kuat'.");
+            return;
+        }
         
         Toast.Success($"Password untuk '{(userToReset?.FullName ?? "Pengguna")}' berhasil diperbarui.");
         showResetPasswordModal = false;
@@ -845,11 +897,9 @@
     private int GetPasswordStrength(string pwd)
     {
         if (string.IsNullOrEmpty(pwd)) return 0;
-        int score = 0;
-        if (pwd.Length >= 6) score++;
-        if (pwd.Length >= 8 && (pwd.Any(char.IsDigit) || pwd.Any(char.IsPunctuation) || pwd.Any(char.IsSymbol))) score++;
-        if (pwd.Length >= 10 && pwd.Any(char.IsUpper) && pwd.Any(char.IsDigit) && (pwd.Any(char.IsPunctuation) || pwd.Any(char.IsSymbol))) score++;
-        return Math.Max(1, Math.Min(score, 3));
+        if (IsPasswordStrongEnough(pwd)) return 3; // Kuat
+        if (pwd.Length >= 8 && (pwd.Any(char.IsDigit) || pwd.Any(ch => !char.IsLetterOrDigit(ch)))) return 2; // Sedang
+        return 1; // Lemah
     }
 
     private string GetPasswordStrengthLabel(int score) => score switch

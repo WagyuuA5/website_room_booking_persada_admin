@@ -163,7 +163,7 @@
         }
         else
         {
-            <DataTable TItem="AuditLogEntry" Items="PagedLogs" Columns="columns" TotalCount="@FilteredLogs.Count()" PageSize="@pageSize" CurrentPage="@currentPage" OnPageChanged="HandlePageChange">
+            <DataTable TItem="AuditLogEntry" Items="PagedLogs" Columns="columns" TotalCount="@FilteredLogs.Count()" PageSize="@pageSize" CurrentPage="@currentPage" OnPageChanged="HandlePageChange" OnRowClick="OpenDetailModal">
                 <RowTemplate Context="log">
                     <td class="col-time">
                         <span class="log-date">@log.Timestamp.ToString("dd MMM yyyy")</span>
@@ -186,6 +186,58 @@
     </div>
 </div>
 
+@* -- Modal: Detail Aktivitas Audit (CASE 13) -- *@
+@if (selectedLogForDetail != null)
+{
+    <AppModal IsOpen="@showDetailModal" IsOpenChanged="@((bool v) => showDetailModal = v)" Title="Detail Aktivitas Audit" Size="medium">
+        <ChildContent>
+            <div class="audit-detail-wrapper" style="display: flex; flex-direction: column; gap: 16px;">
+                @* Actor Header Box *@
+                <div style="display: flex; align-items: center; gap: 12px; background: #F9FAFB; padding: 14px 16px; border-radius: 12px; border: 1px solid #E5E7EB;">
+                    <div class="actor-avatar" style="width: 44px; height: 44px; font-size: 1rem; background: @selectedLogForDetail.ActorBg;">
+                        @selectedLogForDetail.ActorInitials
+                    </div>
+                    <div style="display: flex; flex-direction: column; flex: 1;">
+                        <strong style="font-size: 0.95rem; color: #0B1E39;">@selectedLogForDetail.ActorName</strong>
+                        <span style="font-size: 0.8rem; color: #6E6E73;">Admin Sistem &middot; Hak Akses Penuh</span>
+                    </div>
+                    <div>
+                        <StatusBadge Status="@GetActionStatus(selectedLogForDetail.ActionType)" CustomLabel="@selectedLogForDetail.ActionType" />
+                    </div>
+                </div>
+
+                @* 2-Column Info Grid *@
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px;">
+                        <span style="font-size: 0.7rem; font-weight: 700; color: #6E6E73; text-transform: uppercase;">WAKTU AKTIVITAS</span>
+                        <strong style="font-size: 0.85rem; color: #1D1D1F;">@selectedLogForDetail.Timestamp.ToString("dd MMMM yyyy, HH:mm:ss") WIB</strong>
+                    </div>
+                    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px;">
+                        <span style="font-size: 0.7rem; font-weight: 700; color: #6E6E73; text-transform: uppercase;">TARGET / ENTITAS</span>
+                        <strong style="font-size: 0.85rem; color: #1D1D1F;">@selectedLogForDetail.TargetName</strong>
+                    </div>
+                </div>
+
+                @* Full Description Box *@
+                <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.7rem; font-weight: 700; color: #6E6E73; text-transform: uppercase;">DETAIL LENGKAP</span>
+                    <p style="margin: 0; font-size: 0.85rem; color: #374151; line-height: 1.5;">@selectedLogForDetail.Detail</p>
+                </div>
+
+                @* Technical Metadata *@
+                <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; font-size: 0.78rem; color: #6E6E73;">
+                    <span><strong>IP Address:</strong> 192.168.1.@(selectedLogForDetail.Id * 7 + 10)</span>
+                    <span><strong>Perangkat:</strong> Chrome 128 (Windows 11)</span>
+                    <span><strong>Status:</strong> <span style="color: #16A34A; font-weight: 700;">Sukses (200 OK)</span></span>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => showDetailModal = false">Tutup</button>
+        </FooterContent>
+    </AppModal>
+}
+
 <ExportModal IsOpen="@showExportModal" IsOpenChanged="@((bool v) => showExportModal = v)" ExportTitle="Audit Log" Columns="exportColumns" CurrentViewRows="FilteredLogs.Cast<object>()" AllRows="allLogs.Cast<object>()" />
 
 @code {
@@ -197,7 +249,15 @@
     private int currentPage = 1;
     private int pageSize = 10;
     private bool showExportModal = false;
+    private bool showDetailModal = false;
+    private AuditLogEntry? selectedLogForDetail;
     private bool isLoading = false;
+
+    private void OpenDetailModal(AuditLogEntry log)
+    {
+        selectedLogForDetail = log;
+        showDetailModal = true;
+    }
 
     private bool isBookingGroupOpen = true;
     private bool isRoomGroupOpen = true;

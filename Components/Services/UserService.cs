@@ -24,18 +24,18 @@ public class UserService : IUserService
     {
         var sampleUsers = new List<(string Name, string Email, string Dept, string Role, string Status, int Bookings, string EmpId, string Phone)>
         {
-            ("Budi Santoso", "budi.santoso@ptpersada.co.id", "Operasional", "Manager", "active", 12, "EMP-1001", "+62 811-2345-6789"),
-            ("Sarah Jenkins", "sarah.j@ptpersada.co.id", "IT & Digital", "Administrator", "active", 28, "EMP-1002", "+62 812-3456-7890"),
-            ("Ahmad Fauzi", "ahmad.f@ptpersada.co.id", "IT & Digital", "User", "active", 15, "EMP-1003", "+62 813-4567-8901"),
-            ("Dewi Kartika", "dewi.k@ptpersada.co.id", "Sumber Daya Manusia (SDM)", "Approver", "active", 9, "EMP-1004", "+62 814-5678-9012"),
-            ("Rizky Hidayat", "rizky.h@ptpersada.co.id", "Keuangan", "User", "inactive", 3, "EMP-1005", "+62 815-6789-0123"),
-            ("Maya Putri", "maya.p@ptpersada.co.id", "Marketing & Komunikasi", "Viewer", "active", 7, "EMP-1006", "+62 816-7890-1234"),
-            ("Eko Prasetyo", "eko.p@ptpersada.co.id", "General Affairs (GA)", "User", "active", 18, "EMP-1007", "+62 817-8901-2345"),
-            ("Siti Nurhaliza", "siti.n@ptpersada.co.id", "Legal & Kepatuhan", "Approver", "active", 11, "EMP-1008", "+62 818-9012-3456"),
-            ("Hendra Wijaya", "hendra.w@ptpersada.co.id", "Layanan Keamanan", "User", "active", 5, "EMP-1009", "+62 819-0123-4567"),
-            ("Lestari Kusuma", "lestari.k@ptpersada.co.id", "Call Center & Layanan Pelanggan", "User", "inactive", 1, "EMP-1010", "+62 820-1234-5678"),
-            ("Wahyu Pratama", "wahyu.p@ptpersada.co.id", "Teknikal & Pemeliharaan Telekomunikasi", "Manager", "active", 21, "EMP-1011", "+62 821-2345-6789"),
-            ("Rani Anggraini", "rani.a@ptpersada.co.id", "Layanan Perkantoran", "User", "active", 8, "EMP-1012", "+62 822-3456-7890")
+            ("Budi Santoso", "budi.santoso@ptpersada.co.id", "Operasional", "Pengguna", "active", 12, "EMP-1001", "+62 811-2345-6789"),
+            ("Sarah Jenkins", "sarah.j@ptpersada.co.id", "IT & Digital", "Admin", "active", 28, "EMP-1002", "+62 812-3456-7890"),
+            ("Ahmad Fauzi", "ahmad.f@ptpersada.co.id", "IT & Digital", "Pengguna", "active", 15, "EMP-1003", "+62 813-4567-8901"),
+            ("Dewi Kartika", "dewi.k@ptpersada.co.id", "Sumber Daya Manusia (SDM)", "Admin", "active", 9, "EMP-1004", "+62 814-5678-9012"),
+            ("Rizky Hidayat", "rizky.h@ptpersada.co.id", "Keuangan", "Pengguna", "inactive", 3, "EMP-1005", "+62 815-6789-0123"),
+            ("Maya Putri", "maya.p@ptpersada.co.id", "Marketing & Komunikasi", "Pengguna", "active", 7, "EMP-1006", "+62 816-7890-1234"),
+            ("Eko Prasetyo", "eko.p@ptpersada.co.id", "General Affairs (GA)", "Pengguna", "active", 18, "EMP-1007", "+62 817-8901-2345"),
+            ("Siti Nurhaliza", "siti.n@ptpersada.co.id", "Legal & Kepatuhan", "Pengguna", "active", 11, "EMP-1008", "+62 818-9012-3456"),
+            ("Hendra Wijaya", "hendra.w@ptpersada.co.id", "Layanan Keamanan", "Pengguna", "active", 5, "EMP-1009", "+62 819-0123-4567"),
+            ("Lestari Kusuma", "lestari.k@ptpersada.co.id", "Call Center & Layanan Pelanggan", "Pengguna", "inactive", 1, "EMP-1010", "+62 820-1234-5678"),
+            ("Wahyu Pratama", "wahyu.p@ptpersada.co.id", "Teknikal & Pemeliharaan Telekomunikasi", "Admin", "active", 21, "EMP-1011", "+62 821-2345-6789"),
+            ("Rani Anggraini", "rani.a@ptpersada.co.id", "Layanan Perkantoran", "Pengguna", "active", 8, "EMP-1012", "+62 822-3456-7890")
         };
 
         int id = 1;
@@ -70,7 +70,7 @@ public class UserService : IUserService
             "Layanan Perkantoran", 
             "Teknikal & Pemeliharaan Telekomunikasi" 
         };
-        var roles = new[] { "Administrator", "Manager", "User", "Viewer", "Approver" };
+        var roles = new[] { "Admin", "Pengguna" };
         var firstNames = new[] { "Andi", "Bambang", "Citra", "Dian", "Fajar", "Gita", "Hadi", "Indah", "Joko", "Kartika", "Lukman", "Mega", "Nugroho", "Putri", "Rendra" };
         var lastNames = new[] { "Saputra", "Pratama", "Wibowo", "Siregar", "Kusuma", "Utami", "Setiawan", "Lestari", "Hidayat", "Nugraha" };
 

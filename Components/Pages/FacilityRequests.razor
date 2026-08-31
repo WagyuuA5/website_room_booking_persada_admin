@@ -85,36 +85,41 @@
             @foreach (var req in PagedRequests)
             {
                 <div class="fr-request-card @(req.IsUrgent ? "card-urgent" : "")" @onclick="() => OpenDetail(req)">
-                    <div class="fr-card-left">
-                        <div class="fr-avatar-col">
-                            <div class="fr-avatar" style="background: @req.AvatarBg;">@req.RequesterInitials</div>
-                        </div>
-                        <div class="fr-main-col">
-                            <div class="fr-card-top-row">
-                                <h4 class="fr-card-title">@req.Title</h4>
-                                @if (req.IsUrgent)
-                                {
-                                    <span class="badge-urgent-pill"><Icon Name="alert-triangle" Size="12" /> Mendesak</span>
-                                }
-                            </div>
-                            <div class="fr-card-meta-row">
-                                <span class="fr-meta-item">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fr-meta-icon"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                    @req.RoomName
-                                </span>
-                                <span class="fr-meta-item">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fr-meta-icon"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                    @req.BookingDate.ToString("dd MMM yyyy, HH:mm")
-                                </span>
-                                <span class="fr-meta-item code-text">#@req.RequestId</span>
-                                <span class="fr-meta-item user-info">@req.RequesterName (@req.Department)</span>
-                            </div>
-                            <div class="fr-card-items-summary">
-                                <span><Icon Name="package" Size="14" /> @req.ItemsSummary</span>
-                            </div>
-                        </div>
+                    @* Line 1: Header (Avatar + Title + Urgency) *@
+                    <div class="fr-card-header-row">
+                        <div class="fr-avatar" style="background: @req.AvatarBg;">@req.RequesterInitials</div>
+                        <h4 class="fr-card-title">@req.Title</h4>
+                        @if (req.IsUrgent)
+                        {
+                            <span class="badge-urgent-pill"><Icon Name="alert-triangle" Size="12" /> Mendesak</span>
+                        }
                     </div>
-                    <div class="fr-card-right" @onclick:stopPropagation="true">
+
+                    @* Line 2: Location, Date, ID, User *@
+                    <div class="fr-card-meta-row">
+                        <span class="fr-meta-item">
+                            <Icon Name="map-pin" Size="14" CssClass="fr-meta-icon" />
+                            @req.RoomName
+                        </span>
+                        <span class="fr-meta-dot">&middot;</span>
+                        <span class="fr-meta-item">
+                            <Icon Name="calendar" Size="14" CssClass="fr-meta-icon" />
+                            @req.BookingDate.ToString("dd MMM yyyy, HH:mm")
+                        </span>
+                        <span class="fr-meta-dot">&middot;</span>
+                        <span class="fr-meta-item code-text">#@req.RequestId</span>
+                        <span class="fr-meta-dot">&middot;</span>
+                        <span class="fr-meta-item user-info">@req.RequesterName (@req.Department)</span>
+                    </div>
+
+                    @* Line 3: Items Summary *@
+                    <div class="fr-card-items-summary">
+                        <Icon Name="package" Size="14" CssClass="text-muted" />
+                        <span>@req.ItemsSummary</span>
+                    </div>
+
+                    @* Line 4: Footer (Status Badge Left, Action Right) *@
+                    <div class="fr-card-footer-row" @onclick:stopPropagation="true">
                         <StatusBadge Status="@req.Status" />
                         <button type="button" class="btn-action-quick @(req.Status == "pending" ? "btn-process" : "btn-update")" @onclick="() => OpenDetail(req)">
                             @(req.Status == "pending" ? "Proses" : "Perbarui")
@@ -162,14 +167,14 @@
                     </div>
                 </div>
 
-                @* Requested Items Section *@
+                @* Requested Items Section with Facility Icons *@
                 <div class="fr-section">
                     <h5 class="fr-section-title">Item Permintaan</h5>
                     <div class="fr-items-list">
                         @foreach (var item in selectedRequest.Items)
                         {
                             <div class="fr-item-row">
-                                <div class="fr-item-icon"><Icon Name="package" Size="18" /></div>
+                                <div class="fr-item-icon"><Icon Name="@IconHelper.GetFacilityIcon(item.Category + " " + item.Description)" Size="18" /></div>
                                 <div class="fr-item-text">
                                     <strong>@item.Category</strong>
                                     <span>@item.Description</span>
@@ -190,7 +195,7 @@
                     </div>
                 }
 
-                @* Action Fields: Assign To & Internal Notes *@
+                @* Action Fields: Assign To & Internal Notes Aligned *@
                 <div class="fr-action-fields-grid">
                     <div class="fr-field">
                         <label class="fr-field-label">Tugaskan Ke (PIC)</label>

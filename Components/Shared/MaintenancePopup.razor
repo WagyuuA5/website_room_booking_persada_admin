@@ -1,24 +1,49 @@
+@namespace booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Helpers
 
 <AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Perawatan Ruangan" Size="medium" OnClose="Close">
     <ChildContent>
         <div class="m-body">
-            <p class="m-subtitle" style="font-weight:600; margin-bottom: 1rem;">@Room?.Name (@Room?.Floor)</p>
+            @if (Room != null)
+            {
+                <p class="m-subtitle" style="font-weight:600; margin-bottom: 1rem; color: var(--color-primary, #0B1E39);">@Room.Name (@Room.Floor)</p>
+            }
             
+            @* 1. Kategori Perawatan with Add Category support (CASE 5) *@
             <div class="m-field" style="margin-bottom: 1rem;">
-                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Kategori</label>
-                <select class="m-input" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" @bind="selectedCategory">
-                    <option value="">Pilih Kategori</option>
-                    @foreach (var cat in categories)
-                    {
-                        <option value="@cat">@cat</option>
-                    }
-                </select>
+                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Kategori Perawatan</label>
+                @if (isAddingNewCategory)
+                {
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" class="m-input" style="flex: 1; padding: 0.45rem 0.75rem; border: 1px solid #2563EB; border-radius: 6px;"
+                               placeholder="Nama kategori baru..." @bind="newCategoryText" @bind:event="oninput" />
+                        <button type="button" class="btn-primary-pill btn-sm" @onclick="ConfirmAddNewCategory" title="Simpan Kategori">
+                            <Icon Name="check" Size="14" />
+                        </button>
+                        <button type="button" class="btn-outline-pill btn-sm" @onclick="CancelAddNewCategory" title="Batal">
+                            <Icon Name="x" Size="14" />
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <select class="m-input" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:6px; background:#fff;" 
+                            @bind="selectedCategory" @bind:after="OnCategoryDropdownChanged">
+                        <option value="">Pilih Kategori</option>
+                        @foreach (var cat in categories)
+                        {
+                            <option value="@cat">@cat</option>
+                        }
+                        <option value="__NEW__" style="color: #2563EB; font-weight: 600;">+ Tambah Kategori Baru...</option>
+                    </select>
+                }
             </div>
             
+            @* 2. Prioritas *@
             <div class="m-field" style="margin-bottom: 1rem;">
                 <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Prioritas</label>
-                <select class="m-input" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" @bind="selectedPriority">
+                <select class="m-input" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:6px; background:#fff;" @bind="selectedPriority">
                     <option value="Rendah">Rendah</option>
                     <option value="Sedang">Sedang</option>
                     <option value="Tinggi">Tinggi</option>
@@ -26,53 +51,64 @@
                 </select>
             </div>
 
+            @* 3. Fasilitas yang Diservis with Icons & Add Facility support (CASE 3 & CASE 6) *@
             <div class="m-field" style="margin-bottom: 1rem;">
-                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Fasilitas yang Diperbaiki</label>
-                <div class="m-facilities-chips" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
-                    @foreach (var fac in facilitiesServiced)
+                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Fasilitas yang Diservis</label>
+                <div class="m-facilities-chips" style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center;">
+                    @foreach (var fac in availableFacilities)
                     {
-                        <span style="padding:0.25rem 0.5rem; background:#f3f4f6; border-radius:1rem; font-size:0.85rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.25rem;" @onclick="() => facilitiesServiced.Remove(fac)">@fac <Icon Name="x" Size="12" /></span>
+                        var isSelected = facilitiesServiced.Contains(fac);
+                        <button type="button" 
+                                style="padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.15s ease; border: 1px solid @(isSelected ? "var(--color-brand-yellow, #F2B705)" : "#E5E7EB"); background: @(isSelected ? "var(--color-brand-yellow, #F2B705)" : "#F9FAFB"); color: @(isSelected ? "#000000" : "#4B5563");"
+                                @onclick="() => ToggleServicedFacility(fac)">
+                            <Icon Name="@(isSelected ? "check" : IconHelper.GetFacilityIcon(fac))" Size="14" />
+                            <span>@fac</span>
+                        </button>
                     }
-                    <button class="btn-outline-pill btn-sm" @onclick="AddCustomFacility"><Icon Name="plus" Size="14" /> Tambah</button>
+                    <button type="button" class="btn-outline-pill btn-sm" @onclick="() => showAddFacility = !showAddFacility">
+                        <Icon Name="plus" Size="13" /> Tambah
+                    </button>
                 </div>
-                @if(showAddFacility)
+
+                @if (showAddFacility)
                 {
-                    <div style="margin-top:0.5rem; display:flex; gap:0.5rem; align-items:center;">
-                        <div style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:4px; background:#F3F4F6; color:#2563EB; border:1px solid #ccc;">
-                            <Icon Name="@(string.IsNullOrWhiteSpace(newFacility) ? "tag" : booking_room_admin.Components.Helpers.IconHelper.GetFacilityIcon(newFacility))" Size="16" />
+                    <div style="margin-top:0.75rem; display:flex; gap:0.5rem; align-items:center;">
+                        <div style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:6px; background:#F3F4F6; color:var(--color-primary, #0B1E39); border:1px solid #D1D5DB;">
+                            <Icon Name="@(string.IsNullOrWhiteSpace(newFacility) ? "tag" : IconHelper.GetFacilityIcon(newFacility))" Size="16" />
                         </div>
-                        <input type="text" @bind="newFacility" @bind:event="oninput" placeholder="Nama fasilitas..." style="flex:1; padding:0.35rem 0.5rem; border:1px solid #ccc; border-radius:4px;" />
-                        <button @onclick="ConfirmAddFacility" style="padding:0.35rem 0.75rem; background:#2563eb; color:white; border:none; border-radius:4px; cursor:pointer;">Tambah</button>
+                        <input type="text" @bind="newFacility" @bind:event="oninput" placeholder="Nama fasilitas yang diservis..." style="flex:1; padding:0.45rem 0.75rem; border:1px solid #D1D5DB; border-radius:6px;" />
+                        <button type="button" class="btn-primary-pill btn-yellow btn-sm" @onclick="ConfirmAddFacility">Tambah</button>
                     </div>
                 }
             </div>
             
+            @* 4. Durasi Cepat *@
             <div class="m-field" style="margin-bottom: 1rem;">
                 <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Durasi (Cepat)</label>
                 <div style="display:flex; gap:0.5rem;">
-                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="20"?"#2563eb":"#fff"); color:@(selectedDuration=="20"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "20")">20 Menit</button>
-                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="30"?"#2563eb":"#fff"); color:@(selectedDuration=="30"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "30")">30 Menit</button>
-                    <button style="padding:0.25rem 0.75rem; border:1px solid #ccc; border-radius:1rem; background:@(selectedDuration=="60"?"#2563eb":"#fff"); color:@(selectedDuration=="60"?"#fff":"#333"); cursor:pointer;" @onclick="@(() => selectedDuration = "60")">1 Jam</button>
+                    <button type="button" style="padding:0.35rem 0.85rem; border:1px solid #D1D5DB; border-radius:999px; font-weight:600; font-size:0.82rem; background:@(selectedDuration=="20"?"var(--color-primary, #0B1E39)":"#fff"); color:@(selectedDuration=="20"?"#fff":"#374151"); cursor:pointer;" @onclick='@(() => selectedDuration = "20")'>20 Menit</button>
+                    <button type="button" style="padding:0.35rem 0.85rem; border:1px solid #D1D5DB; border-radius:999px; font-weight:600; font-size:0.82rem; background:@(selectedDuration=="30"?"var(--color-primary, #0B1E39)":"#fff"); color:@(selectedDuration=="30"?"#fff":"#374151"); cursor:pointer;" @onclick='@(() => selectedDuration = "30")'>30 Menit</button>
+                    <button type="button" style="padding:0.35rem 0.85rem; border:1px solid #D1D5DB; border-radius:999px; font-weight:600; font-size:0.82rem; background:@(selectedDuration=="60"?"var(--color-primary, #0B1E39)":"#fff"); color:@(selectedDuration=="60"?"#fff":"#374151"); cursor:pointer;" @onclick='@(() => selectedDuration = "60")'>1 Jam</button>
                 </div>
             </div>
 
+            @* 5. Deskripsi *@
             <div class="m-field" style="margin-bottom: 1rem;">
-                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Deskripsi</label>
-                <textarea style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px; min-height:80px;" @bind="description"></textarea>
+                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Deskripsi / Catatan Perawatan</label>
+                <textarea class="m-input" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:6px; min-height:80px; box-sizing:border-box;" placeholder="Masukkan detail perbaikan atau catatan teknisi..." @bind="description"></textarea>
             </div>
 
+            @* 6. Unggah Dokumentasi with Reusable ImageUploadBox (CASE 4) *@
             <div class="m-field" style="margin-bottom: 1rem;">
-                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Unggah Dokumentasi</label>
-                <div style="width:100%; padding:2rem; border:2px dashed #ccc; border-radius:4px; text-align:center; background:#f9fafb; color:#6b7280; font-size:0.9rem;">
-                    Seret & lepas file di sini (maks. 5MB)
-                </div>
+                <label class="m-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Unggah Dokumentasi Foto</label>
+                <ImageUploadBox OnImageUploaded="HandleUploadedPhoto" />
             </div>
 
         </div>
     </ChildContent>
     <FooterContent>
-        <button class="btn-outline-pill" @onclick="Close">Batal</button>
-        <button class="btn-primary-pill btn-yellow" @onclick="ConfirmMaintenance">Konfirmasi Maintenance</button>
+        <button type="button" class="btn-outline-pill" @onclick="Close">Batal</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="ConfirmMaintenance">Konfirmasi Pemeliharaan</button>
     </FooterContent>
 </AppModal>
 
@@ -82,30 +118,86 @@
     [Parameter] public EventCallback<Room> OnMaintenanceScheduled { get; set; }
     [Parameter] public Room? Room { get; set; }
 
-    private string selectedCategory = string.Empty;
-    private string selectedPriority = "Medium";
+    private string selectedCategory = "HVAC";
+    private string selectedPriority = "Tinggi";
     private string selectedDuration = "30";
     private string description = string.Empty;
+    private string uploadedDocUrl = string.Empty;
     
-    private List<string> facilitiesServiced = new() { "AC", "Proyektor" };
+    private List<string> availableFacilities = new() { "AC Unit", "Lighting/Pencahayaan", "Furniture/Perabotan", "Sound System", "Proyektor" };
+    private List<string> facilitiesServiced = new() { "AC Unit" };
     private bool showAddFacility = false;
     private string newFacility = string.Empty;
 
-    private List<string> categories = new() { "HVAC", "Perbaikan Peralatan", "Plambing", "Kelistrikan", "Kebersihan" };
+    private List<string> categories = new() { "HVAC", "Perbaikan Peralatan", "Instalasi Fasilitas", "Pembersihan Rutin", "Pemulihan Sistem Audio/Visual" };
+    private bool isAddingNewCategory = false;
+    private string newCategoryText = string.Empty;
 
-    private void AddCustomFacility()
+    private void OnCategoryDropdownChanged()
     {
-        showAddFacility = true;
+        if (selectedCategory == "__NEW__")
+        {
+            isAddingNewCategory = true;
+            newCategoryText = string.Empty;
+            selectedCategory = string.Empty;
+        }
+    }
+
+    private void ConfirmAddNewCategory()
+    {
+        if (!string.IsNullOrWhiteSpace(newCategoryText))
+        {
+            var trimmed = newCategoryText.Trim();
+            if (!categories.Contains(trimmed))
+            {
+                categories.Add(trimmed);
+            }
+            selectedCategory = trimmed;
+        }
+        isAddingNewCategory = false;
+        newCategoryText = string.Empty;
+    }
+
+    private void CancelAddNewCategory()
+    {
+        isAddingNewCategory = false;
+        newCategoryText = string.Empty;
+        selectedCategory = categories.FirstOrDefault() ?? "HVAC";
+    }
+
+    private void ToggleServicedFacility(string fac)
+    {
+        if (facilitiesServiced.Contains(fac))
+        {
+            facilitiesServiced.Remove(fac);
+        }
+        else
+        {
+            facilitiesServiced.Add(fac);
+        }
     }
 
     private void ConfirmAddFacility()
     {
-        if (!string.IsNullOrWhiteSpace(newFacility) && !facilitiesServiced.Contains(newFacility))
+        if (!string.IsNullOrWhiteSpace(newFacility))
         {
-            facilitiesServiced.Add(newFacility);
+            var trimmed = newFacility.Trim();
+            if (!availableFacilities.Contains(trimmed))
+            {
+                availableFacilities.Add(trimmed);
+            }
+            if (!facilitiesServiced.Contains(trimmed))
+            {
+                facilitiesServiced.Add(trimmed);
+            }
         }
         newFacility = string.Empty;
         showAddFacility = false;
+    }
+
+    private void HandleUploadedPhoto(string url)
+    {
+        uploadedDocUrl = url;
     }
 
     private void ConfirmMaintenance()
@@ -114,7 +206,6 @@
 
         Room.Status = "maintenance";
         Room.MaintenanceEnd = DateTime.UtcNow.AddMinutes(int.Parse(selectedDuration));
-        // You could update Room description or something here if needed.
 
         OnMaintenanceScheduled.InvokeAsync(Room);
         Close();
@@ -129,11 +220,12 @@
 
     private void Reset()
     {
-        selectedCategory = string.Empty;
-        selectedPriority = "Medium";
+        selectedCategory = "HVAC";
+        selectedPriority = "Tinggi";
         selectedDuration = "30";
         description = string.Empty;
-        facilitiesServiced = new() { "AC", "Proyektor" };
+        facilitiesServiced = new() { "AC Unit" };
         showAddFacility = false;
+        isAddingNewCategory = false;
     }
 }

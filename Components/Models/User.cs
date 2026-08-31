@@ -11,5 +11,6 @@ public class User
     public string Initials { get; set; } = string.Empty;
     public string EmployeeId { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
-    public string Role { get; set; } = "User";
+    public string Role { get; set; } = "Pengguna";
+    public string PhotoUrl { get; set; } = string.Empty;
 }

@@ -2,6 +2,7 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @inject booking_room_admin.Components.Services.ToastService Toast
+@inject NavigationManager Navigation
 
 <TopBar Title="Profil Saya" Subtitle="Kelola informasi akun dan foto profil Anda." />
 
@@ -24,7 +25,7 @@
                 </div>
                 <div class="info-group">
                     <label class="info-label">Peran (Role)</label>
-                    <input type="text" class="info-input" value="Pengontrol Sistem" disabled />
+                    <input type="text" class="info-input" value="Admin" disabled />
                 </div>
                 <div class="info-group">
                     <label class="info-label">Divisi</label>
@@ -45,6 +46,7 @@
             </div>
 
             <div class="profile-actions">
+                <button type="button" class="btn-outline-pill" style="margin-right: 8px;" @onclick="CancelEdit">Batal</button>
                 <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveChanges">
                     <Icon Name="check" Size="14" />
                     <span>Simpan Perubahan</span>
@@ -55,15 +57,36 @@
 </div>
 
 @code {
+    [SupplyParameterFromQuery]
+    public string? returnUrl { get; set; }
+
     private string adminAvatarUrl = "";
     private string fullName = "Admin Wahyu";
     private string division = "IT & Digital";
     private string phoneNumber = "+62 812-3456-7890";
     private string timeZone = "wib";
 
+    private void CancelEdit()
+    {
+        NavigateBack();
+    }
+
     private void SaveChanges()
     {
         Toast.Success("Profil akun berhasil diperbarui.");
+        NavigateBack();
+    }
+
+    private void NavigateBack()
+    {
+        if (!string.IsNullOrWhiteSpace(returnUrl))
+        {
+            Navigation.NavigateTo(returnUrl);
+        }
+        else
+        {
+            Navigation.NavigateTo("/dashboard");
+        }
     }
 }
 
