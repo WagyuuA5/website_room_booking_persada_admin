@@ -1,3 +1,6 @@
+@inject NavigationManager Navigation
+@inject booking_room_admin.Components.Services.ToastService Toast
+
 <div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
     <div class="popup-card notification-popup" @onclick:stopPropagation="true">
         <div class="popup-header">
@@ -24,9 +27,9 @@
             {
                 @foreach (var item in FilteredNotifications)
                 {
-                    <div class="notification-item @(item.IsRead ? "read" : "unread")" @onclick="() => item.IsRead = true">
-                        <div class="notification-icon-wrap">
-                            <Icon Name="@item.IconName" Size="16" />
+                    <div class="notification-item @(item.IsRead ? "read" : "unread")" @onclick="() => HandleNotificationClick(item)">
+                        <div class="notification-icon-wrap @GetIconStatusClass(item.Status)">
+                            <Icon Name="@GetNotificationIcon(item.Category, item.Status)" Size="16" />
                             @if (!item.IsRead)
                             {
                                 <span class="unread-dot"></span>
@@ -53,18 +56,59 @@
 
     private List<NotificationItem> AllNotifications = new()
     {
-        new NotificationItem { Title = "Persetujuan Ruang Rapat Utama", Message = "Permintaan booking ruang rapat utama telah disetujui.", TimeAgo = "2 menit lalu", IsRead = false, IconName = "check-circle" },
-        new NotificationItem { Title = "Pembaruan Kata Sandi Berhasil", Message = "Kata sandi akun Anda berhasil diperbarui.", TimeAgo = "15 menit lalu", IsRead = false, IconName = "shield" },
-        new NotificationItem { Title = "Laporan Mingguan Siap", Message = "Laporan penggunaan ruangan minggu ini sudah tersedia.", TimeAgo = "1 jam lalu", IsRead = true, IconName = "file-text" },
-        new NotificationItem { Title = "Jadwal Perawatan Ruangan", Message = "Ruang Diskusi B dijadwalkan perawatan besok.", TimeAgo = "2 jam lalu", IsRead = true, IconName = "wrench" }
+        new NotificationItem { Id = 1, Category = "booking", Status = "approved", Title = "Persetujuan Ruang Rapat Utama", Message = "Pemesanan ruang rapat utama telah disetujui oleh admin.", TimeAgo = "2 menit lalu", IsRead = false, TargetUrl = "/booking-management" },
+        new NotificationItem { Id = 2, Category = "security", Status = "info", Title = "Pembaruan Kata Sandi Berhasil", Message = "Kata sandi akun Anda berhasil diperbarui.", TimeAgo = "15 menit lalu", IsRead = false, TargetUrl = "/settings" },
+        new NotificationItem { Id = 3, Category = "report", Status = "info", Title = "Laporan Mingguan Siap", Message = "Laporan penggunaan ruangan minggu ini sudah tersedia.", TimeAgo = "1 jam lalu", IsRead = true, TargetUrl = "/reports" },
+        new NotificationItem { Id = 4, Category = "maintenance", Status = "warning", Title = "Jadwal Perawatan Ruangan", Message = "Ruang Diskusi B dijadwalkan perawatan berkala besok.", TimeAgo = "2 jam lalu", IsRead = true, TargetUrl = "/rooms/status" },
+        new NotificationItem { Id = 5, Category = "facility", Status = "info", Title = "Permintaan Fasilitas Baru", Message = "Permintaan catering dan proyektor untuk Ruang VIP diajukan.", TimeAgo = "3 jam lalu", IsRead = true, TargetUrl = "/facility-requests" },
+        new NotificationItem { Id = 6, Category = "itsupport", Status = "info", Title = "Tiket IT Support Masuk", Message = "Kendala koneksi HDMI di Ruang Rapat A telah dilaporkan.", TimeAgo = "4 jam lalu", IsRead = true, TargetUrl = "/reports" }
     };
 
     private IEnumerable<NotificationItem> FilteredNotifications => ActiveTab switch
     {
         "unread" => AllNotifications.Where(n => !n.IsRead),
-        "system" => AllNotifications.Where(n => n.Title.Contains("Sistem") || n.Title.Contains("Pembaruan") || n.Title.Contains("Perawatan")),
+        "system" => AllNotifications.Where(n => n.Category == "security" || n.Category == "maintenance" || n.Category == "itsupport" || n.Category == "system"),
         _ => AllNotifications
     };
+
+    private static string GetNotificationIcon(string category, string status)
+    {
+        return category.ToLowerInvariant() switch
+        {
+            "booking" or "pemesanan" => status == "rejected" ? "calendar-x" : "calendar-check",
+            "security" or "keamanan" => "shield-check",
+            "report" or "laporan" => "file-text",
+            "maintenance" or "perawatan" => "wrench",
+            "facility" or "fasilitas" => "package",
+            "itsupport" or "it" => "life-buoy",
+            "bug" => "bug",
+            "system" or "trafik" => "activity",
+            _ => "bell" // Fallback wajib: tidak pernah kosong/null
+        };
+    }
+
+    private static string GetIconStatusClass(string status) => status switch
+    {
+        "approved" => "icon-approved",
+        "rejected" => "icon-rejected",
+        "warning" => "icon-warning",
+        _ => "icon-default"
+    };
+
+    private async Task HandleNotificationClick(NotificationItem item)
+    {
+        item.IsRead = true;
+        await Close();
+
+        if (!string.IsNullOrWhiteSpace(item.TargetUrl))
+        {
+            Navigation.NavigateTo(item.TargetUrl);
+        }
+        else
+        {
+            Toast.Info("Detail informasi tidak tersedia.");
+        }
+    }
 
     private void SetTab(string tab)
     {
@@ -79,18 +123,21 @@
         }
     }
 
-    private void Close()
+    private async Task Close()
     {
         IsOpen = false;
-        IsOpenChanged.InvokeAsync(false);
+        await IsOpenChanged.InvokeAsync(false);
     }
 
     private class NotificationItem
     {
+        public int Id { get; set; }
+        public string Category { get; set; } = "";
+        public string Status { get; set; } = "info";
         public string Title { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
         public string TimeAgo { get; set; } = string.Empty;
         public bool IsRead { get; set; }
-        public string IconName { get; set; } = "bell";
+        public string TargetUrl { get; set; } = string.Empty;
     }
 }

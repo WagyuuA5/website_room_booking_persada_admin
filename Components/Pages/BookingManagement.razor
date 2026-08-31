@@ -14,13 +14,10 @@
             <Icon Name="search" Size="15" CssClass="bm-search-icon" />
             <input type="text" class="bm-search-input" placeholder="Cari berdasarkan nama, divisi, atau ruangan..." @bind="searchQuery" @bind:event="oninput" />
         </div>
-        <button type="button" class="bm-date-pill" @onclick="() => showDatePicker = true">
-            <Icon Name="calendar" Size="15" />
-            <span>@filterDateLabel</span>
-        </button>
+        <DateFilter OnDateSelectedCallback="HandleDateChanged" />
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => showManualBooking = true">
             <Icon Name="plus" Size="14" />
-            <span>+ Buat Pemesanan Manual</span>
+            <span>Buat Pemesanan Manual</span>
         </button>
     </div>
 
@@ -135,20 +132,25 @@
             <div class="bm-modal-body">
                 <p class="bm-room-desc">Ruang meeting eksekutif premium untuk sesi strategi, koordinasi tim, dan presentasi tingkat tinggi.</p>
 
-                    <div class="bm-chips-row">
-                        <span class="bm-spec-chip"><Icon Name="users" Size="14" /> @selectedBooking.ParticipantsCount Peserta</span>
-                        <span class="bm-spec-chip"><Icon Name="map-pin" Size="14" /> Gedung Pusat, Lantai 14</span>
-                    </div>
+                <div class="bm-chips-row">
+                    <span class="bm-spec-chip"><Icon Name="users" Size="14" /> @selectedBooking.ParticipantsCount Peserta</span>
+                    <span class="bm-spec-chip"><Icon Name="map-pin" Size="14" /> Gedung Pusat, Lantai 14</span>
+                </div>
 
-                    <div class="bm-section">
-                        <h5 class="bm-section-title">FASILITAS RUANGAN</h5>
-                        <div class="bm-amenities-grid">
-                            <span class="bm-amenity-item"><Icon Name="wifi" Size="14" /> Wi-Fi Cepat</span>
-                            <span class="bm-amenity-item"><Icon Name="monitor" Size="14" /> Layar 85 Inci</span>
-                            <span class="bm-amenity-item"><Icon Name="video" Size="14" /> Video Konferensi</span>
-                            <span class="bm-amenity-item"><Icon Name="coffee" Size="14" /> Katering / Minuman</span>
-                        </div>
+                <div class="bdm-room-photo-wrap" style="position:relative; width:100%; height:160px; border-radius:12px; overflow:hidden; border:1px solid var(--color-border); margin-bottom: 1rem;">
+                    <img src="@GetRoomPhoto(selectedBooking.Room)" alt="@selectedBooking.Room" style="width:100%; height:100%; object-fit:cover;" />
+                    <span class="bdm-room-badge" style="position:absolute; bottom:10px; left:10px; background:rgba(15,23,42,0.85); color:#fff; font-size:0.8rem; font-weight:700; padding:4px 10px; border-radius:999px; display:inline-flex; align-items:center; gap:5px;"><Icon Name="building" Size="14" /> @selectedBooking.Room</span>
+                </div>
+
+                <div class="bm-section">
+                    <h5 class="bm-section-title">FASILITAS RUANGAN</h5>
+                    <div class="bm-amenities-grid">
+                        <span class="bm-amenity-item"><Icon Name="wifi" Size="14" /> Wi-Fi Cepat</span>
+                        <span class="bm-amenity-item"><Icon Name="tv" Size="14" /> Layar 85 Inci</span>
+                        <span class="bm-amenity-item"><Icon Name="video" Size="14" /> Video Konferensi</span>
+                        <span class="bm-amenity-item"><Icon Name="coffee" Size="14" /> Katering / Minuman</span>
                     </div>
+                </div>
 
                 <div class="bm-detail-box">
                     <div class="bm-box-row">
@@ -172,6 +174,11 @@
                     </div>
                 </div>
 
+                <RoomLocationMiniMap RoomName="@selectedBooking.Room"
+                                     LocationText="@GetRoomLocationText(selectedBooking.Room)"
+                                     PinX="@GetRoomPinX(selectedBooking.Room)"
+                                     PinY="@GetRoomPinY(selectedBooking.Room)" />
+
                 @if (selectedBooking.Status != "pending" && !string.IsNullOrEmpty(selectedBooking.ProcessedBy))
                 {
                     <div class="bm-processed-info">
@@ -194,15 +201,12 @@
     </AppModal>
 }
 
-<DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => showDatePicker = v)" IsRangeMode="false" OnDateSelected="OnDatePicked" />
 <ManualBookingPopup @bind-IsOpen="showManualBooking" OnBookingCreated="HandleBookingCreated" />
 
 @code {
     private string searchQuery = "";
     private string selectedTab = "all";
-    private string filterDateLabel = "Semua Tanggal";
     private DateTime? selectedDateFilter;
-    private bool showDatePicker = false;
     private bool showDetailModal = false;
     private bool showManualBooking = false;
 
@@ -396,10 +400,18 @@
         currentPage = 1;
     }
 
+    private void HandleDateChanged(DateTime? d)
+    {
+        selectedDateFilter = d;
+        currentPage = 1;
+        StateHasChanged();
+    }
+
     private void OnDatePicked(DateTime? d)
     {
         selectedDateFilter = d;
-        filterDateLabel = d.HasValue ? d.Value.ToString("dd MMM yyyy") : "Semua Tanggal";
+        currentPage = 1;
+        StateHasChanged();
     }
 
     private void ResetFilters()
@@ -407,7 +419,6 @@
         searchQuery = "";
         selectedTab = "all";
         selectedDateFilter = null;
-        filterDateLabel = "Semua Tanggal";
     }
 
     private void OpenDetail(BookingExtendedItem b)
@@ -476,5 +487,45 @@
         "rejected" => "Ditolak",
         "cancelled" => "Dibatalkan",
         _ => status
+    };
+
+    private string GetRoomPhoto(string room) => room switch
+    {
+        "Ruang Dirantara" => "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800&auto=format&fit=crop&q=80",
+        "Ruang Rapat A" => "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80",
+        "Ruang Boardroom" => "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&auto=format&fit=crop&q=80",
+        "Ruang Training" => "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80",
+        "Ruang Diskusi C" => "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80",
+        _ => "https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=800&auto=format&fit=crop&q=80"
+    };
+
+    private string GetRoomLocationText(string room) => room switch
+    {
+        "Ruang Dirantara" => "Lantai 3, Sayap Utama — dekat lift eksekutif",
+        "Ruang Rapat A" => "Lantai 2, Sayap Barat — samping area pantry",
+        "Ruang Boardroom" => "Lantai 14, Area Direksi — akses kartu khusus",
+        "Ruang Training" => "Lantai 1, Hall Utama — depan lobby barat",
+        "Ruang Diskusi C" => "Lantai 2, Sayap Timur — dekat tangga darurat",
+        _ => "Lantai 14, Sayap VIP — koridor barat"
+    };
+
+    private double GetRoomPinX(string room) => room switch
+    {
+        "Ruang Dirantara" => 35.0,
+        "Ruang Rapat A" => 65.0,
+        "Ruang Boardroom" => 50.0,
+        "Ruang Training" => 25.0,
+        "Ruang Diskusi C" => 75.0,
+        _ => 60.0
+    };
+
+    private double GetRoomPinY(string room) => room switch
+    {
+        "Ruang Dirantara" => 40.0,
+        "Ruang Rapat A" => 30.0,
+        "Ruang Boardroom" => 55.0,
+        "Ruang Training" => 70.0,
+        "Ruang Diskusi C" => 60.0,
+        _ => 45.0
     };
 }

@@ -12,4 +12,9 @@ public class Room
     public int TotalBookings { get; set; }
     public List<string> Facilities { get; set; } = new();
     public DateTime? MaintenanceEnd { get; set; }
+    public string PhotoUrl { get; set; } = string.Empty;
+    public List<string> GalleryPhotos { get; set; } = new();
+    public double PinX { get; set; } = 50.0;
+    public double PinY { get; set; } = 50.0;
+    public string LocationNotes { get; set; } = string.Empty;
 }

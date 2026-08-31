@@ -1,0 +1,83 @@
+﻿@namespace booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+
+<div class="mini-map-container @CssClass">
+    <div class="mini-map-header">
+        <div class="mini-map-title">
+            <Icon Name="map-pin" Size="14" />
+            <span>@LocationText</span>
+        </div>
+        @if (ShowZoomButton)
+        {
+            <button type="button" class="mini-map-zoom-btn" @onclick="() => showLightbox = true" title="Perbesar Denah Lokasi">
+                <Icon Name="eye" Size="13" />
+                <span>Lihat Denah Penuh</span>
+            </button>
+        }
+    </div>
+
+    <div class="mini-map-canvas" @onclick="() => { if (ShowZoomButton) showLightbox = true; }">
+        <div class="floorplan-layout-bg">
+            <div class="layout-zone zone-left"><span>Sayap Barat</span></div>
+            <div class="layout-zone zone-center"><span>Lobby & Lift Utama</span></div>
+            <div class="layout-zone zone-right"><span>Sayap Timur</span></div>
+            
+            @* Highlighted Active Pin *@
+            <div class="active-room-marker" style="left: @($"{PinX}%"); top: @($"{PinY}%");">
+                <div class="marker-pulse"></div>
+                <div class="marker-pin">
+                    <Icon Name="map-pin" Size="14" />
+                </div>
+                <span class="marker-label">@RoomName</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Lightbox Modal Denah Penuh *@
+@if (showLightbox)
+{
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) showLightbox = false; })" Title="@($"Denah Lokasi — {RoomName}")" Size="large">
+        <ChildContent>
+            <div class="lightbox-map-content">
+                <div class="lightbox-map-header-info">
+                    <div class="lbm-meta">
+                        <strong>@RoomName</strong>
+                        <span>@LocationText</span>
+                    </div>
+                    <span class="lbm-hint">Denah Lantai Kantor PT Personel Alih Daya Tbk</span>
+                </div>
+                <div class="lightbox-map-view">
+                    <div class="floorplan-layout-bg large">
+                        <div class="layout-zone zone-left"><span>Sayap Barat (Meeting & Coworking)</span></div>
+                        <div class="layout-zone zone-center"><span>Lobby Tengah & Lift Eksekutif</span></div>
+                        <div class="layout-zone zone-right"><span>Sayap Timur (Ruang Rapat Utama & VIP)</span></div>
+                        
+                        <div class="active-room-marker large" style="left: @($"{PinX}%"); top: @($"{PinY}%");">
+                            <div class="marker-pulse"></div>
+                            <div class="marker-pin">
+                                <Icon Name="map-pin" Size="18" />
+                            </div>
+                            <span class="marker-label">@RoomName</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => showLightbox = false">Tutup</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@code {
+    [Parameter] public string RoomName { get; set; } = "Ruang Rapat";
+    [Parameter] public string LocationText { get; set; } = "Lantai 2, Gedung Pusat";
+    [Parameter] public double PinX { get; set; } = 50.0;
+    [Parameter] public double PinY { get; set; } = 50.0;
+    [Parameter] public bool ShowZoomButton { get; set; } = true;
+    [Parameter] public string CssClass { get; set; } = "";
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private bool showLightbox = false;
+}

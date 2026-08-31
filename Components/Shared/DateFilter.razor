@@ -1,19 +1,29 @@
 @namespace booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Shared
 
-<div class="date-filter-wrapper" style="position: relative; display: inline-block;">
-    <button type="button" class="topbar-date-btn" @onclick="ToggleDatePicker" title="Pilih rentang tanggal">
-        <Icon Name="calendar" Size="15" />
-        <span>@dateRangeLabel</span>
+<div class="date-filter-wrapper">
+    <button type="button" class="btn-icon-date @(hasActiveFilter ? "active-filter" : "")" @onclick="ToggleDatePicker" title="@ActiveTooltip">
+        <Icon Name="calendar" Size="18" />
+        @if (hasActiveFilter)
+        {
+            <span class="date-filter-dot"></span>
+        }
     </button>
     <DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => { showDatePicker = v; StateHasChanged(); })" OnDateSelected="OnDateSelected" />
 </div>
 
 @code {
     [Parameter] public EventCallback<DateTime?> OnDateSelectedCallback { get; set; }
+    [Parameter] public string DefaultLabel { get; set; } = "01 Okt - 31 Okt 2026";
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
     
     private bool showDatePicker = false;
-    private string dateRangeLabel = "01 Okt - 31 Okt 2026";
+    private string selectedDateText = "";
+    private bool hasActiveFilter => !string.IsNullOrEmpty(selectedDateText);
+
+    private string ActiveTooltip => hasActiveFilter 
+        ? $"Filter Aktif: {selectedDateText}" 
+        : (!string.IsNullOrEmpty(DefaultLabel) ? $"Rentang Tanggal: {DefaultLabel}" : "Pilih Rentang Tanggal");
     
     private void ToggleDatePicker()
     {
@@ -24,8 +34,13 @@
     {
         if (date.HasValue)
         {
-            dateRangeLabel = date.Value.ToString("dd MMM yyyy");
+            selectedDateText = date.Value.ToString("dd MMMM yyyy");
             OnDateSelectedCallback.InvokeAsync(date.Value);
+        }
+        else
+        {
+            selectedDateText = "";
+            OnDateSelectedCallback.InvokeAsync(null);
         }
     }
 }

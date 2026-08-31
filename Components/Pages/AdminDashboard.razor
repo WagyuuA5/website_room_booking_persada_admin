@@ -243,7 +243,7 @@
                 <div class="mini-table-body">
                     @foreach (var booking in historyBookings.Take(5))
                     {
-                        <div class="mini-table-row" style="grid-template-columns: 1.8fr 1.4fr 1.6fr 1fr;">
+                        <div class="mini-table-row clickable-row" style="grid-template-columns: 1.8fr 1.4fr 1.6fr 1fr;" @onclick="() => HandleHistoryBookingClick(booking)" title="@($"Klik untuk melihat detail pemesanan {booking.UserName}")">
                             <div class="user-cell">
                                 <UserAvatar Initials="@booking.Initials" BgColor="@booking.AvatarColor" Size="34px" />
                                 <div class="user-cell-info" title="@($"{booking.UserName} ({booking.Department})")">
@@ -595,6 +595,67 @@
     </AppModal>
 }
 
+@* E. Detail Riwayat Pemesanan *@
+@if (selectedHistoryBooking != null)
+{
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) selectedHistoryBooking = null; })" Title="Detail Pemesanan Ruangan" Size="medium">
+        <ChildContent>
+            <div class="booking-detail-modal-body">
+                <div class="bdm-room-photo-wrap">
+                    <img src="@GetRoomPhoto(selectedHistoryBooking.Room)" alt="@selectedHistoryBooking.Room" class="bdm-room-photo" />
+                    <span class="bdm-room-badge"><Icon Name="building" Size="14" /> @selectedHistoryBooking.Room</span>
+                </div>
+
+                <div class="bdm-user-card">
+                    <div class="bdm-user-left">
+                        <UserAvatar Initials="@selectedHistoryBooking.Initials" BgColor="@selectedHistoryBooking.AvatarColor" Size="44px" />
+                        <div>
+                            <strong class="bdm-user-name">@selectedHistoryBooking.UserName</strong>
+                            <span class="bdm-user-dept">@selectedHistoryBooking.Department</span>
+                        </div>
+                    </div>
+                    <StatusBadge Status="@selectedHistoryBooking.Status" />
+                </div>
+
+                <div class="bdm-grid">
+                    <div class="bdm-grid-item">
+                        <span class="bdm-label"><Icon Name="calendar" Size="14" /> Tanggal</span>
+                        <strong class="bdm-val">@selectedHistoryBooking.ScheduleDate</strong>
+                    </div>
+                    <div class="bdm-grid-item">
+                        <span class="bdm-label"><Icon Name="clock" Size="14" /> Waktu</span>
+                        <strong class="bdm-val">@selectedHistoryBooking.ScheduleTime</strong>
+                    </div>
+                    <div class="bdm-grid-item">
+                        <span class="bdm-label"><Icon Name="users" Size="14" /> Peserta</span>
+                        <strong class="bdm-val">12 Orang</strong>
+                    </div>
+                    <div class="bdm-grid-item">
+                        <span class="bdm-label"><Icon Name="file-text" Size="14" /> Keperluan</span>
+                        <strong class="bdm-val">Rapat Koordinasi Internal</strong>
+                    </div>
+                </div>
+
+                <RoomLocationMiniMap RoomName="@selectedHistoryBooking.Room"
+                                     LocationText="@GetRoomLocationText(selectedHistoryBooking.Room)"
+                                     PinX="@GetRoomPinX(selectedHistoryBooking.Room)"
+                                     PinY="@GetRoomPinY(selectedHistoryBooking.Room)" />
+            </div>
+        </ChildContent>
+        <FooterContent>
+            @if (selectedHistoryBooking.Status == "pending" || selectedHistoryBooking.Status == "menunggu")
+            {
+                <button type="button" class="btn-outline-pill" @onclick="() => RejectBooking(selectedHistoryBooking)">Tolak</button>
+                <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => ApproveBooking(selectedHistoryBooking)">Setujui</button>
+            }
+            else
+            {
+                <button type="button" class="btn-outline-pill" @onclick="() => selectedHistoryBooking = null">Tutup</button>
+            }
+        </FooterContent>
+    </AppModal>
+}
+
 @* -- Modals Ekspor Grafik & Riwayat -- *@
 <ExportModal IsOpen="@showTrendExport" IsOpenChanged="@(v => { showTrendExport = v; StateHasChanged(); })"
              ExportTitle="Tren Pemesanan Ruangan" Columns="@_trendColumns"
@@ -631,6 +692,7 @@
     private AccountRequestData? selectedAccountDetail;
     private BugRequestData? selectedBugDetail;
     private ITRequestData? selectedITDetail;
+    private HistoryBookingItem? selectedHistoryBooking;
 
     private bool showTrendExport;
     private bool showDonutExport;
@@ -883,28 +945,28 @@
         };
         _trendOptions = new()
         {
-            Chart = new Chart { Type = ChartType.Area, Height = "260px", Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false }, Zoom = new Zoom { Enabled = false } },
-            Stroke = new Stroke { Curve = Curve.Smooth, Width = 2 },
-            Fill = new Fill { Opacity = 0.15, Type = FillType.Solid },
+            Chart = new Chart { Type = ChartType.Area, Height = "260px", Background = "transparent", Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false }, Zoom = new Zoom { Enabled = false } },
+            Stroke = new Stroke { Curve = Curve.Smooth, Width = 2.5 },
+            Fill = new Fill { Opacity = 0.2, Type = FillType.Solid },
             DataLabels = new DataLabels { Enabled = false },
-            Markers = new Markers { Size = 3, Hover = new MarkersHover { Size = 5 } },
-            Xaxis = new XAxis { Categories = _trendData.Select(d => d.Bulan).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "11px", Colors = new List<string> { "#8A97A6" } } } },
-            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "11px", Colors = new List<string> { "#8A97A6" } } } } },
-            Grid = new Grid { BorderColor = "#E8EDF2", StrokeDashArray = 4 },
-            Colors = new List<string> { "#152F4A" },
-            Theme = new Theme { Mode = Mode.Light }
+            Markers = new Markers { Size = 4, Hover = new MarkersHover { Size = 6 } },
+            Xaxis = new XAxis { Categories = _trendData.Select(d => d.Bulan).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "600", FontSize = "11px", Colors = new List<string> { "#94A3B8" } } }, AxisBorder = new AxisBorder { Show = false }, AxisTicks = new AxisTicks { Show = false } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "600", FontSize = "11px", Colors = new List<string> { "#94A3B8" } } } } },
+            Grid = new Grid { BorderColor = "rgba(148, 163, 184, 0.15)", StrokeDashArray = 4 },
+            Colors = new List<string> { "#F5A623" },
+            Tooltip = new Tooltip { Theme = Mode.Dark }
         };
 
-        _donutData = new() { new("Ruangan A", 35), new("Ruangan B", 25), new("Ruangan C", 20) };
+        _donutData = new() { new("Ruang Dirantara", 35), new("Ruang Rapat A", 25), new("Ruang Boardroom", 20), new("Ruang Training", 15) };
         _donutOptions = new()
         {
-            Chart = new Chart { Type = ChartType.Donut, Height = "200px", Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 } },
-            PlotOptions = new PlotOptions { Pie = new PlotOptionsPie { Donut = new PlotOptionsDonut { Size = "65%", Labels = new DonutLabels { Show = true, Value = new DonutLabelValue { Show = true, FontSize = "24px", FontWeight = "700", Color = "#1F3B5B" }, Total = new DonutLabelTotal { Show = true, Label = "TOTAL RUANGAN", FontSize = "10px", FontWeight = "600", Color = "#8A97A6", ShowAlways = true } } } } },
+            Chart = new Chart { Type = ChartType.Donut, Height = "210px", Background = "transparent", Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 } },
+            PlotOptions = new PlotOptions { Pie = new PlotOptionsPie { Donut = new PlotOptionsDonut { Size = "68%", Labels = new DonutLabels { Show = true, Value = new DonutLabelValue { Show = true, FontSize = "22px", FontWeight = "800", Color = "#F5A623" }, Total = new DonutLabelTotal { Show = true, Label = "TOTAL PEMESANAN", FontSize = "10px", FontWeight = "700", Color = "#94A3B8", ShowAlways = true } } } } },
             DataLabels = new DataLabels { Enabled = false },
-            Legend = new Legend { Position = LegendPosition.Bottom, FontSize = "11px", FontWeight = "500", Markers = new LegendMarkers { Width = 8, Height = 8, Radius = 2 }, ItemMargin = new LegendItemMargin { Horizontal = 8, Vertical = 4 } },
-            Colors = new List<string> { "#152F4A", "#2563EB", "#94A3B8" },
+            Legend = new Legend { Position = LegendPosition.Bottom, FontSize = "11px", FontWeight = "600", Labels = new LegendLabels { Colors = new List<string> { "#94A3B8" } }, Markers = new LegendMarkers { Width = 8, Height = 8, Radius = 4 }, ItemMargin = new LegendItemMargin { Horizontal = 8, Vertical = 4 } },
+            Colors = new List<string> { "#F5A623", "#3B82F6", "#10B981", "#8B5CF6" },
             Stroke = new Stroke { Width = 0 },
-            Theme = new Theme { Mode = Mode.Light }
+            Tooltip = new Tooltip { Theme = Mode.Dark }
         };
     }
 
@@ -1000,6 +1062,63 @@
         Toast.Error($"Tiket IT Support #{data.Id} telah ditolak.");
         selectedITDetail = null;
     }
+
+    private void HandleHistoryBookingClick(HistoryBookingItem booking)
+    {
+        selectedHistoryBooking = booking;
+    }
+
+    private void ApproveBooking(HistoryBookingItem booking)
+    {
+        selectedHistoryBooking = null;
+        Toast.Success($"Pemesanan '{booking.Room}' oleh {booking.UserName} berhasil disetujui.");
+    }
+
+    private void RejectBooking(HistoryBookingItem booking)
+    {
+        selectedHistoryBooking = null;
+        Toast.Error($"Pemesanan '{booking.Room}' oleh {booking.UserName} telah ditolak.");
+    }
+
+    private string GetRoomPhoto(string room) => room switch
+    {
+        "Ruang Dirantara" => "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800&auto=format&fit=crop&q=80",
+        "Ruang Rapat A" => "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80",
+        "Ruang Boardroom" => "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&auto=format&fit=crop&q=80",
+        "Ruang Training" => "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80",
+        "Ruang Diskusi C" => "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80",
+        _ => "https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=800&auto=format&fit=crop&q=80"
+    };
+
+    private string GetRoomLocationText(string room) => room switch
+    {
+        "Ruang Dirantara" => "Lantai 3, Sayap Utama — dekat lift eksekutif",
+        "Ruang Rapat A" => "Lantai 2, Sayap Barat — samping area pantry",
+        "Ruang Boardroom" => "Lantai 14, Area Direksi — akses kartu khusus",
+        "Ruang Training" => "Lantai 1, Hall Utama — depan lobby barat",
+        "Ruang Diskusi C" => "Lantai 2, Sayap Timur — dekat tangga darurat",
+        _ => "Lantai 14, Sayap VIP — koridor barat"
+    };
+
+    private double GetRoomPinX(string room) => room switch
+    {
+        "Ruang Dirantara" => 35.0,
+        "Ruang Rapat A" => 65.0,
+        "Ruang Boardroom" => 50.0,
+        "Ruang Training" => 25.0,
+        "Ruang Diskusi C" => 75.0,
+        _ => 60.0
+    };
+
+    private double GetRoomPinY(string room) => room switch
+    {
+        "Ruang Dirantara" => 40.0,
+        "Ruang Rapat A" => 30.0,
+        "Ruang Boardroom" => 55.0,
+        "Ruang Training" => 70.0,
+        "Ruang Diskusi C" => 60.0,
+        _ => 45.0
+    };
 
     // -- Models --
     public record TrendPoint(string Bulan, int Jumlah);

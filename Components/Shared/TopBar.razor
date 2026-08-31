@@ -33,7 +33,7 @@
             </button>
 
             <button type="button" class="admin-profile-btn" @onclick="ToggleProfilePopup" title="Buka menu akun">
-                <UserAvatar Initials="WA" BgColor="#0B1E39" Size="36px" />
+                <UserAvatar Initials="WA" BgColor="#0B1E39" Size="36px" PhotoUrl="@adminAvatarUrl" />
                 <div class="admin-info">
                     <span class="admin-name">Admin Wahyu</span>
                     <span class="admin-role">PENGONTROL SISTEM</span>
@@ -61,22 +61,16 @@
     <div class="profile-popup-overlay" @onclick="() => showProfilePopup = false">
         <div class="profile-popup" @onclick:stopPropagation="true">
             <div class="profile-header">
-                <div class="profile-avatar-container">
-                    <UserAvatar Initials="WA" BgColor="#0B1E39" Size="48px" />
-                    <label class="avatar-upload-btn" title="Ubah Foto Profil">
-                        <Icon Name="camera" Size="12" />
-                        <InputFile class="avatar-upload-input" OnChange="HandleAvatarUpload" accept="image/png, image/jpeg" />
-                    </label>
-                </div>
-                <div>
-                    <strong>Admin Wahyu</strong>
+                <ProfileAvatarUploader Initials="WA" BgColor="#0B1E39" Size="52px" CameraIconSize="12" @bind-AvatarUrl="adminAvatarUrl" />
+                <div class="profile-title-group">
+                    <strong class="profile-user-name">Admin Wahyu</strong>
                     <div class="text-sm text-gray">wahyu.admin@persada.co.id</div>
                 </div>
             </div>
             <hr />
             <div class="profile-details">
                 <div class="pd-row"><span>Jabatan:</span> <strong>Pengontrol Sistem</strong></div>
-                <div class="pd-row"><span>Divisi:</span> <strong>IT & Infrastruktur</strong></div>
+                <div class="pd-row"><span>Divisi:</span> <strong>IT & Digital</strong></div>
                 <div class="pd-row"><span>Lokasi:</span> <strong>Kantor Pusat, Lt. 14</strong></div>
                 <div class="pd-row"><span>Terakhir Login:</span> <strong>Hari ini, 08:30 WIB</strong></div>
             </div>
@@ -96,7 +90,8 @@
 
     private bool showNotification = false;
     private bool showProfilePopup = false;
-    private int unreadCount = 3;
+    private int unreadCount = 2;
+    private string adminAvatarUrl = "";
 
     private void ToggleTheme()
     {
@@ -114,14 +109,5 @@
     {
         showProfilePopup = !showProfilePopup;
         if (showProfilePopup) { showNotification = false; }
-    }
-
-    private async Task HandleAvatarUpload(InputFileChangeEventArgs e)
-    {
-        var file = e.File;
-        if (file != null && file.Size <= 5242880 && (file.ContentType == "image/jpeg" || file.ContentType == "image/png"))
-        {
-            await Task.Delay(500);
-        }
     }
 }

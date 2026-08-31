@@ -15,6 +15,7 @@
             <button type="button" class="toast-close" @onclick="() => DismissToast(t)" title="Tutup notifikasi">
                 <Icon Name="x" Size="12" />
             </button>
+            <div class="toast-progress"></div>
         </div>
     }
 </div>
@@ -34,7 +35,7 @@
         if (_toasts.Count > 4) _toasts.RemoveAt(0);
         InvokeAsync(StateHasChanged);
 
-        _timer = new System.Timers.Timer(3200);
+        _timer = new System.Timers.Timer(4000);
         _timer.Elapsed += (s, e) =>
         {
             _timer?.Stop();
