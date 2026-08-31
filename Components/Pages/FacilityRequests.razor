@@ -123,7 +123,7 @@
                 </div>
             }
 
-            <Pagination CurrentPage="@currentPage" TotalItems="@FilteredRequests.Count()" PageSize="@pageSize" OnPageChanged="HandlePageChanged" />
+            <PaginationBar CurrentPage="@currentPage" CurrentPageChanged="HandlePageChanged" TotalData="@FilteredRequests.Count()" PageSize="@pageSize" />
         }
     </div>
 </div>

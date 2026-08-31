@@ -5,6 +5,7 @@
 @using booking_room_admin.Components.Services
 @inject IUserService UserService
 @inject ToastService Toast
+@inject IJSRuntime JS
 
 <TopBar Title="Manajemen Pengguna" Subtitle="Kelola akses, profil, dan hak pengguna sistem pemesanan ruangan." />
 
@@ -82,6 +83,7 @@
                        PageSize="pageSize"
                        CurrentPage="currentPage"
                        OnPageChanged="HandlePageChange"
+                       OnRowClick="OpenDetailModal"
                        ShowCheckbox="false">
                 <RowTemplate Context="u">
                     <td>
@@ -108,12 +110,12 @@
                         </span>
                     </td>
                     <td>
-                        <div class="um-actions">
+                        <div class="um-actions" @onclick:stopPropagation="true">
                             <button type="button" class="btn-action-edit" title="Edit Pengguna" @onclick="() => OpenEditModal(u)">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <Icon Name="edit" Size="16" />
                             </button>
                             <button type="button" class="btn-action-delete" title="Hapus User" @onclick="() => OpenDeleteModal(u)">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                <Icon Name="trash-2" Size="16" />
                             </button>
                         </div>
                     </td>
@@ -168,12 +170,16 @@
                     <label class="form-label">Departemen <span class="req">*</span></label>
                     <select class="form-input" @bind="formModel.Department">
                         <option value="IT & Digital">IT & Digital</option>
-                        <option value="Human Resources">Human Resources</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Operations">Operations</option>
-                        <option value="Legal">Legal</option>
-                        <option value="General Affairs">General Affairs</option>
+                        <option value="Operasional">Operasional</option>
+                        <option value="Sumber Daya Manusia (SDM)">Sumber Daya Manusia (SDM)</option>
+                        <option value="Keuangan">Keuangan</option>
+                        <option value="Marketing & Komunikasi">Marketing & Komunikasi</option>
+                        <option value="Legal & Kepatuhan">Legal & Kepatuhan</option>
+                        <option value="General Affairs (GA)">General Affairs (GA)</option>
+                        <option value="Layanan Keamanan">Layanan Keamanan</option>
+                        <option value="Call Center & Layanan Pelanggan">Call Center & Layanan Pelanggan</option>
+                        <option value="Layanan Perkantoran">Layanan Perkantoran</option>
+                        <option value="Teknikal & Pemeliharaan Telekomunikasi">Teknikal & Pemeliharaan Telekomunikasi</option>
                     </select>
                 </div>
             </div>
@@ -196,12 +202,36 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Status Akun</label>
-                <select class="form-input" @bind="formModel.Status">
-                    <option value="active">Aktif</option>
-                    <option value="inactive">Tidak Aktif</option>
-                </select>
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">Password Sementara <span class="req">*</span></label>
+                    <div class="rm-photo-add-row" style="margin-bottom: 0.5rem;">
+                        <div class="password-wrapper" style="position: relative; flex-grow: 1;">
+                            <input type="@(showPassword ? "text" : "password")" class="form-input" placeholder="Buat password..." @bind="newPasswordInput" />
+                            <button type="button" class="btn-password-toggle" @onclick="() => showPassword = !showPassword" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--color-ink-500);" title="Lihat/Sembunyikan">
+                                <Icon Name="@(showPassword ? "eye-off" : "eye")" Size="16" />
+                            </button>
+                        </div>
+                        <button type="button" class="btn-outline-pill btn-sm" @onclick="GeneratePassword" title="Buat Password Otomatis">
+                            <Icon Name="refresh-cw" Size="14" />
+                        </button>
+                        <button type="button" class="btn-outline-pill btn-sm" @onclick="CopyPassword" title="Salin Password">
+                            <Icon Name="copy" Size="14" />
+                        </button>
+                    </div>
+                    <label class="rm-checkbox-label" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--color-ink-600); cursor: pointer;">
+                        <input type="checkbox" @bind="forceChangePassword" />
+                        <span>User wajib mengganti password saat login pertama</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Status Akun</label>
+                    <select class="form-input" @bind="formModel.Status">
+                        <option value="active">Aktif</option>
+                        <option value="inactive">Tidak Aktif</option>
+                    </select>
+                </div>
             </div>
         </div>
     </ChildContent>
@@ -245,15 +275,19 @@
 
                 <div class="form-group">
                     <label class="form-label">Departemen</label>
-                    <select class="form-input" @bind="editModel.Department">
-                        <option value="IT & Digital">IT & Digital</option>
-                        <option value="Human Resources">Human Resources</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Operations">Operations</option>
-                        <option value="Legal">Legal</option>
-                        <option value="General Affairs">General Affairs</option>
-                    </select>
+                        <select class="form-input" @bind="editModel.Department">
+                            <option value="IT & Digital">IT & Digital</option>
+                            <option value="Operasional">Operasional</option>
+                            <option value="Sumber Daya Manusia (SDM)">Sumber Daya Manusia (SDM)</option>
+                            <option value="Keuangan">Keuangan</option>
+                            <option value="Marketing & Komunikasi">Marketing & Komunikasi</option>
+                            <option value="Legal & Kepatuhan">Legal & Kepatuhan</option>
+                            <option value="General Affairs (GA)">General Affairs (GA)</option>
+                            <option value="Layanan Keamanan">Layanan Keamanan</option>
+                            <option value="Call Center & Layanan Pelanggan">Call Center & Layanan Pelanggan</option>
+                            <option value="Layanan Perkantoran">Layanan Perkantoran</option>
+                            <option value="Teknikal & Pemeliharaan Telekomunikasi">Teknikal & Pemeliharaan Telekomunikasi</option>
+                        </select>
                 </div>
             </div>
 
@@ -285,6 +319,9 @@
         </div>
     </ChildContent>
     <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="OpenResetPasswordModal" style="margin-right: auto;">
+            <Icon Name="key" Size="14" /> Reset Password
+        </button>
         <button type="button" class="btn-outline-pill" @onclick="() => showEditModal = false" disabled="@isFormSubmitting">Batal</button>
         <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveEditUser" disabled="@isFormSubmitting">
             @if (isFormSubmitting)
@@ -301,16 +338,114 @@
 </AppModal>
 
 @* -- Modal 3: Hapus User -- *@
-<AppModal IsOpen="showDeleteModal" IsOpenChanged="v => showDeleteModal = v" Title="Hapus User?" Size="small">
+<AppModal IsOpen="showDeleteModal" IsOpenChanged="v => showDeleteModal = v" Title="Hapus Pengguna" Size="small">
     <ChildContent>
-        <div class="delete-user-content">
-            <p>Apakah Anda yakin ingin menghapus user <strong>@userToDelete?.FullName</strong>?</p>
-            <p class="text-muted text-sm">Tindakan ini tidak dapat dibatalkan dan akan menghapus riwayat akses pengguna.</p>
-        </div>
+        @if (userToDelete != null)
+        {
+            <div class="delete-confirm-box" style="text-align: center;">
+                <div class="delete-icon-wrapper" style="margin-bottom: 1rem;">
+                    <Icon Name="alert-triangle" Size="48" CssClass="text-danger" />
+                </div>
+                <p>Apakah Anda yakin ingin menghapus pengguna <strong>@userToDelete.FullName</strong> (@userToDelete.Email)?</p>
+                <div class="warning-text" style="color: #d97706; font-size: 0.85rem; margin: 1rem 0; padding: 0.5rem; background: #fffbeb; border-radius: 6px;">Tindakan ini tidak dapat dibatalkan. Pengguna ini memiliki <strong>@userToDelete.TotalBookings booking aktif</strong>.</div>
+                
+                <div class="delete-options" style="margin-top: 1rem; text-align: left;">
+                    <div class="rm-field">
+                        <label class="rm-label">KETIK NAMA UNTUK MENGHAPUS PERMANEN:</label>
+                        <input type="text" class="rm-input" placeholder="@userToDelete.FullName" @bind="confirmDeleteName" @bind:event="oninput" />
+                    </div>
+                </div>
+            </div>
+        }
     </ChildContent>
     <FooterContent>
         <button type="button" class="btn-outline-pill" @onclick="() => showDeleteModal = false">Batal</button>
-        <button type="button" class="btn-danger-pill" @onclick="ConfirmDeleteUser">Hapus User</button>
+        <button type="button" class="btn-primary-pill btn-warning" @onclick="DeactivateUser">Nonaktifkan Saja</button>
+        <button type="button" class="btn-primary-pill btn-danger" @onclick="ConfirmDeleteUser" disabled="@(confirmDeleteName != userToDelete?.FullName)">Hapus Permanen</button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal Detail Pengguna -- *@
+<AppModal IsOpen="showDetailModal" IsOpenChanged="v => showDetailModal = v" Title="Detail Pengguna" Size="medium">
+    <ChildContent>
+        @if (selectedUserForDetail != null)
+        {
+            <div class="um-detail-wrapper">
+                <div class="um-detail-header" style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-border); padding-bottom: 1rem;">
+                    <ProfileAvatarUploader Initials="@selectedUserForDetail.Initials" BgColor="@GetAvatarColor(selectedUserForDetail.FullName)" Size="64px" CameraIconSize="14" />
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.2rem; color: var(--color-ink-900);">@selectedUserForDetail.FullName</h3>
+                        <div style="color: var(--color-ink-500); font-size: 0.9rem;">@selectedUserForDetail.Email</div>
+                        <span class="um-status-pill @(selectedUserForDetail.Status.ToLower() == "active" ? "status-active" : "status-inactive")" style="margin-top: 0.5rem; display: inline-block;">
+                            <span class="status-dot"></span>
+                            @(selectedUserForDetail.Status.ToLower() == "active" ? "Aktif" : "Tidak Aktif")
+                        </span>
+                    </div>
+                </div>
+                <div class="rm-row-2col">
+                    <div class="rm-field">
+                        <label class="rm-label">DEPARTEMEN</label>
+                        <strong>@selectedUserForDetail.Department</strong>
+                    </div>
+                    <div class="rm-field">
+                        <label class="rm-label">ROLE</label>
+                        <strong>@selectedUserForDetail.Role</strong>
+                    </div>
+                    <div class="rm-field">
+                        <label class="rm-label">TOTAL BOOKING</label>
+                        <strong>@selectedUserForDetail.TotalBookings Booking</strong>
+                    </div>
+                    <div class="rm-field">
+                        <label class="rm-label">BERGABUNG SEJAK</label>
+                        <strong>12 Jan 2026</strong>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label class="rm-label">LOG AKTIVITAS TERAKHIR</label>
+                    <div style="font-size: 0.85rem; color: var(--color-ink-700); padding: 0.75rem; background: var(--color-surface-1); border-radius: 8px;">
+                        Booking "Ruang Alpha" pada 15 Okt 2026, 09:00 WIB
+                    </div>
+                </div>
+            </div>
+        }
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Tutup</button>
+        <button type="button" class="btn-primary-pill btn-navy" @onclick="() => { showDetailModal = false; OpenEditModal(selectedUserForDetail!); }">Edit Pengguna</button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal Reset Password -- *@
+<AppModal IsOpen="showResetPasswordModal" IsOpenChanged="v => showResetPasswordModal = v" Title="Reset Password" Size="small">
+    <ChildContent>
+        <p class="modal-subtitle-text">Reset password untuk pengguna <strong>@userToReset?.FullName</strong>.</p>
+        <div class="um-form" style="margin-top: 1rem;">
+            <div class="form-group">
+                <label class="form-label">Password Baru <span class="req">*</span></label>
+                <div class="rm-photo-add-row" style="margin-bottom: 0.5rem;">
+                    <div class="password-wrapper" style="position: relative; flex-grow: 1;">
+                        <input type="@(showPassword ? "text" : "password")" class="form-input" placeholder="Buat password..." @bind="newPasswordInput" />
+                        <button type="button" class="btn-password-toggle" @onclick="() => showPassword = !showPassword" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--color-ink-500);" title="Lihat/Sembunyikan">
+                            <Icon Name="@(showPassword ? "eye-off" : "eye")" Size="16" />
+                        </button>
+                    </div>
+                    <button type="button" class="btn-outline-pill btn-sm" @onclick="GeneratePassword" title="Buat Password Otomatis">
+                        <Icon Name="refresh-cw" Size="14" />
+                    </button>
+                    <button type="button" class="btn-outline-pill btn-sm" @onclick="CopyPassword" title="Salin Password">
+                        <Icon Name="copy" Size="14" />
+                    </button>
+                </div>
+                <label class="rm-checkbox-label" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--color-ink-600); cursor: pointer;">
+                    <input type="checkbox" @bind="forceChangePassword" />
+                    <span>User wajib mengganti password saat login pertama</span>
+                </label>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showResetPasswordModal = false">Batal</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="SubmitResetPassword" disabled="@string.IsNullOrWhiteSpace(newPasswordInput)">Simpan Password</button>
     </FooterContent>
 </AppModal>
 
@@ -386,6 +521,8 @@
     private bool showAddModal = false;
     private bool showEditModal = false;
     private bool showDeleteModal = false;
+    private bool showDetailModal = false;
+    private bool showResetPasswordModal = false;
     private bool showImportModal = false;
     private bool showExportModal = false;
 
@@ -395,6 +532,9 @@
     private User formModel = new() { Department = "IT & Digital", Role = "User", Status = "active" };
     private User editModel = new();
     private User? userToDelete;
+    private User? userToReset;
+    private User? selectedUserForDetail;
+    private string confirmDeleteName = "";
 
     private List<User> csvPreviewList = new();
 
@@ -417,6 +557,42 @@
         new() { Header = "Status", PropertyName = "Status" },
         new() { Header = "Total Booking", PropertyName = "TotalBookings" }
     };
+
+    private string newPasswordInput = "";
+    private bool showPassword = false;
+    private bool forceChangePassword = true;
+
+    private void GeneratePassword()
+    {
+        var chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+        var random = new Random();
+        newPasswordInput = new string(Enumerable.Repeat(chars, 10).Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+    private async Task CopyPassword()
+    {
+        if (!string.IsNullOrEmpty(newPasswordInput))
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", newPasswordInput);
+            Toast.Success("Password disalin ke clipboard!");
+        }
+    }
+
+    private void OpenResetPasswordModal()
+    {
+        userToReset = editModel; // Since it's opened from the Edit Modal
+        newPasswordInput = "";
+        showPassword = false;
+        forceChangePassword = true;
+        showResetPasswordModal = true;
+    }
+
+    private void SubmitResetPassword()
+    {
+        // Mock API Call
+        Toast.Success($"Password untuk {userToReset?.FullName} berhasil direset.");
+        showResetPasswordModal = false;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -480,6 +656,9 @@
         };
         hasAddSubmitted = false;
         isFormSubmitting = false;
+        newPasswordInput = "";
+        showPassword = false;
+        forceChangePassword = true;
         showAddModal = true;
     }
 
@@ -547,9 +726,27 @@
         }
     }
 
+    private void OpenDetailModal(User u)
+    {
+        selectedUserForDetail = u;
+        showDetailModal = true;
+    }
+
+    private async Task DeactivateUser()
+    {
+        if (userToDelete != null)
+        {
+            userToDelete.Status = "inactive";
+            Toast.Success($"Pengguna {userToDelete.FullName} berhasil dinonaktifkan.");
+            showDeleteModal = false;
+            await LoadUsers();
+        }
+    }
+
     private void OpenDeleteModal(User u)
     {
         userToDelete = u;
+        confirmDeleteName = "";
         showDeleteModal = true;
     }
 

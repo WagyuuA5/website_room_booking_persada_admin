@@ -126,3 +126,16 @@ window.ScrollAnimations = {
         }
     }
 };
+
+window.getClickPercentage = function(elementId, clientX, clientY) {
+    const el = document.getElementById(elementId);
+    if (!el) return [50, 50];
+    const rect = el.getBoundingClientRect();
+    let x = ((clientX - rect.left) / rect.width) * 100;
+    let y = ((clientY - rect.top) / rect.height) * 100;
+    // Clamp to 0-100
+    x = Math.max(0, Math.min(100, x));
+    y = Math.max(0, Math.min(100, y));
+    return [x, y];
+};
+

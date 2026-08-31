@@ -179,3 +179,15 @@
 }
 
 .data-table-container { border-radius: var(--radius-md, 16px); overflow: hidden; border: 1px solid var(--color-border, #E3E6EC); }
+
+.data-table tr.clickable {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.data-table tr.clickable:hover {
+    background-color: var(--color-surface-2, #F8FAFC);
+}
+body.dark .data-table tr.clickable:hover {
+    background-color: #1E293B;
+}
+

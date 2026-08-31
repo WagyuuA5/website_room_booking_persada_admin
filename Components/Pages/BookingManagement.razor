@@ -111,7 +111,7 @@
                 </div>
             }
 
-            <Pagination CurrentPage="@currentPage" TotalItems="@FilteredBookings.Count()" PageSize="@pageSize" OnPageChanged="HandlePageChanged" />
+            <PaginationBar CurrentPage="@currentPage" CurrentPageChanged="HandlePageChanged" TotalData="@FilteredBookings.Count()" PageSize="@pageSize" />
         }
     </div>
 </div>

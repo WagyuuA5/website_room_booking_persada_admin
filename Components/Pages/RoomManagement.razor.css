@@ -519,3 +519,124 @@ body.dark .rm-dropzone {
         grid-template-columns: 1fr;
     }
 }
+
+.rm-amenities-icons {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.rm-amenity-icon-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--color-surface-2, #F8FAFC);
+    border: 1px solid var(--color-border, #E2E8F0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-ink-700, #475569);
+    position: relative;
+}
+
+.rm-amenity-icon-badge.more {
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+body.dark .rm-amenity-icon-badge {
+    background: #1E293B;
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #94A3B8;
+}
+
+
+.rm-select-chip-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.rm-select-chip-wrapper:hover .rm-delete-custom-amenity {
+    opacity: 1;
+    pointer-events: auto;
+}
+.rm-delete-custom-amenity {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--color-danger, #EF4444);
+    color: white;
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+.rm-delete-custom-amenity:hover {
+    transform: scale(1.1);
+}
+body.dark .rm-delete-custom-amenity {
+    border-color: #1E293B;
+}
+
+
+.rm-photo-maintenance-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    z-index: 2;
+    backdrop-filter: blur(2px);
+}
+
+.rm-photo-maintenance-overlay .maint-icon {
+    margin-bottom: 0.5rem;
+    color: var(--color-primary, #F5A623);
+}
+
+.rm-photo-maintenance-overlay span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.rm-status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 0.35rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    z-index: 3;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(4px);
+}
+
+.rm-status-badge.active {
+    background: rgba(16, 185, 129, 0.9);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.rm-status-badge.maintenance {
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+

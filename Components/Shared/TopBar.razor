@@ -60,19 +60,40 @@
 {
     <div class="profile-popup-overlay" @onclick="() => showProfilePopup = false">
         <div class="profile-popup" @onclick:stopPropagation="true">
-            <div class="profile-header">
-                <ProfileAvatarUploader Initials="WA" BgColor="#0B1E39" Size="52px" CameraIconSize="12" @bind-AvatarUrl="adminAvatarUrl" />
-                <div class="profile-title-group">
-                    <strong class="profile-user-name">Admin Wahyu</strong>
-                    <div class="text-sm text-gray">wahyu.admin@persada.co.id</div>
+            <div class="profile-header-redesign">
+                <ProfileAvatarUploader Initials="WA" BgColor="#0B1E39" Size="80px" CameraIconSize="16" @bind-AvatarUrl="adminAvatarUrl" />
+            </div>
+            
+            <div class="profile-body-redesign">
+                <div class="pbr-info-group">
+                    <label>Nama Lengkap</label>
+                    <strong>Admin Wahyu</strong>
+                </div>
+                <div class="pbr-info-group">
+                    <label>Jabatan</label>
+                    <strong>Pengontrol Sistem</strong>
+                </div>
+                <div class="pbr-info-group">
+                    <label>Divisi</label>
+                    <strong>IT & Digital</strong>
+                </div>
+                <div class="pbr-info-group">
+                    <label>Email</label>
+                    <strong>wahyu.admin@persada.co.id</strong>
+                </div>
+                <div class="pbr-info-group">
+                    <label>Lokasi Kantor</label>
+                    <strong>Kantor Pusat, Lt. 14</strong>
+                </div>
+                <div class="pbr-info-group">
+                    <label>Terakhir Login</label>
+                    <strong>Hari ini, 08:30 WIB</strong>
                 </div>
             </div>
-            <hr />
-            <div class="profile-details">
-                <div class="pd-row"><span>Jabatan:</span> <strong>Pengontrol Sistem</strong></div>
-                <div class="pd-row"><span>Divisi:</span> <strong>IT & Digital</strong></div>
-                <div class="pd-row"><span>Lokasi:</span> <strong>Kantor Pusat, Lt. 14</strong></div>
-                <div class="pd-row"><span>Terakhir Login:</span> <strong>Hari ini, 08:30 WIB</strong></div>
+
+            <div class="profile-footer-redesign">
+                <button type="button" class="btn-outline-pill" @onclick="() => showProfilePopup = false">Tutup</button>
+                <button type="button" class="btn-primary-pill" @onclick="GoToProfile">Edit Profil</button>
             </div>
         </div>
     </div>
@@ -109,5 +130,11 @@
     {
         showProfilePopup = !showProfilePopup;
         if (showProfilePopup) { showNotification = false; }
+    }
+
+    private void GoToProfile()
+    {
+        showProfilePopup = false;
+        Navigation.NavigateTo("/profile");
     }
 }

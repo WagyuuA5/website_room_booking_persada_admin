@@ -75,7 +75,7 @@
     @* Pagination *@
     @if (TotalCount > PageSize)
     {
-        <Pagination CurrentPage="@CurrentPage" TotalItems="@TotalCount" PageSize="@PageSize" OnPageChanged="GoToPage" />
+        <PaginationBar CurrentPage="@CurrentPage" CurrentPageChanged="GoToPage" TotalData="@TotalCount" PageSize="@PageSize" />
     }
 </div>
 
