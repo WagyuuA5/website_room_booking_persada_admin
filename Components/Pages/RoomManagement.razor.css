@@ -456,7 +456,16 @@ input[type=number] {
     gap: 0.4rem;
 }
 
+.rm-select-chip-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
 .rm-select-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background: var(--color-background, #F7F8FA);
     border: 1px solid var(--color-border, #E5E7EB);
     color: var(--color-text, #1D1D1F);
@@ -473,6 +482,29 @@ input[type=number] {
     border-color: #EAB308;
     color: #713F12;
     font-weight: 700;
+    padding-right: 1.65rem;
+}
+
+.rm-chip-remove-btn {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted, #6E6E73);
+    padding: 2px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.rm-chip-remove-btn:hover {
+    color: var(--color-danger, #DC2626);
+    background: rgba(220, 38, 38, 0.1);
 }
 
 .rm-dropzone {

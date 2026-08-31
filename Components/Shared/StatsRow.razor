@@ -1,4 +1,4 @@
-﻿@using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Models
 
 <div class="stats-row">
     @foreach (var stat in Stats)
@@ -9,7 +9,15 @@
             </div>
             <div class="stat-info">
                 <span class="stat-label">@stat.Label</span>
-                <span class="stat-value">@stat.Value</span>
+                <div class="stat-val-row" style="display: flex; align-items: baseline; gap: 8px;">
+                    <span class="stat-value">@stat.Value</span>
+                    @if (!string.IsNullOrEmpty(stat.Trend))
+                    {
+                        <span class="stat-trend @(stat.IsPositiveTrend == true ? "trend-up" : stat.IsPositiveTrend == false ? "trend-down" : "")" style="font-size: 0.72rem; font-weight: 700; color: @(stat.IsPositiveTrend == true ? "#16A34A" : "#DC2626");">
+                            @(stat.IsPositiveTrend == true ? "↑ " : stat.IsPositiveTrend == false ? "↓ " : "")@stat.Trend
+                        </span>
+                    }
+                </div>
                 @if (!string.IsNullOrEmpty(stat.Subtitle))
                 {
                     <span class="stat-subtitle">@stat.Subtitle</span>

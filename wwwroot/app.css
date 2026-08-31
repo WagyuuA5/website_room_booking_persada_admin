@@ -1392,20 +1392,24 @@ input[type="time"] {
     align-items: center;
 }
 
-/* PaginationBar */
+/* PaginationBar (CASE 3 Fix) */
 .pagination-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 0;
-    margin-top: 1rem;
+    padding: 0.85rem 1.25rem;
+    margin: 0;
     border-top: 1px solid var(--color-border, #E2E8F0);
+    box-sizing: border-box;
+    width: 100%;
+    background: var(--color-surface, #FFFFFF);
 }
 
 .pagination-info {
-    font-size: 0.85rem;
-    color: var(--color-ink-600, #64748B);
+    font-size: 0.82rem;
+    color: var(--color-text-muted, #64748B);
     font-weight: 500;
+    line-height: 1.4;
 }
 
 .pagination-controls {

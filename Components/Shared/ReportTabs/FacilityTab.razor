@@ -41,30 +41,30 @@
     <div class="tab-table-section">
         <div class="tab-table-header">
             <h3>Log Permintaan Fasilitas</h3>
-            <a href="#" class="tab-table-link">Lihat Semua</a>
+            <a href="facility-requests" class="tab-table-link">Lihat Semua</a>
         </div>
         <div class="tab-table-wrapper">
             <table class="tab-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Pemohon</th>
-                        <th>Departemen</th>
-                        <th>Jenis Barang</th>
-                        <th>Ditugaskan ke</th>
-                        <th>Status</th>
+                        <th>ID PERMINTAAN</th>
+                        <th>PEMOHON</th>
+                        <th>DIVISI</th>
+                        <th>JENIS BARANG</th>
+                        <th>DITUGASKAN KE</th>
+                        <th>STATUS</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var row in _tableData)
                     {
                         <tr>
-                            <td><span class="td-primary">@row.Id</span></td>
+                            <td><span class="td-primary" style="font-family: monospace; font-weight: 700;">#@row.Id</span></td>
                             <td><span class="td-primary">@row.Name</span></td>
-                            <td>@row.Department</td>
-                            <td>@row.Type</td>
+                            <td><span class="td-secondary">@row.Department</span></td>
+                            <td><span class="td-primary">@row.Type</span></td>
                             <td>@row.Assigned</td>
-                            <td><span class="badge @GetStatusClass(row.Status)">@GetStatusLabel(row.Status)</span></td>
+                            <td><StatusBadge Status="@row.Status" /></td>
                         </tr>
                     }
                 </tbody>

@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 namespace booking_room_admin.Components.Helpers
 {
     public static class IconHelper
@@ -8,46 +6,49 @@ namespace booking_room_admin.Components.Helpers
         {
             var nama = facilityName?.ToLowerInvariant().Trim() ?? "";
             
-            // 1. Skenario Ruangan Kapasitas Besar
-            if (nama.Contains("ac sentral") || nama.Contains("ac besar") || nama.Contains("kapasitas besar") || nama.Contains("central ac")) return "wind";
-            if (nama.Contains("sound system") || nama.Contains("mikrofon wireless") || nama.Contains("mikrofon podium") || nama.Contains("clip-on") || nama.Contains("wireless mic")) return "mic-2";
-            if (nama.Contains("multi-screen") || nama.Contains("wall screen") || nama.Contains("led") || nama.Contains("layar ganda") || nama.Contains("dual proyektor")) return "monitor-play";
-            if (nama.Contains("dedicated bandwidth") || nama.Contains("bandwidth khusus") || nama.Contains("wifi dedicated")) return "gauge";
-            if (nama.Contains("roll kabel") || nama.Contains("power strip") || nama.Contains("extension") || nama.Contains("terminal listrik")) return "cable";
+            // 1. WIFI / Internet / Jaringan
+            if (nama.Contains("wifi") || nama.Contains("wi-fi") || nama.Contains("internet") || nama.Contains("hotspot") || nama.Contains("bandwidth")) return "wifi";
 
-            // 2. Fasilitas Utama (Presentasi & Konektivitas)
-            if (nama.Contains("proyektor") || nama.Contains("projector")) return "projector";
-            if (nama.Contains("layar tv") || nama.Contains("tv") || nama.Contains("televisi")) return "tv";
-            if (nama.Contains("kabel") || nama.Contains("hdmi") || nama.Contains("vga") || nama.Contains("adaptor") || nama.Contains("konektor")) return "cable";
-            if (nama.Contains("papan tulis") || nama.Contains("whiteboard") || nama.Contains("spidol")) return "presentation";
-            if (nama.Contains("wifi") || nama.Contains("wi-fi") || nama.Contains("internet") || nama.Contains("koneksi internet")) return "wifi";
-            if (nama.Contains("mikrofon") || nama.Contains("microphone") || nama.Contains("mic")) return "mic";
-            if (nama.Contains("audio") || nama.Contains("pengeras suara") || nama.Contains("speaker") || nama.Contains("sound")) return "volume-2";
+            // 2. VIDEO CALL / Telekonferensi / Zoom / Kamera
+            if (nama.Contains("video call") || nama.Contains("video") || nama.Contains("zoom") || nama.Contains("telekonferensi") || nama.Contains("konferensi video") || nama.Contains("vicon") || nama.Contains("webcam") || nama.Contains("kamera")) return "video";
 
-            // 3. Kenyamanan Ruangan
-            if (nama.Contains("ac") || nama.Contains("pendingin") || nama.Contains("suhu") || nama.Contains("pengatur suhu")) return "wind";
+            // 3. PROYEKTOR / DUAL PROYEKTOR / Projector
+            if (nama.Contains("proyektor") || nama.Contains("projector") || nama.Contains("infocus")) return "projector";
+
+            // 4. TV / Display / Monitor
+            if (nama.Contains("tv") || nama.Contains("televisi") || nama.Contains("display") || nama.Contains("layar tv")) return "tv";
+
+            // 5. AC / Pendingin / Pengatur Suhu / HVAC / Wind
+            if (nama.Contains("ac") || nama.Contains("pendingin") || nama.Contains("suhu") || nama.Contains("angin") || nama.Contains("wind") || nama.Contains("hvac")) return "wind";
+
+            // 6. SOUND SYSTEM / Audio / Speaker
+            if (nama.Contains("sound system") || nama.Contains("sound") || nama.Contains("speaker") || nama.Contains("audio") || nama.Contains("pengeras suara") || nama.Contains("tata suara")) return "speaker";
+            if (nama.Contains("mikrofon") || nama.Contains("microphone") || nama.Contains("mic") || nama.Contains("clip-on") || nama.Contains("podium")) return "mic";
+
+            // 7. PAPAN TULIS / SMART BOARD / Whiteboard / Presentation
+            if (nama.Contains("smart board") || nama.Contains("smartboard") || nama.Contains("papan tulis") || nama.Contains("whiteboard") || nama.Contains("spidol") || nama.Contains("flipchart") || nama.Contains("presentasi")) return "presentation";
+
+            // 8. MEJA / Table
+            if (nama.Contains("meja") || nama.Contains("table") || nama.Contains("desk")) return "table-2";
+
+            // 9. KURSI / Armchair / Tempat Duduk
+            if (nama.Contains("kursi") || nama.Contains("chair") || nama.Contains("armchair") || nama.Contains("sofa") || nama.Contains("duduk") || nama.Contains("ergonomis")) return "armchair";
+
+            // 10. Kabel / Stopkontak / Listrik / Plug
+            if (nama.Contains("kabel") || nama.Contains("hdmi") || nama.Contains("vga") || nama.Contains("adaptor") || nama.Contains("konektor") || nama.Contains("extension")) return "cable";
+            if (nama.Contains("stopkontak") || nama.Contains("colokan") || nama.Contains("listrik") || nama.Contains("power") || nama.Contains("plug") || nama.Contains("terminal")) return "plug";
+
+            // 11. Lampu / Pencahayaan
             if (nama.Contains("lampu") || nama.Contains("cahaya") || nama.Contains("pencahayaan") || nama.Contains("lighting")) return "lightbulb";
-            if (nama.Contains("meja") || nama.Contains("table")) return "table-2";
-            if (nama.Contains("kursi") || nama.Contains("chair") || nama.Contains("ergonomis")) return "armchair";
-            if (nama.Contains("stopkontak") || nama.Contains("colokan") || nama.Contains("listrik") || nama.Contains("power") || nama.Contains("plug")) return "plug";
 
-            // 4. Fasilitas Tambahan (Opsional)
-            if (nama.Contains("konsumsi") || nama.Contains("kopi") || nama.Contains("teh") || nama.Contains("snack") || nama.Contains("makanan") || nama.Contains("minuman")) return "coffee";
+            // 12. Konsumsi / Katering / Makanan / Minuman (HANYA untuk konsumsi spesifik)
+            if (nama.Contains("konsumsi") || nama.Contains("katering") || nama.Contains("catering") || nama.Contains("kopi") || nama.Contains("teh") || nama.Contains("snack") || nama.Contains("makanan") || nama.Contains("minuman")) return "coffee";
+
+            // 13. Toilet / Kamar Mandi
             if (nama.Contains("toilet") || nama.Contains("wc") || nama.Contains("kamar mandi")) return "bath";
-            
-            // 5. Fallback bertingkat - JANGAN langsung alert-circle
-            return GetSmartFallbackIcon(nama);
-        }
 
-        private static string GetSmartFallbackIcon(string nama)
-        {
-            if (Regex.IsMatch(nama, "elektronik|listrik|daya|power")) return "plug";
-            if (Regex.IsMatch(nama, "suara|bunyi|sound")) return "volume-2";
-            if (Regex.IsMatch(nama, "layar|tampil|visual")) return "monitor";
-            if (Regex.IsMatch(nama, "meja|kursi|duduk")) return "armchair";
-            
-            // Fallback akhir netral, BUKAN alert-circle
-            return "tag"; 
+            // 14. Fallback Default untuk Fasilitas Custom / Tidak Dikenali -> "package" (Bukan tag, bukan alert-circle)
+            return "package";
         }
 
         public static string GetNotificationIcon(string type)

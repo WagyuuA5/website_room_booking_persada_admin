@@ -1,4 +1,4 @@
-﻿namespace booking_room_admin.Components.Services;
+namespace booking_room_admin.Components.Services;
 
 /// <summary>
 /// Helper untuk pemetaan ikon representatif dan styling warna berdasarkan jenis permasalahan/tiket.
@@ -34,18 +34,22 @@ public static class IssueIconHelper
         if (text.Contains("katering") || text.Contains("catering") || text.Contains("makanan") || text.Contains("snack") || text.Contains("coffee") || text.Contains("minum"))
             return new IssueVisual("coffee", "#FCE7F3", "#BE185D", "#F9A8D4");
 
-        // 6. AV / Proyektor / Layar / Sound
+        // 6. Fasilitas Umum / Permintaan Fasilitas
+        if (text.Contains("fasilitas") || text.Contains("facility"))
+            return new IssueVisual("package", "#DBEAFE", "#1D4ED8", "#93C5FD");
+
+        // 7. AV / Proyektor / Layar / Sound
         if (text.Contains("av") || text.Contains("audio") || text.Contains("proyektor") || text.Contains("projector") || text.Contains("mic") || text.Contains("sound") || text.Contains("layar") || text.Contains("screen") || text.Contains("streaming") || text.Contains("video"))
             return new IssueVisual("monitor", "#EDE9FE", "#6D28D9", "#C4B5FD");
 
-        // 7. Akun / Resign / Mutasi / User Deletion
+        // 8. Akun / Resign / Mutasi / User Deletion
         if (text.Contains("akun") || text.Contains("account") || text.Contains("resign") || text.Contains("mutasi") || text.Contains("hapus"))
             return new IssueVisual("user-x", "#FFEDD5", "#C2410C", "#FDBA74");
 
-        // 8. Hardware / IT Umum
+        // 9. Hardware / IT Umum
         if (text.Contains("laptop") || text.Contains("pc") || text.Contains("komputer") || text.Contains("printer") || text.Contains("hardware") || text.Contains("it"))
             return new IssueVisual("wrench", "#DBEAFE", "#2563EB", "#BFDBFE");
 
-        return new IssueVisual("alert-circle", "#F3F4F6", "#4B5563", "#E5E7EB");
+        return new IssueVisual("package", "#F3F4F6", "#4B5563", "#E5E7EB");
     }
 }
