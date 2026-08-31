@@ -1,5 +1,6 @@
-﻿@namespace booking_room_admin.Components.Shared
+@namespace booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
+@inject IJSRuntime JS
 
 <div class="mini-map-container @CssClass">
     <div class="mini-map-header">
@@ -9,14 +10,14 @@
         </div>
         @if (ShowZoomButton)
         {
-            <button type="button" class="mini-map-zoom-btn" @onclick="() => showLightbox = true" title="Perbesar Denah Lokasi">
+            <button type="button" class="mini-map-zoom-btn" @onclick="OpenLightbox" title="Perbesar Denah Lokasi">
                 <Icon Name="eye" Size="13" />
                 <span>Lihat Denah Penuh</span>
             </button>
         }
     </div>
 
-    <div class="mini-map-canvas" @onclick="() => { if (ShowZoomButton) showLightbox = true; }">
+    <div class="mini-map-canvas" @onclick="async () => { if (ShowZoomButton) await OpenLightbox(); }">
         <div class="floorplan-layout-bg">
             <div class="layout-zone zone-left"><span>Sayap Barat</span></div>
             <div class="layout-zone zone-center"><span>Lobby & Lift Utama</span></div>
@@ -37,7 +38,7 @@
 @* Lightbox Modal Denah Penuh *@
 @if (showLightbox)
 {
-    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) showLightbox = false; })" Title="@($"Denah Lokasi — {RoomName}")" Size="large">
+    <AppModal IsOpen="true" IsOpenChanged="@(async (bool v) => { if (!v) await CloseLightbox(); })" Title="@($"Denah Lokasi Multi-Lantai")" Size="large">
         <ChildContent>
             <div class="lightbox-map-content">
                 <div class="lightbox-map-header-info">
@@ -45,27 +46,61 @@
                         <strong>@RoomName</strong>
                         <span>@LocationText</span>
                     </div>
-                    <span class="lbm-hint">Denah Lantai Kantor PT Personel Alih Daya Tbk</span>
+                    <span class="lbm-hint">Transisi antar lantai (Overlapping Sections & Velocity Scroll)</span>
                 </div>
-                <div class="lightbox-map-view">
-                    <div class="floorplan-layout-bg large">
-                        <div class="layout-zone zone-left"><span>Sayap Barat (Meeting & Coworking)</span></div>
-                        <div class="layout-zone zone-center"><span>Lobby Tengah & Lift Eksekutif</span></div>
-                        <div class="layout-zone zone-right"><span>Sayap Timur (Ruang Rapat Utama & VIP)</span></div>
+                <div id="lightbox-map-view" class="lightbox-map-view">
+                    <div class="scroll-content-wrapper anim-velocity-skew">
                         
-                        <div class="active-room-marker large" style="left: @($"{PinX}%"); top: @($"{PinY}%");">
-                            <div class="marker-pulse"></div>
-                            <div class="marker-pin">
-                                <Icon Name="map-pin" Size="18" />
+                        @* Lantai 1 *@
+                        <div class="anim-overlap-section">
+                            <div class="anim-overlap-inner">
+                                <div class="floor-badge">Lantai 1</div>
+                                <div class="floorplan-layout-bg large">
+                                    <div class="layout-zone zone-left"><span>Resepsionis</span></div>
+                                    <div class="layout-zone zone-center"><span>Lobby Utama</span></div>
+                                    <div class="layout-zone zone-right"><span>Auditorium</span></div>
+                                </div>
                             </div>
-                            <span class="marker-label">@RoomName</span>
                         </div>
+
+                        @* Lantai 2 (Active Floor) *@
+                        <div class="anim-overlap-section">
+                            <div class="anim-overlap-inner">
+                                <div class="floor-badge">Lantai 2 (Lokasi Ruangan)</div>
+                                <div class="floorplan-layout-bg large">
+                                    <div class="layout-zone zone-left"><span>Sayap Barat (Meeting)</span></div>
+                                    <div class="layout-zone zone-center"><span>Lobby Tengah</span></div>
+                                    <div class="layout-zone zone-right"><span>Sayap Timur (VIP)</span></div>
+                                    
+                                    <div class="active-room-marker large" style="left: @($"{PinX}%"); top: @($"{PinY}%");">
+                                        <div class="marker-pulse"></div>
+                                        <div class="marker-pin">
+                                            <Icon Name="map-pin" Size="18" />
+                                        </div>
+                                        <span class="marker-label">@RoomName</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Lantai 3 *@
+                        <div class="anim-overlap-section">
+                            <div class="anim-overlap-inner">
+                                <div class="floor-badge">Lantai 3</div>
+                                <div class="floorplan-layout-bg large">
+                                    <div class="layout-zone zone-left"><span>Area Direksi</span></div>
+                                    <div class="layout-zone zone-center"><span>Lobby Eksekutif</span></div>
+                                    <div class="layout-zone zone-right"><span>Ruang Rapat Tertutup</span></div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </ChildContent>
         <FooterContent>
-            <button type="button" class="btn-outline-pill" @onclick="() => showLightbox = false">Tutup</button>
+            <button type="button" class="btn-outline-pill" @onclick="CloseLightbox">Tutup</button>
         </FooterContent>
     </AppModal>
 }
@@ -80,4 +115,18 @@
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
     private bool showLightbox = false;
+
+    private async Task OpenLightbox()
+    {
+        showLightbox = true;
+        StateHasChanged();
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("window.ScrollAnimations.init", "#lightbox-map-view");
+    }
+
+    private async Task CloseLightbox()
+    {
+        await JS.InvokeVoidAsync("window.ScrollAnimations.destroy");
+        showLightbox = false;
+    }
 }
