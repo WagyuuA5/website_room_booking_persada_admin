@@ -21,31 +21,37 @@
 </div>
 
 @code {
-    private List<(string Message, string Type)> _toasts = new();
-    private System.Timers.Timer? _timer;
+    private class ToastItem
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string Message { get; set; } = "";
+        public string Type { get; set; } = "";
+    }
+
+    private List<ToastItem> _toasts = new();
 
     protected override void OnInitialized()
     {
         ToastSvc.OnToast += HandleToast;
     }
 
-    private void HandleToast(string message, string type)
+    private async void HandleToast(string message, string type)
     {
-        _toasts.Add((message, type));
+        var toast = new ToastItem { Message = message, Type = type };
+        _toasts.Add(toast);
         if (_toasts.Count > 4) _toasts.RemoveAt(0);
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
 
-        _timer = new System.Timers.Timer(4000);
-        _timer.Elapsed += (s, e) =>
+        await Task.Delay(3000); // 3 seconds per toast
+
+        if (_toasts.Contains(toast)) 
         {
-            _timer?.Stop();
-            if (_toasts.Any()) { _toasts.RemoveAt(0); InvokeAsync(StateHasChanged); }
-        };
-        _timer.AutoReset = false;
-        _timer.Start();
+            _toasts.Remove(toast);
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
-    private void DismissToast((string Message, string Type) t)
+    private void DismissToast(ToastItem t)
     {
         _toasts.Remove(t);
         StateHasChanged();
@@ -54,6 +60,5 @@
     public void Dispose()
     {
         ToastSvc.OnToast -= HandleToast;
-        _timer?.Dispose();
     }
 }
