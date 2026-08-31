@@ -202,11 +202,14 @@
                             <div class="rm-row-2col">
                                 <div class="rm-field">
                                     <label class="rm-label">LOKASI</label>
-                                    <input type="text" class="rm-input" @bind="editForm.Location" />
+                                    <input type="text" class="rm-input text-ellipsis" title="@editForm.Location" placeholder="cth. Lantai 2, Wing A" @bind="editForm.Location" />
                                 </div>
                                 <div class="rm-field">
                                     <label class="rm-label">KAPASITAS</label>
-                                    <input type="number" class="rm-input" @bind="editForm.Capacity" />
+                                    <div class="rm-input-suffix">
+                                        <input type="number" class="rm-input" min="1" @bind="editForm.Capacity" />
+                                        <span>Orang</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -317,7 +320,7 @@
                         <div class="rm-row-2col">
                             <div class="rm-field">
                                 <label class="rm-label">LOKASI <span class="req">*</span></label>
-                                <input type="text" class="rm-input" placeholder="cth. Lantai 2, Wing A" @bind="newRoomForm.Location" />
+                                <input type="text" class="rm-input text-ellipsis" title="@newRoomForm.Location" placeholder="cth. Lantai 2, Wing A" @bind="newRoomForm.Location" />
                             </div>
                             <div class="rm-field">
                                 <label class="rm-label">KAPASITAS <span class="req">*</span></label>

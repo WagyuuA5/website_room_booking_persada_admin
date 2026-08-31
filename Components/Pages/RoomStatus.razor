@@ -41,7 +41,8 @@
         <div class="rs-cards-grid">
             @foreach (var room in statusRooms)
             {
-                <div class="rs-card card-@room.Status.ToLower() @(room.Status == "inactive" ? "card-ghost" : "")">
+                <div class="rs-card card-@room.Status.ToLower() @(room.Status == "inactive" ? "card-ghost" : "")"
+                     @onclick="() => OpenDetailModal(room)">
                     @* Photo Wrap *@
                     <div class="rs-photo-wrap @(room.Status != "active" ? "photo-grayscale" : "")">
                         @if (!room.ImageFailed)
@@ -83,11 +84,7 @@
                                 <h4 class="rs-room-title" title="@room.Name">@room.Name</h4>
                                 <span class="rs-room-loc"><Icon Name="map-pin" Size="14" /> @room.Location</span>
                             </div>
-                            <div class="rs-toggle-block">
-                                <label class="rs-switch">
-                                    <input type="checkbox" checked="@(room.Status == "active")" @onchange="@((ChangeEventArgs e) => ToggleRoomStatus(room, (bool)(e.Value ?? false)))" />
-                                    <span class="rs-slider"></span>
-                                </label>
+                            <div class="rs-status-pill-wrap">
                                 <span class="rs-status-tag tag-@room.Status.ToLower()">
                                     @GetStatusLabel(room.Status)
                                 </span>
@@ -103,7 +100,7 @@
                         }
                         else if (room.Status == "maintenance")
                         {
-                            <div class="rs-schedule-box">
+                            <div class="rs-schedule-box" @onclick:stopPropagation="true">
                                 <span class="rs-sched-label">Jadwal Perawatan</span>
                                 <div class="rs-duration-chips">
                                     <button type="button" class="rs-dur-chip @(room.SelectedDurationMinutes == 20 ? "active" : "")" @onclick="() => SetDuration(room, 20)">20 Menit</button>
@@ -117,19 +114,22 @@
                             <div class="rs-amenities-row">
                                 @foreach (var am in room.Amenities)
                                 {
-                                    <span class="rs-amenity-chip">@am</span>
+                                    <span class="rs-amenity-chip">
+                                        <Icon Name="@IconHelper.GetFacilityIcon(am)" Size="12" />
+                                        @am
+                                    </span>
                                 }
                             </div>
                         }
 
-                        <div class="rs-card-bottom-row">
+                        <div class="rs-card-bottom-row" @onclick:stopPropagation="true">
                             @if (room.JustFinished)
                             {
                                 <span class="rs-badge-just-finished">BARU SELESAI</span>
                             }
                             <div style="flex:1;"></div>
                             <button type="button" class="btn-rs-trash" @onclick="() => ConfirmDelete(room)" title="Hapus Ruangan">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rs-trash-svg"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                <Icon Name="trash-2" Size="16" />
                             </button>
                         </div>
                     </div>
@@ -147,13 +147,119 @@
     }
 </div>
 
+@* -- Modal 1: Detail Ruangan (Case F) -- *@
+@if (selectedRoomForDetail != null)
+{
+    <AppModal IsOpen="@showDetailModal" IsOpenChanged="@((bool v) => showDetailModal = v)" Title="Detail Ruangan" Size="medium">
+        <ChildContent>
+            <div class="rs-detail-modal-body">
+                @* 16:9 Photo *@
+                <div class="rs-detail-photo-wrap">
+                    <img src="@selectedRoomForDetail.PhotoUrl" alt="@selectedRoomForDetail.Name" class="rs-detail-photo" />
+                    <div class="rs-detail-badge-overlay">
+                        <span class="rs-status-tag tag-@selectedRoomForDetail.Status.ToLower()">
+                            @GetStatusLabel(selectedRoomForDetail.Status)
+                        </span>
+                    </div>
+                </div>
+
+                <div class="rs-detail-header-info">
+                    <h3 class="rs-detail-title">@selectedRoomForDetail.Name</h3>
+                    <div class="rs-detail-loc">
+                        <Icon Name="map-pin" Size="14" />
+                        <span>@selectedRoomForDetail.Location</span>
+                    </div>
+                </div>
+
+                @* Grid Info *@
+                <div class="rs-detail-grid">
+                    <div class="rs-dgrid-item">
+                        <span class="rs-dgrid-label">Kapasitas</span>
+                        <strong class="rs-dgrid-val">@selectedRoomForDetail.Capacity Orang</strong>
+                    </div>
+                    <div class="rs-dgrid-item">
+                        <span class="rs-dgrid-label">Status Operasional</span>
+                        <div class="rs-toggle-block" style="margin-top: 4px;">
+                            <label class="rs-switch">
+                                <input type="checkbox" checked="@(selectedRoomForDetail.Status == "active")" 
+                                       @onchange="@((ChangeEventArgs e) => ToggleDetailStatus((bool)(e.Value ?? false)))" />
+                                <span class="rs-slider"></span>
+                            </label>
+                            <span class="rs-toggle-text">@(selectedRoomForDetail.Status == "active" ? "Aktif (Siap Booking)" : "Nonaktif")</span>
+                        </div>
+                    </div>
+                </div>
+
+                @* Facilities *@
+                <div class="rs-detail-section">
+                    <span class="rs-section-label">Fasilitas Termasuk</span>
+                    <div class="rs-amenities-chips-wrap">
+                        @if (selectedRoomForDetail.Amenities.Any())
+                        {
+                            @foreach (var am in selectedRoomForDetail.Amenities)
+                            {
+                                <div class="rs-amenity-chip-lg">
+                                    <Icon Name="@IconHelper.GetFacilityIcon(am)" Size="14" />
+                                    <span>@am</span>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted" style="font-size: 0.8rem;">Tidak ada fasilitas terdaftar.</span>
+                        }
+                    </div>
+                </div>
+
+                @* Maintenance History *@
+                <div class="rs-detail-section">
+                    <div class="rs-section-header-row">
+                        <span class="rs-section-label">Riwayat Pemeliharaan Terakhir</span>
+                        <button type="button" class="btn-primary-pill btn-sm btn-yellow" @onclick="OpenMaintenanceFromDetail">
+                            <Icon Name="wrench" Size="13" />
+                            <span>Atur Pemeliharaan</span>
+                        </button>
+                    </div>
+
+                    <div class="rs-maint-history-list">
+                        <div class="rs-maint-history-item">
+                            <div class="rmh-dot"></div>
+                            <div class="rmh-content">
+                                <div class="rmh-top">
+                                    <strong>Pembersihan Rutin & Service AC</strong>
+                                    <span>18 Okt 2026</span>
+                                </div>
+                                <span class="rmh-tech">Ditangani oleh: Teknisi Budi (GA & Maintenance) &middot; Selesai</span>
+                            </div>
+                        </div>
+                        <div class="rs-maint-history-item">
+                            <div class="rmh-dot"></div>
+                            <div class="rmh-content">
+                                <div class="rmh-top">
+                                    <strong>Penggantian Kabel Proyektor HDMI</strong>
+                                    <span>04 Okt 2026</span>
+                                </div>
+                                <span class="rmh-tech">Ditangani oleh: Hendra (IT Support) &middot; Selesai</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Tutup</button>
+            <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveDetailChanges">Simpan Perubahan</button>
+        </FooterContent>
+    </AppModal>
+}
+
 @* -- Modal Set Maintenance -- *@
 @if (activeMaintenanceRoom != null)
 {
     <AppModal IsOpen="@showMaintModal" IsOpenChanged="@((bool v) => showMaintModal = v)" Size="medium">
         <HeaderContent>
             <div class="rs-modal-maint-header">
-                <h3 class="rs-maint-modal-title"><Icon Name="wrench" Size="20" /> PERAWATAN</h3>
+                <h3 class="rs-maint-modal-title"><Icon Name="wrench" Size="20" /> Atur Pemeliharaan Ruangan</h3>
                 <span class="rs-maint-room-pill"><Icon Name="building" Size="14" /> @activeMaintenanceRoom.Name &middot; @activeMaintenanceRoom.Location</span>
             </div>
         </HeaderContent>
@@ -163,11 +269,11 @@
                     <div class="rs-field">
                         <label class="rs-label">Kategori Perawatan</label>
                         <select class="rs-select" @bind="maintForm.Category">
-                            <option value="HVAC">HVAC</option>
+                            <option value="HVAC">HVAC / Pendingin Ruangan</option>
                             <option value="Perbaikan Peralatan">Perbaikan Peralatan</option>
                             <option value="Instalasi Fasilitas">Instalasi Fasilitas</option>
                             <option value="Pembersihan Rutin">Pembersihan Rutin</option>
-                            <option value="Pemulihan Sistem">Pemulihan Sistem</option>
+                            <option value="Pemulihan Sistem">Pemulihan Sistem Audio/Visual</option>
                         </select>
                     </div>
                     <div class="rs-field">
@@ -203,23 +309,23 @@
                 </div>
 
                 <div class="rs-field">
-                    <label class="rs-label">Dokumentasi</label>
+                    <label class="rs-label">Dokumentasi Foto</label>
                     <div class="rs-dropzone">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rs-up-svg"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <Icon Name="upload" Size="24" CssClass="text-muted" />
                         <strong>Klik untuk unggah atau seret & lepas</strong>
-                        <span>SVG, PNG, JPG atau GIF (maks. 5MB)</span>
+                        <span>PNG, JPG atau WEBP (maks. 5MB)</span>
                     </div>
                 </div>
 
                 <div class="rs-field">
-                    <label class="rs-label">Deskripsi</label>
-                    <textarea class="rs-textarea" rows="2" placeholder="Masukkan catatan detail di sini..." @bind="maintForm.Description"></textarea>
+                    <label class="rs-label">Deskripsi / Catatan Perawatan</label>
+                    <textarea class="rs-textarea" rows="2" placeholder="Masukkan catatan detail perbaikan di sini..." @bind="maintForm.Description"></textarea>
                 </div>
             </div>
         </ChildContent>
         <FooterContent>
             <button type="button" class="btn-outline-pill" @onclick="CancelMaintenanceModal">Batal</button>
-            <button type="button" class="btn-primary-pill btn-yellow" @onclick="ConfirmSetMaintenance">Konfirmasi Maintenance</button>
+            <button type="button" class="btn-primary-pill btn-yellow" @onclick="ConfirmSetMaintenance">Konfirmasi Pemeliharaan</button>
         </FooterContent>
     </AppModal>
 }
@@ -473,6 +579,42 @@
     private void CancelMaintenanceModal()
     {
         showMaintModal = false;
+    }
+
+    private RoomStatusItem? selectedRoomForDetail;
+    private bool showDetailModal = false;
+
+    private void OpenDetailModal(RoomStatusItem room)
+    {
+        selectedRoomForDetail = room;
+        showDetailModal = true;
+    }
+
+    private void ToggleDetailStatus(bool toActive)
+    {
+        if (selectedRoomForDetail == null) return;
+        selectedRoomForDetail.Status = toActive ? "active" : "inactive";
+        if (toActive) selectedRoomForDetail.JustFinished = true;
+    }
+
+    private void OpenMaintenanceFromDetail()
+    {
+        if (selectedRoomForDetail != null)
+        {
+            activeMaintenanceRoom = selectedRoomForDetail;
+            maintForm = new MaintenanceFormModel();
+            showDetailModal = false;
+            showMaintModal = true;
+        }
+    }
+
+    private void SaveDetailChanges()
+    {
+        if (selectedRoomForDetail != null)
+        {
+            Toast.Success($"Perubahan status untuk '{selectedRoomForDetail.Name}' berhasil disimpan.");
+            showDetailModal = false;
+        }
     }
 
     private void ConfirmDelete(RoomStatusItem r)

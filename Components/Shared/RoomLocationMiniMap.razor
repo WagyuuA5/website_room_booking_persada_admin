@@ -1,32 +1,134 @@
 @namespace booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
 @inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <div class="mini-map-container @CssClass">
     <div class="mini-map-header">
         <div class="mini-map-title">
-            <Icon Name="map-pin" Size="14" />
-            <span>@LocationText</span>
+            <Icon Name="map-pin" Size="15" />
+            <span title="@LocationText">@LocationText</span>
         </div>
-        @if (ShowZoomButton)
-        {
-            <button type="button" class="mini-map-zoom-btn" @onclick="OpenLightbox" title="Perbesar Denah Lokasi">
-                <Icon Name="eye" Size="13" />
-                <span>Lihat Denah Penuh</span>
-            </button>
-        }
+        <div class="mini-map-header-actions">
+            @if (ShowZoomButton)
+            {
+                <button type="button" class="mini-map-zoom-btn" @onclick="OpenLightbox" title="Perbesar Denah Lokasi">
+                    <Icon Name="eye" Size="16" />
+                    <span>Lihat Denah Penuh</span>
+                </button>
+            }
+        </div>
     </div>
 
-    <div class="mini-map-canvas" id="@canvasId" @onclick="HandleMapClick">
-        <div class="floorplan-layout-bg">
+    <div class="mini-map-canvas @(IsEditable ? "is-editable" : "")" id="@canvasId" style="--zoom-level: @zoomLevel;">
+        @* Zoom controls *@
+        <div class="map-zoom-controls" @onclick:stopPropagation="true">
+            <button type="button" class="btn-map-zoom" @onclick="ZoomIn" title="Perbesar Denah" disabled="@(zoomLevel >= 2.0)">
+                <Icon Name="zoom-in" Size="14" />
+            </button>
+            <button type="button" class="btn-map-zoom" @onclick="ZoomOut" title="Perkecil Denah" disabled="@(zoomLevel <= 0.8)">
+                <Icon Name="zoom-out" Size="14" />
+            </button>
+            @if (zoomLevel != 1.0)
+            {
+                <button type="button" class="btn-map-zoom reset" @onclick="ZoomReset" title="Reset Skala">
+                    <span>@((int)(zoomLevel * 100))%</span>
+                </button>
+            }
+        </div>
+
+        @if (IsEditable)
+        {
+            <div class="map-drag-hint">
+                <Icon Name="move" Size="12" />
+                <span>Klik atau geser pin untuk menentukan posisi ruangan</span>
+            </div>
+        }
+
+        <div class="floorplan-layout-blueprint" style="transform: scale(@zoomLevel); transform-origin: center center;">
+            @* SVG Detailed Architectural Blueprint Floorplan *@
+            <svg class="blueprint-svg" viewBox="0 0 800 350" preserveAspectRatio="none">
+                <!-- Background Grid -->
+                <defs>
+                    <pattern id="blueprint-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(148, 163, 184, 0.25)" stroke-width="0.75"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#blueprint-grid)" />
+
+                <!-- Outer Boundary & Corridors -->
+                <rect x="15" y="15" width="770" height="320" rx="8" fill="none" stroke="#64748B" stroke-width="2.5" />
+                
+                <!-- Corridor line -->
+                <line x1="15" y1="175" x2="785" y2="175" stroke="#94A3B8" stroke-width="2" stroke-dasharray="6 4" />
+
+                <!-- SAYAP BARAT (Rooms & Partitions) -->
+                <!-- Room Alpha -->
+                <rect x="25" y="25" width="220" height="135" rx="4" fill="rgba(59, 130, 246, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                <rect x="85" y="70" width="100" height="45" rx="6" fill="rgba(148, 163, 184, 0.2)" stroke="#94A3B8" stroke-width="1" />
+                <!-- Chairs -->
+                <circle cx="100" cy="58" r="5" fill="#94A3B8" />
+                <circle cx="135" cy="58" r="5" fill="#94A3B8" />
+                <circle cx="170" cy="58" r="5" fill="#94A3B8" />
+                <circle cx="100" cy="127" r="5" fill="#94A3B8" />
+                <circle cx="135" cy="127" r="5" fill="#94A3B8" />
+                <circle cx="170" cy="127" r="5" fill="#94A3B8" />
+                <text x="35" y="45" font-size="11" font-weight="700" fill="#64748B">RUANG ALPHA (VIP)</text>
+                <!-- Door swing -->
+                <path d="M 120 160 A 20 20 0 0 1 140 160" fill="none" stroke="#94A3B8" stroke-width="1" stroke-dasharray="2 2" />
+
+                <!-- Room Beta -->
+                <rect x="25" y="190" width="220" height="135" rx="4" fill="rgba(59, 130, 246, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                <rect x="90" y="235" width="90" height="45" rx="6" fill="rgba(148, 163, 184, 0.2)" stroke="#94A3B8" stroke-width="1" />
+                <text x="35" y="210" font-size="11" font-weight="700" fill="#64748B">RUANG BETA (DISKUSI)</text>
+
+                <!-- LOBBY & LIFT UTAMA (Center) -->
+                <rect x="270" y="25" width="260" height="135" rx="4" fill="rgba(245, 158, 11, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                <!-- Elevators -->
+                <rect x="290" y="45" width="45" height="45" rx="2" fill="rgba(148, 163, 184, 0.15)" stroke="#94A3B8" stroke-width="1" />
+                <line x1="290" y1="45" x2="335" y2="90" stroke="#94A3B8" stroke-width="1" />
+                <line x1="335" y1="45" x2="290" y2="90" stroke="#94A3B8" stroke-width="1" />
+                <rect x="345" y="45" width="45" height="45" rx="2" fill="rgba(148, 163, 184, 0.15)" stroke="#94A3B8" stroke-width="1" />
+                <line x1="345" y1="45" x2="390" y2="90" stroke="#94A3B8" stroke-width="1" />
+                <line x1="390" y1="45" x2="345" y2="90" stroke="#94A3B8" stroke-width="1" />
+                <!-- Reception Desk -->
+                <path d="M 420 55 Q 470 55 470 105" fill="none" stroke="#94A3B8" stroke-width="2" />
+                <text x="290" y="145" font-size="11" font-weight="700" fill="#64748B">LOBBY UTAMA & RESEPSIONIS</text>
+
+                <!-- Restrooms & Stairs -->
+                <rect x="270" y="190" width="260" height="135" rx="4" fill="rgba(148, 163, 184, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                <rect x="290" y="210" width="105" height="100" rx="3" fill="none" stroke="#94A3B8" stroke-width="1" />
+                <text x="305" y="265" font-size="10" font-weight="600" fill="#94A3B8">TOILET & PANTRY</text>
+                <rect x="410" y="210" width="105" height="100" rx="3" fill="none" stroke="#94A3B8" stroke-width="1" />
+                <text x="435" y="265" font-size="10" font-weight="600" fill="#94A3B8">TANGGA DARURAT</text>
+
+                <!-- SAYAP TIMUR (Auditorium & Gamma) -->
+                <!-- Auditorium -->
+                <rect x="555" y="25" width="220" height="135" rx="4" fill="rgba(16, 185, 129, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                <circle cx="665" cy="85" r="35" fill="rgba(148, 163, 184, 0.15)" stroke="#94A3B8" stroke-width="1" />
+                <text x="565" y="45" font-size="11" font-weight="700" fill="#64748B">AUDITORIUM SERBAGUNA</text>
+
+                <!-- Ruang Gamma -->
+                <rect x="555" y="190" width="220" height="135" rx="4" fill="rgba(59, 130, 246, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                <rect x="615" y="235" width="100" height="45" rx="6" fill="rgba(148, 163, 184, 0.2)" stroke="#94A3B8" stroke-width="1" />
+                <text x="565" y="210" font-size="11" font-weight="700" fill="#64748B">RUANG GAMMA (BOARDROOM)</text>
+            </svg>
+
+            <!-- Zone Overlays -->
             <div class="layout-zone zone-left"><span>Sayap Barat</span></div>
             <div class="layout-zone zone-center"><span>Lobby & Lift Utama</span></div>
             <div class="layout-zone zone-right"><span>Sayap Timur</span></div>
             
-            @* Highlighted Active Pin *@
-            <div class="active-room-marker" style="left: @($"{PinX}%"); top: @($"{PinY}%");">
+            @* Highlighted Active Draggable Pin *@
+            <div class="active-room-marker @(isDraggingPin ? "is-dragging" : "")" style="left: @($"{PinX}%"); top: @($"{PinY}%");">
+                @if (isDraggingPin)
+                {
+                    <div class="pin-coordinate-tooltip">
+                        X: @($"{PinX:F0}%") &middot; Y: @($"{PinY:F0}%")
+                    </div>
+                }
                 <div class="marker-pulse"></div>
-                <div class="marker-pin">
+                <div class="marker-pin" title="@(IsEditable ? "Geser pin untuk memindahkan lokasi" : RoomName)">
                     <Icon Name="map-pin" Size="14" />
                 </div>
                 <span class="marker-label">@RoomName</span>
@@ -38,63 +140,49 @@
 @* Lightbox Modal Denah Penuh *@
 @if (showLightbox)
 {
-    <AppModal IsOpen="true" IsOpenChanged="@(async (bool v) => { if (!v) await CloseLightbox(); })" Title="@($"Denah Lokasi Multi-Lantai")" Size="large">
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) CloseLightbox(); })" Title="Denah Lokasi Ruangan Interaktif" Size="large">
         <ChildContent>
             <div class="lightbox-map-content">
                 <div class="lightbox-map-header-info">
                     <div class="lbm-meta">
                         <strong>@RoomName</strong>
-                        <span>@LocationText</span>
+                        <span>@LocationText &middot; Koordinat Pin: X: @($"{PinX:F1}%") / Y: @($"{PinY:F1}%")</span>
                     </div>
-                    <span class="lbm-hint">Transisi antar lantai (Overlapping Sections & Velocity Scroll)</span>
+                    <div class="floor-selector-pills">
+                        <button type="button" class="btn-floor-pill @(selectedFloorTab == 1 ? "active" : "")" @onclick="() => selectedFloorTab = 1">Lantai 1</button>
+                        <button type="button" class="btn-floor-pill @(selectedFloorTab == 2 ? "active" : "")" @onclick="() => selectedFloorTab = 2">Lantai 2 (Aktif)</button>
+                        <button type="button" class="btn-floor-pill @(selectedFloorTab == 3 ? "active" : "")" @onclick="() => selectedFloorTab = 3">Lantai 3</button>
+                    </div>
                 </div>
-                <div id="lightbox-map-view" class="lightbox-map-view">
-                    <div class="scroll-content-wrapper anim-velocity-skew">
+
+                <div class="mini-map-canvas large" id="@($"{canvasId}-lightbox")" style="height: 420px; --zoom-level: @zoomLevel;">
+                    <div class="floorplan-layout-blueprint large" style="transform: scale(@zoomLevel); transform-origin: center center;">
+                        <svg class="blueprint-svg" viewBox="0 0 800 350" preserveAspectRatio="none">
+                            <rect width="100%" height="100%" fill="url(#blueprint-grid)" />
+                            <rect x="15" y="15" width="770" height="320" rx="8" fill="none" stroke="#64748B" stroke-width="2.5" />
+                            <line x1="15" y1="175" x2="785" y2="175" stroke="#94A3B8" stroke-width="2" stroke-dasharray="6 4" />
+                            <rect x="25" y="25" width="220" height="135" rx="4" fill="rgba(59, 130, 246, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                            <rect x="25" y="190" width="220" height="135" rx="4" fill="rgba(59, 130, 246, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                            <rect x="270" y="25" width="260" height="135" rx="4" fill="rgba(245, 158, 11, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                            <rect x="270" y="190" width="260" height="135" rx="4" fill="rgba(148, 163, 184, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                            <rect x="555" y="25" width="220" height="135" rx="4" fill="rgba(16, 185, 129, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                            <rect x="555" y="190" width="220" height="135" rx="4" fill="rgba(59, 130, 246, 0.04)" stroke="#64748B" stroke-width="1.5" />
+                            <text x="35" y="45" font-size="12" font-weight="700" fill="#64748B">SAYAP BARAT (MEETING & DISKUSI)</text>
+                            <text x="290" y="45" font-size="12" font-weight="700" fill="#64748B">LOBBY UTAMA & LIFT</text>
+                            <text x="565" y="45" font-size="12" font-weight="700" fill="#64748B">SAYAP TIMUR (AUDITORIUM & VIP)</text>
+                        </svg>
+
+                        <div class="layout-zone zone-left"><span>Sayap Barat</span></div>
+                        <div class="layout-zone zone-center"><span>Lobby & Lift Utama</span></div>
+                        <div class="layout-zone zone-right"><span>Sayap Timur</span></div>
                         
-                        @* Lantai 1 *@
-                        <div class="anim-overlap-section">
-                            <div class="anim-overlap-inner">
-                                <div class="floor-badge">Lantai 1</div>
-                                <div class="floorplan-layout-bg large">
-                                    <div class="layout-zone zone-left"><span>Resepsionis</span></div>
-                                    <div class="layout-zone zone-center"><span>Lobby Utama</span></div>
-                                    <div class="layout-zone zone-right"><span>Auditorium</span></div>
-                                </div>
+                        <div class="active-room-marker large" style="left: @($"{PinX}%"); top: @($"{PinY}%");">
+                            <div class="marker-pulse"></div>
+                            <div class="marker-pin">
+                                <Icon Name="map-pin" Size="18" />
                             </div>
+                            <span class="marker-label">@RoomName</span>
                         </div>
-
-                        @* Lantai 2 (Active Floor) *@
-                        <div class="anim-overlap-section">
-                            <div class="anim-overlap-inner">
-                                <div class="floor-badge">Lantai 2 (Lokasi Ruangan)</div>
-                                <div class="floorplan-layout-bg large">
-                                    <div class="layout-zone zone-left"><span>Sayap Barat (Meeting)</span></div>
-                                    <div class="layout-zone zone-center"><span>Lobby Tengah</span></div>
-                                    <div class="layout-zone zone-right"><span>Sayap Timur (VIP)</span></div>
-                                    
-                                    <div class="active-room-marker large" style="left: @($"{PinX}%"); top: @($"{PinY}%");">
-                                        <div class="marker-pulse"></div>
-                                        <div class="marker-pin">
-                                            <Icon Name="map-pin" Size="18" />
-                                        </div>
-                                        <span class="marker-label">@RoomName</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        @* Lantai 3 *@
-                        <div class="anim-overlap-section">
-                            <div class="anim-overlap-inner">
-                                <div class="floor-badge">Lantai 3</div>
-                                <div class="floorplan-layout-bg large">
-                                    <div class="layout-zone zone-left"><span>Area Direksi</span></div>
-                                    <div class="layout-zone zone-center"><span>Lobby Eksekutif</span></div>
-                                    <div class="layout-zone zone-right"><span>Ruang Rapat Tertutup</span></div>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -107,6 +195,7 @@
 
 @code {
     private readonly string canvasId = "minimap-" + Guid.NewGuid().ToString("N");
+    private DotNetObjectReference<RoomLocationMiniMap>? dotNetRef;
 
     [Parameter] public string RoomName { get; set; } = "Ruang Rapat";
     [Parameter] public string LocationText { get; set; } = "Lantai 2, Gedung Pusat";
@@ -121,27 +210,60 @@
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
     private bool showLightbox = false;
+    private int selectedFloorTab = 2;
+    private double zoomLevel = 1.0;
+    private bool isDraggingPin = false;
 
-    private async Task HandleMapClick(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (IsEditable)
+        if (firstRender && IsEditable)
         {
-            var coords = await JS.InvokeAsync<double[]>("getClickPercentage", canvasId, e.ClientX, e.ClientY);
-            if (coords != null && coords.Length == 2)
-            {
-                PinX = coords[0];
-                PinY = coords[1];
-                await PinXChanged.InvokeAsync(PinX);
-                await PinYChanged.InvokeAsync(PinY);
-                
-                string newLoc = GenerateLocationText(PinX, PinY);
-                await OnLocationAutoGenerated.InvokeAsync(newLoc);
-            }
+            dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("initDraggablePin", canvasId, dotNetRef, IsEditable);
         }
-        else if (ShowZoomButton)
-        {
-            await OpenLightbox();
-        }
+    }
+
+    [JSInvokable]
+    public async Task OnPinDragUpdate(double x, double y, bool isDragging)
+    {
+        isDraggingPin = isDragging;
+        PinX = x;
+        PinY = y;
+        await PinXChanged.InvokeAsync(PinX);
+        await PinYChanged.InvokeAsync(PinY);
+        
+        string newLoc = GenerateLocationText(PinX, PinY);
+        await OnLocationAutoGenerated.InvokeAsync(newLoc);
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnPinDragEnd(double x, double y)
+    {
+        isDraggingPin = false;
+        PinX = x;
+        PinY = y;
+        await PinXChanged.InvokeAsync(PinX);
+        await PinYChanged.InvokeAsync(PinY);
+        
+        string newLoc = GenerateLocationText(PinX, PinY);
+        await OnLocationAutoGenerated.InvokeAsync(newLoc);
+        StateHasChanged();
+    }
+
+    private void ZoomIn()
+    {
+        if (zoomLevel < 2.0) zoomLevel = Math.Round(zoomLevel + 0.25, 2);
+    }
+
+    private void ZoomOut()
+    {
+        if (zoomLevel > 0.8) zoomLevel = Math.Round(zoomLevel - 0.25, 2);
+    }
+
+    private void ZoomReset()
+    {
+        zoomLevel = 1.0;
     }
 
     private string GenerateLocationText(double x, double y)
@@ -154,20 +276,21 @@
         if (y < 33) area = "Utara";
         else if (y > 66) area = "Selatan";
         
-        return $"Lantai 1, {wing} ({area})";
+        return $"Lantai 2, {wing} ({area})";
     }
 
-    private async Task OpenLightbox()
+    private void OpenLightbox()
     {
         showLightbox = true;
-        StateHasChanged();
-        await Task.Delay(100);
-        await JS.InvokeVoidAsync("window.ScrollAnimations.init", "#lightbox-map-view");
     }
 
-    private async Task CloseLightbox()
+    private void CloseLightbox()
     {
-        await JS.InvokeVoidAsync("window.ScrollAnimations.destroy");
         showLightbox = false;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        dotNetRef?.Dispose();
     }
 }

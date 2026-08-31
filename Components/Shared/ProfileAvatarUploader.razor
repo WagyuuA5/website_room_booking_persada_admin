@@ -1,4 +1,4 @@
-﻿@namespace booking_room_admin.Components.Shared
+@namespace booking_room_admin.Components.Shared
 @inject booking_room_admin.Components.Services.ToastService Toast
 
 <div class="avatar-uploader-wrapper @CssClass" style="width: @Size; height: @Size;">
@@ -20,7 +20,8 @@
     <InputFile id="@inputId" 
                accept="image/png, image/jpeg, image/jpg, image/webp" 
                OnChange="HandleFileSelected" 
-               class="avatar-hidden-file-input" />
+               class="avatar-hidden-file-input"
+               style="display: none !important;" />
 </div>
 
 @code {

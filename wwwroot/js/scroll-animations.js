@@ -139,3 +139,53 @@ window.getClickPercentage = function(elementId, clientX, clientY) {
     return [x, y];
 };
 
+window.initDraggablePin = function(canvasId, dotNetHelper, isEditable) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !isEditable) return;
+
+    let isDragging = false;
+
+    function getCoords(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        let x = ((clientX - rect.left) / rect.width) * 100;
+        let y = ((clientY - rect.top) / rect.height) * 100;
+        x = Math.max(2, Math.min(98, x));
+        y = Math.max(2, Math.min(98, y));
+        return [parseFloat(x.toFixed(1)), parseFloat(y.toFixed(1))];
+    }
+
+    function onPointerDown(e) {
+        isDragging = true;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const coords = getCoords(clientX, clientY);
+        dotNetHelper.invokeMethodAsync('OnPinDragUpdate', coords[0], coords[1], true);
+        e.preventDefault();
+    }
+
+    function onPointerMove(e) {
+        if (!isDragging) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const coords = getCoords(clientX, clientY);
+        dotNetHelper.invokeMethodAsync('OnPinDragUpdate', coords[0], coords[1], true);
+    }
+
+    function onPointerUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        const clientX = e.changedTouches ? e.changedTouches[0].clientX : (e.clientX || 0);
+        const clientY = e.changedTouches ? e.changedTouches[0].clientY : (e.clientY || 0);
+        const coords = getCoords(clientX, clientY);
+        dotNetHelper.invokeMethodAsync('OnPinDragEnd', coords[0], coords[1]);
+    }
+
+    canvas.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+
+    canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp, { passive: false });
+};
+

@@ -5,26 +5,26 @@
         Menampilkan @(TotalData == 0 ? 0 : StartIndex) - @EndIndex dari @TotalData data
     </div>
     <div class="pagination-controls">
-        <button type="button" class="btn-page-nav" @onclick="GoToPrevious" disabled="@(CurrentPage <= 1)">
+        <button type="button" class="btn-page-nav" @onclick="GoToPrevious" disabled="@(CurrentPage <= 1)" title="Halaman Sebelumnya">
             <Icon Name="chevron-left" Size="16" />
         </button>
 
-        @for (int i = 1; i <= TotalPages; i++)
+        @foreach (var item in GetPaginationItems())
         {
-            var pageNum = i;
-            if (ShouldShowPage(pageNum))
+            if (item.IsEllipsis)
             {
-                <button type="button" class="btn-page-num @(CurrentPage == pageNum ? "active" : "")" @onclick="() => GoToPage(pageNum)">
-                    @pageNum
-                </button>
+                <span class="pagination-ellipsis">&hellip;</span>
             }
-            else if (ShouldShowEllipsis(pageNum))
+            else
             {
-                <span class="pagination-ellipsis">...</span>
+                var p = item.PageNumber;
+                <button type="button" class="btn-page-num @(CurrentPage == p ? "active" : "")" @onclick="() => GoToPage(p)">
+                    @p
+                </button>
             }
         }
 
-        <button type="button" class="btn-page-nav" @onclick="GoToNext" disabled="@(CurrentPage >= TotalPages || TotalPages == 0)">
+        <button type="button" class="btn-page-nav" @onclick="GoToNext" disabled="@(CurrentPage >= TotalPages || TotalPages == 0)" title="Halaman Berikutnya">
             <Icon Name="chevron-right" Size="16" />
         </button>
     </div>
@@ -41,12 +41,23 @@
     private int StartIndex => TotalData == 0 ? 0 : ((CurrentPage - 1) * PageSize) + 1;
     private int EndIndex => Math.Min(CurrentPage * PageSize, TotalData);
 
+    public struct PageItem
+    {
+        public int PageNumber { get; set; }
+        public bool IsEllipsis { get; set; }
+    }
+
     protected override void OnParametersSet()
     {
         // Clamp current page if it exceeds total pages
         if (CurrentPage > TotalPages && TotalPages > 0)
         {
             CurrentPage = TotalPages;
+            CurrentPageChanged.InvokeAsync(CurrentPage);
+        }
+        else if (CurrentPage < 1)
+        {
+            CurrentPage = 1;
             CurrentPageChanged.InvokeAsync(CurrentPage);
         }
     }
@@ -63,19 +74,48 @@
     private async Task GoToPrevious() => await GoToPage(CurrentPage - 1);
     private async Task GoToNext() => await GoToPage(CurrentPage + 1);
 
-    private bool ShouldShowPage(int pageNum)
+    private List<PageItem> GetPaginationItems()
     {
-        if (TotalPages <= 5) return true;
-        if (pageNum == 1 || pageNum == TotalPages) return true;
-        if (Math.Abs(pageNum - CurrentPage) <= 1) return true;
-        return false;
-    }
+        var items = new List<PageItem>();
+        if (TotalPages <= 7)
+        {
+            for (int i = 1; i <= TotalPages; i++)
+            {
+                items.Add(new PageItem { PageNumber = i, IsEllipsis = false });
+            }
+            return items;
+        }
 
-    private bool ShouldShowEllipsis(int pageNum)
-    {
-        if (TotalPages <= 5) return false;
-        if (pageNum == 2 && CurrentPage > 3) return true;
-        if (pageNum == TotalPages - 1 && CurrentPage < TotalPages - 2) return true;
-        return false;
+        // Page 1
+        items.Add(new PageItem { PageNumber = 1, IsEllipsis = false });
+
+        if (CurrentPage <= 4)
+        {
+            for (int i = 2; i <= 5; i++)
+            {
+                items.Add(new PageItem { PageNumber = i, IsEllipsis = false });
+            }
+            items.Add(new PageItem { IsEllipsis = true });
+            items.Add(new PageItem { PageNumber = TotalPages, IsEllipsis = false });
+        }
+        else if (CurrentPage >= TotalPages - 3)
+        {
+            items.Add(new PageItem { IsEllipsis = true });
+            for (int i = TotalPages - 4; i <= TotalPages; i++)
+            {
+                items.Add(new PageItem { PageNumber = i, IsEllipsis = false });
+            }
+        }
+        else
+        {
+            items.Add(new PageItem { IsEllipsis = true });
+            items.Add(new PageItem { PageNumber = CurrentPage - 1, IsEllipsis = false });
+            items.Add(new PageItem { PageNumber = CurrentPage, IsEllipsis = false });
+            items.Add(new PageItem { PageNumber = CurrentPage + 1, IsEllipsis = false });
+            items.Add(new PageItem { IsEllipsis = true });
+            items.Add(new PageItem { PageNumber = TotalPages, IsEllipsis = false });
+        }
+
+        return items;
     }
 }

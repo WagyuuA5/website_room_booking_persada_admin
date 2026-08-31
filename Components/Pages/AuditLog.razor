@@ -179,7 +179,7 @@
                         <StatusBadge Status="@GetActionStatus(log.ActionType)" CustomLabel="@log.ActionType" />
                     </td>
                     <td><span class="log-target">@log.TargetName</span></td>
-                    <td><span class="log-detail">@log.Detail</span></td>
+                    <td><span class="log-detail text-ellipsis" title="@log.Detail">@log.Detail</span></td>
                 </RowTemplate>
             </DataTable>
         }

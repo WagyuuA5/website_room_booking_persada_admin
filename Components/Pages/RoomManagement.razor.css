@@ -414,6 +414,42 @@
     border-color: var(--color-primary, #0B1E39);
 }
 
+.text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rm-input-suffix {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.rm-input-suffix input {
+    padding-right: 52px;
+}
+
+.rm-input-suffix span {
+    position: absolute;
+    right: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #9CA3AF;
+    pointer-events: none;
+    user-select: none;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
 .rm-chips-select-grid {
     display: flex;
     flex-wrap: wrap;
