@@ -37,9 +37,12 @@
                 </div>
                 @if(showAddFacility)
                 {
-                    <div style="margin-top:0.5rem; display:flex; gap:0.5rem;">
-                        <input type="text" @bind="newFacility" placeholder="Nama fasilitas..." style="flex:1; padding:0.25rem; border:1px solid #ccc; border-radius:4px;" />
-                        <button @onclick="ConfirmAddFacility" style="padding:0.25rem 0.5rem; background:#2563eb; color:white; border:none; border-radius:4px; cursor:pointer;">Tambah</button>
+                    <div style="margin-top:0.5rem; display:flex; gap:0.5rem; align-items:center;">
+                        <div style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:4px; background:#F3F4F6; color:#2563EB; border:1px solid #ccc;">
+                            <Icon Name="@(string.IsNullOrWhiteSpace(newFacility) ? "tag" : booking_room_admin.Components.Helpers.IconHelper.GetFacilityIcon(newFacility))" Size="16" />
+                        </div>
+                        <input type="text" @bind="newFacility" @bind:event="oninput" placeholder="Nama fasilitas..." style="flex:1; padding:0.35rem 0.5rem; border:1px solid #ccc; border-radius:4px;" />
+                        <button @onclick="ConfirmAddFacility" style="padding:0.35rem 0.75rem; background:#2563eb; color:white; border:none; border-radius:4px; cursor:pointer;">Tambah</button>
                     </div>
                 }
             </div>

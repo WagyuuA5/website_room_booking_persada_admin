@@ -233,8 +233,11 @@
 
                                 @if (showAddCustomInput)
                                 {
-                                    <div class="rm-custom-facility-row">
-                                        <input type="text" class="rm-input" placeholder="Nama fasilitas baru (cth. PODCAST MIC)" @bind="newCustomAmenityText" />
+                                    <div class="rm-custom-facility-row" style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+                                        <div style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-md); background: #F3F4F6; color: var(--color-primary); border: 1px solid var(--border-light);">
+                                            <Icon Name="@(string.IsNullOrWhiteSpace(newCustomAmenityText) ? "tag" : IconHelper.GetFacilityIcon(newCustomAmenityText))" Size="18" />
+                                        </div>
+                                        <input type="text" class="rm-input" style="flex: 1; margin: 0;" placeholder="Nama fasilitas baru (cth. PODCAST MIC)" @bind="newCustomAmenityText" @bind:event="oninput" />
                                         <button type="button" class="btn-primary-pill btn-sm" @onclick="AddCustomAmenityToEdit">Tambah</button>
                                     </div>
                                 }
@@ -351,8 +354,11 @@
 
                             @if (showAddCustomInputNew)
                             {
-                                <div class="rm-custom-facility-row">
-                                    <input type="text" class="rm-input" placeholder="Nama fasilitas baru (cth. PODCAST MIC)" @bind="newCustomAmenityText" />
+                                <div class="rm-custom-facility-row" style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+                                    <div style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-md); background: #F3F4F6; color: var(--color-primary); border: 1px solid var(--border-light);">
+                                        <Icon Name="@(string.IsNullOrWhiteSpace(newCustomAmenityText) ? "tag" : IconHelper.GetFacilityIcon(newCustomAmenityText))" Size="18" />
+                                    </div>
+                                    <input type="text" class="rm-input" style="flex: 1; margin: 0;" placeholder="Nama fasilitas baru (cth. PODCAST MIC)" @bind="newCustomAmenityText" @bind:event="oninput" />
                                     <button type="button" class="btn-primary-pill btn-sm" @onclick="AddCustomAmenityToNew">Tambah</button>
                                 </div>
                             }
