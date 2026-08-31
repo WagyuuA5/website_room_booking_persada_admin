@@ -15,6 +15,20 @@ public class LayoutStateService
 
     public bool IsDarkMode { get; private set; }
 
+    private string _adminAvatarUrl = "";
+    public string AdminAvatarUrl
+    {
+        get => _adminAvatarUrl;
+        set => SetAdminAvatarUrl(value);
+    }
+
+    private string _adminFullName = "Admin Wahyu";
+    public string AdminFullName
+    {
+        get => _adminFullName;
+        set => SetAdminFullName(value);
+    }
+
     public event Action? OnChange;
 
     public async Task InitStateAsync()
@@ -29,6 +43,19 @@ public class LayoutStateService
             {
                 IsSidebarCollapsed = true;
             }
+
+            var storedAvatar = await _js.InvokeAsync<string?>("localStorage.getItem", "admin-avatar");
+            if (!string.IsNullOrEmpty(storedAvatar))
+            {
+                _adminAvatarUrl = storedAvatar;
+            }
+
+            var storedName = await _js.InvokeAsync<string?>("localStorage.getItem", "admin-name");
+            if (!string.IsNullOrEmpty(storedName))
+            {
+                _adminFullName = storedName;
+            }
+
             Notify();
         }
         catch
@@ -85,6 +112,34 @@ public class LayoutStateService
         catch
         {
             // Ignore JS errors during prerender
+        }
+    }
+
+    public void SetAdminAvatarUrl(string url)
+    {
+        if (_adminAvatarUrl != url)
+        {
+            _adminAvatarUrl = url;
+            Notify();
+            try
+            {
+                _js.InvokeVoidAsync("localStorage.setItem", "admin-avatar", url);
+            }
+            catch { }
+        }
+    }
+
+    public void SetAdminFullName(string name)
+    {
+        if (_adminFullName != name)
+        {
+            _adminFullName = name;
+            Notify();
+            try
+            {
+                _js.InvokeVoidAsync("localStorage.setItem", "admin-name", name);
+            }
+            catch { }
         }
     }
 

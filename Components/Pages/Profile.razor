@@ -3,6 +3,7 @@
 @using booking_room_admin.Components.Shared
 @inject booking_room_admin.Components.Services.ToastService Toast
 @inject NavigationManager Navigation
+@inject booking_room_admin.Components.Services.LayoutStateService LayoutState
 
 <TopBar Title="Profil Saya" Subtitle="Kelola informasi akun dan foto profil Anda." />
 
@@ -66,6 +67,12 @@
     private string phoneNumber = "+62 812-3456-7890";
     private string timeZone = "wib";
 
+    protected override void OnInitialized()
+    {
+        adminAvatarUrl = LayoutState.AdminAvatarUrl;
+        fullName = LayoutState.AdminFullName;
+    }
+
     private void CancelEdit()
     {
         NavigateBack();
@@ -73,6 +80,8 @@
 
     private void SaveChanges()
     {
+        LayoutState.SetAdminAvatarUrl(adminAvatarUrl);
+        LayoutState.SetAdminFullName(fullName);
         Toast.Success("Profil akun berhasil diperbarui.");
         NavigateBack();
     }
