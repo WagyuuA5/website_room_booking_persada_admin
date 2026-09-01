@@ -204,7 +204,7 @@
     width: 100%;
 }
 
-.input-icon {
+::deep .input-icon {
     position: absolute;
     left: 14px;
     top: 50%;
@@ -245,8 +245,8 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
 }
 
-.form-input:focus + .btn-toggle-visibility ~ .input-icon,
-.input-wrap:focus-within .input-icon {
+.form-input:focus + .btn-toggle-visibility ~ ::deep .input-icon,
+.input-wrap:focus-within ::deep .input-icon {
     color: #FFFFFF;
 }
 
@@ -538,7 +538,7 @@
     color: var(--color-ink-900, #14171F);
 }
 
-.forgot-input-icon {
+::deep .forgot-input-icon {
     position: absolute;
     left: 14px;
     top: 50%;
@@ -584,7 +584,7 @@
     background: var(--color-danger-soft, #FEF2F2) !important;
 }
 
-.input-wrap:focus-within .forgot-input-icon {
+.input-wrap:focus-within ::deep .forgot-input-icon {
     color: var(--color-accent, #2563EB);
 }
 
