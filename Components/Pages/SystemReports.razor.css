@@ -138,26 +138,26 @@
 }
 
 /* -- Shared Table Styles for Tabs (CASE 4) -- */
-.tab-table tbody tr.clickable-row {
+::deep .tab-table tbody tr.clickable-row {
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
 
-.tab-table tbody tr.clickable-row:hover {
+::deep .tab-table tbody tr.clickable-row:hover {
     background-color: var(--color-surface-alt, #F1F5F9);
 }
 
-.user-cell {
+::deep .user-cell {
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
-.user-cell-info {
+::deep .user-cell-info {
     display: flex;
     flex-direction: column;
 }
-body.dark .tab-table tbody tr.clickable-row:hover {
+body.dark ::deep .tab-table tbody tr.clickable-row:hover {
     background-color: var(--color-surface-1, #1E293B);
 }
 
