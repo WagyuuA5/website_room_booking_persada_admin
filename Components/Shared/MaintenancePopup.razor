@@ -58,12 +58,20 @@
                     @foreach (var fac in availableFacilities)
                     {
                         var isSelected = facilitiesServiced.Contains(fac);
-                        <button type="button" 
-                                style="padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.15s ease; border: 1px solid @(isSelected ? "var(--color-brand-yellow, #F2B705)" : "#E5E7EB"); background: @(isSelected ? "var(--color-brand-yellow, #F2B705)" : "#F9FAFB"); color: @(isSelected ? "#000000" : "#4B5563");"
-                                @onclick="() => ToggleServicedFacility(fac)">
-                            <Icon Name="@(isSelected ? "check" : IconHelper.GetFacilityIcon(fac))" Size="14" />
-                            <span>@fac</span>
-                        </button>
+                        var isStandard = new[] { "AC Unit", "Lighting/Pencahayaan", "Furniture/Perabotan", "Sound System", "Proyektor" }.Contains(fac);
+                        
+                        <div style="display:inline-flex; align-items:center; gap: 4px; padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; border: 1px solid @(isSelected ? "var(--color-brand-yellow, #F2B705)" : "#E5E7EB"); background: @(isSelected ? "var(--color-brand-yellow, #F2B705)" : "#F9FAFB"); color: @(isSelected ? "#000000" : "#4B5563");">
+                            <div @onclick="() => ToggleServicedFacility(fac)" style="display:flex; align-items:center; gap:0.4rem;">
+                                <Icon Name="@(isSelected ? "check" : IconHelper.GetFacilityIcon(fac))" Size="14" />
+                                <span>@fac</span>
+                            </div>
+                            @if (!isStandard)
+                            {
+                                <div @onclick:stopPropagation="true" @onclick="() => ConfirmDeleteMaintenanceFacility(fac)" style="margin-left: 4px; display:flex; align-items:center; justify-content:center; border-radius:50%; width:18px; height:18px; background: rgba(0,0,0,0.05);">
+                                    <Icon Name="x" Size="14" />
+                                </div>
+                            }
+                        </div>
                     }
                     <button type="button" class="btn-outline-pill btn-sm" @onclick="() => showAddFacility = !showAddFacility">
                         <Icon Name="plus" Size="13" /> Tambah
@@ -216,6 +224,13 @@
         IsOpen = false;
         IsOpenChanged.InvokeAsync(false);
         Reset();
+    }
+
+    private void ConfirmDeleteMaintenanceFacility(string fac)
+    {
+        availableFacilities = availableFacilities.Where(f => f != fac).ToList();
+        facilitiesServiced = facilitiesServiced.Where(f => f != fac).ToList();
+        StateHasChanged();
     }
 
     private void Reset()

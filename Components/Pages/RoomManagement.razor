@@ -248,26 +248,15 @@
                                 }
 
                                 <div class="rm-chips-select-grid">
-                                    @foreach (var am in allAvailableAmenities)
+                                    @foreach (var am in editForm.Amenities)
                                     {
-                                        var isSelected = editForm.Amenities.Contains(am);
                                         <div class="rm-select-chip-wrapper">
-                                            <button type="button" class="rm-select-chip @(isSelected ? "selected" : "")"
-                                                    @onclick="() => ToggleAmenity(am)">
+                                            <button type="button" class="rm-select-chip selected" @onclick="() => ToggleAmenity(am)">
                                                 <Icon Name="@IconHelper.GetFacilityIcon(am)" Size="14" /> @am.ToUpperInvariant()
                                             </button>
-                                            @if (isSelected)
-                                            {
-                                                <button type="button" class="rm-chip-remove-btn" title="Lepas Fasilitas" @onclick:stopPropagation="true" @onclick="() => RemoveAmenityFromRoom(am)">
-                                                    <Icon Name="x" Size="13" />
-                                                </button>
-                                            }
-                                            else if (!defaultAmenities.Contains(am))
-                                            {
-                                                <button type="button" class="rm-delete-custom-amenity" @onclick:stopPropagation="true" @onclick="() => ConfirmDeleteCustomAmenity(am)" title="Hapus Fasilitas Kustom">
-                                                    <Icon Name="x" Size="12" />
-                                                </button>
-                                            }
+                                            <button type="button" class="rm-chip-remove-btn" title="Lepas Fasilitas" @onclick:stopPropagation="true" @onclick="() => RemoveAmenityFromRoom(am)">
+                                                <Icon Name="x" Size="13" />
+                                            </button>
                                         </div>
                                     }
                                 </div>
@@ -376,19 +365,15 @@
                             }
 
                             <div class="rm-chips-select-grid">
-                                @foreach (var am in allAvailableAmenities)
+                                @foreach (var am in newRoomForm.Amenities)
                                 {
                                     <div class="rm-select-chip-wrapper">
-                                        <button type="button" class="rm-select-chip @(newRoomForm.Amenities.Contains(am) ? "selected" : "")"
-                                                @onclick="() => ToggleNewAmenity(am)">
+                                        <button type="button" class="rm-select-chip selected" @onclick="() => ToggleNewAmenity(am)">
                                             <Icon Name="@IconHelper.GetFacilityIcon(am)" Size="14" /> @am.ToUpperInvariant()
                                         </button>
-                                        @if (!defaultAmenities.Contains(am))
-                                        {
-                                            <button type="button" class="rm-delete-custom-amenity" @onclick:stopPropagation="true" @onclick="() => ConfirmDeleteCustomAmenity(am)">
-                                                <Icon Name="x" Size="12" />
-                                            </button>
-                                        }
+                                        <button type="button" class="rm-chip-remove-btn" title="Lepas Fasilitas" @onclick:stopPropagation="true" @onclick="() => ToggleNewAmenity(am)">
+                                            <Icon Name="x" Size="13" />
+                                        </button>
                                     </div>
                                 }
                             </div>
@@ -841,27 +826,13 @@
         Toast.Success("Foto berhasil ditambahkan ke galeri.");
     }
 
-    private async Task RemoveAmenityFromRoom(string am)
+    private void RemoveAmenityFromRoom(string am)
     {
         if (editForm.Amenities.Contains(am))
         {
-            // Optimistic update
-            editForm.Amenities.Remove(am);
+            editForm.Amenities = editForm.Amenities.Where(a => a != am).ToList();
+            Toast.Success($"Fasilitas '{am}' dilepas dari ruangan.");
             StateHasChanged();
-            
-            try 
-            {
-                // Simulasi pemanggilan API ke backend
-                await Task.Delay(300); 
-                Toast.Info($"Fasilitas '{am}' dilepas dari ruangan.");
-            }
-            catch
-            {
-                // Rollback if fails
-                editForm.Amenities.Add(am);
-                StateHasChanged();
-                Toast.Error($"Gagal melepas '{am}', coba lagi.");
-            }
         }
     }
 

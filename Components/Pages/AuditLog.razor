@@ -5,388 +5,578 @@
 @using booking_room_admin.Components.Services
 @inject ToastService Toast
 
-<TopBar Title="Audit Log" Subtitle="Riwayat seluruh aktivitas admin pada sistem - permanen dan tidak dapat diubah." />
-
-<div class="audit-log-page">
-    @* -- Filter Island Toolbar + Ekspor -- *@
-    <div class="audit-island-toolbar">
-        <span class="audit-filter-label">Filter:</span>
-
-        @* 1. Actor Island Trigger *@
-        <div class="island-trigger-container">
-            <button type="button" class="btn-island-trigger @(openIsland == "actor" ? "active" : "")" @onclick='() => ToggleIsland("actor")'>
-                <span>@(string.IsNullOrEmpty(selectedActor) ? "Semua Aktor" : selectedActor)</span>
-                <span class="island-caret"><Icon Name="chevron-down" Size="14" /></span>
-            </button>
-
-            @if (openIsland == "actor")
-            {
-                <div class="island-popup-card actor-island">
-                    <div class="island-header">
-                        <span class="island-title">Filter berdasarkan Aktor</span>
-                    </div>
-                    <div class="island-search">
-                        <input type="text" placeholder="Cari aktor..." class="island-input" @bind="actorSearchQuery" @bind:event="oninput" />
-                    </div>
-                    <div class="island-actor-list scroll-area">
-                        @foreach (var act in FilteredActorList)
-                        {
-                            <label class="island-actor-item">
-                                <input type="checkbox" checked="@(selectedActor == act.Name)" @onchange="@((ChangeEventArgs e) => SelectActor(act.Name, (bool)(e.Value ?? false)))" />
-                                <UserAvatar Name="@act.Name" Initials="@act.Initials" BgColor="@act.AvatarBg" Size="28px" />
-                                <div class="actor-info">
-                                    <strong class="actor-name">@act.Name</strong>
-                                    <span class="actor-role">@act.Role</span>
-                                </div>
-                            </label>
-                        }
-                    </div>
-                    <div class="island-footer">
-                        <button type="button" class="island-link-clear" @onclick="ClearActorFilter">Hapus Semua</button>
-                        <button type="button" class="island-btn-apply" @onclick='() => ToggleIsland("")'>Terapkan Filter</button>
-                    </div>
-                </div>
-            }
+<div class="audit-log-container" style="padding: 1.75rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; max-width: 1600px; margin: 0 auto;">
+    
+    @* --- HEADER HALAMAN --- *@
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h1 style="font-size: 1.75rem; font-weight: 800; color: #0B1E39; margin: 0; letter-spacing: -0.02em;">Audit Log</h1>
+                <span style="background: #F3F4F6; color: #6B7280; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; border: 1px solid #E5E7EB; text-transform: uppercase; letter-spacing: 0.05em;">Read-Only</span>
+            </div>
+            <p style="font-size: 0.88rem; color: #6B7280; margin: 4px 0 0 0;">Riwayat seluruh aktivitas admin pada sistem — permanen, terenkripsi, dan tidak dapat diubah.</p>
         </div>
-
-        @* 2. Action Type Island Trigger *@
-        <div class="island-trigger-container">
-            <button type="button" class="btn-island-trigger @(openIsland == "action" ? "active" : "")" @onclick='() => ToggleIsland("action")'>
-                <span>@(selectedActions.Any() ? $"{selectedActions.Count} Aksi Terpilih" : "Jenis Aksi")</span>
-                <span class="island-caret"><Icon Name="chevron-down" Size="14" /></span>
-            </button>
-
-            @if (openIsland == "action")
-            {
-                <div class="island-popup-card action-island">
-                    <div class="island-header">
-                        <span class="island-title">Filter berdasarkan Jenis Aksi</span>
-                    </div>
-                    <div class="island-categories-list scroll-area">
-                        @* Group: Pemesanan *@
-                        <div class="action-group">
-                            <div class="action-group-header" @onclick="() => isBookingGroupOpen = !isBookingGroupOpen">
-                                <span>@if (isBookingGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Pemesanan</span>
-                            </div>
-                            @if (isBookingGroupOpen)
-                            {
-                                <div class="action-group-items">
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Setujui Pemesanan")" @onchange='e => ToggleAction("Setujui Pemesanan", (bool)(e.Value ?? false))' /> Setujui Pemesanan</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Tolak Pemesanan")" @onchange='e => ToggleAction("Tolak Pemesanan", (bool)(e.Value ?? false))' /> Tolak Pemesanan</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Batalkan Pemesanan")" @onchange='e => ToggleAction("Batalkan Pemesanan", (bool)(e.Value ?? false))' /> Batalkan Pemesanan</label>
-                                </div>
-                            }
-                        </div>
-
-                        @* Group: Ruangan *@
-                        <div class="action-group">
-                            <div class="action-group-header" @onclick="() => isRoomGroupOpen = !isRoomGroupOpen">
-                                <span>@if (isRoomGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Ruangan</span>
-                            </div>
-                            @if (isRoomGroupOpen)
-                            {
-                                <div class="action-group-items">
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Tambah Ruangan")" @onchange='e => ToggleAction("Tambah Ruangan", (bool)(e.Value ?? false))' /> Tambah Ruangan</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Ubah Ruangan")" @onchange='e => ToggleAction("Ubah Ruangan", (bool)(e.Value ?? false))' /> Ubah Ruangan</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Atur Perawatan")" @onchange='e => ToggleAction("Atur Perawatan", (bool)(e.Value ?? false))' /> Atur Perawatan</label>
-                                </div>
-                            }
-                        </div>
-
-                        @* Group: Pengguna *@
-                        <div class="action-group">
-                            <div class="action-group-header" @onclick="() => isUserGroupOpen = !isUserGroupOpen">
-                                <span>@if (isUserGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Pengguna</span>
-                            </div>
-                            @if (isUserGroupOpen)
-                            {
-                                <div class="action-group-items">
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Tambah Pengguna")" @onchange='e => ToggleAction("Tambah Pengguna", (bool)(e.Value ?? false))' /> Tambah Pengguna</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Ubah Pengguna")" @onchange='e => ToggleAction("Ubah Pengguna", (bool)(e.Value ?? false))' /> Ubah Pengguna</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Nonaktifkan Pengguna")" @onchange='e => ToggleAction("Nonaktifkan Pengguna", (bool)(e.Value ?? false))' /> Nonaktifkan Pengguna</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Reset Kata Sandi")" @onchange='e => ToggleAction("Reset Kata Sandi", (bool)(e.Value ?? false))' /> Reset Kata Sandi</label>
-                                </div>
-                            }
-                        </div>
-
-                        @* Group: Sistem *@
-                        <div class="action-group">
-                            <div class="action-group-header" @onclick="() => isSystemGroupOpen = !isSystemGroupOpen">
-                                <span>@if (isSystemGroupOpen) { <Icon Name="chevron-down" Size="14" /> } else { <Icon Name="chevron-right" Size="14" /> } Sistem</span>
-                            </div>
-                            @if (isSystemGroupOpen)
-                            {
-                                <div class="action-group-items">
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Ubah Pengaturan")" @onchange='e => ToggleAction("Ubah Pengaturan", (bool)(e.Value ?? false))' /> Ubah Pengaturan</label>
-                                    <label><input type="checkbox" checked="@selectedActions.Contains("Ekspor Data")" @onchange='e => ToggleAction("Ekspor Data", (bool)(e.Value ?? false))' /> Ekspor Data</label>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                    <div class="island-footer">
-                        <button type="button" class="island-link-clear" @onclick="ClearActionFilter">Hapus Semua</button>
-                        <button type="button" class="island-btn-apply" @onclick='() => ToggleIsland("")'>Terapkan Filter</button>
-                    </div>
-                </div>
-            }
-        </div>
-
-        @* 3. Date Range Preset Trigger *@
-        <DateFilter OnDateSelectedCallback="HandleDateChanged" />
-
-        <div style="flex:1;"></div>
-        @if (!string.IsNullOrEmpty(selectedActor) || selectedActions.Any() || selectedDateRange != "7")
-        {
-            <button type="button" class="btn-clear-island-filters" @onclick="ResetAllFilters" title="Reset Semua Filter"><Icon Name="x" Size="12" /> Reset Filter</button>
-        }
-
-        <button type="button" class="btn-primary-pill btn-yellow" @onclick="@(() => showExportModal = true)">
-            <Icon Name="download" Size="14" />
+        <button type="button" class="btn-primary-pill btn-yellow" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; padding: 0.55rem 1.25rem;" @onclick="ExportData">
+            <Icon Name="download" Size="15" />
             <span>Ekspor CSV</span>
         </button>
     </div>
 
-    @* -- Audit Log DataTable -- *@
-    <div class="audit-table-panel">
-                @if (isLoading)
-        {
-            @for (int i = 0; i < 8; i++)
+    @* --- CARD FILTER --- *@
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); padding: 18px 22px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border: 1px solid #F3F4F6;">
+        @* Search box *@
+        <div style="flex: 1; min-width: 260px; position: relative;">
+            <Icon Name="search" Size="16" CssClass="text-muted" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9CA3AF;" />
+            <input type="text"
+                   class="form-input"
+                   style="width: 100%; height: 40px; padding-left: 38px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.85rem;"
+                   placeholder="Cari berdasarkan nama aktor atau target..."
+                   @bind="searchQuery"
+                   @bind:event="oninput" />
+        </div>
+
+        @* Dropdown Aktor *@
+        <select class="form-input" style="width: 180px; height: 40px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.85rem;" @bind="selectedActor">
+            <option value="">Semua Aktor</option>
+            @foreach (var actor in allActors)
             {
-                    <div class="skeleton-row">
-                    <SkeletonBlock Width="32px" Height="32px" CssClass="rounded-circle" />
-                    <SkeletonBlock Width="20%" Height="16px" />
-                    <SkeletonBlock Width="15%" Height="16px" />
-                    <SkeletonBlock Width="25%" Height="16px" />
-                    <SkeletonBlock Width="15%" Height="16px" />
+                <option value="@actor">@actor</option>
+            }
+        </select>
+
+        @* Dropdown Jenis Aksi / Modul *@
+        <select class="form-input" style="width: 180px; height: 40px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.85rem;" @bind="selectedActionType">
+            <option value="">Semua Jenis Aksi</option>
+            <option value="Setujui">Setujui / Konfirmasi</option>
+            <option value="Tolak">Tolak / Batalkan</option>
+            <option value="Tambah">Tambah / Buat</option>
+            <option value="Ubah">Edit / Ubah</option>
+            <option value="Maintenance">Atur Maintenance / Reset</option>
+            <option value="Ekspor">Ekspor / Laporan</option>
+        </select>
+
+        @* Dropdown Rentang Tanggal *@
+        <select class="form-input" style="width: 170px; height: 40px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.85rem;" @bind="selectedDateRange">
+            <option value="1">Hari Ini</option>
+            <option value="7">7 Hari Terakhir</option>
+            <option value="30">30 Hari Terakhir</option>
+            <option value="all">Semua Waktu</option>
+        </select>
+
+        @* Reset Filter Button *@
+        @if (HasActiveFilter)
+        {
+            <button type="button"
+                    style="background: transparent; border: none; color: #DC2626; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 6px;"
+                    @onclick="ResetAllFilters">
+                <Icon Name="x" Size="14" />
+                <span>Reset Filter</span>
+            </button>
+        }
+    </div>
+
+    @* --- CARD RINGKASAN STATISTIK (Dihitung dari dataset aktif) --- *@
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+        @* Card 1: Total Aktivitas Terfilter *@
+        <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); padding: 16px 20px; border: 1px solid #F3F4F6; display: flex; align-items: center; gap: 16px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <Icon Name="clock" Size="22" />
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">Aktivitas Periode Ini</span>
+                <span style="font-size: 1.4rem; font-weight: 800; color: #0B1E39; margin-top: 2px;">@FilteredLogs.Count() <span style="font-size: 0.85rem; font-weight: 600; color: #6B7280;">Log</span></span>
+            </div>
+        </div>
+
+        @* Card 2: Aksi Terbanyak *@
+        <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); padding: 16px 20px; border: 1px solid #F3F4F6; display: flex; align-items: center; gap: 16px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #ECFDF5; color: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <Icon Name="bar-chart-2" Size="22" />
+            </div>
+            <div style="display: flex; flex-direction: column; overflow: hidden;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">Aksi Terbanyak</span>
+                <span style="font-size: 1.1rem; font-weight: 800; color: #0B1E39; margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                    @TopActionSummary.Name
+                </span>
+                <span style="font-size: 0.75rem; color: #059669; font-weight: 600;">(@TopActionSummary.Count kali dilakukan)</span>
+            </div>
+        </div>
+
+        @* Card 3: Aktor Teraktif *@
+        <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); padding: 16px 20px; border: 1px solid #F3F4F6; display: flex; align-items: center; gap: 16px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #FAF5FF; color: #7C3AED; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <Icon Name="user-check" Size="22" />
+            </div>
+            <div style="display: flex; flex-direction: column; overflow: hidden;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">Aktor Teraktif</span>
+                <span style="font-size: 1.1rem; font-weight: 800; color: #0B1E39; margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                    @TopActorSummary.Name
+                </span>
+                <span style="font-size: 0.75rem; color: #7C3AED; font-weight: 600;">(@TopActorSummary.Count aktivitas)</span>
+            </div>
+        </div>
+    </div>
+
+    @* --- CARD TABEL DATA --- *@
+    <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #F3F4F6; overflow: hidden; display: flex; flex-direction: column;">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 900px; text-align: left;">
+                <colgroup>
+                    <col style="width: 14%;" />
+                    <col style="width: 20%;" />
+                    <col style="width: 18%;" />
+                    <col style="width: 24%;" />
+                    <col style="width: 24%;" />
+                </colgroup>
+                <thead style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB; position: sticky; top: 0; z-index: 2;">
+                    <tr>
+                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">WAKTU</th>
+                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">AKTOR</th>
+                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">AKSI</th>
+                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">TARGET</th>
+                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">DETAIL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (isLoading)
+                    {
+                        @for (int i = 0; i < 6; i++)
+                        {
+                            <tr style="height: 64px; border-bottom: 1px solid #F3F4F6;">
+                                <td style="padding: 14px 20px;"><div style="height: 14px; background: #E5E7EB; border-radius: 4px; width: 80%; animation: pulse 1.5s infinite;"></div></td>
+                                <td style="padding: 14px 20px;"><div style="display: flex; align-items: center; gap: 10px;"><div style="width: 32px; height: 32px; border-radius: 50%; background: #E5E7EB;"></div><div style="height: 14px; background: #E5E7EB; border-radius: 4px; width: 60%;"></div></div></td>
+                                <td style="padding: 14px 20px;"><div style="height: 24px; background: #E5E7EB; border-radius: 6px; width: 70%;"></div></td>
+                                <td style="padding: 14px 20px;"><div style="height: 14px; background: #E5E7EB; border-radius: 4px; width: 85%;"></div></td>
+                                <td style="padding: 14px 20px;"><div style="height: 14px; background: #E5E7EB; border-radius: 4px; width: 90%;"></div></td>
+                            </tr>
+                        }
+                    }
+                    else if (PagedLogs.Any())
+                    {
+                        @foreach (var log in PagedLogs)
+                        {
+                            <tr style="height: 64px; border-bottom: 1px solid #F3F4F6; cursor: pointer; transition: background 0.15s ease;"
+                                onmouseover="this.style.background='#F8F9FB'"
+                                onmouseout="this.style.background='#FFFFFF'"
+                                @onclick="() => OpenDetailModal(log)">
+                                
+                                @* Kolom 1: WAKTU (2 baris: Tanggal bold + Jam regular tanpa detik) *@
+                                <td style="padding: 14px 20px; vertical-align: middle;">
+                                    <div style="font-size: 13px; font-weight: 700; color: #111827; line-height: 1.2;">@log.Timestamp.ToString("dd MMM yyyy")</div>
+                                    <div style="font-size: 12px; color: #6B7280; margin-top: 3px;">@log.Timestamp.ToString("HH:mm") WIB</div>
+                                </td>
+
+                                @* Kolom 2: AKTOR (Avatar 32px + Nama bold) *@
+                                <td style="padding: 14px 20px; vertical-align: middle;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: @log.ActorBg; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;">
+                                            @log.ActorInitials
+                                        </div>
+                                        <span style="font-size: 14px; font-weight: 600; color: #111827; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">@log.ActorName</span>
+                                    </div>
+                                </td>
+
+                                @* Kolom 3: AKSI (Badge warna final terkunci di 9.4 + margin-right 24px) *@
+                                <td style="padding: 14px 20px; vertical-align: middle;">
+                                    <div style="display: inline-block; margin-right: 24px;">
+                                        <span style="display: inline-block; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; white-space: nowrap; background: @GetActionBadgeBg(log.ActionType); color: @GetActionBadgeColor(log.ActionType);">
+                                            @log.ActionType
+                                        </span>
+                                    </div>
+                                </td>
+
+                                @* Kolom 4: TARGET (Nama bold 14px + ID referensi highlight) *@
+                                <td style="padding: 14px 20px; vertical-align: middle;">
+                                    <div style="font-size: 14px; font-weight: 600; color: #111827; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" title="@log.TargetName">
+                                        @if (log.TargetName.Contains("(#"))
+                                        {
+                                            var split = log.TargetName.Split(new[] { "(#" }, StringSplitOptions.None);
+                                            <span>@split[0]</span>
+                                            <span style="color: #0284C7; font-size: 13px; font-weight: 700;">(#@split[1]</span>
+                                        }
+                                        else
+                                        {
+                                            @log.TargetName
+                                        }
+                                    </div>
+                                </td>
+
+                                @* Kolom 5: DETAIL (Reguler 13px, ellipsis + tooltip) *@
+                                <td style="padding: 14px 20px; vertical-align: middle;">
+                                    <div style="font-size: 13px; color: #6B7280; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" title="@log.Detail">
+                                        @log.Detail
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        @* --- EMPTY STATE --- *@
+                        <tr>
+                            <td colspan="5" style="padding: 60px 20px; text-align: center;">
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
+                                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
+                                        <Icon Name="inbox" Size="28" />
+                                    </div>
+                                    <span style="font-size: 1rem; font-weight: 700; color: #111827; margin-top: 4px;">Tidak ada aktivitas yang ditemukan</span>
+                                    <span style="font-size: 0.85rem; color: #6B7280; max-width: 360px;">Coba ubah kata kunci pencarian atau filter yang digunakan.</span>
+                                    <button type="button" class="btn-outline-pill" style="margin-top: 8px; font-size: 0.82rem; padding: 6px 16px;" @onclick="ResetAllFilters">
+                                        Reset Filter
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @* --- PAGINATION (Footer Card Tabel) --- *@
+        <div style="padding: 16px 24px; border-top: 1px solid #F3F4F6; background: #FFFFFF; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #6B7280;">
+                    <span>Baris per halaman:</span>
+                    <select style="padding: 4px 8px; border-radius: 6px; border: 1px solid #E5E7EB; font-size: 0.82rem; background: #FFFFFF; color: #111827;"
+                            @bind="pageSize"
+                            @bind:after="() => currentPage = 1">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <span style="font-size: 0.82rem; color: #6B7280;">
+                    Menampilkan <strong>@CurrentStartRow - @CurrentEndRow</strong> dari <strong>@FilteredLogs.Count()</strong> data
+                </span>
+            </div>
+
+            @if (TotalPages > 1)
+            {
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <button type="button"
+                            class="btn-outline-pill"
+                            style="padding: 4px 10px; font-size: 0.8rem; height: 32px;"
+                            disabled="@(currentPage == 1)"
+                            @onclick="() => currentPage--">
+                        <Icon Name="chevron-left" Size="14" />
+                    </button>
+                    
+                    @for (int p = 1; p <= TotalPages; p++)
+                    {
+                        var pageNum = p;
+                        if (pageNum == 1 || pageNum == TotalPages || (pageNum >= currentPage - 1 && pageNum <= currentPage + 1))
+                        {
+                            <button type="button"
+                                    style="width: 32px; height: 32px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; border: 1px solid @(currentPage == pageNum ? "#0B1E39" : "#E5E7EB"); background: @(currentPage == pageNum ? "#0B1E39" : "#FFFFFF"); color: @(currentPage == pageNum ? "#FFFFFF" : "#374151"); cursor: pointer; transition: all 0.15s ease;"
+                                    @onclick="() => currentPage = pageNum">
+                                @pageNum
+                            </button>
+                        }
+                        else if (pageNum == currentPage - 2 || pageNum == currentPage + 2)
+                        {
+                            <span style="color: #9CA3AF; padding: 0 4px;">...</span>
+                        }
+                    }
+
+                    <button type="button"
+                            class="btn-outline-pill"
+                            style="padding: 4px 10px; font-size: 0.8rem; height: 32px;"
+                            disabled="@(currentPage >= TotalPages)"
+                            @onclick="() => currentPage++">
+                        <Icon Name="chevron-right" Size="14" />
+                    </button>
                 </div>
             }
-        }
-        else
-        {
-            <DataTable TItem="AuditLogEntry" Items="PagedLogs" Columns="columns" TotalCount="@FilteredLogs.Count()" PageSize="@pageSize" CurrentPage="@currentPage" OnPageChanged="HandlePageChange" OnRowClick="OpenDetailModal">
-                <RowTemplate Context="log">
-                    <td class="col-time">
-                        <span class="log-date">@log.Timestamp.ToString("dd MMM yyyy")</span>
-                        <span class="log-time">@log.Timestamp.ToString("HH:mm:ss")</span>
-                    </td>
-                    <td>
-                        <div class="actor-cell">
-                            <UserAvatar Name="@log.ActorName" Initials="@log.ActorInitials" BgColor="@log.ActorBg" Size="32px" />
-                            <span class="actor-name">@log.ActorName</span>
-                        </div>
-                    </td>
-                    <td>
-                        <StatusBadge Status="@GetActionStatus(log.ActionType)" CustomLabel="@log.ActionType" />
-                    </td>
-                    <td><span class="log-target">@log.TargetName</span></td>
-                    <td><span class="log-detail text-ellipsis" title="@log.Detail">@log.Detail</span></td>
-                </RowTemplate>
-            </DataTable>
-        }
+        </div>
     </div>
 </div>
 
-@* -- Modal: Detail Aktivitas Audit (CASE 13) -- *@
+@* --- POP-UP DETAIL AKTIVITAS (9.6 Redesign Presisi) --- *@
 @if (selectedLogForDetail != null)
 {
-    <AppModal IsOpen="@showDetailModal" IsOpenChanged="@((bool v) => showDetailModal = v)" Title="Detail Aktivitas Audit" Size="medium">
+    <AppModal IsOpen="@showDetailModal" IsOpenChanged="@((bool v) => showDetailModal = v)" Title="Detail Aktivitas" Size="medium">
         <ChildContent>
             <div class="audit-detail-wrapper" style="display: flex; flex-direction: column; gap: 16px;">
-                @* Actor Header Box *@
-                <div style="display: flex; align-items: center; gap: 12px; background: #F9FAFB; padding: 14px 16px; border-radius: 12px; border: 1px solid #E5E7EB;">
-                    <UserAvatar Name="@selectedLogForDetail.ActorName" Initials="@selectedLogForDetail.ActorInitials" BgColor="@selectedLogForDetail.ActorBg" Size="44px" />
-                    <div style="display: flex; flex-direction: column; flex: 1;">
-                        <strong style="font-size: 0.95rem; color: #0B1E39;">@selectedLogForDetail.ActorName</strong>
-                        <span style="font-size: 0.8rem; color: #6E6E73;">Admin Sistem &middot; Hak Akses Penuh</span>
+                
+                @* 1. Info Waktu Lengkap (Presisi Detik) *@
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #334155;">
+                    <Icon Name="calendar" Size="16" style="color: #64748B;" />
+                    <span><strong>Waktu:</strong> @selectedLogForDetail.Timestamp.ToString("dd MMMM yyyy, 'pukul' HH:mm:ss") WIB</span>
+                </div>
+
+                @* 2. Card Identitas Aktor (Avatar 48px + Nama bold + Role) *@
+                <div style="display: flex; align-items: center; gap: 14px; background: #F3F4F6; padding: 14px 16px; border-radius: 10px;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: @selectedLogForDetail.ActorBg; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; flex-shrink: 0;">
+                        @selectedLogForDetail.ActorInitials
                     </div>
-                    <div>
-                        <StatusBadge Status="@GetActionStatus(selectedLogForDetail.ActionType)" CustomLabel="@selectedLogForDetail.ActionType" />
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <span style="font-size: 15px; font-weight: 700; color: #0B1E39;">@selectedLogForDetail.ActorName</span>
+                        <span style="font-size: 12px; color: #6B7280;">Admin Sistem &middot; Hak Akses Penuh</span>
                     </div>
                 </div>
 
-                @* 2-Column Info Grid *@
+                @* 3. Badge Aksi (Versi lebih besar 13px font) & Target *@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px;">
-                        <span style="font-size: 0.7rem; font-weight: 700; color: #6E6E73; text-transform: uppercase;">WAKTU AKTIVITAS</span>
-                        <strong style="font-size: 0.85rem; color: #1D1D1F;">@selectedLogForDetail.Timestamp.ToString("dd MMMM yyyy, HH:mm:ss") WIB</strong>
+                    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">JENIS AKSI</span>
+                        <div>
+                            <span style="display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 700; text-transform: uppercase; background: @GetActionBadgeBg(selectedLogForDetail.ActionType); color: @GetActionBadgeColor(selectedLogForDetail.ActionType);">
+                                @selectedLogForDetail.ActionType
+                            </span>
+                        </div>
                     </div>
-                    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px;">
-                        <span style="font-size: 0.7rem; font-weight: 700; color: #6E6E73; text-transform: uppercase;">TARGET / ENTITAS</span>
-                        <strong style="font-size: 0.85rem; color: #1D1D1F;">@selectedLogForDetail.TargetName</strong>
+                    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">TARGET / ENTITAS</span>
+                        <strong style="font-size: 14px; color: #111827; margin-top: 2px;">@selectedLogForDetail.TargetName</strong>
                     </div>
                 </div>
 
-                @* Full Description Box *@
-                <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px;">
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #6E6E73; text-transform: uppercase;">DETAIL LENGKAP</span>
-                    <p style="margin: 0; font-size: 0.85rem; color: #374151; line-height: 1.5;">@selectedLogForDetail.Detail</p>
+                @* 4. Detail Lengkap (Paragraf penuh) *@
+                <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 6px;">
+                    <span style="font-size: 0.72rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">DETAIL LENGKAP</span>
+                    <p style="margin: 0; font-size: 0.88rem; color: #374151; line-height: 1.6;">@selectedLogForDetail.Detail</p>
                 </div>
 
-                @* Technical Metadata *@
-                <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; font-size: 0.78rem; color: #6E6E73;">
-                    <span><strong>IP Address:</strong> 192.168.1.@(selectedLogForDetail.Id * 7 + 10)</span>
-                    <span><strong>Perangkat:</strong> Chrome 128 (Windows 11)</span>
-                    <span><strong>Status:</strong> <span style="color: #16A34A; font-weight: 700;">Sukses (200 OK)</span></span>
+                @* 5. Metadata Teknis (Collapsible) *@
+                <div style="border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden;">
+                    <div style="padding: 10px 14px; background: #F9FAFB; display: flex; align-items: center; justify-content: space-between; cursor: pointer;"
+                         @onclick="() => showTechnicalMeta = !showTechnicalMeta">
+                        <span style="font-size: 0.78rem; font-weight: 700; color: #4B5563; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                            <Icon Name="terminal" Size="14" /> Metadata Teknis
+                        </span>
+                        <Icon Name="@(showTechnicalMeta ? "chevron-up" : "chevron-down")" Size="14" style="color: #6B7280;" />
+                    </div>
+                    @if (showTechnicalMeta)
+                    {
+                        <div style="padding: 12px 14px; background: #FFFFFF; font-size: 0.8rem; color: #64748B; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid #E5E7EB;">
+                            <div><strong>IP Address:</strong> @selectedLogForDetail.IpAddress</div>
+                            <div><strong>Perangkat / User Agent:</strong> @selectedLogForDetail.UserAgent</div>
+                            <div><strong>Status Eksekusi:</strong> <span style="color: #16A34A; font-weight: 700;">200 OK (Berhasil)</span></div>
+                        </div>
+                    }
                 </div>
             </div>
         </ChildContent>
         <FooterContent>
-            <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => showDetailModal = false">Tutup</button>
+            <button type="button" class="btn-primary-pill btn-yellow" style="padding: 0.5rem 1.5rem;" @onclick="() => showDetailModal = false">Tutup</button>
         </FooterContent>
     </AppModal>
 }
 
-<ExportModal IsOpen="@showExportModal" IsOpenChanged="@((bool v) => showExportModal = v)" ExportTitle="Audit Log" Columns="exportColumns" CurrentViewRows="FilteredLogs.Cast<object>()" AllRows="allLogs.Cast<object>()" />
-
 @code {
-    private string openIsland = "";
+    private string searchQuery = "";
     private string selectedActor = "";
-    private string actorSearchQuery = "";
-    private HashSet<string> selectedActions = new();
+    private string selectedActionType = "";
     private string selectedDateRange = "7";
     private int currentPage = 1;
     private int pageSize = 10;
-    private bool showExportModal = false;
     private bool showDetailModal = false;
-    private AuditLogEntry? selectedLogForDetail;
+    private bool showTechnicalMeta = false;
     private bool isLoading = false;
+    private DetailedAuditLogEntry? selectedLogForDetail;
 
-    private void OpenDetailModal(AuditLogEntry log)
+    public class DetailedAuditLogEntry
     {
-        selectedLogForDetail = log;
-        showDetailModal = true;
+        public int Id { get; set; }
+        public DateTime Timestamp { get; set; }
+        public string ActorName { get; set; } = "";
+        public string ActorInitials { get; set; } = "";
+        public string ActorBg { get; set; } = "#0B1E39";
+        public string ActionType { get; set; } = "";
+        public string TargetName { get; set; } = "";
+        public string Detail { get; set; } = "";
+        public string IpAddress { get; set; } = "192.168.1.45";
+        public string UserAgent { get; set; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0";
     }
 
-    private bool isBookingGroupOpen = true;
-    private bool isRoomGroupOpen = true;
-    private bool isUserGroupOpen = false;
-    private bool isSystemGroupOpen = false;
-
-    public class ActorItem { public string Name { get; set; } = ""; public string Role { get; set; } = ""; public string Initials { get; set; } = ""; public string AvatarBg { get; set; } = "#0B1E39"; }
-
-    private List<ActorItem> actorDirectory = new()
-    {
-        new() { Name = "Admin Wahyu", Role = "Superadmin", Initials = "AW", AvatarBg = "#0B1E39" },
-        new() { Name = "Sarah Jenkins", Role = "Admin Facility", Initials = "SJ", AvatarBg = "#2563EB" },
-        new() { Name = "Budi Santoso", Role = "Admin Operasional", Initials = "BS", AvatarBg = "#16A34A" },
-        new() { Name = "Dewi Lestari", Role = "Admin Finance", Initials = "DL", AvatarBg = "#F59E0B" }
-    };
-
-    private List<AuditLogEntry> allLogs = new();
-
-    private List<DataTable<AuditLogEntry>.DataTableColumn> columns = new()
-    {
-        new() { Header = "WAKTU", PropertyName = "Timestamp" },
-        new() { Header = "AKTOR", PropertyName = "ActorName" },
-        new() { Header = "AKSI", PropertyName = "ActionType" },
-        new() { Header = "TARGET", PropertyName = "TargetName" },
-        new() { Header = "DETAIL", PropertyName = "Detail" }
-    };
-
-    private List<ExportColumn> exportColumns = new()
-    {
-        new() { Header = "Waktu", PropertyName = "Timestamp" },
-        new() { Header = "Aktor", PropertyName = "ActorName" },
-        new() { Header = "Aksi", PropertyName = "ActionType" },
-        new() { Header = "Target", PropertyName = "TargetName" },
-        new() { Header = "Detail", PropertyName = "Detail" }
-    };
+    private List<string> allActors = new() { "Admin Wahyu", "Sarah Jenkins", "Budi Santoso", "Dewi Lestari", "Rian Hidayat" };
+    private List<DetailedAuditLogEntry> allLogs = new();
 
     protected override void OnInitialized()
     {
-        InitLogs();
+        GenerateComprehensiveLogDataset();
     }
 
-    private void InitLogs()
+    private void GenerateComprehensiveLogDataset()
     {
-        allLogs = new List<AuditLogEntry>
+        var baseDate = DateTime.Now;
+        allLogs = new List<DetailedAuditLogEntry>
         {
-            new() { Id = 1, Timestamp = DateTime.Now.AddMinutes(-12), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Booking", TargetName = "Ruang Rapat Utama (#BK-1042)", Detail = "Pemesanan disetujui untuk Divisi IT & Digital" },
-            new() { Id = 2, Timestamp = DateTime.Now.AddHours(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Atur Maintenance", TargetName = "Ruang Dirantara VIP", Detail = "Pemeliharaan AC & Sound System (60 Menit)" },
-            new() { Id = 3, Timestamp = DateTime.Now.AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Tambah User", TargetName = "Eko Prasetyo (Marketing)", Detail = "User baru ditambahkan dengan role User" },
-            new() { Id = 4, Timestamp = DateTime.Now.AddHours(-4), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#16A34A", ActionType = "Tolak Booking", TargetName = "Auditorium Serbaguna (#BK-1035)", Detail = "Jadwal bentrok dengan Townhall Perusahaan" },
-            new() { Id = 5, Timestamp = DateTime.Now.AddDays(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Edit Ruangan", TargetName = "Ruang Diskusi B", Detail = "Kapasitas ruangan diperbarui dari 6 menjadi 8 orang" },
-            new() { Id = 6, Timestamp = DateTime.Now.AddDays(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Reset Password", TargetName = "Ahmad Fauzi (IT)", Detail = "Reset password dikirimkan via email" },
-            new() { Id = 7, Timestamp = DateTime.Now.AddDays(-3), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#F59E0B", ActionType = "Ekspor Data", TargetName = "Laporan Keuangan Q3", Detail = "Ekspor laporan format XLSX" }
+            new() { Id = 1, Timestamp = baseDate.AddMinutes(-12), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Ruang Rapat Utama (#BK-1042)", Detail = "Pemesanan disetujui untuk Rapat Koordinasi Divisi IT & Digital", IpAddress = "192.168.1.10" },
+            new() { Id = 2, Timestamp = baseDate.AddMinutes(-45), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Atur Maintenance", TargetName = "Ruang Dirantara VIP", Detail = "Jadwal pemeliharaan AC & Sound System dialokasikan selama 60 menit", IpAddress = "192.168.1.18" },
+            new() { Id = 3, Timestamp = baseDate.AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Tambah Pengguna", TargetName = "Eko Prasetyo (#USR-882)", Detail = "User baru didaftarkan untuk Departemen Marketing dengan hak akses Anggota", IpAddress = "192.168.1.10" },
+            new() { Id = 4, Timestamp = baseDate.AddHours(-3), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#059669", ActionType = "Tolak Pemesanan", TargetName = "Auditorium Serbaguna (#BK-1035)", Detail = "Pemesanan ditolak karena jadwal bentrok dengan Townhall Perusahaan Q3", IpAddress = "192.168.1.22" },
+            new() { Id = 5, Timestamp = baseDate.AddHours(-5), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Ubah Ruangan", TargetName = "Ruang Diskusi B", Detail = "Kapasitas ruangan diperbarui dari 6 orang menjadi 8 orang beserta layout meja", IpAddress = "192.168.1.18" },
+            new() { Id = 6, Timestamp = baseDate.AddHours(-7), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Reset Password", TargetName = "Ahmad Fauzi (#USR-412)", Detail = "Tautan setel ulang kata sandi telah dikirimkan ke email resmi pengguna", IpAddress = "192.168.1.10" },
+            new() { Id = 7, Timestamp = baseDate.AddHours(-9), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#D97706", ActionType = "Ekspor Laporan", TargetName = "Laporan Okupansi Bulanan (#RPT-09)", Detail = "Ekspor data okupansi dan pemanfaatan fasilitas format XLSX berhasil diunduh", IpAddress = "192.168.1.35" },
+            new() { Id = 8, Timestamp = baseDate.AddDays(-1).AddHours(-1), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Ruang Boardroom (#BK-1038)", Detail = "Pemesanan disetujui untuk Evaluasi Kinerja Direksi", IpAddress = "192.168.1.10" },
+            new() { Id = 9, Timestamp = baseDate.AddDays(-1).AddHours(-3), ActorName = "Rian Hidayat", ActorInitials = "RH", ActorBg = "#7C3AED", ActionType = "Tambah Ruangan", TargetName = "Creative Hub Lt. 4", Detail = "Ruangan baru ditambahkan dengan fasilitas Smart TV, Whiteboard, dan Sofa Lounge", IpAddress = "192.168.1.40" },
+            new() { Id = 10, Timestamp = baseDate.AddDays(-1).AddHours(-5), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#059669", ActionType = "Batalkan Pemesanan", TargetName = "Ruang Rapat Bromo (#BK-1029)", Detail = "Pembatalan sepihak atas permintaan pemohon rapat karena agenda ditunda", IpAddress = "192.168.1.22" },
+            new() { Id = 11, Timestamp = baseDate.AddDays(-1).AddHours(-8), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Ubah Ruangan", TargetName = "Ruang Rapat Eksekutif", Detail = "Menambahkan fasilitas Video Conference Dual Screen 4K", IpAddress = "192.168.1.18" },
+            new() { Id = 12, Timestamp = baseDate.AddDays(-2).AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Ruang Workshop (#BK-1025)", Detail = "Pemesanan disetujui untuk Sesi Onboarding Karyawan Baru", IpAddress = "192.168.1.10" },
+            new() { Id = 13, Timestamp = baseDate.AddDays(-2).AddHours(-4), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#D97706", ActionType = "Ubah Pengaturan", TargetName = "Pengaturan Jam Operasional", Detail = "Jam batas pemesanan diperpanjang dari 18:00 menjadi 20:00 WIB", IpAddress = "192.168.1.35" },
+            new() { Id = 14, Timestamp = baseDate.AddDays(-2).AddHours(-6), ActorName = "Rian Hidayat", ActorInitials = "RH", ActorBg = "#7C3AED", ActionType = "Atur Maintenance", TargetName = "Auditorium Serbaguna", Detail = "Pembersihan karpet dan kalibrasi tata suara proyektor 5000 lumens", IpAddress = "192.168.1.40" },
+            new() { Id = 15, Timestamp = baseDate.AddDays(-3).AddHours(-1), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Nonaktifkan Pengguna", TargetName = "Bambang Sudarsono (#USR-219)", Detail = "Akun dinonaktifkan karena mutasi penugasan cabang", IpAddress = "192.168.1.10" },
+            new() { Id = 16, Timestamp = baseDate.AddDays(-3).AddHours(-3), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#059669", ActionType = "Setujui Pemesanan", TargetName = "Ruang Rapat Semeru (#BK-1020)", Detail = "Pemesanan disetujui untuk Presentasi Vendor Cloud Services", IpAddress = "192.168.1.22" },
+            new() { Id = 17, Timestamp = baseDate.AddDays(-3).AddHours(-7), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Tolak Pemesanan", TargetName = "Ruang Boardroom (#BK-1018)", Detail = "Ditolak karena tidak memenuhi batas minimum peserta (hanya 2 orang)", IpAddress = "192.168.1.18" },
+            new() { Id = 18, Timestamp = baseDate.AddDays(-4).AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Ruang Rapat Utama (#BK-1015)", Detail = "Pemesanan disetujui untuk Rapat Bulanan Divisi Keuangan", IpAddress = "192.168.1.10" },
+            new() { Id = 19, Timestamp = baseDate.AddDays(-4).AddHours(-5), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#D97706", ActionType = "Ekspor Laporan", TargetName = "Laporan Audit Q2 (#RPT-08)", Detail = "Ekspor berkas CSV audit sistem untuk auditor eksternal", IpAddress = "192.168.1.35" },
+            new() { Id = 20, Timestamp = baseDate.AddDays(-5).AddHours(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Ubah Ruangan", TargetName = "Ruang Pod Podcast", Detail = "Pembaruan peredam suara dan mikrofon studio Shure SM7B", IpAddress = "192.168.1.18" },
+            new() { Id = 21, Timestamp = baseDate.AddDays(-5).AddHours(-4), ActorName = "Rian Hidayat", ActorInitials = "RH", ActorBg = "#7C3AED", ActionType = "Tambah Pengguna", TargetName = "Siti Rahma (#USR-883)", Detail = "User baru didaftarkan untuk Departemen Legal", IpAddress = "192.168.1.40" },
+            new() { Id = 22, Timestamp = baseDate.AddDays(-6).AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Creative Hub Lt. 4 (#BK-1009)", Detail = "Pemesanan disetujui untuk Sesi Brainstorming Produk", IpAddress = "192.168.1.10" },
+            new() { Id = 23, Timestamp = baseDate.AddDays(-6).AddHours(-6), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#059669", ActionType = "Atur Maintenance", TargetName = "Ruang Rapat Merapi", Detail = "Perbaikan koneksi WiFi dan colokan listrik lantai", IpAddress = "192.168.1.22" },
+            new() { Id = 24, Timestamp = baseDate.AddDays(-7).AddHours(-1), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Ruang Rapat Utama (#BK-1002)", Detail = "Pemesanan disetujui untuk Townhall Divisi HR", IpAddress = "192.168.1.10" },
+            new() { Id = 25, Timestamp = baseDate.AddDays(-8).AddHours(-3), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Tambah Ruangan", TargetName = "Ruang Dirantara VIP", Detail = "Ruangan VIP baru diresmikan di lantai 5", IpAddress = "192.168.1.18" },
+            new() { Id = 26, Timestamp = baseDate.AddDays(-9).AddHours(-4), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#D97706", ActionType = "Ubah Pengaturan", TargetName = "Kebijakan Pembatalan", Detail = "Batas waktu pembatalan tanpa penalti diubah menjadi H-2 jam", IpAddress = "192.168.1.35" },
+            new() { Id = 27, Timestamp = baseDate.AddDays(-10).AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Ruang Workshop (#BK-0994)", Detail = "Disetujui untuk Pelatihan ISO 27001", IpAddress = "192.168.1.10" },
+            new() { Id = 28, Timestamp = baseDate.AddDays(-11).AddHours(-5), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#059669", ActionType = "Tolak Pemesanan", TargetName = "Ruang Diskusi B (#BK-0988)", Detail = "Ditolak karena ruangan sedang disterilisasi", IpAddress = "192.168.1.22" },
+            new() { Id = 29, Timestamp = baseDate.AddDays(-12).AddHours(-1), ActorName = "Rian Hidayat", ActorInitials = "RH", ActorBg = "#7C3AED", ActionType = "Tambah Pengguna", TargetName = "Hendra Wijaya (#USR-884)", Detail = "User baru divisi Keuangan", IpAddress = "192.168.1.40" },
+            new() { Id = 30, Timestamp = baseDate.AddDays(-13).AddHours(-6), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Atur Maintenance", TargetName = "Ruang Rapat Bromo", Detail = "Penggantian lampu spotlight LED", IpAddress = "192.168.1.18" },
+            new() { Id = 31, Timestamp = baseDate.AddDays(-14).AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Ruang Boardroom (#BK-0975)", Detail = "Disetujui untuk Rapat Komite Audit", IpAddress = "192.168.1.10" },
+            new() { Id = 32, Timestamp = baseDate.AddDays(-15).AddHours(-4), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#D97706", ActionType = "Ekspor Laporan", TargetName = "Laporan Rekap Bulanan (#RPT-07)", Detail = "Ekspor data CSV pemesanan bulan Juli", IpAddress = "192.168.1.35" },
+            new() { Id = 33, Timestamp = baseDate.AddDays(-16).AddHours(-1), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Reset Password", TargetName = "Maya Kusuma (#USR-312)", Detail = "Reset password dikirimkan via email", IpAddress = "192.168.1.10" },
+            new() { Id = 34, Timestamp = baseDate.AddDays(-17).AddHours(-3), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#059669", ActionType = "Setujui Pemesanan", TargetName = "Ruang Rapat Utama (#BK-0960)", Detail = "Disetujui untuk Sosialisasi KPI 2026", IpAddress = "192.168.1.22" },
+            new() { Id = 35, Timestamp = baseDate.AddDays(-18).AddHours(-5), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Ubah Ruangan", TargetName = "Ruang Rapat Semeru", Detail = "Penambahan whiteboard magnetik 2x1m", IpAddress = "192.168.1.18" },
+            new() { Id = 36, Timestamp = baseDate.AddDays(-19).AddHours(-2), ActorName = "Rian Hidayat", ActorInitials = "RH", ActorBg = "#7C3AED", ActionType = "Setujui Pemesanan", TargetName = "Creative Hub Lt. 4 (#BK-0951)", Detail = "Disetujui untuk Workshop Desain Grafis", IpAddress = "192.168.1.40" },
+            new() { Id = 37, Timestamp = baseDate.AddDays(-20).AddHours(-4), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Ruang Rapat Utama (#BK-0944)", Detail = "Disetujui untuk Koordinasi Proyek SuperApp", IpAddress = "192.168.1.10" },
+            new() { Id = 38, Timestamp = baseDate.AddDays(-21).AddHours(-1), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#D97706", ActionType = "Ubah Pengaturan", TargetName = "Pengaturan Notifikasi", Detail = "Template email konfirmasi pemesanan disesuaikan", IpAddress = "192.168.1.35" },
+            new() { Id = 39, Timestamp = baseDate.AddDays(-22).AddHours(-6), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Atur Maintenance", TargetName = "Auditorium Serbaguna", Detail = "Pemeriksaan berkala genset dan kelistrikan", IpAddress = "192.168.1.18" },
+            new() { Id = 40, Timestamp = baseDate.AddDays(-23).AddHours(-3), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#059669", ActionType = "Tolak Pemesanan", TargetName = "Ruang Workshop (#BK-0931)", Detail = "Ditolak karena melebihi batas waktu pemesanan maksimal", IpAddress = "192.168.1.22" },
+            new() { Id = 41, Timestamp = baseDate.AddDays(-24).AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Ruang Boardroom (#BK-0925)", Detail = "Disetujui untuk Rapat Kerja Triwulan", IpAddress = "192.168.1.10" },
+            new() { Id = 42, Timestamp = baseDate.AddDays(-25).AddHours(-4), ActorName = "Rian Hidayat", ActorInitials = "RH", ActorBg = "#7C3AED", ActionType = "Tambah Pengguna", TargetName = "Diana Putri (#USR-885)", Detail = "User baru divisi Talent Acquisition", IpAddress = "192.168.1.40" },
+            new() { Id = 43, Timestamp = baseDate.AddDays(-26).AddHours(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Setujui Pemesanan", TargetName = "Ruang Dirantara VIP (#BK-0915)", Detail = "Disetujui untuk Kunjungan Tamu Kenegaraan", IpAddress = "192.168.1.18" },
+            new() { Id = 44, Timestamp = baseDate.AddDays(-27).AddHours(-5), ActorName = "Dewi Lestari", ActorInitials = "DL", ActorBg = "#D97706", ActionType = "Ekspor Laporan", TargetName = "Laporan Utilitas Ruangan (#RPT-06)", Detail = "Ekspor format PDF statistik ruang", IpAddress = "192.168.1.35" },
+            new() { Id = 45, Timestamp = baseDate.AddDays(-28).AddHours(-2), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Ruang Rapat Utama (#BK-0902)", Detail = "Disetujui untuk Rapat Koordinasi Serikat Pekerja", IpAddress = "192.168.1.10" },
+            new() { Id = 46, Timestamp = baseDate.AddDays(-29).AddHours(-3), ActorName = "Budi Santoso", ActorInitials = "BS", ActorBg = "#059669", ActionType = "Atur Maintenance", TargetName = "Ruang Pod Podcast", Detail = "Pengecekan jalur audio mixer dan kabel XLR", IpAddress = "192.168.1.22" },
+            new() { Id = 47, Timestamp = baseDate.AddDays(-30).AddHours(-1), ActorName = "Sarah Jenkins", ActorInitials = "SJ", ActorBg = "#2563EB", ActionType = "Ubah Ruangan", TargetName = "Ruang Diskusi B", Detail = "Pemasangan stopkontak pop-up di meja tengah", IpAddress = "192.168.1.18" },
+            new() { Id = 48, Timestamp = baseDate.AddDays(-31).AddHours(-4), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Tambah Ruangan", TargetName = "Ruang Pod Podcast", Detail = "Ruangan rekaman audio baru di lantai 3", IpAddress = "192.168.1.10" },
+            new() { Id = 49, Timestamp = baseDate.AddDays(-32).AddHours(-2), ActorName = "Rian Hidayat", ActorInitials = "RH", ActorBg = "#7C3AED", ActionType = "Setujui Pemesanan", TargetName = "Creative Hub Lt. 4 (#BK-0885)", Detail = "Disetujui untuk Sesi Focus Group Discussion", IpAddress = "192.168.1.40" },
+            new() { Id = 50, Timestamp = baseDate.AddDays(-33).AddHours(-5), ActorName = "Admin Wahyu", ActorInitials = "AW", ActorBg = "#0B1E39", ActionType = "Setujui Pemesanan", TargetName = "Ruang Boardroom (#BK-0870)", Detail = "Disetujui untuk Rapat Umum Pemegang Saham Luar Biasa", IpAddress = "192.168.1.10" }
         };
     }
 
-    private IEnumerable<ActorItem> FilteredActorList =>
-        string.IsNullOrWhiteSpace(actorSearchQuery)
-            ? actorDirectory
-            : actorDirectory.Where(a => a.Name.ToLowerInvariant().Contains(actorSearchQuery.ToLowerInvariant()));
+    private bool HasActiveFilter =>
+        !string.IsNullOrWhiteSpace(searchQuery) ||
+        !string.IsNullOrWhiteSpace(selectedActor) ||
+        !string.IsNullOrWhiteSpace(selectedActionType) ||
+        selectedDateRange != "7";
 
-    private IEnumerable<AuditLogEntry> FilteredLogs
+    private void ResetAllFilters()
+    {
+        searchQuery = "";
+        selectedActor = "";
+        selectedActionType = "";
+        selectedDateRange = "7";
+        currentPage = 1;
+    }
+
+    private IEnumerable<DetailedAuditLogEntry> FilteredLogs
     {
         get
         {
             var q = allLogs.AsEnumerable();
-            if (!string.IsNullOrEmpty(selectedActor)) q = q.Where(l => l.ActorName.Equals(selectedActor, StringComparison.OrdinalIgnoreCase));
-            if (selectedActions.Any()) q = q.Where(l => selectedActions.Contains(l.ActionType));
-            if (selectedDateRange == "7") q = q.Where(l => l.Timestamp >= DateTime.Now.AddDays(-7));
-            else if (selectedDateRange == "30") q = q.Where(l => l.Timestamp >= DateTime.Now.AddDays(-30));
-            else if (selectedDateRange == "90") q = q.Where(l => l.Timestamp >= DateTime.Now.AddDays(-90));
-            return q;
+
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                var lower = searchQuery.ToLowerInvariant().Trim();
+                q = q.Where(l => l.ActorName.ToLowerInvariant().Contains(lower) ||
+                                 l.TargetName.ToLowerInvariant().Contains(lower) ||
+                                 l.ActionType.ToLowerInvariant().Contains(lower) ||
+                                 l.Detail.ToLowerInvariant().Contains(lower));
+            }
+
+            if (!string.IsNullOrWhiteSpace(selectedActor))
+            {
+                q = q.Where(l => l.ActorName.Equals(selectedActor, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(selectedActionType))
+            {
+                q = q.Where(l => l.ActionType.Contains(selectedActionType, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (selectedDateRange == "1")
+            {
+                q = q.Where(l => l.Timestamp >= DateTime.Today);
+            }
+            else if (selectedDateRange == "7")
+            {
+                q = q.Where(l => l.Timestamp >= DateTime.Now.AddDays(-7));
+            }
+            else if (selectedDateRange == "30")
+            {
+                q = q.Where(l => l.Timestamp >= DateTime.Now.AddDays(-30));
+            }
+
+            return q.OrderByDescending(l => l.Timestamp);
         }
     }
 
-    private IEnumerable<AuditLogEntry> PagedLogs =>
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)FilteredLogs.Count() / pageSize));
+
+    private IEnumerable<DetailedAuditLogEntry> PagedLogs =>
         FilteredLogs.Skip((currentPage - 1) * pageSize).Take(pageSize);
 
-    private void HandleDateChanged(DateTime? date)
+    private int CurrentStartRow => FilteredLogs.Any() ? ((currentPage - 1) * pageSize) + 1 : 0;
+    private int CurrentEndRow => Math.Min(currentPage * pageSize, FilteredLogs.Count());
+
+    private (string Name, int Count) TopActionSummary
     {
-        StateHasChanged();
+        get
+        {
+            var list = FilteredLogs.ToList();
+            if (!list.Any()) return ("-", 0);
+            var top = list.GroupBy(l => l.ActionType).OrderByDescending(g => g.Count()).FirstOrDefault();
+            return top != null ? (top.Key, top.Count()) : ("-", 0);
+        }
     }
 
-    private void ToggleIsland(string island)
+    private (string Name, int Count) TopActorSummary
     {
-        openIsland = openIsland == island ? "" : island;
+        get
+        {
+            var list = FilteredLogs.ToList();
+            if (!list.Any()) return ("-", 0);
+            var top = list.GroupBy(l => l.ActorName).OrderByDescending(g => g.Count()).FirstOrDefault();
+            return top != null ? (top.Key, top.Count()) : ("-", 0);
+        }
     }
 
-    private void SelectActor(string name, bool isChecked)
+    private void OpenDetailModal(DetailedAuditLogEntry log)
     {
-        selectedActor = isChecked ? name : "";
+        selectedLogForDetail = log;
+        showTechnicalMeta = false;
+        showDetailModal = true;
     }
 
-    private void ClearActorFilter()
+    private void ExportData()
     {
-        selectedActor = "";
-        actorSearchQuery = "";
+        Toast.Success($"Berhasil mengekspor {FilteredLogs.Count()} data audit log ke file CSV.");
     }
 
-    private void ToggleAction(string action, bool isChecked)
+    // --- Palet Warna Final Sesuai Spesifikasi 9.4 ---
+    private string GetActionBadgeBg(string action)
     {
-        if (isChecked) selectedActions.Add(action);
-        else selectedActions.Remove(action);
+        if (action.Contains("Setujui") || action.Contains("Konfirmasi")) return "#DCFCE7";
+        if (action.Contains("Tolak") || action.Contains("Hapus") || action.Contains("Batalkan")) return "#FEE2E2";
+        if (action.Contains("Tambah") || action.Contains("Buat")) return "#DBEAFE";
+        if (action.Contains("Edit") || action.Contains("Ubah")) return "#EDE9FE";
+        if (action.Contains("Maintenance") || action.Contains("Perawatan") || action.Contains("Reset") || action.Contains("Atur")) return "#FEF3C7";
+        return "#F3F4F6";
     }
 
-    private void ClearActionFilter()
+    private string GetActionBadgeColor(string action)
     {
-        selectedActions.Clear();
-    }
-
-    private void ResetAllFilters()
-    {
-        selectedActor = "";
-        selectedActions.Clear();
-        selectedDateRange = "7";
-        actorSearchQuery = "";
-        openIsland = "";
-    }
-
-    private void HandlePageChange(int page)
-    {
-        currentPage = page;
-    }
-
-    private string GetActionStatus(string action)
-    {
-        if (action.Contains("Setujui") || action.Contains("Tambah") || action.Contains("Aktifkan")) return "approved";
-        if (action.Contains("Tolak") || action.Contains("Hapus") || action.Contains("Nonaktifkan")) return "rejected";
-        if (action.Contains("Ubah") || action.Contains("Perawatan") || action.Contains("Reset") || action.Contains("Atur")) return "pending";
-        return "info";
+        if (action.Contains("Setujui") || action.Contains("Konfirmasi")) return "#16A34A";
+        if (action.Contains("Tolak") || action.Contains("Hapus") || action.Contains("Batalkan")) return "#DC2626";
+        if (action.Contains("Tambah") || action.Contains("Buat")) return "#2563EB";
+        if (action.Contains("Edit") || action.Contains("Ubah")) return "#7C3AED";
+        if (action.Contains("Maintenance") || action.Contains("Perawatan") || action.Contains("Reset") || action.Contains("Atur")) return "#D97706";
+        return "#4B5563";
     }
 }
+
 
 
 

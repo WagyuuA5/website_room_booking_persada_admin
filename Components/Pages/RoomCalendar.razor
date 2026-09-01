@@ -357,18 +357,25 @@
         }
         else if (calendarMode == "week")
         {
-            return "Minggu Ini"; // Simplified for week view
+            var diffWeekDays = (date.Date - DateTime.Today).TotalDays;
+            if (diffWeekDays >= 0 && diffWeekDays <= 6) return "Minggu Ini";
+            if (diffWeekDays > 6) return "Minggu Depan";
+            if (diffWeekDays < 0 && diffWeekDays >= -6) return "Minggu Lalu";
+            return "";
         }
         
-        var diff = (date.Date - DateTime.Today).TotalDays;
+        // PENTING: JANGAN gunakan Math.Abs() untuk logic — tanda (+/-) menentukan arah waktu
+        var diff = (int)(date.Date - DateTime.Today).TotalDays;
         if (diff == 0) return "Hari Ini";
-        if (diff == 1) return "Besok";
         if (diff == -1) return "Kemarin";
-        if (diff > 1 && diff <= 7) return "Minggu Depan";
+        if (diff == 1) return "Besok";
         if (diff < -1 && diff >= -7) return "Minggu Lalu";
+        if (diff > 1 && diff <= 7) return "Minggu Depan";
+        // Math.Abs HANYA untuk tampilan angka, bukan untuk logic pengecekan
+        if (diff < -7) return $"{Math.Abs(diff)} Hari Lalu";
+        if (diff > 7) return $"{diff} Hari Lagi";
         
-        var culture = new System.Globalization.CultureInfo("id-ID");
-        return culture.DateTimeFormat.GetDayName(date.DayOfWeek);
+        return "";
     }
 
     private void OpenBookingDetail(CalendarEventItem ev)

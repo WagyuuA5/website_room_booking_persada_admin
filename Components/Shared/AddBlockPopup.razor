@@ -53,35 +53,62 @@
                 </div>
             </div>
 
-            @* 3. Ulangi Blokir Ini (Recurring Block) *@
-            <div class="ab-field" style="display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" id="chkRepeatBlock" @bind="isRecurring" style="width: 16px; height: 16px; accent-color: #0B1E39;" />
-                <label for="chkRepeatBlock" style="font-size: 0.82rem; font-weight: 600; color: #1D1D1F; cursor: pointer;">
-                    Ulangi Blokir Ini (Pola Pemblokiran Berulang)
-                </label>
+            @* 3. Jadwalkan Blokir Berulang *@
+            <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="chkRepeatBlock" @bind="isRecurring" style="width: 16px; height: 16px; accent-color: #0B1E39;" />
+                    <label for="chkRepeatBlock" style="font-size: 0.85rem; font-weight: 600; color: #1D1D1F; cursor: pointer;">
+                        Jadwalkan Blokir Berulang
+                    </label>
+                </div>
+                @if (!isRecurring)
+                {
+                    <span style="font-size: 0.78rem; color: #6B7280; margin-left: 24px;">Terapkan blokir ini secara otomatis pada jadwal mendatang.</span>
+                }
             </div>
 
             @if (isRecurring)
             {
-                <div class="ab-recurring-settings" style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
-                        <label style="font-size: 0.8rem; font-weight: 600; color: #1D1D1F;">Pola Pengulangan</label>
-                        <select class="ab-input" style="padding: 0.4rem 0.6rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" @bind="recurringPattern">
-                            <option value="Harian">Harian (Setiap Hari)</option>
-                            <option value="Mingguan">Mingguan (Hari yang Sama)</option>
-                            <option value="Bulanan">Bulanan (Tanggal yang Sama)</option>
-                        </select>
-                    </div>
-                    <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
-                        <label style="font-size: 0.8rem; font-weight: 600; color: #1D1D1F;">Jumlah Pengulangan</label>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <input type="number" class="ab-input" style="width: 70px; padding: 0.4rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" min="1" max="12" @bind="repeatCount" />
-                            <span style="font-size: 0.8rem; color: #6E6E73;">kali ke depan</span>
+                <div class="ab-recurring-settings" style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 14px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 0.8rem; font-weight: 600; color: #1D1D1F;">Ulangi Setiap</label>
+                            <select class="ab-input" style="padding: 0.4rem 0.6rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" @bind="recurringPattern">
+                                <option value="Hari">Hari (setiap hari)</option>
+                                <option value="Minggu">Minggu (hari yang sama)</option>
+                                <option value="Bulan">Bulan (tanggal yang sama)</option>
+                            </select>
+                        </div>
+                        <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 0.8rem; font-weight: 600; color: #1D1D1F;">Berakhir</label>
+                            @if (endMode == "count")
+                            {
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <input type="number" class="ab-input" style="width: 70px; padding: 0.4rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" min="1" max="24" @bind="repeatCount" />
+                                    <span style="font-size: 0.82rem; color: #4B5563;">@GetRepeatUnitLabel() ke depan</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="date" class="ab-input" style="padding: 0.4rem 0.6rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" @bind="endDate" />
+                            }
                         </div>
                     </div>
-                    <div style="grid-column: 1 / -1; font-size: 0.78rem; color: #0284C7; background: #E0F2FE; padding: 6px 10px; border-radius: 6px; border-left: 3px solid #0284C7; display: flex; align-items: center; gap: 6px;">
-                        <Icon Name="refresh-cw" Size="13" />
-                        <span>Blokir akan dijadwalkan sebanyak <strong>@(repeatCount + 1) sesi</strong> secara <strong>@recurringPattern.ToLower()</strong>.</span>
+
+                    <div style="display: flex; gap: 16px; font-size: 0.8rem;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #374151;">
+                            <input type="radio" name="endMode" value="count" checked="@(endMode == "count")" @onchange='() => endMode = "count"' style="accent-color: #0B1E39;" />
+                            Setelah jumlah tertentu
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #374151;">
+                            <input type="radio" name="endMode" value="date" checked="@(endMode == "date")" @onchange='() => endMode = "date"' style="accent-color: #0B1E39;" />
+                            Pada tanggal tertentu
+                        </label>
+                    </div>
+                    
+                    <div style="font-size: 0.78rem; color: #0369A1; background: #E0F2FE; padding: 10px 12px; border-radius: 6px; border-left: 4px solid #0284C7; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;">
+                        <Icon Name="refresh-cw" Size="14" style="margin-top: 2px; flex-shrink: 0;" />
+                        <span>Ruangan ini akan diblokir setiap <strong>@recurringPattern.ToLower()</strong>, dimulai <strong>@blockDate.ToString("dd MMMM yyyy")</strong> hingga <strong>@GetEndDateDisplay()</strong> (total <strong>@GetTotalSessions() sesi</strong>).</span>
                     </div>
                 </div>
             }
@@ -146,8 +173,57 @@
     private bool hasSubmitted = false;
 
     private bool isRecurring = false;
-    private string recurringPattern = "Mingguan";
+    private string recurringPattern = "Minggu";
     private int repeatCount = 3;
+    private string endMode = "count";
+    private DateTime endDate = DateTime.Today.AddDays(21);
+
+    private string GetRepeatUnitLabel() => recurringPattern switch
+    {
+        "Hari" => "hari",
+        "Minggu" => "minggu",
+        "Bulan" => "bulan",
+        _ => "kali"
+    };
+
+    private int GetTotalSessions()
+    {
+        if (endMode == "count")
+        {
+            return repeatCount + 1;
+        }
+        else
+        {
+            if (endDate <= blockDate) return 1;
+            var diffDays = (endDate.Date - blockDate.Date).Days;
+            return recurringPattern switch
+            {
+                "Hari" => diffDays + 1,
+                "Minggu" => (diffDays / 7) + 1,
+                "Bulan" => Math.Max(1, ((endDate.Year - blockDate.Year) * 12 + endDate.Month - blockDate.Month) + 1),
+                _ => 1
+            };
+        }
+    }
+
+    private string GetEndDateDisplay()
+    {
+        if (endMode == "date")
+        {
+            return endDate.ToString("dd MMMM yyyy");
+        }
+        else
+        {
+            var calculatedEnd = recurringPattern switch
+            {
+                "Hari" => blockDate.AddDays(repeatCount),
+                "Minggu" => blockDate.AddDays(repeatCount * 7),
+                "Bulan" => blockDate.AddMonths(repeatCount),
+                _ => blockDate.AddDays(repeatCount * 7)
+            };
+            return calculatedEnd.ToString("dd MMMM yyyy");
+        }
+    }
 
     private Room? currentSelectedRoom => availableRooms.FirstOrDefault(r => r.Id == selectedRoomId);
 
@@ -184,10 +260,11 @@
 
         var room = availableRooms.FirstOrDefault(r => r.Id == selectedRoomId);
         var roomName = room?.Name ?? "Ruangan";
+        var totalSessions = GetTotalSessions();
 
         if (isRecurring)
         {
-            Toast.Success($"Jadwal {roomName} berhasil diblokir sebanyak {repeatCount + 1} sesi untuk {selectedReason}.");
+            Toast.Success($"Jadwal {roomName} berhasil diblokir sebanyak {totalSessions} sesi untuk {selectedReason}.");
         }
         else
         {
@@ -204,6 +281,8 @@
         notes = "";
         selectedReason = "Pemeliharaan";
         isRecurring = false;
+        endMode = "count";
+        repeatCount = 3;
         IsOpen = false;
         await IsOpenChanged.InvokeAsync(false);
     }

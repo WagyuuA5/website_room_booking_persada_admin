@@ -313,51 +313,65 @@
 </AppModal>
 
 @* -- Modal 3: Hapus Pengguna (CASE 4 Redesign) -- *@
-<AppModal IsOpen="showDeleteModal" IsOpenChanged="v => showDeleteModal = v" Title="Hapus Pengguna" Size="small">
+<AppModal IsOpen="showDeleteModal" IsOpenChanged="v => showDeleteModal = v" Title="Hapus Pengguna" Size="medium">
     <ChildContent>
         @if (userToDelete != null)
         {
             <div class="delete-modal-content" style="display: flex; flex-direction: column; gap: 1rem;">
-                @* 1. Inline Warning Header: Icon 48px circle + Text *@
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <div style="width: 48px; height: 48px; border-radius: 50%; background: #FEE2E2; color: #DC2626; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <Icon Name="alert-triangle" Size="24" />
+                
+                @* Info Pengguna Target *@
+                <div style="background: #F3F4F6; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: @GetAvatarColor(userToDelete.FullName); color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">
+                        @userToDelete.Initials
                     </div>
-                    <div style="font-size: 0.92rem; color: #1D1D1F; line-height: 1.4;">
-                        Apakah Anda yakin ingin menghapus pengguna <strong style="color: #0B1E39;">@userToDelete.FullName</strong> (<span style="color: #6B7280;">@userToDelete.Email</span>)?
+                    <div>
+                        <div style="font-weight: 600; color: #111827; font-size: 14px;">@userToDelete.FullName</div>
+                        <div style="color: #6B7280; font-size: 13px;">@userToDelete.Email</div>
                     </div>
                 </div>
 
-                @* 2. Yellow Warning Box (Bahasa Indonesia 100%, "pemesanan" instead of "booking") *@
-                <div style="background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 8px; padding: 12px 14px; font-size: 0.82rem; color: #92400E; line-height: 1.4;">
-                    Tindakan ini tidak dapat dibatalkan. Pengguna ini memiliki <strong>@userToDelete.TotalBookings pemesanan aktif</strong>.
+                @* Kotak Peringatan Kuning *@
+                <div style="background: #FEF3C7; border-left: 4px solid #F59E0B; border-radius: 4px; padding: 12px; font-size: 13px; color: #92400E; display: flex; align-items: flex-start; gap: 8px;">
+                    <Icon Name="alert-triangle" Size="16" CssClass="text-warning" style="margin-top: 2px;" />
+                    <div style="line-height: 1.4;">
+                        Tindakan ini tidak dapat dibatalkan. Pengguna ini memiliki <strong>@userToDelete.TotalBookings pemesanan aktif</strong>.
+                    </div>
                 </div>
 
-                @* 3. Input Konfirmasi Nama *@
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; color: #64748B; text-transform: uppercase;">KETIK NAMA UNTUK MENGHAPUS PERMANEN:</label>
-                    <input type="text"
-                           class="form-input @(!string.IsNullOrEmpty(confirmDeleteName) && confirmDeleteName != userToDelete.FullName ? "is-invalid" : "")"
-                           style="width: 100%;"
-                           placeholder="@userToDelete.FullName"
-                           @bind="confirmDeleteName"
-                           @bind:event="oninput" />
-                    @if (!string.IsNullOrEmpty(confirmDeleteName) && confirmDeleteName != userToDelete.FullName)
-                    {
-                        <span style="color: #DC2626; font-size: 0.75rem;">Nama tidak sesuai. Ketik persis seperti nama di atas.</span>
-                    }
+                @* Opsi 1: Nonaktifkan (Biru) *@
+                <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-weight: 600; color: #1E40AF; font-size: 14px;">(Direkomendasikan) Nonaktifkan Akun</div>
+                    <div style="color: #3B82F6; font-size: 13px; line-height: 1.4;">Pengguna tidak bisa login, namun data dan riwayat pemesanan tetap tersimpan di sistem.</div>
+                    <button type="button" class="btn-primary-pill btn-navy" style="width: 100%; justify-content: center; margin-top: 4px;" @onclick="DeactivateUser">Nonaktifkan Akun</button>
+                </div>
+
+                <div style="display: flex; align-items: center; text-align: center; color: #9CA3AF; font-size: 12px; font-weight: 600; letter-spacing: 1px;">
+                    <div style="flex: 1; border-bottom: 1px solid #E5E7EB;"></div>
+                    <span style="padding: 0 10px;">ATAU</span>
+                    <div style="flex: 1; border-bottom: 1px solid #E5E7EB;"></div>
+                </div>
+
+                @* Opsi 2: Hapus Permanen (Merah) *@
+                <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-weight: 600; color: #991B1B; font-size: 14px;">Hapus Permanen</div>
+                    <div style="color: #EF4444; font-size: 13px; line-height: 1.4;">Data pengguna dan riwayat terkait akan dihapus secara permanen.</div>
+                    
+                    <div style="margin-top: 4px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #7F1D1D; text-transform: uppercase; margin-bottom: 4px; display: block;">Ketik nama "<span style="color:#B91C1C;">@userToDelete.FullName</span>" untuk konfirmasi:</label>
+                        <input type="text"
+                               class="form-input @(!string.IsNullOrEmpty(confirmDeleteName) && confirmDeleteName != userToDelete.FullName ? "is-invalid" : "")"
+                               style="width: 100%; border-color: #FCA5A5; background: #FFF;"
+                               placeholder="@userToDelete.FullName"
+                               @bind="confirmDeleteName"
+                               @bind:event="oninput" />
+                    </div>
+                    <button type="button" class="btn-primary-pill btn-danger" style="width: 100%; justify-content: center; margin-top: 8px;" @onclick="ConfirmDeleteUser" disabled="@(confirmDeleteName != userToDelete?.FullName)">Hapus Permanen</button>
                 </div>
             </div>
         }
     </ChildContent>
     <FooterContent>
-        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 8px;">
-            <button type="button" class="btn-outline-pill" @onclick="() => showDeleteModal = false">Batal</button>
-            <div style="display: flex; gap: 8px; margin-left: auto;">
-                <button type="button" class="btn-primary-pill btn-navy" @onclick="DeactivateUser">Nonaktifkan Saja</button>
-                <button type="button" class="btn-primary-pill btn-danger" @onclick="ConfirmDeleteUser" disabled="@(confirmDeleteName != userToDelete?.FullName)">Hapus Permanen</button>
-            </div>
-        </div>
+        <button type="button" class="btn-outline-pill" style="width: 100%; justify-content: center;" @onclick="() => showDeleteModal = false">Batal</button>
     </FooterContent>
 </AppModal>
 
