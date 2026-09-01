@@ -1,37 +1,52 @@
+@namespace booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
 
 <div class="stats-row">
     @foreach (var stat in Stats)
     {
-        var variant = GetVariant(stat);
-        <StatCard Label="@stat.Label"
-                  Value="@stat.Value"
-                  Icon="@GetIconName(stat.Icon)"
-                  Variant="@variant"
-                  Trend="@FormatTrend(stat)"
-                  IsPositiveTrend="@stat.IsPositiveTrend"
-                  Subtitle="@stat.Subtitle" />
+        @if (stat.Type.HasValue)
+        {
+            <StatCard Label="@stat.Label"
+                      Value="@stat.Value"
+                      Type="@stat.Type.Value"
+                      Trend="@FormatTrend(stat)"
+                      IsPositiveTrend="@stat.IsPositiveTrend"
+                      Subtitle="@stat.Subtitle" />
+        }
+        else
+        {
+            var fallbackType = ResolveFallbackType(stat);
+            <StatCard Label="@stat.Label"
+                      Value="@stat.Value"
+                      Type="@fallbackType"
+                      Trend="@FormatTrend(stat)"
+                      IsPositiveTrend="@stat.IsPositiveTrend"
+                      Subtitle="@stat.Subtitle" />
+        }
     }
 </div>
 
 @code {
     [Parameter] public List<StatItem> Stats { get; set; } = new();
 
-    private string GetVariant(StatItem stat)
+    private StatCardType ResolveFallbackType(StatItem stat)
     {
         var label = stat.Label.ToLowerInvariant();
-        var icon = stat.Icon.ToLowerInvariant();
-
-        if (label.Contains("setuju") || label.Contains("selesai") || icon.Contains("check"))
-            return "success";
-        if (label.Contains("tolak") || label.Contains("kritis") || label.Contains("bug") || label.Contains("belum") || icon.Contains("x.svg") || icon.Contains("alert"))
-            return "danger";
-        if (label.Contains("tunggu") || label.Contains("durasi") || label.Contains("waktu") || icon.Contains("clock"))
-            return "info";
-        if (label.Contains("katering") || label.Contains("terpopuler") || icon.Contains("coffee"))
-            return "warning";
-        
-        return "accent";
+        if (label.Contains("populer")) return StatCardType.PopularRoom;
+        if (label.Contains("pemesanan")) return StatCardType.TotalBooking;
+        if (label.Contains("tiket terbuka")) return StatCardType.OpenTicket;
+        if (label.Contains("tiket")) return StatCardType.TotalTicket;
+        if (label.Contains("penghapusan")) return StatCardType.TotalAccountDeletionRequest;
+        if (label.Contains("fasilitas")) return StatCardType.TotalFacilityRequest;
+        if (label.Contains("kritis") || label.Contains("tinggi")) return StatCardType.CriticalSeverity;
+        if (label.Contains("bug") || label.Contains("laporan")) return StatCardType.TotalBugReport;
+        if (label.Contains("belum ditugaskan")) return StatCardType.Unassigned;
+        if (label.Contains("permintaan sistem")) return StatCardType.TotalSystemRequest;
+        if (label.Contains("persetujuan") || label.Contains("penyelesaian") || label.Contains("selesai") || label.Contains("disetujui")) return StatCardType.ApprovalRate;
+        if (label.Contains("durasi") || label.Contains("waktu") || label.Contains("tanggap") || label.Contains("penanganan")) return StatCardType.AverageDuration;
+        if (label.Contains("katering")) return StatCardType.SpecialCatering;
+        if (label.Contains("aktivitas") || label.Contains("hari ini")) return StatCardType.TodayActivity;
+        return StatCardType.TotalBooking;
     }
 
     private string? FormatTrend(StatItem stat)
@@ -40,20 +55,4 @@
         var prefix = stat.IsPositiveTrend == true ? "↑ " : stat.IsPositiveTrend == false ? "↓ " : "";
         return $"{prefix}{stat.Trend}";
     }
-
-    private string GetIconName(string iconPath) => iconPath switch
-    {
-        var s when s.Contains("check") => "check",
-        var s when s.Contains("clock") => "clock",
-        var s when s.Contains("x.svg") => "x",
-        var s when s.Contains("coffee") => "coffee",
-        var s when s.Contains("icon_1_admin") => "layers",
-        var s when s.Contains("icon_2_admin") => "users",
-        var s when s.Contains("icon_3_admin") => "activity",
-        var s when s.Contains("icon_4_admin") => "calendar",
-        var s when s.Contains("icon_9_admin") => "help-circle",
-        var s when s.Contains("icon_10_admin") => "alert-circle",
-        var s when s.Contains("icon_14_admin") => "tool",
-        _ => "bar-chart-2"
-    };
 }

@@ -13,7 +13,7 @@
             </span>
             <span class="toast-message">@t.Message</span>
             <button type="button" class="toast-close" @onclick="() => DismissToast(t)" title="Tutup notifikasi">
-                <Icon Name="x" Size="12" />
+                <Icon Name="x" Size="14" />
             </button>
             <div class="toast-progress"></div>
         </div>
@@ -25,7 +25,7 @@
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Message { get; set; } = "";
-        public string Type { get; set; } = "";
+        public string Type { get; set; } = "info";
     }
 
     private List<ToastItem> _toasts = new();
@@ -39,10 +39,10 @@
     {
         var toast = new ToastItem { Message = message, Type = type };
         _toasts.Add(toast);
-        if (_toasts.Count > 4) _toasts.RemoveAt(0);
+        if (_toasts.Count > 5) _toasts.RemoveAt(0);
         await InvokeAsync(StateHasChanged);
 
-        await Task.Delay(3000); // 3 seconds per toast
+        await Task.Delay(4000); // 4 seconds auto-dismiss duration
 
         if (_toasts.Contains(toast)) 
         {

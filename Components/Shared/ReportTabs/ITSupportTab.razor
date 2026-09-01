@@ -76,10 +76,10 @@
 @code {
     private List<StatItem> _stats = new()
     {
-        new StatItem { Label = "Total Tiket", Value = "482", Icon = "icon/icon_9_admin.svg" },
-        new StatItem { Label = "Rata-rata Penyelesaian", Value = "2.4j", Icon = "icon/clock.svg" },
-        new StatItem { Label = "Tiket Terbuka", Value = "12", Subtitle = "+2 sejak kemarin", Icon = "icon/icon_1_admin.svg" },
-        new StatItem { Label = "Kategori Teratas", Value = "Reset Kata Sandi", Subtitle = "32% dari total volume", Icon = "icon/icon_14_admin.svg" }
+        new StatItem { Label = "Total Tiket", Value = "482", Type = StatCardType.TotalTicket },
+        new StatItem { Label = "Rata-rata Penyelesaian", Value = "2.4j", Type = StatCardType.AverageHandlingTime },
+        new StatItem { Label = "Tiket Terbuka", Value = "12", Subtitle = "+2 sejak kemarin", Type = StatCardType.OpenTicket },
+        new StatItem { Label = "Kategori Teratas", Value = "Reset Kata Sandi", Subtitle = "32% dari total volume", Type = StatCardType.ConfigChanges }
     };
 
     private List<ChartPoint> _chartData = new()

@@ -88,10 +88,10 @@
 @code {
     private List<StatItem> _stats = new()
     {
-        new StatItem { Label = "Total Permintaan Sistem", Value = "4.821", Icon = "icon/icon_1_admin.svg" },
-        new StatItem { Label = "Selesai Bulan Ini", Value = "3.102", Icon = "icon/check.svg" },
-        new StatItem { Label = "Belum Ditugaskan", Value = "142", Icon = "icon/icon_10_admin.svg" },
-        new StatItem { Label = "Rata-rata Waktu Penyelesaian", Value = "4.2j", Icon = "icon/clock.svg" }
+        new StatItem { Label = "Total Permintaan Sistem", Value = "4.821", Type = StatCardType.TotalSystemRequest },
+        new StatItem { Label = "Selesai Bulan Ini", Value = "3.102", Type = StatCardType.CompletedRequest },
+        new StatItem { Label = "Belum Ditugaskan", Value = "142", Type = StatCardType.Unassigned },
+        new StatItem { Label = "Rata-rata Waktu Penyelesaian", Value = "4.2j", Type = StatCardType.AverageResolutionTime }
     };
 
     private List<ChartPoint> _bookingData = new()

@@ -76,10 +76,10 @@
 @code {
     private List<StatItem> _stats = new()
     {
-        new StatItem { Label = "Total Laporan", Value = "142", Icon = "icon/icon_10_admin.svg" },
-        new StatItem { Label = "Kritis/Tinggi", Value = "24", Icon = "icon/icon_10_admin.svg" },
-        new StatItem { Label = "Terselesaikan (Bulan Ini)", Value = "98", Icon = "icon/check.svg" },
-        new StatItem { Label = "Rata-rata Penyelesaian", Value = "4.2j", Icon = "icon/clock.svg" }
+        new StatItem { Label = "Total Laporan", Value = "142", Type = StatCardType.TotalBugReport },
+        new StatItem { Label = "Kritis/Tinggi", Value = "24", Type = StatCardType.CriticalSeverity },
+        new StatItem { Label = "Terselesaikan (Bulan Ini)", Value = "98", Type = StatCardType.ResolvedBug },
+        new StatItem { Label = "Rata-rata Penyelesaian", Value = "4.2j", Type = StatCardType.AverageResolutionTime }
     };
 
     private List<ChartPoint> _chartData = new()

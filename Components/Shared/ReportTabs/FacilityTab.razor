@@ -76,10 +76,10 @@
 @code {
     private List<StatItem> _stats = new()
     {
-        new StatItem { Label = "Total Permintaan", Value = "482", Icon = "icon/icon_1_admin.svg" },
-        new StatItem { Label = "Jenis Teratas (Katering)", Value = "45%", Icon = "icon/coffee.svg" },
-        new StatItem { Label = "Rata-rata Penyelesaian", Value = "1.4j", Icon = "icon/clock.svg" },
-        new StatItem { Label = "Belum Ditugaskan", Value = "12", Subtitle = "Prioritas Tinggi", Icon = "icon/icon_10_admin.svg" }
+        new StatItem { Label = "Total Permintaan", Value = "482", Type = StatCardType.TotalFacilityRequest },
+        new StatItem { Label = "Jenis Teratas (Katering)", Value = "45%", Type = StatCardType.SpecialCatering },
+        new StatItem { Label = "Rata-rata Penyelesaian", Value = "1.4j", Type = StatCardType.AverageDuration },
+        new StatItem { Label = "Belum Ditugaskan", Value = "12", Subtitle = "Prioritas Tinggi", Type = StatCardType.Unassigned }
     };
 
     private List<ChartPoint> _chartData = new()

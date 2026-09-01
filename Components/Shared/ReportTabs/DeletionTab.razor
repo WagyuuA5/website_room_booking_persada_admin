@@ -76,10 +76,10 @@
 @code {
     private List<StatItem> _stats = new()
     {
-        new StatItem { Label = "Total Permintaan", Value = "142", Icon = "icon/icon_1_admin.svg" },
-        new StatItem { Label = "Disetujui", Value = "118", Icon = "icon/check.svg" },
-        new StatItem { Label = "Ditolak", Value = "15", Icon = "icon/x.svg" },
-        new StatItem { Label = "Menunggu Peninjauan", Value = "09", Icon = "icon/clock.svg" }
+        new StatItem { Label = "Total Permintaan", Value = "142", Type = StatCardType.TotalAccountDeletionRequest },
+        new StatItem { Label = "Disetujui", Value = "118", Type = StatCardType.ApprovedDeletion },
+        new StatItem { Label = "Ditolak", Value = "15", Type = StatCardType.RejectedDeletion },
+        new StatItem { Label = "Menunggu Peninjauan", Value = "09", Type = StatCardType.PendingVerification }
     };
 
     private List<ChartPoint> _chartData = new()

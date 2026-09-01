@@ -79,19 +79,16 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
         <StatCard Label="Aktivitas Periode Ini"
                   Value="@($"{FilteredLogs.Count()} Log")"
-                  Icon="clock"
-                  Variant="accent" />
+                  Type="StatCardType.TodayActivity" />
 
         <StatCard Label="Aksi Terbanyak"
                   Value="@TopActionSummary.Name"
-                  Icon="bar-chart-2"
-                  Variant="warning"
+                  Type="StatCardType.ConfigChanges"
                   Subtitle="@($"({TopActionSummary.Count} kali dilakukan)")" />
 
         <StatCard Label="Aktor Teraktif"
                   Value="@TopActorSummary.Name"
-                  Icon="user-check"
-                  Variant="success"
+                  Type="StatCardType.ActiveUsers"
                   Subtitle="@($"({TopActorSummary.Count} aktivitas)")" />
     </div>
 

@@ -8,4 +8,5 @@ public class StatItem
     public string Icon { get; set; } = string.Empty;
     public string Trend { get; set; } = string.Empty;
     public bool? IsPositiveTrend { get; set; }
+    public StatCardType? Type { get; set; }
 }

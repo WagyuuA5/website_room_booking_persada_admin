@@ -1,8 +1,9 @@
 @namespace booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
 
 <div class="stat-card @CssClass" @attributes="AdditionalAttributes">
     <div class="stat-icon-badge @GetBadgeVariantClass()">
-        <Icon Name="@Icon" Size="20" />
+        <Icon Name="@ResolvedIcon" Size="20" />
     </div>
     <div class="stat-body">
         <span class="stat-label">@Label</span>
@@ -25,17 +26,42 @@
 @code {
     [Parameter] public string Label { get; set; } = "";
     [Parameter] public string Value { get; set; } = "";
-    [Parameter] public string Icon { get; set; } = "bar-chart-2";
-    [Parameter] public string Variant { get; set; } = "accent";
+    [Parameter] public StatCardType? Type { get; set; }
+    [Parameter] public string Icon { get; set; } = "";
+    [Parameter] public string Variant { get; set; } = "";
     [Parameter] public string? Trend { get; set; }
     [Parameter] public bool? IsPositiveTrend { get; set; }
     [Parameter] public string? Subtitle { get; set; }
     [Parameter] public string CssClass { get; set; } = "";
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
+    private string ResolvedIcon
+    {
+        get
+        {
+            if (Type.HasValue)
+                return StatCardIconMap.Get(Type.Value).Icon;
+            if (!string.IsNullOrWhiteSpace(Icon))
+                return Icon;
+            return "bar-chart-2";
+        }
+    }
+
+    private string ResolvedVariant
+    {
+        get
+        {
+            if (Type.HasValue)
+                return StatCardIconMap.Get(Type.Value).Variant;
+            if (!string.IsNullOrWhiteSpace(Variant))
+                return Variant;
+            return "accent";
+        }
+    }
+
     private bool IsLongText => Value.Length > 12 && !char.IsDigit(Value[0]);
 
-    private string GetBadgeVariantClass() => Variant.ToLowerInvariant() switch
+    private string GetBadgeVariantClass() => ResolvedVariant.ToLowerInvariant() switch
     {
         "success" => "badge-variant-success",
         "warning" => "badge-variant-warning",

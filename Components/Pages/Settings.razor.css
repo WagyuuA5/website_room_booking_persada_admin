@@ -71,27 +71,6 @@
     font-weight: 600;
 }
 
-.settings-nav-divider {
-    height: 1px;
-    background: var(--color-border, #E2E8F0);
-    margin: 4px 8px;
-}
-
-.settings-nav-footer {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.nav-item-logout {
-    color: var(--color-danger, #DC2626);
-}
-
-.nav-item-logout:hover {
-    background: var(--color-danger-soft, #FEF2F2);
-    color: var(--color-danger, #DC2626);
-}
-
 /* --- 2. RIGHT CONTENT PANEL --- */
 .settings-content-panel {
     display: flex;

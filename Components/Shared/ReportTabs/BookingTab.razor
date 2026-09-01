@@ -83,10 +83,10 @@
 @code {
     private List<StatItem> _stats = new()
     {
-        new StatItem { Label = "Total Pemesanan", Value = "1.248", Icon = "icon/icon_1_admin.svg", Trend = "12%", IsPositiveTrend = true },
-        new StatItem { Label = "Tingkat Persetujuan", Value = "87%", Icon = "icon/check.svg", Trend = "5%", IsPositiveTrend = true },
-        new StatItem { Label = "Rata-rata Durasi", Value = "1.4j", Icon = "icon/clock.svg", Trend = "0.2j", IsPositiveTrend = false },
-        new StatItem { Label = "Ruangan Terpopuler", Value = "Ruang Dirantara", Icon = "icon/icon_1_admin.svg", Subtitle = "124 Pemesanan" }
+        new StatItem { Label = "Total Pemesanan", Value = "1.248", Type = StatCardType.TotalBooking, Trend = "12%", IsPositiveTrend = true },
+        new StatItem { Label = "Tingkat Persetujuan", Value = "87%", Type = StatCardType.ApprovalRate, Trend = "5%", IsPositiveTrend = true },
+        new StatItem { Label = "Rata-rata Durasi", Value = "1.4j", Type = StatCardType.AverageDuration, Trend = "0.2j", IsPositiveTrend = false },
+        new StatItem { Label = "Ruangan Terpopuler", Value = "Ruang Dirantara", Type = StatCardType.PopularRoom, Subtitle = "124 Pemesanan" }
     };
 
     private List<ChartPoint> _chartData = new()

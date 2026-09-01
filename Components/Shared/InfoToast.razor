@@ -1,0 +1,17 @@
+@namespace booking_room_admin.Components.Shared
+@inject booking_room_admin.Components.Services.ToastService ToastSvc
+
+@code {
+    /// <summary>
+    /// Helper statis/komponen untuk memicu Info Toast secara deklaratif atau programatik.
+    /// </summary>
+    [Parameter] public string? Message { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrWhiteSpace(Message))
+        {
+            ToastSvc.Info(Message);
+        }
+    }
+}

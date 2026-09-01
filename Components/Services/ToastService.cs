@@ -12,4 +12,5 @@ public class ToastService
     public void Success(string message) => Show(message, "success");
     public void Error(string message) => Show(message, "error");
     public void Info(string message) => Show(message, "info");
+    public void ShowInfo(string message) => Show(message, "info");
 }
