@@ -453,6 +453,9 @@
                                             <th class="th-center">Admin</th>
                                             <th class="th-center">Staf</th>
                                             <th class="th-center">Karyawan</th>
+                                            @foreach(var cr in customRolesList) {
+                                                <th class="th-center">@cr.Name</th>
+                                            }
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -461,36 +464,72 @@
                                             <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
                                             <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
                                             <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
+                                            @foreach(var cr in customRolesList) {
+                                                <td class="td-center">
+                                                    @if (cr.CanCreateBooking) { <span class="perm-check checked"><Icon Name="check" Size="16" /></span> }
+                                                    else { <span class="perm-check unchecked"><Icon Name="x" Size="14" /></span> }
+                                                </td>
+                                            }
                                         </tr>
                                         <tr>
                                             <td><strong>Setujui / Tolak Pemesanan</strong></td>
                                             <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
                                             <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
                                             <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                            @foreach(var cr in customRolesList) {
+                                                <td class="td-center">
+                                                    @if (cr.CanApproveBooking) { <span class="perm-check checked"><Icon Name="check" Size="16" /></span> }
+                                                    else { <span class="perm-check unchecked"><Icon Name="x" Size="14" /></span> }
+                                                </td>
+                                            }
                                         </tr>
                                         <tr>
                                             <td><strong>Kelola Ruangan</strong></td>
                                             <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
                                             <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
                                             <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                            @foreach(var cr in customRolesList) {
+                                                <td class="td-center">
+                                                    @if (cr.CanManageRooms) { <span class="perm-check checked"><Icon Name="check" Size="16" /></span> }
+                                                    else { <span class="perm-check unchecked"><Icon Name="x" Size="14" /></span> }
+                                                </td>
+                                            }
                                         </tr>
                                         <tr>
                                             <td><strong>Kelola Pengguna & Peran</strong></td>
                                             <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
                                             <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
                                             <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                            @foreach(var cr in customRolesList) {
+                                                <td class="td-center">
+                                                    @if (cr.CanManageUsers) { <span class="perm-check checked"><Icon Name="check" Size="16" /></span> }
+                                                    else { <span class="perm-check unchecked"><Icon Name="x" Size="14" /></span> }
+                                                </td>
+                                            }
                                         </tr>
                                         <tr>
                                             <td><strong>Lihat Laporan</strong></td>
                                             <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
                                             <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
                                             <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                            @foreach(var cr in customRolesList) {
+                                                <td class="td-center">
+                                                    @if (cr.CanViewReports) { <span class="perm-check checked"><Icon Name="check" Size="16" /></span> }
+                                                    else { <span class="perm-check unchecked"><Icon Name="x" Size="14" /></span> }
+                                                </td>
+                                            }
                                         </tr>
                                         <tr>
                                             <td><strong>Ubah Pengaturan Sistem</strong></td>
                                             <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
                                             <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
                                             <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                            @foreach(var cr in customRolesList) {
+                                                <td class="td-center">
+                                                    @if (cr.CanChangeSettings) { <span class="perm-check checked"><Icon Name="check" Size="16" /></span> }
+                                                    else { <span class="perm-check unchecked"><Icon Name="x" Size="14" /></span> }
+                                                </td>
+                                            }
                                         </tr>
                                     </tbody>
                                 </table>
@@ -779,6 +818,62 @@
     </FooterContent>
 </AppModal>
 
+<AppModal IsOpen="@showCustomRoleModal" IsOpenChanged="@((bool v) => showCustomRoleModal = v)" Size="medium">
+    <HeaderContent>
+        <h4 class="modal-title">Tambah Role Kustom</h4>
+        <button type="button" class="btn-icon" @onclick="() => showCustomRoleModal = false" style="background:transparent; border:none; cursor:pointer; color:var(--color-text-secondary, #64748B); display:flex; align-items:center; justify-content:center; padding: 4px; border-radius: 50%;" aria-label="Tutup">
+            <Icon Name="x" Size="20" />
+        </button>
+    </HeaderContent>
+    <ChildContent>
+        <div style="display:flex; flex-direction:column; gap:1.5rem;">
+            <div class="form-group" style="display:flex; flex-direction:column; gap:0.5rem;">
+                <label style="font-weight:600; color:var(--color-ink-900, #14171F);">Nama Role <span style="color:var(--color-danger, #DC2626);">*</span></label>
+                <input type="text" @bind="newRoleName" class="form-input" placeholder="Contoh: Supervisor Gedung" style="padding:0.75rem 1rem; border-radius:var(--radius-md, 12px); border:1px solid var(--color-border, #E3E6EC); width:100%; transition:all 0.2s ease;" />
+            </div>
+            
+            <div class="form-group" style="display:flex; flex-direction:column; gap:0.5rem;">
+                <label style="font-weight:600; color:var(--color-ink-900, #14171F);">Deskripsi Role (Opsional)</label>
+                <textarea @bind="newRoleDesc" class="form-input" placeholder="Jelaskan peran ini..." rows="2" style="padding:0.75rem 1rem; border-radius:var(--radius-md, 12px); border:1px solid var(--color-border, #E3E6EC); width:100%; resize:vertical; transition:all 0.2s ease;"></textarea>
+            </div>
+
+            <div class="form-group" style="display:flex; flex-direction:column; gap:1rem;">
+                <label style="font-weight:600; color:var(--color-ink-900, #14171F);">Hak Akses Modul</label>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; color:var(--color-text-primary, #0F172A);">
+                        <input type="checkbox" @bind="permCreateBooking" style="width:1.125rem; height:1.125rem; cursor:pointer;" />
+                        Buat Pemesanan
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; color:var(--color-text-primary, #0F172A);">
+                        <input type="checkbox" @bind="permApproveBooking" style="width:1.125rem; height:1.125rem; cursor:pointer;" />
+                        Setujui / Tolak Pemesanan
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; color:var(--color-text-primary, #0F172A);">
+                        <input type="checkbox" @bind="permManageRooms" style="width:1.125rem; height:1.125rem; cursor:pointer;" />
+                        Kelola Ruangan
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; color:var(--color-text-primary, #0F172A);">
+                        <input type="checkbox" @bind="permManageUsers" style="width:1.125rem; height:1.125rem; cursor:pointer;" />
+                        Kelola Pengguna & Peran
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; color:var(--color-text-primary, #0F172A);">
+                        <input type="checkbox" @bind="permViewReports" style="width:1.125rem; height:1.125rem; cursor:pointer;" />
+                        Lihat Laporan
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; color:var(--color-text-primary, #0F172A);">
+                        <input type="checkbox" @bind="permChangeSettings" style="width:1.125rem; height:1.125rem; cursor:pointer;" />
+                        Ubah Pengaturan Sistem
+                    </label>
+                </div>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showCustomRoleModal = false">Batal</button>
+        <button type="button" class="btn-primary-pill btn-navy" @onclick="SaveNewCustomRole">Simpan Role</button>
+    </FooterContent>
+</AppModal>
+
 @code {
     private bool isPageLoading = true;
     private string activeSection = "notifications";
@@ -787,6 +882,30 @@
     private bool showPasswordModal = false;
     private bool showTwoFactorModal = false;
     private bool showSessionsModal = false;
+    private bool showCustomRoleModal = false;
+
+    // Tambah Role Kustom
+    private string newRoleName = "";
+    private string newRoleDesc = "";
+    private bool permCreateBooking = false;
+    private bool permApproveBooking = false;
+    private bool permManageRooms = false;
+    private bool permManageUsers = false;
+    private bool permViewReports = false;
+    private bool permChangeSettings = false;
+
+    public class RoleMatrixItem
+    {
+        public string Name { get; set; } = "";
+        public bool CanCreateBooking { get; set; }
+        public bool CanApproveBooking { get; set; }
+        public bool CanManageRooms { get; set; }
+        public bool CanManageUsers { get; set; }
+        public bool CanViewReports { get; set; }
+        public bool CanChangeSettings { get; set; }
+    }
+
+    private List<RoleMatrixItem> customRolesList = new();
 
     // Ubah Kata Sandi
     private string currentPassword = "";
@@ -993,7 +1112,39 @@
 
     private void OpenAddCustomRole()
     {
+        newRoleName = "";
+        newRoleDesc = "";
+        permCreateBooking = false;
+        permApproveBooking = false;
+        permManageRooms = false;
+        permManageUsers = false;
+        permViewReports = false;
+        permChangeSettings = false;
+        showCustomRoleModal = true;
         Toast.Info("Formulir penambahan role kustom dibuka.");
+    }
+
+    private void SaveNewCustomRole()
+    {
+        if (string.IsNullOrWhiteSpace(newRoleName))
+        {
+            Toast.Error("Nama role tidak boleh kosong.");
+            return;
+        }
+
+        customRolesList.Add(new RoleMatrixItem
+        {
+            Name = newRoleName,
+            CanCreateBooking = permCreateBooking,
+            CanApproveBooking = permApproveBooking,
+            CanManageRooms = permManageRooms,
+            CanManageUsers = permManageUsers,
+            CanViewReports = permViewReports,
+            CanChangeSettings = permChangeSettings
+        });
+
+        showCustomRoleModal = false;
+        Toast.Success("Role kustom berhasil ditambahkan.");
     }
 
     private void CancelChanges()
