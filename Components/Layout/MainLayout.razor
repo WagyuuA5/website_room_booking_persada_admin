@@ -1,5 +1,7 @@
 @inherits LayoutComponentBase
 @inject booking_room_admin.Components.Services.LayoutStateService LayoutState
+@inject booking_room_admin.Components.Services.AuthService AuthService
+@inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @using booking_room_admin.Components.Shared
 @implements IDisposable
@@ -44,6 +46,12 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (!AuthService.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
         LayoutState.OnChange += StateHasChanged;
         await LayoutState.InitStateAsync();
         try
