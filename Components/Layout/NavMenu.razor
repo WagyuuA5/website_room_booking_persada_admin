@@ -1,4 +1,5 @@
 @inject NavigationManager Navigation
+@inject booking_room_admin.Components.Services.AuthService AuthService
 @using booking_room_admin.Components.Shared
 
 <div class="sidebar-header">
@@ -130,6 +131,7 @@
 
     private void HandleLogout()
     {
-        Navigation.NavigateTo("/", replace: true);
+        AuthService.Logout();
+        Navigation.NavigateTo("/login", forceLoad: true);
     }
 }

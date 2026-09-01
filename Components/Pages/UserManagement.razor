@@ -359,13 +359,13 @@
                     <div style="margin-top: 4px;">
                         <label style="font-size: 11px; font-weight: 600; color: var(--color-danger, #7F1D1D); text-transform: uppercase; margin-bottom: 4px; display: block;">Ketik nama "<span style="color: var(--color-danger, #B91C1C);">@userToDelete.FullName</span>" untuk konfirmasi:</label>
                         <input type="text"
-                               class="form-input @(!string.IsNullOrEmpty(confirmDeleteName) && confirmDeleteName != userToDelete.FullName ? "is-invalid" : "")"
+                               class="form-input @(!string.IsNullOrEmpty(confirmDeleteName) && !string.Equals(confirmDeleteName, userToDelete.FullName, StringComparison.OrdinalIgnoreCase) ? "is-invalid" : "")"
                                style="width: 100%; border-color: var(--color-danger, #FCA5A5); background: var(--color-surface, #FFF);"
                                placeholder="@userToDelete.FullName"
                                @bind="confirmDeleteName"
                                @bind:event="oninput" />
                     </div>
-                    <button type="button" class="btn-primary-pill btn-danger" style="width: 100%; justify-content: center; margin-top: 8px;" @onclick="ConfirmDeleteUser" disabled="@(confirmDeleteName != userToDelete?.FullName)">Hapus Permanen</button>
+                    <button type="button" class="btn-primary-pill btn-danger" style="width: 100%; justify-content: center; margin-top: 8px;" @onclick="ConfirmDeleteUser" disabled="@(!string.Equals(confirmDeleteName, userToDelete?.FullName, StringComparison.OrdinalIgnoreCase))">Hapus Permanen</button>
                 </div>
             </div>
         }
@@ -718,6 +718,8 @@
         if (success)
         {
             Toast.Success($"Pengguna '{formModel.FullName}' berhasil ditambahkan.");
+            searchQuery = "";
+            departmentFilter = "All";
             currentPage = 1;
             await LoadUsers();
         }
@@ -793,9 +795,17 @@
     {
         if (userToDelete != null)
         {
+            if (!string.Equals(confirmDeleteName, userToDelete.FullName, StringComparison.OrdinalIgnoreCase))
+            {
+                Toast.Error("Nama konfirmasi tidak cocok.");
+                return;
+            }
             await UserService.DeleteUserAsync(userToDelete.Id);
             Toast.Success("Pengguna berhasil dihapus.");
             showDeleteModal = false;
+            searchQuery = "";
+            departmentFilter = "All";
+            currentPage = 1;
             await LoadUsers();
         }
     }

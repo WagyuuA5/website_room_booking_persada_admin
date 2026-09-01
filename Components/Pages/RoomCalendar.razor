@@ -2,6 +2,7 @@
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @using booking_room_admin.Components.Models
+@inject booking_room_admin.Components.Services.LayoutStateService LayoutState
 
 <TopBar Title="Kalender Ruangan" Subtitle="Tinjauan jadwal dan ketersediaan semua ruangan dalam format kalender interaktif." />
 
@@ -114,16 +115,26 @@
     {
         <div class="rc-month-grid">
             <div class="rc-month-header-row">
-                <span>Senin</span><span>Selasa</span><span>Rabu</span><span>Kamis</span><span>Jumat</span><span>Sabtu</span><span>Minggu</span>
+                @for (int i = 0; i < 7; i++)
+                {
+                    var d = GetStartOfWeek(DateTime.Today).AddDays(i);
+                    <span>@d.ToString("dddd")</span>
+                }
             </div>
             <div class="rc-month-days-grid">
-                @for (int day = 1; day <= 31; day++)
+                @{
+                    var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+                    var startDate = GetStartOfWeek(firstDayOfMonth);
+                }
+                @for (int i = 0; i < 42; i++)
                 {
-                    int d = day;
-                    bool isToday = (d == DateTime.Today.Day);
-                    var dayBookings = calendarEvents.Where(e => e.Day == d).ToList();
-                    <div class="rc-month-cell @(isToday ? "today-cell" : "")">
-                        <div class="rc-day-number">@d</div>
+                    var d = startDate.AddDays(i);
+                    bool isToday = (d.Date == DateTime.Today);
+                    bool isCurrentMonth = (d.Month == currentDate.Month);
+                    // Mock data only has "Day", so we limit it to current month for realism
+                    var dayBookings = isCurrentMonth ? calendarEvents.Where(e => e.Day == d.Day).ToList() : new List<CalendarEventItem>();
+                    <div class="rc-month-cell @(isToday ? "today-cell" : "") @(!isCurrentMonth ? "other-month-cell" : "")" style="@(!isCurrentMonth ? "opacity: 0.5;" : "")">
+                        <div class="rc-day-number">@d.Day</div>
                         <div class="rc-day-events-list">
                             @foreach (var ev in dayBookings.Take(3))
                             {
@@ -151,7 +162,7 @@
                         <th style="width: 80px;">Waktu</th>
                         @for (int i = 0; i < 7; i++)
                         {
-                            var d = currentDate.AddDays(i - (int)currentDate.DayOfWeek + 1);
+                            var d = GetStartOfWeek(currentDate).AddDays(i);
                             <th class="@(d.Date == DateTime.Today ? "th-today" : "")">@d.ToString("ddd, dd MMM")</th>
                         }
                     </tr>
@@ -164,7 +175,7 @@
                             <td class="rc-time-label">@($"{currentHour:D2}:00")</td>
                             @for (int i = 0; i < 7; i++)
                             {
-                                var d = currentDate.AddDays(i - (int)currentDate.DayOfWeek + 1);
+                                var d = GetStartOfWeek(currentDate).AddDays(i);
                                 var ev = calendarEvents.FirstOrDefault(e => e.Day == d.Day && e.StartHour == currentHour);
                                 if (ev != null)
                                 {
@@ -255,6 +266,28 @@
     private bool showAddBlock = false;
     private bool showDetailModal = false;
     private CalendarEventItem? selectedEvent;
+
+    private DayOfWeek GetFirstDayOfWeek()
+    {
+        return LayoutState.FirstDayOfWeek switch
+        {
+            "Senin" => DayOfWeek.Monday,
+            "Selasa" => DayOfWeek.Tuesday,
+            "Rabu" => DayOfWeek.Wednesday,
+            "Kamis" => DayOfWeek.Thursday,
+            "Jumat" => DayOfWeek.Friday,
+            "Sabtu" => DayOfWeek.Saturday,
+            "Minggu" => DayOfWeek.Sunday,
+            _ => DayOfWeek.Monday
+        };
+    }
+
+    private DateTime GetStartOfWeek(DateTime date)
+    {
+        var firstDay = GetFirstDayOfWeek();
+        int diff = (7 + (date.DayOfWeek - firstDay)) % 7;
+        return date.AddDays(-1 * diff).Date;
+    }
 
     public class CalendarRoomItem
     {

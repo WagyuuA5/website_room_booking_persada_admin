@@ -43,13 +43,14 @@
 .bg-zoom-out .login-bg-img {
     animation: none;
     transform: scale(1.0);
-    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .login-bg-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.35) 100%);
+    /* CASE 13: Warm color fallback via rgba overlay (no filter) */
+    background: linear-gradient(180deg, rgba(253, 245, 230, 0.1) 0%, rgba(15, 23, 42, 0.45) 100%);
     z-index: 2;
 }
 
@@ -63,8 +64,8 @@
 }
 
 .persada-logo {
-    height: 44px;
-    max-height: 48px;
+    height: 60px;
+    max-height: 64px;
     object-fit: contain;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
 }
@@ -92,7 +93,7 @@
     padding: 2.75rem;
     color: #FFFFFF;
     animation: cardEntrance 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    transition: transform 250ms ease-in, opacity 250ms ease-in;
+    transition: transform 350ms ease-in, opacity 350ms ease-in;
 }
 
 @keyframes cardEntrance {
@@ -210,7 +211,7 @@
 
 .form-input {
     width: 100%;
-    padding: 0.825rem 1rem 0.825rem 2.85rem;
+    padding: 0.825rem 3rem 0.825rem 3.1rem;
     font-size: 0.95rem;
     border-radius: var(--radius-md, 12px);
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -515,6 +516,69 @@
     font-size: 0.88rem;
     font-weight: 500;
     animation: fadeInDown 200ms ease-out;
+}
+
+/* --- 11. FORGOT MODAL FORM CONTROLS (solid bg context) --- */
+.forgot-form-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-ink-900, #14171F);
+}
+
+.forgot-input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-secondary, #64748B);
+    pointer-events: none;
+    transition: color 150ms ease;
+}
+
+.forgot-form-input {
+    width: 100%;
+    padding: 0.825rem 1rem 0.825rem 3.1rem;
+    font-size: 0.95rem;
+    border-radius: var(--radius-md, 12px);
+    border: 1px solid var(--color-border, #E3E6EC);
+    background: var(--color-surface-1, #F7F8FA);
+    color: var(--color-ink-900, #14171F);
+    transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.forgot-form-input::placeholder {
+    color: var(--color-text-muted, #9CA3AF);
+}
+
+.forgot-form-input:hover {
+    border-color: var(--color-accent, #2563EB);
+    background: var(--color-surface-0, #FFFFFF);
+}
+
+.forgot-form-input:focus {
+    outline: none;
+    background: var(--color-surface-0, #FFFFFF);
+    border-color: var(--color-accent, #2563EB);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.forgot-form-input.input-error {
+    border-color: var(--color-danger, #DC2626) !important;
+    background: var(--color-danger-soft, #FEF2F2) !important;
+}
+
+.input-wrap:focus-within .forgot-input-icon {
+    color: var(--color-accent, #2563EB);
+}
+
+.forgot-field-error {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.82rem;
+    color: var(--color-danger, #DC2626);
+    font-weight: 500;
 }
 
 .forgot-modal-footer {

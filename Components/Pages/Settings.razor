@@ -4,6 +4,7 @@
 @using booking_room_admin.Components.Shared
 @inject booking_room_admin.Components.Services.ToastService Toast
 @inject NavigationManager Navigation
+@inject booking_room_admin.Components.Services.LayoutStateService LayoutState
 
 <TopBar Title="Pengaturan" Subtitle="Kelola keamanan, preferensi, dan konfigurasi sistem." />
 
@@ -327,8 +328,13 @@
 
                                 <div class="form-group" style="max-width: 480px; margin-top: 1rem;">
                                     <label class="form-label">HARI PERTAMA DALAM SEMINGGU</label>
-                                    <select class="form-input" @bind="firstDayOfWeek">
+                                    <select class="form-input" @bind="LayoutState.FirstDayOfWeek">
                                         <option value="Senin">Senin</option>
+                                        <option value="Selasa">Selasa</option>
+                                        <option value="Rabu">Rabu</option>
+                                        <option value="Kamis">Kamis</option>
+                                        <option value="Jumat">Jumat</option>
+                                        <option value="Sabtu">Sabtu</option>
                                         <option value="Minggu">Minggu</option>
                                     </select>
                                 </div>

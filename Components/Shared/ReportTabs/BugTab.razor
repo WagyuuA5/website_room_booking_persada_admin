@@ -58,9 +58,16 @@
                 <tbody>
                     @foreach (var row in _tableData)
                     {
-                        <tr>
+                        <tr class="clickable-row" @onclick="() => OpenDetail(row)">
                             <td><span class="td-primary" style="font-family: monospace; font-weight: 500;">#@row.Id</span></td>
-                            <td><span class="td-primary">@row.Name</span></td>
+                            <td>
+                                <div class="user-cell">
+                                    <UserAvatar Initials="@GetInitials(row.Name)" BgColor="@GetAvatarColor(row.Name)" Size="34px" />
+                                    <div class="user-cell-info">
+                                        <span class="td-primary">@row.Name</span>
+                                    </div>
+                                </div>
+                            </td>
                             <td><span class="td-secondary">@row.Module</span></td>
                             <td><StatusBadge Status="@row.Severity" /></td>
                             <td><span class="td-secondary">@row.Assigned</span></td>
@@ -72,6 +79,48 @@
         </div>
     </div>
 </div>
+
+@if (selectedRow != null)
+{
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) selectedRow = null; })" Title="Detail Laporan Bug" Size="medium">
+        <ChildContent>
+            <div style="display: flex; flex-direction: column; gap: 16px; padding: 12px 0;">
+                <div style="display: flex; gap: 16px; align-items: center;">
+                    <UserAvatar Initials="@GetInitials(selectedRow.Name)" BgColor="@GetAvatarColor(selectedRow.Name)" Size="56px" />
+                    <div>
+                        <h4 style="margin: 0; font-size: 1.1rem; color: var(--color-ink-900, #14171F);">@selectedRow.Name</h4>
+                        <span style="color: var(--color-text-secondary, #64748B); font-size: 0.9rem;">Pelapor Bug</span>
+                    </div>
+                </div>
+                <div style="border-top: 1px solid var(--color-border, #E2E8F0); padding-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--color-text-muted, #9CA3AF); text-transform: uppercase;">ID Bug</label>
+                        <div style="font-weight: 500; color: var(--color-ink-900, #14171F);">#@selectedRow.Id</div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--color-text-muted, #9CA3AF); text-transform: uppercase;">Status</label>
+                        <div style="margin-top: 4px;"><StatusBadge Status="@selectedRow.Status" /></div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--color-text-muted, #9CA3AF); text-transform: uppercase;">Modul Terdampak</label>
+                        <div style="font-weight: 500; color: var(--color-ink-900, #14171F);">@selectedRow.Module</div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--color-text-muted, #9CA3AF); text-transform: uppercase;">Tingkat Keparahan</label>
+                        <div style="margin-top: 4px;"><StatusBadge Status="@selectedRow.Severity" /></div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--color-text-muted, #9CA3AF); text-transform: uppercase;">Ditugaskan Ke</label>
+                        <div style="font-weight: 500; color: var(--color-ink-900, #14171F);">@selectedRow.Assigned</div>
+                    </div>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => selectedRow = null">Tutup</button>
+        </FooterContent>
+    </AppModal>
+}
 
 @code {
     private List<StatItem> _stats = new()
@@ -139,5 +188,29 @@
         public string Severity { get; set; } = string.Empty;
         public string Assigned { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
+    }
+
+    private TableRow? selectedRow;
+
+    private void OpenDetail(TableRow row)
+    {
+        selectedRow = row;
+    }
+
+    private string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "U";
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Substring(0, 1).ToUpper();
+        return (parts[0].Substring(0, 1) + parts[1].Substring(0, 1)).ToUpper();
+    }
+
+    private string GetAvatarColor(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "#94A3B8";
+        var colors = new[] { "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6", "#F97316" };
+        int sum = 0;
+        foreach (char c in name) sum += c;
+        return colors[sum % colors.Length];
     }
 }

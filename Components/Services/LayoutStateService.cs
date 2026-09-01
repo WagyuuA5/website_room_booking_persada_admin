@@ -29,6 +29,13 @@ public class LayoutStateService
         set => SetAdminFullName(value);
     }
 
+    private string _firstDayOfWeek = "Senin";
+    public string FirstDayOfWeek
+    {
+        get => _firstDayOfWeek;
+        set => SetFirstDayOfWeek(value);
+    }
+
     public event Action? OnChange;
 
     public async Task InitStateAsync()
@@ -58,6 +65,12 @@ public class LayoutStateService
             if (!string.IsNullOrEmpty(storedName))
             {
                 _adminFullName = storedName;
+            }
+
+            var storedFirstDay = await _js.InvokeAsync<string?>("localStorage.getItem", "first-day-of-week");
+            if (!string.IsNullOrEmpty(storedFirstDay))
+            {
+                _firstDayOfWeek = storedFirstDay;
             }
 
             Notify();
@@ -143,6 +156,20 @@ public class LayoutStateService
             try
             {
                 _js.InvokeVoidAsync("localStorage.setItem", "admin-name", name);
+            }
+            catch { }
+        }
+    }
+
+    public void SetFirstDayOfWeek(string day)
+    {
+        if (_firstDayOfWeek != day)
+        {
+            _firstDayOfWeek = day;
+            Notify();
+            try
+            {
+                _js.InvokeVoidAsync("localStorage.setItem", "first-day-of-week", day);
             }
             catch { }
         }

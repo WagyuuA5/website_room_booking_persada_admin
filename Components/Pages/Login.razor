@@ -76,7 +76,7 @@
                                 @onclick="TogglePasswordVisibility"
                                 aria-label="@(showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi")"
                                 title="@(showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi")">
-                            <Icon Name="@(showPassword ? "eye-off" : "eye")" Size="18" />
+                            <Icon Name="@(showPassword ? "eye" : "eye-off")" Size="18" />
                         </button>
                     </div>
                     @if (passwordError != null)
@@ -154,12 +154,12 @@
                 }
 
                 <div class="form-group" style="margin-bottom: 0;">
-                    <label for="forgotEmail" class="form-label">Email</label>
+                    <label for="forgotEmail" class="forgot-form-label">EMAIL</label>
                     <div class="input-wrap">
-                        <Icon Name="mail" Size="18" class="input-icon" />
+                        <Icon Name="mail" Size="18" class="forgot-input-icon" />
                         <input type="email"
                                id="forgotEmail"
-                               class="form-input @(forgotEmailError != null ? "input-error" : "")"
+                               class="forgot-form-input @(forgotEmailError != null ? "input-error" : "")"
                                placeholder="nama@ptpersada.co.id"
                                @bind="forgotEmail"
                                @bind:event="oninput"
@@ -167,7 +167,7 @@
                     </div>
                     @if (forgotEmailError != null)
                     {
-                        <span class="field-error-text">@forgotEmailError</span>
+                        <span class="forgot-field-error">@forgotEmailError</span>
                     }
                 </div>
             </div>
@@ -319,8 +319,8 @@
                 isSuccess = true;
                 StateHasChanged();
 
-                // Durasi transisi ~350ms (total login selesai -> skeleton ~650ms)
-                await Task.Delay(350);
+                // Durasi transisi ~500ms (total login selesai -> skeleton ~800ms)
+                await Task.Delay(500);
                 NavigationManager.NavigateTo("/dashboard");
             }
             else if (result.Type == AuthResultType.ConnectionFailed)

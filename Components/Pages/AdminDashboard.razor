@@ -716,7 +716,7 @@ else
         InitData();
         InitCharts();
         InitExportColumns();
-        await Task.Delay(350);
+        await Task.Delay(500); // 500ms minimum per CASE 14 specification
         isPageLoading = false;
     }
 
