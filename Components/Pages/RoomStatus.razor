@@ -333,7 +333,17 @@
 
                 <div class="rs-field">
                     <label class="rs-label">Dokumentasi Foto</label>
-                    <ImageUploadBox OnImageUploaded="(url) => maintForm.PhotoUrl = url" />
+                    @if (!string.IsNullOrEmpty(maintForm.PhotoUrl))
+                    {
+                        <div style="position: relative; display: inline-block;">
+                            <img src="@maintForm.PhotoUrl" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--color-border);" />
+                            <button type="button" @onclick="() => maintForm.PhotoUrl = null" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center;"><Icon Name="x" Size="14" /></button>
+                        </div>
+                    }
+                    else
+                    {
+                        <ImageUploadBox OnImageUploaded="(url) => maintForm.PhotoUrl = url" />
+                    }
                 </div>
 
                 <div class="rs-field">

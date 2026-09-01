@@ -186,10 +186,7 @@
 }
 
 .mb-suggestions-drop {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
+    margin-top: 4px;
     z-index: 100;
     background: var(--color-surface, #FFFFFF);
     border: 1px solid var(--color-border, #E5E7EB);

@@ -1,41 +1,40 @@
-﻿@namespace booking_room_admin.Components.Shared
+@namespace booking_room_admin.Components.Shared
 
 @if (IsOpen)
 {
-    <div class="dp-overlay" @onclick="Close">
-        <div class="date-picker-card" @onclick:stopPropagation="true">
-            <div class="dp-header">
-                <button type="button" class="dp-nav-arrow" @onclick="PrevMonth" title="Bulan Sebelumnya"><Icon Name="chevron-left" Size="14" /></button>
-                <span class="dp-month-title">@MonthNames[currentMonth.Month - 1] @currentMonth.Year</span>
-                <button type="button" class="dp-nav-arrow" @onclick="NextMonth" title="Bulan Berikutnya"><Icon Name="chevron-right" Size="14" /></button>
-            </div>
+    <div class="dp-overlay" @onclick="Close"></div>
+    <div class="date-picker-card">
+        <div class="dp-header">
+            <button type="button" class="dp-nav-arrow" @onclick="PrevMonth" title="Bulan Sebelumnya"><Icon Name="chevron-left" Size="14" /></button>
+            <span class="dp-month-title">@MonthNames[currentMonth.Month - 1] @currentMonth.Year</span>
+            <button type="button" class="dp-nav-arrow" @onclick="NextMonth" title="Bulan Berikutnya"><Icon Name="chevron-right" Size="14" /></button>
+        </div>
 
-            <div class="dp-weekdays">
-                <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
-            </div>
+        <div class="dp-weekdays">
+            <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
+        </div>
 
-            <div class="dp-days-grid">
-                @foreach (var d in days)
-                {
-                    <button type="button"
-                            class="dp-day-cell @(d.IsCurrentMonth ? "" : "dp-day--muted") @(IsSelected(d.Date) ? "dp-day--selected" : "") @(IsInRange(d.Date) ? "dp-day--in-range" : "") @(IsToday(d.Date) ? "dp-day--today" : "")"
-                            @onclick="() => SelectDate(d.Date)">
-                        @d.Date.Day
-                    </button>
-                }
-            </div>
-
-            @if (IsRangeMode && (rangeStart.HasValue || rangeEnd.HasValue))
+        <div class="dp-days-grid">
+            @foreach (var d in days)
             {
-                <div class="dp-range-label">
-                    <span>Terpilih: @(rangeStart?.ToString("dd MMM") ?? "...") - @(rangeEnd?.ToString("dd MMM yyyy") ?? "...")</span>
-                </div>
+                <button type="button"
+                        class="dp-day-cell @(d.IsCurrentMonth ? "" : "dp-day--muted") @(IsSelected(d.Date) ? "dp-day--selected" : "") @(IsInRange(d.Date) ? "dp-day--in-range" : "") @(IsToday(d.Date) ? "dp-day--today" : "")"
+                        @onclick="() => SelectDate(d.Date)">
+                    @d.Date.Day
+                </button>
             }
+        </div>
 
-            <div class="dp-footer">
-                <button type="button" class="dp-btn-cancel" @onclick="Close">Batal</button>
-                <button type="button" class="dp-btn-select" @onclick="Apply">Pilih Tanggal</button>
+        @if (IsRangeMode && (rangeStart.HasValue || rangeEnd.HasValue))
+        {
+            <div class="dp-range-label">
+                <span>Terpilih: @(rangeStart?.ToString("dd MMM") ?? "...") - @(rangeEnd?.ToString("dd MMM yyyy") ?? "...")</span>
             </div>
+        }
+
+        <div class="dp-footer">
+            <button type="button" class="dp-btn-cancel" @onclick="Close">Batal</button>
+            <button type="button" class="dp-btn-select" @onclick="Apply">Pilih Tanggal</button>
         </div>
     </div>
 }
