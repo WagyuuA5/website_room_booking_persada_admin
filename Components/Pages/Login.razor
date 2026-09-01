@@ -1,92 +1,122 @@
 @page "/login"
 @layout booking_room_admin.Components.Layout.EmptyLayout
 @inject booking_room_admin.Components.Services.AuthService AuthService
+@inject booking_room_admin.Components.Services.ToastService Toast
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Services
 
-<div class="login-container @(isSuccess ? "login-success" : "")">
-    <div class="login-left">
-        <div class="login-hero">
-            <div class="hero-overlay"></div>
-            <img src="FOTO GEDEUNG PERSADA.png" alt="Gedung Persada" class="hero-bg" />
-            <div class="hero-content">
-                <img src="logo-persada.png" alt="PT PERSADA" class="hero-logo" />
-                <h1 class="hero-title">Sistem Manajemen<br/>Ruangan & Pemesanan</h1>
-                <p class="hero-subtitle">Kelola dan jadwalkan fasilitas ruang rapat dengan mudah, efisien, dan terintegrasi penuh untuk seluruh operasional PT PERSADA.</p>
-            </div>
-        </div>
+<div class="login-wrapper @(isSuccess ? "transition-to-dashboard" : "")">
+    @* Background Image & Overlay *@
+    <div class="login-bg-container @(isSuccess ? "bg-zoom-out" : "")">
+        <img src="FOTO GEDEUNG PERSADA.png" alt="Gedung PT PERSADA" class="login-bg-img" />
+        <div class="login-bg-overlay"></div>
     </div>
-    
-    <div class="login-right">
-        <div class="login-form-container">
-            <div class="login-header">
-                <h2>Selamat Datang</h2>
-                <p>Silakan masuk ke akun Anda</p>
+
+    @* Header: Logo PERSADA (Kiri Atas) *@
+    <header class="login-topbar">
+        <img src="logo-persada.png" alt="Logo PT PERSADA" class="persada-logo" />
+    </header>
+
+    @* Center Content: Login Card *@
+    <main class="login-main">
+        <div class="login-card @(cardShake ? "card-shake" : "") @(isSuccess ? "card-exit" : "")">
+            <div class="card-header">
+                <h1 class="card-title">Masuk</h1>
+                <p class="card-subtitle">Sistem Manajemen Ruangan & Pemesanan</p>
             </div>
 
-            <form @onsubmit="HandleLogin" class="login-form">
-                @if (!string.IsNullOrEmpty(errorMessage))
+            <form @onsubmit="HandleSubmit" class="login-form" novalidate>
+                @* Server-side Error Banner *@
+                @if (!string.IsNullOrEmpty(serverErrorMessage))
                 {
-                    <div class="alert-error">
+                    <div class="server-error-banner" role="alert">
                         <Icon Name="alert-circle" Size="18" />
-                        <span>@errorMessage</span>
+                        <span>@serverErrorMessage</span>
                     </div>
                 }
 
+                @* Field 1: Email *@
                 <div class="form-group">
-                    <label for="email">Alamat Email</label>
-                    <div class="input-icon-wrap">
+                    <label for="email" class="form-label">Email</label>
+                    <div class="input-wrap">
                         <Icon Name="mail" Size="18" class="input-icon" />
-                        <input type="email" id="email" @bind="email" @bind:event="oninput" placeholder="contoh@ptpersada.co.id" class="form-input @(emailError ? "input-error" : "")" />
+                        <input type="email"
+                               id="email"
+                               class="form-input @(emailError != null ? "input-error shake-field" : "")"
+                               placeholder="nama@ptpersada.co.id"
+                               @bind="email"
+                               @bind:event="oninput"
+                               @onblur="ValidateEmailOnBlur"
+                               autocomplete="username" />
                     </div>
-                    @if (emailError)
+                    @if (emailError != null)
                     {
-                        <span class="error-text">Format email tidak valid atau kosong.</span>
+                        <span class="field-error-text">@emailError</span>
                     }
                 </div>
 
+                @* Field 2: Kata Sandi *@
                 <div class="form-group">
-                    <label for="password">Kata Sandi</label>
-                    <div class="input-icon-wrap">
+                    <label for="password" class="form-label">Kata Sandi</label>
+                    <div class="input-wrap">
                         <Icon Name="lock" Size="18" class="input-icon" />
-                        <input type="@(showPassword ? "text" : "password")" id="password" @bind="password" @bind:event="oninput" placeholder="Masukkan kata sandi" class="form-input @(passwordError ? "input-error" : "")" />
-                        <button type="button" class="btn-toggle-pass" @onclick="TogglePassword">
+                        <input type="@(showPassword ? "text" : "password")"
+                               id="password"
+                               class="form-input @(passwordError != null ? "input-error shake-field" : "")"
+                               placeholder="Masukkan kata sandi"
+                               @bind="password"
+                               @bind:event="oninput"
+                               @onblur="ValidatePasswordOnBlur"
+                               autocomplete="current-password" />
+                        <button type="button"
+                                class="btn-toggle-visibility"
+                                @onclick="TogglePasswordVisibility"
+                                aria-label="@(showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi")"
+                                title="@(showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi")">
                             <Icon Name="@(showPassword ? "eye-off" : "eye")" Size="18" />
                         </button>
                     </div>
-                    @if (passwordError)
+                    @if (passwordError != null)
                     {
-                        <span class="error-text">Kata sandi minimal 8 karakter.</span>
+                        <span class="field-error-text">@passwordError</span>
                     }
                 </div>
 
+                @* Options: Ingat Saya & Lupa Kata Sandi *@
                 <div class="form-options">
-                    <label class="remember-me">
+                    <label class="remember-option">
                         <input type="checkbox" @bind="rememberMe" />
                         <span>Ingat saya</span>
                     </label>
-                    <a href="#" class="forgot-link">Lupa kata sandi?</a>
+                    <a href="javascript:void(0)" @onclick="HandleForgotPassword" class="forgot-link">Lupa Kata Sandi?</a>
                 </div>
 
-                <button type="submit" class="btn-login @(isLoading ? "loading" : "")" disabled="@isLoading">
-                    @if (isLoading)
+                @* Submit Button *@
+                <button type="submit" class="btn-submit @(isLoading ? "is-loading" : "") @(showSuccessCheck ? "is-success" : "")" disabled="@(isLoading || isSuccess)">
+                    @if (showSuccessCheck)
                     {
-                        <span class="spinner"></span>
-                        <span>Memverifikasi...</span>
+                        <Icon Name="check" Size="18" />
+                        <span>Berhasil</span>
+                    }
+                    else if (isLoading)
+                    {
+                        <span class="spinner-sm"></span>
+                        <span>Memproses...</span>
                     }
                     else
                     {
-                        <span>Masuk ke Sistem</span>
+                        <span>Masuk</span>
                     }
                 </button>
             </form>
-            
-            <div class="login-footer">
+
+            <div class="card-footer">
                 <p>2026 &copy; PT PERSADA. Seluruh hak cipta dilindungi.</p>
             </div>
         </div>
-    </div>
+    </main>
 </div>
 
 @code {
@@ -94,13 +124,15 @@
     private string password = "";
     private bool rememberMe = false;
     private bool showPassword = false;
-    
+
+    private string? emailError = null;
+    private string? passwordError = null;
+    private string? serverErrorMessage = null;
+
     private bool isLoading = false;
+    private bool showSuccessCheck = false;
     private bool isSuccess = false;
-    
-    private bool emailError = false;
-    private bool passwordError = false;
-    private string errorMessage = "";
+    private bool cardShake = false;
 
     protected override void OnInitialized()
     {
@@ -110,52 +142,144 @@
         }
     }
 
-    private void TogglePassword()
+    private void TogglePasswordVisibility()
     {
         showPassword = !showPassword;
     }
 
-    private async Task HandleLogin()
+    private void ValidateEmailOnBlur()
     {
-        // Reset errors
-        emailError = false;
-        passwordError = false;
-        errorMessage = "";
-
-        // Client-side validation
-        if (string.IsNullOrWhiteSpace(email) || !email.Contains("@"))
+        if (!string.IsNullOrEmpty(email))
         {
-            emailError = true;
+            ValidateEmailField();
         }
-        if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
+    }
+
+    private void ValidatePasswordOnBlur()
+    {
+        if (!string.IsNullOrEmpty(password))
         {
-            passwordError = true;
+            ValidatePasswordField();
+        }
+    }
+
+    private bool ValidateEmailField()
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            emailError = "Email wajib diisi.";
+            return false;
         }
 
-        if (emailError || passwordError)
+        // Standard email regex format validation
+        var emailRegex = new System.Text.RegularExpressions.Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+        if (!emailRegex.IsMatch(email.Trim()))
         {
+            emailError = "Format email tidak valid.";
+            return false;
+        }
+
+        emailError = null;
+        return true;
+    }
+
+    private bool ValidatePasswordField()
+    {
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            passwordError = "Kata sandi wajib diisi.";
+            return false;
+        }
+
+        if (password.Length < 8)
+        {
+            passwordError = "Kata sandi minimal 8 karakter.";
+            return false;
+        }
+
+        passwordError = null;
+        return true;
+    }
+
+    private async Task HandleSubmit()
+    {
+        serverErrorMessage = null;
+
+        // 1. Client-side Validation (Bagian 2.1)
+        bool isEmailValid = ValidateEmailField();
+        bool isPasswordValid = ValidatePasswordField();
+
+        if (!isEmailValid || !isPasswordValid)
+        {
+            // Trigger quick card shake on validation failure
+            TriggerCardShake();
             return;
         }
 
         isLoading = true;
-        
-        // Server-side validation simulation
-        bool success = await AuthService.LoginAsync(email, password);
-        
-        isLoading = false;
+        StateHasChanged();
 
-        if (success)
+        try
         {
-            isSuccess = true;
-            StateHasChanged();
-            
-            // Wait for transition animation
-            await Task.Delay(500); 
-            NavigationManager.NavigateTo("/dashboard");
+            // 2. Server-side Authentication (Bagian 2.2)
+            var result = await AuthService.AuthenticateAsync(email.Trim(), password);
+
+            if (result.Type == AuthResultType.Success)
+            {
+                isLoading = false;
+                showSuccessCheck = true;
+                StateHasChanged();
+
+                // Show checkmark briefly (~300ms)
+                await Task.Delay(300);
+
+                // Start transition animation (card fade-out + bg zoom-out)
+                isSuccess = true;
+                StateHasChanged();
+
+                // Allow 350ms for transition animation before navigating (total ~650ms)
+                await Task.Delay(350);
+                NavigationManager.NavigateTo("/dashboard");
+            }
+            else if (result.Type == AuthResultType.ConnectionFailed)
+            {
+                isLoading = false;
+                // Connection failure goes to InfoToast / Toast as per requirement
+                Toast.Error(result.ErrorMessage ?? "Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+                TriggerCardShake();
+            }
+            else
+            {
+                isLoading = false;
+                // Invalid credentials or Inactive account banner
+                serverErrorMessage = result.ErrorMessage ?? "Email atau kata sandi salah.";
+                TriggerCardShake();
+            }
         }
-        else
+        catch
         {
-            errorMessage = "Kombinasi email dan kata sandi salah.";
+            isLoading = false;
+            Toast.Error("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+            TriggerCardShake();
         }
+    }
+
+    private void TriggerCardShake()
+    {
+        cardShake = true;
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(350);
+            await InvokeAsync(() =>
+            {
+                cardShake = false;
+                StateHasChanged();
+            });
+        });
+    }
+
+    private void HandleForgotPassword()
+    {
+        Toast.Info("Tautan pengaturan ulang kata sandi dapat diminta melalui administrator IT PT PERSADA.");
     }
 }

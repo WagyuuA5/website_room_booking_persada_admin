@@ -11,6 +11,13 @@
         <DateFilter OnDateSelectedCallback="HandleDateChanged" />
     </RightSlot>
 </TopBar>
+
+@if (isPageLoading)
+{
+    <SkeletonPage Variant="full" />
+}
+else
+{
 <div class="dashboard">
     @* -- Bagian 1: Ringkasan Statistik -- *@
     <div class="stats-grid">
@@ -264,6 +271,7 @@
         </div>
     </div>
 </div>
+}
 
 @* ==========================================
    MODAL DAFTAR RINGKASAN PERMINTAAN (Level 1)
@@ -694,6 +702,7 @@
     private ITRequestData? selectedITDetail;
     private HistoryBookingItem? selectedHistoryBooking;
 
+    private bool isPageLoading = true;
     private bool showTrendExport;
     private bool showDonutExport;
     private bool showHistoryExport;
@@ -702,11 +711,13 @@
     private List<ExportColumn> _donutColumns = new();
     private List<ExportColumn> _historyColumns = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         InitData();
         InitCharts();
         InitExportColumns();
+        await Task.Delay(350);
+        isPageLoading = false;
     }
 
     private void InitExportColumns()
