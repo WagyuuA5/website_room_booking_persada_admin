@@ -56,7 +56,7 @@
             @* 3. Jadwalkan Blokir Berulang *@
             <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="chkRepeatBlock" @bind="isRecurring" style="width: 16px; height: 16px; accent-color: #0B1E39;" />
+                    <input type="checkbox" id="chkRepeatBlock" @bind="isRecurring" @bind:after="StateHasChanged" style="width: 16px; height: 16px; accent-color: #0B1E39; cursor: pointer;" />
                     <label for="chkRepeatBlock" style="font-size: 0.85rem; font-weight: 600; color: #1D1D1F; cursor: pointer;">
                         Jadwalkan Blokir Berulang
                     </label>
@@ -73,7 +73,7 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div class="ab-field" style="display: flex; flex-direction: column; gap: 4px;">
                             <label style="font-size: 0.8rem; font-weight: 600; color: #1D1D1F;">Ulangi Setiap</label>
-                            <select class="ab-input" style="padding: 0.4rem 0.6rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" @bind="recurringPattern">
+                            <select class="ab-input" style="padding: 0.4rem 0.6rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" @bind="recurringPattern" @bind:after="StateHasChanged">
                                 <option value="Hari">Hari (setiap hari)</option>
                                 <option value="Minggu">Minggu (hari yang sama)</option>
                                 <option value="Bulan">Bulan (tanggal yang sama)</option>
@@ -84,30 +84,30 @@
                             @if (endMode == "count")
                             {
                                 <div style="display: flex; align-items: center; gap: 6px;">
-                                    <input type="number" class="ab-input" style="width: 70px; padding: 0.4rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" min="1" max="24" @bind="repeatCount" />
+                                    <input type="number" class="ab-input" style="width: 70px; padding: 0.4rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" min="1" max="24" @bind="repeatCount" @bind:event="oninput" @bind:after="StateHasChanged" />
                                     <span style="font-size: 0.82rem; color: #4B5563;">@GetRepeatUnitLabel() ke depan</span>
                                 </div>
                             }
                             else
                             {
-                                <input type="date" class="ab-input" style="padding: 0.4rem 0.6rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" @bind="endDate" />
+                                <input type="date" class="ab-input" style="padding: 0.4rem 0.6rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.82rem;" @bind="endDate" @bind:after="StateHasChanged" />
                             }
                         </div>
                     </div>
 
                     <div style="display: flex; gap: 16px; font-size: 0.8rem;">
                         <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #374151;">
-                            <input type="radio" name="endMode" value="count" checked="@(endMode == "count")" @onchange='() => endMode = "count"' style="accent-color: #0B1E39;" />
+                            <input type="radio" name="endMode" value="count" checked="@(endMode == "count")" @onchange='() => { endMode = "count"; StateHasChanged(); }' style="accent-color: #0B1E39;" />
                             Setelah jumlah tertentu
                         </label>
                         <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #374151;">
-                            <input type="radio" name="endMode" value="date" checked="@(endMode == "date")" @onchange='() => endMode = "date"' style="accent-color: #0B1E39;" />
+                            <input type="radio" name="endMode" value="date" checked="@(endMode == "date")" @onchange='() => { endMode = "date"; StateHasChanged(); }' style="accent-color: #0B1E39;" />
                             Pada tanggal tertentu
                         </label>
                     </div>
                     
                     <div style="font-size: 0.78rem; color: #0369A1; background: #E0F2FE; padding: 10px 12px; border-radius: 6px; border-left: 4px solid #0284C7; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;">
-                        <Icon Name="refresh-cw" Size="14" style="margin-top: 2px; flex-shrink: 0;" />
+                        <Icon Name="refresh-cw" Size="14" CssClass="flex-shrink-0" style="margin-top: 2px;" />
                         <span>Ruangan ini akan diblokir setiap <strong>@recurringPattern.ToLower()</strong>, dimulai <strong>@blockDate.ToString("dd MMMM yyyy")</strong> hingga <strong>@GetEndDateDisplay()</strong> (total <strong>@GetTotalSessions() sesi</strong>).</span>
                     </div>
                 </div>

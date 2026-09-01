@@ -1,6 +1,6 @@
 @namespace booking_room_admin.Components.Shared
 
-<span class="status-badge @GetBadgeClass()">@GetLabel()</span>
+<span class="status-badge @GetBadgeClass()" @attributes="AdditionalAttributes">@GetLabel()</span>
 
 @code {
     /// <summary>Status key: pending, approved, confirmed, rejected, preparing, fulfilled, ready, active, inactive, baru, diproses, selesai, cancelled, declined, maintenance</summary>
