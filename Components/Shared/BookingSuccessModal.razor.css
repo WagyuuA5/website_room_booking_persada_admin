@@ -1,4 +1,4 @@
-﻿.bs-container {
+.bs-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -43,7 +43,7 @@
 
 .bs-title {
     font-size: 1.35rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-ink-900, #14171F);
     margin: 0 0 0.4rem 0;
 }
@@ -86,7 +86,7 @@
 
 .bs-room-name {
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-ink-900, #14171F);
 }
 

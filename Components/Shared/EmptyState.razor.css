@@ -23,7 +23,7 @@
 
 .empty-state-title {
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
     margin: 0;
     letter-spacing: 0.02em;

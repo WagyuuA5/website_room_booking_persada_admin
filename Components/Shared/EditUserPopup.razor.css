@@ -15,7 +15,7 @@
 
 .eu-title {
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #111827;
     margin: 0;
 }
@@ -48,7 +48,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 1rem;
     flex-shrink: 0;
 }
@@ -61,7 +61,7 @@
 
 .eu-identity-name {
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #111827;
 }
 
@@ -108,7 +108,7 @@
 
 .eu-section-title {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.05em;

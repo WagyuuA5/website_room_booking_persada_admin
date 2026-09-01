@@ -1,11 +1,24 @@
 window.applyThemeMode = function (isDark) {
+    var theme = isDark ? 'dark' : 'light';
+    try {
+        localStorage.setItem('persada-theme', theme);
+        localStorage.setItem('theme-mode', theme);
+    } catch(e) {}
+
     if (isDark) {
         document.body.classList.add('dark');
         document.documentElement.classList.add('dark');
+        document.body.setAttribute('data-theme', 'dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
     } else {
         document.body.classList.remove('dark');
         document.documentElement.classList.remove('dark');
+        document.body.setAttribute('data-theme', 'light');
+        document.documentElement.setAttribute('data-theme', 'light');
     }
+
+    // Trigger custom event for charts or components that need to refresh colors
+    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: isDark, theme: theme } }));
 };
 
 window.initSidebarDrag = function (dotNetRef) {

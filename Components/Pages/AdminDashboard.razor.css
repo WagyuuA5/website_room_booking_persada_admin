@@ -58,7 +58,7 @@
 
 .stat-value {
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-strong);
     line-height: 1;
 }
@@ -79,7 +79,7 @@
 
 .section-title {
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-strong);
     margin: 0;
 }
@@ -152,7 +152,7 @@
     align-items: center;
     justify-content: center;
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 600;
     flex-shrink: 0;
 }
 
@@ -164,7 +164,7 @@
 
 .summary-card-body h2 {
     font-size: 1.75rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-strong);
     margin: 0;
     line-height: 1;
@@ -172,7 +172,7 @@
 
 .summary-status {
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-muted);
     letter-spacing: 0.05em;
 }
@@ -201,7 +201,7 @@
 
 .chart-header h3 {
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-strong);
     margin: 0;
 }
@@ -259,7 +259,7 @@
 
 .table-title {
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-strong);
     margin: 0 0 2px 0;
 }
@@ -281,7 +281,7 @@
     align-items: center;
     gap: 4px;
     font-size: 0.78rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-primary, #0B1E39);
     text-decoration: none;
     letter-spacing: 0.02em;
@@ -313,7 +313,7 @@
 
 .mini-table-header-cell {
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.04em;
     color: var(--text-subtle, #6B7280);
     text-transform: uppercase;
@@ -488,13 +488,13 @@
 
 .custom-card-title {
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-strong);
 }
 
 .custom-card-id {
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-muted);
     background: var(--surface-alt, #F3F4F6);
     padding: 1px 6px;
@@ -544,7 +544,7 @@
 
 .modal-detail-title {
     font-size: 1.15rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--text-strong);
     margin: 0;
     line-height: 1.2;
@@ -581,7 +581,7 @@
 
 .modal-user-name {
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-strong);
 }
 
@@ -616,7 +616,7 @@
 
 .modal-section-label {
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.04em;
     color: var(--text-muted);
 }
@@ -635,7 +635,7 @@
 
 .badge-urgency {
     font-size: 0.7rem;
-    font-weight: 800;
+    font-weight: 600;
     padding: 3px 8px;
     border-radius: 999px;
     letter-spacing: 0.05em;
@@ -665,7 +665,7 @@
 
 .admin-box-title {
     font-size: 0.78rem;
-    font-weight: 800;
+    font-weight: 600;
     color: #1D4ED8;
     letter-spacing: 0.04em;
     margin: 0;
@@ -788,7 +788,7 @@ body.dark .admin-textarea-input {
     background: rgba(15, 23, 42, 0.85);
     color: #FFFFFF;
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: 600;
     padding: 4px 10px;
     border-radius: 999px;
     display: inline-flex;
@@ -816,7 +816,7 @@ body.dark .admin-textarea-input {
 .bdm-user-name {
     display: block;
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-strong);
 }
 
@@ -846,7 +846,7 @@ body.dark .admin-textarea-input {
     align-items: center;
     gap: 0.35rem;
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--text-muted);

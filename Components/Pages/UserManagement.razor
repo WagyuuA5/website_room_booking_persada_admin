@@ -321,7 +321,7 @@
                 
                 @* Info Pengguna Target *@
                 <div style="background: #F3F4F6; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: @GetAvatarColor(userToDelete.FullName); color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: @GetAvatarColor(userToDelete.FullName); color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;">
                         @userToDelete.Initials
                     </div>
                     <div>
@@ -357,7 +357,7 @@
                     <div style="color: #EF4444; font-size: 13px; line-height: 1.4;">Data pengguna dan riwayat terkait akan dihapus secara permanen.</div>
                     
                     <div style="margin-top: 4px;">
-                        <label style="font-size: 11px; font-weight: 700; color: #7F1D1D; text-transform: uppercase; margin-bottom: 4px; display: block;">Ketik nama "<span style="color:#B91C1C;">@userToDelete.FullName</span>" untuk konfirmasi:</label>
+                        <label style="font-size: 11px; font-weight: 600; color: #7F1D1D; text-transform: uppercase; margin-bottom: 4px; display: block;">Ketik nama "<span style="color:#B91C1C;">@userToDelete.FullName</span>" untuk konfirmasi:</label>
                         <input type="text"
                                class="form-input @(!string.IsNullOrEmpty(confirmDeleteName) && confirmDeleteName != userToDelete.FullName ? "is-invalid" : "")"
                                style="width: 100%; border-color: #FCA5A5; background: #FFF;"

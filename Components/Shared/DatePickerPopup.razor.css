@@ -37,7 +37,7 @@
 
 .dp-month-title {
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
 }
 
@@ -104,13 +104,13 @@
 
 .dp-day--today {
     border: 1.5px solid var(--color-brand-yellow, #F2B705);
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .dp-day--selected {
     background: var(--color-primary, #0B1E39) !important;
     color: #FFFFFF !important;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .dp-day--in-range {

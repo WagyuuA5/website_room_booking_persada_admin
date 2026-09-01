@@ -79,7 +79,7 @@
     justify-content: center;
     cursor: pointer;
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 600;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     backdrop-filter: blur(4px);
     transition: all 0.15s ease;
@@ -143,7 +143,7 @@
     padding: 8px;
     color: #64748B;
     font-size: 0.65rem;
-    font-weight: 800;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     pointer-events: none;
@@ -173,7 +173,7 @@
     background: #0B1E39;
     color: #FACC15;
     font-size: 0.65rem;
-    font-weight: 800;
+    font-weight: 600;
     padding: 2px 8px;
     border-radius: 6px;
     white-space: nowrap;
@@ -246,7 +246,7 @@
     background: rgba(15, 23, 42, 0.85);
     color: #FFFFFF;
     font-size: 0.68rem;
-    font-weight: 700;
+    font-weight: 600;
     padding: 2px 8px;
     border-radius: 999px;
     white-space: nowrap;
@@ -371,7 +371,7 @@ body.dark .lbm-meta strong {
     padding: 0.4rem 1rem;
     border-radius: 8px;
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: 600;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     z-index: 20;
     border: 1px solid var(--color-border, #E2E8F0);

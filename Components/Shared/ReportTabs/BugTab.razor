@@ -30,7 +30,7 @@
                             <span class="tab-breakdown-value">@item.Value%</span>
                         </div>
                         <div class="tab-breakdown-bar">
-                            <div class="tab-breakdown-fill" style="width: @($"{item.Value}%")"></div>
+                            <div class="tab-breakdown-fill" style="width: @($"{item.Value}%"); background: var(--color-accent, #2563EB);"></div>
                         </div>
                     </div>
                 }
@@ -59,12 +59,12 @@
                     @foreach (var row in _tableData)
                     {
                         <tr>
-                            <td><span class="td-primary">@row.Id</span></td>
+                            <td><span class="td-primary" style="font-family: monospace; font-weight: 500;">#@row.Id</span></td>
                             <td><span class="td-primary">@row.Name</span></td>
-                            <td>@row.Module</td>
-                            <td><span class="badge @GetSeverityClass(row.Severity)">@GetSeverityLabel(row.Severity)</span></td>
-                            <td>@row.Assigned</td>
-                            <td><span class="badge @GetStatusClass(row.Status)">@GetStatusLabel(row.Status)</span></td>
+                            <td><span class="td-secondary">@row.Module</span></td>
+                            <td><StatusBadge Status="@row.Severity" /></td>
+                            <td><span class="td-secondary">@row.Assigned</span></td>
+                            <td><StatusBadge Status="@row.Status" /></td>
                         </tr>
                     }
                 </tbody>
@@ -94,60 +94,28 @@
         _chartOptions = new ApexChartOptions<ChartPoint>
         {
             Chart = new Chart { Type = ChartType.Bar, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false } },
-            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "55%", BorderRadius = 4 } },
-            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } },
-            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } } },
-            Grid = new Grid { BorderColor = "#e5e7eb", StrokeDashArray = 4 },
-            Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 }
+            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "48%", BorderRadius = 6 } },
+            Colors = new List<string> { "#2563EB" },
+            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } } },
+            Grid = new Grid { BorderColor = "rgba(226, 232, 240, 0.6)", StrokeDashArray = 3 }
         };
     }
 
     private List<BreakdownItem> _breakdown = new()
     {
-        new BreakdownItem { Name = "Halaman Booking", Value = 32 },
-        new BreakdownItem { Name = "Login/Autentikasi", Value = 18 },
+        new BreakdownItem { Name = "Halaman Pemesanan", Value = 32 },
+        new BreakdownItem { Name = "Login & Autentikasi", Value = 18 },
         new BreakdownItem { Name = "Profil Pengguna", Value = 15 },
-        new BreakdownItem { Name = "Mesin Laporan", Value = 12 },
+        new BreakdownItem { Name = "Ekspor Laporan", Value = 12 },
         new BreakdownItem { Name = "Lainnya", Value = 23 }
     };
 
     private List<TableRow> _tableData = new()
     {
-        new TableRow { Id = "BUG-001", Name = "Dewi Kartika", Module = "Halaman Booking", Severity = "critical", Assigned = "Ahmad Fauzi", Status = "open" },
-        new TableRow { Id = "BUG-002", Name = "Budi Santoso", Module = "Login/Autentikasi", Severity = "high", Assigned = "Siti Nurhaliza", Status = "in_progress" },
-        new TableRow { Id = "BUG-003", Name = "Rizky Hidayat", Module = "Profil Pengguna", Severity = "medium", Assigned = "Maya Putri", Status = "resolved" }
-    };
-
-    private string GetSeverityClass(string severity) => severity switch
-    {
-        "critical" => "badge-rejected",
-        "high" => "badge-forwarded",
-        "medium" => "badge-pending",
-        _ => "badge-pending"
-    };
-
-    private string GetSeverityLabel(string severity) => severity switch
-    {
-        "critical" => "Kritis",
-        "high" => "Tinggi",
-        "medium" => "Sedang",
-        _ => severity
-    };
-
-    private string GetStatusClass(string status) => status switch
-    {
-        "open" => "badge-rejected",
-        "in_progress" => "badge-progress",
-        "resolved" => "badge-approved",
-        _ => "badge-pending"
-    };
-
-    private string GetStatusLabel(string status) => status switch
-    {
-        "open" => "Terbuka",
-        "in_progress" => "Dikerjakan",
-        "resolved" => "Selesai",
-        _ => status
+        new TableRow { Id = "BUG-001", Name = "Dewi Kartika", Module = "Halaman Pemesanan", Severity = "kritis", Assigned = "Ahmad Fauzi", Status = "terbuka" },
+        new TableRow { Id = "BUG-002", Name = "Budi Santoso", Module = "Login & Autentikasi", Severity = "tinggi", Assigned = "Siti Nurhaliza", Status = "dikerjakan" },
+        new TableRow { Id = "BUG-003", Name = "Rizky Hidayat", Module = "Profil Pengguna", Severity = "sedang", Assigned = "Maya Putri", Status = "selesai" }
     };
 
     public class ChartPoint

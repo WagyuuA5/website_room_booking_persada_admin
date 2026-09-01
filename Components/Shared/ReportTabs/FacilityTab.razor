@@ -30,7 +30,7 @@
                             <span class="tab-breakdown-value">@item.Value%</span>
                         </div>
                         <div class="tab-breakdown-bar">
-                            <div class="tab-breakdown-fill" style="width: @($"{item.Value}%")"></div>
+                            <div class="tab-breakdown-fill" style="width: @($"{item.Value}%"); background: var(--color-accent, #2563EB);"></div>
                         </div>
                     </div>
                 }
@@ -47,23 +47,23 @@
             <table class="tab-table">
                 <thead>
                     <tr>
-                        <th>ID PERMINTAAN</th>
-                        <th>PEMOHON</th>
-                        <th>DIVISI</th>
-                        <th>JENIS BARANG</th>
-                        <th>DITUGASKAN KE</th>
-                        <th>STATUS</th>
+                        <th>ID Permintaan</th>
+                        <th>Pemohon</th>
+                        <th>Divisi</th>
+                        <th>Jenis Barang</th>
+                        <th>Ditugaskan ke</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var row in _tableData)
                     {
                         <tr>
-                            <td><span class="td-primary" style="font-family: monospace; font-weight: 700;">#@row.Id</span></td>
+                            <td><span class="td-primary" style="font-family: monospace; font-weight: 500;">#@row.Id</span></td>
                             <td><span class="td-primary">@row.Name</span></td>
                             <td><span class="td-secondary">@row.Department</span></td>
                             <td><span class="td-primary">@row.Type</span></td>
-                            <td>@row.Assigned</td>
+                            <td><span class="td-secondary">@row.Assigned</span></td>
                             <td><StatusBadge Status="@row.Status" /></td>
                         </tr>
                     }
@@ -94,45 +94,27 @@
         _chartOptions = new ApexChartOptions<ChartPoint>
         {
             Chart = new Chart { Type = ChartType.Bar, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false } },
-            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "55%", BorderRadius = 4 } },
-            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } },
-            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } } },
-            Grid = new Grid { BorderColor = "#e5e7eb", StrokeDashArray = 4 },
-            Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 }
+            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "48%", BorderRadius = 6 } },
+            Colors = new List<string> { "#2563EB" },
+            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } } },
+            Grid = new Grid { BorderColor = "rgba(226, 232, 240, 0.6)", StrokeDashArray = 3 }
         };
     }
 
     private List<BreakdownItem> _breakdown = new()
     {
-        new BreakdownItem { Name = "Katering", Value = 45 },
-        new BreakdownItem { Name = "Peralatan AV", Value = 28 },
-        new BreakdownItem { Name = "Furnitur", Value = 18 },
+        new BreakdownItem { Name = "Katering & Konsumsi", Value = 45 },
+        new BreakdownItem { Name = "Peralatan AV & Proyektor", Value = 28 },
+        new BreakdownItem { Name = "Furnitur & Kursi", Value = 18 },
         new BreakdownItem { Name = "Lainnya", Value = 9 }
     };
 
     private List<TableRow> _tableData = new()
     {
-        new TableRow { Id = "FR-001", Name = "Ahmad Fauzi", Department = "Eksekutif", Type = "Katering (Kotak Makan Siang)", Assigned = "Budi Santoso", Status = "processing" },
-        new TableRow { Id = "FR-002", Name = "Siti Nurhaliza", Department = "Produk", Type = "AV (Pemasangan Proyektor)", Assigned = "Dewi Kartika", Status = "new" },
-        new TableRow { Id = "FR-003", Name = "Rizky Hidayat", Department = "Pengadaan", Type = "Furnitur (Kursi Tambahan)", Assigned = "Belum Ditugaskan", Status = "completed" }
-    };
-
-    private string GetStatusClass(string status) => status switch
-    {
-        "processing" => "badge-progress",
-        "new" => "badge-pending",
-        "completed" => "badge-approved",
-        "forwarded" => "badge-forwarded",
-        _ => "badge-pending"
-    };
-
-    private string GetStatusLabel(string status) => status switch
-    {
-        "processing" => "Diproses",
-        "new" => "Baru",
-        "completed" => "Selesai",
-        "forwarded" => "Diteruskan",
-        _ => status
+        new TableRow { Id = "FR-001", Name = "Ahmad Fauzi", Department = "Eksekutif", Type = "Katering (Kotak Makan Siang)", Assigned = "Budi Santoso", Status = "diproses" },
+        new TableRow { Id = "FR-002", Name = "Siti Nurhaliza", Department = "Produk", Type = "AV (Pemasangan Proyektor)", Assigned = "Dewi Kartika", Status = "baru" },
+        new TableRow { Id = "FR-003", Name = "Rizky Hidayat", Department = "Pengadaan", Type = "Furnitur (Kursi Tambahan)", Assigned = "Belum Ditugaskan", Status = "selesai" }
     };
 
     public class ChartPoint

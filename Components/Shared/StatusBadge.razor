@@ -24,15 +24,16 @@
         if (!string.IsNullOrEmpty(CustomLabel)) return CustomLabel;
         if (!string.IsNullOrEmpty(Text)) return Text;
 
-        return EffectiveStatus.ToLowerInvariant() switch
+        return EffectiveStatus.ToLowerInvariant().Trim() switch
         {
             "pending" or "menunggu" => "Menunggu",
-            "approved" or "confirmed" or "disetujui" => "Disetujui",
+            "approved" or "disetujui" => "Disetujui",
+            "confirmed" or "dikonfirmasi" => "Dikonfirmasi",
             "rejected" or "rejected_admin" or "ditolak" => "Ditolak",
             "rejected_system" => "Ditolak Sistem",
             "declined" => "Ditolak",
-            "preparing" or "diproses" => "Diproses",
-            "fulfilled" or "selesai" => "Selesai",
+            "processing" or "preparing" or "diproses" => "Diproses",
+            "completed" or "fulfilled" or "resolved" or "selesai" => "Selesai",
             "ready" or "siap" => "Siap",
             "active" or "aktif" => "Aktif",
             "inactive" or "tidak aktif" => "Tidak Aktif",
@@ -42,18 +43,25 @@
             "overdue" or "terlambat" => "Terlambat",
             "tersedia" or "available" => "Tersedia",
             "diblokir" or "blocked" => "Diblokir",
+            "open" or "terbuka" => "Terbuka",
+            "in_progress" or "dikerjakan" => "Dikerjakan",
+            "forwarded" or "diteruskan" => "Diteruskan",
+            "critical" or "kritis" => "Kritis",
+            "high" or "tinggi" => "Tinggi",
+            "medium" or "sedang" => "Sedang",
             _ => EffectiveStatus
         };
     }
 
     private string GetBadgeClass()
     {
-        return EffectiveStatus.ToLowerInvariant() switch
+        return EffectiveStatus.ToLowerInvariant().Trim() switch
         {
-            "baru" or "new" or "info" => "badge-info",
-            "pending" or "menunggu" or "preparing" or "diproses" or "maintenance" or "perawatan" or "draft" => "badge-warning",
-            "approved" or "confirmed" or "disetujui" or "active" or "aktif" or "selesai" or "fulfilled" or "ready" or "siap" or "tersedia" or "available" => "badge-success",
-            "rejected" or "rejected_admin" or "rejected_system" or "declined" or "ditolak" or "cancelled" or "dibatalkan" or "overdue" or "terlambat" or "inactive" or "tidak aktif" or "diblokir" or "blocked" => "badge-danger",
+            "baru" or "new" => "badge-accent",
+            "processing" or "preparing" or "diproses" or "info" or "forwarded" or "diteruskan" or "medium" or "sedang" => "badge-info",
+            "pending" or "menunggu" or "in_progress" or "dikerjakan" or "maintenance" or "perawatan" or "draft" or "high" or "tinggi" => "badge-warning",
+            "approved" or "disetujui" or "confirmed" or "dikonfirmasi" or "active" or "aktif" or "completed" or "fulfilled" or "resolved" or "selesai" or "ready" or "siap" or "tersedia" or "available" => "badge-success",
+            "rejected" or "rejected_admin" or "rejected_system" or "declined" or "ditolak" or "cancelled" or "dibatalkan" or "overdue" or "terlambat" or "inactive" or "tidak aktif" or "diblokir" or "blocked" or "open" or "terbuka" or "critical" or "kritis" => "badge-danger",
             _ => "badge-neutral"
         };
     }

@@ -1,41 +1,74 @@
 .status-badge {
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    padding: 0.2rem 0.55rem;
-    border-radius: 999px;
+    font-size: var(--font-badge-size, 12px);
+    font-weight: var(--font-badge-weight, 500);
+    letter-spacing: 0.01em;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-pill, 999px);
     display: inline-block;
     white-space: nowrap;
     line-height: 1.4;
 }
 
-.badge-pending {
-    background: #FEF3C7;
-    color: #92400E;
+.badge-success {
+    background: var(--color-success-soft, #ECFDF5);
+    color: var(--color-success, #16A34A);
 }
 
-.badge-confirmed {
-    background: #D1FAE5;
-    color: #065F46;
+.badge-warning {
+    background: var(--color-warning-soft, #FFFBEB);
+    color: var(--color-warning, #D97706);
 }
 
-.badge-rejected {
-    background: #FEE2E2;
-    color: #991B1B;
+.badge-danger {
+    background: var(--color-danger-soft, #FEF2F2);
+    color: var(--color-danger, #DC2626);
 }
 
-.badge-progress {
-    background: #DBEAFE;
-    color: #1E40AF;
+.badge-info {
+    background: var(--color-info-soft, #F0F9FF);
+    color: var(--color-info, #0284C7);
 }
 
-.badge-maintenance {
-    background: #FED7AA;
-    color: #9A3412;
+.badge-accent,
+.badge-primary {
+    background: var(--color-accent-soft, #EFF6FF);
+    color: var(--color-accent, #2563EB);
 }
 
 .badge-neutral {
-    background: #F3F4F6;
-    color: #4B5563;
+    background: var(--color-surface-alt, #F1F5F9);
+    color: var(--color-text-secondary, #64748B);
 }
+
+/* Legacy class compatibility */
+.badge-pending {
+    background: var(--color-warning-soft, #FFFBEB);
+    color: var(--color-warning, #D97706);
+}
+
+.badge-confirmed,
+.badge-approved {
+    background: var(--color-success-soft, #ECFDF5);
+    color: var(--color-success, #16A34A);
+}
+
+.badge-rejected {
+    background: var(--color-danger-soft, #FEF2F2);
+    color: var(--color-danger, #DC2626);
+}
+
+.badge-progress {
+    background: var(--color-info-soft, #F0F9FF);
+    color: var(--color-info, #0284C7);
+}
+
+.badge-forwarded {
+    background: var(--color-accent-soft, #EFF6FF);
+    color: var(--color-accent, #2563EB);
+}
+
+.badge-maintenance {
+    background: var(--color-warning-soft, #FFFBEB);
+    color: var(--color-warning, #D97706);
+}
+

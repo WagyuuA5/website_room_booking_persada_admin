@@ -37,7 +37,7 @@
 
 .topbar-title {
     font-size: 1.15rem;
-    font-weight: 800;
+    font-weight: 600;
     color: #1E293B;
     margin: 0;
     line-height: 1.2;
@@ -162,7 +162,7 @@
     background: #EF4444;
     color: #fff;
     font-size: 0.6rem;
-    font-weight: 700;
+    font-weight: 600;
     width: 1rem;
     height: 1rem;
     border-radius: 50%;

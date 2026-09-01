@@ -11,8 +11,8 @@
     <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
         <div>
             <div style="display: flex; align-items: center; gap: 10px;">
-                <h1 style="font-size: 1.75rem; font-weight: 800; color: #0B1E39; margin: 0; letter-spacing: -0.02em;">Audit Log</h1>
-                <span style="background: #F3F4F6; color: #6B7280; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; border: 1px solid #E5E7EB; text-transform: uppercase; letter-spacing: 0.05em;">Read-Only</span>
+                <h1 style="font-size: 1.75rem; font-weight: 600; color: #0B1E39; margin: 0; letter-spacing: -0.02em;">Audit Log</h1>
+                <span style="background: #F3F4F6; color: #6B7280; font-size: 0.72rem; font-weight: 600; padding: 3px 8px; border-radius: 6px; border: 1px solid #E5E7EB; text-transform: uppercase; letter-spacing: 0.05em;">Read-Only</span>
             </div>
             <p style="font-size: 0.88rem; color: #6B7280; margin: 4px 0 0 0;">Riwayat seluruh aktivitas admin pada sistem — permanen, terenkripsi, dan tidak dapat diubah.</p>
         </div>
@@ -83,8 +83,8 @@
                 <Icon Name="clock" Size="22" />
             </div>
             <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">Aktivitas Periode Ini</span>
-                <span style="font-size: 1.4rem; font-weight: 800; color: #0B1E39; margin-top: 2px;">@FilteredLogs.Count() <span style="font-size: 0.85rem; font-weight: 600; color: #6B7280;">Log</span></span>
+                <span style="font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">Aktivitas Periode Ini</span>
+                <span style="font-size: 1.4rem; font-weight: 600; color: #0B1E39; margin-top: 2px;">@FilteredLogs.Count() <span style="font-size: 0.85rem; font-weight: 600; color: #6B7280;">Log</span></span>
             </div>
         </div>
 
@@ -94,8 +94,8 @@
                 <Icon Name="bar-chart-2" Size="22" />
             </div>
             <div style="display: flex; flex-direction: column; overflow: hidden;">
-                <span style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">Aksi Terbanyak</span>
-                <span style="font-size: 1.1rem; font-weight: 800; color: #0B1E39; margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                <span style="font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">Aksi Terbanyak</span>
+                <span style="font-size: 1.1rem; font-weight: 600; color: #0B1E39; margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
                     @TopActionSummary.Name
                 </span>
                 <span style="font-size: 0.75rem; color: #059669; font-weight: 600;">(@TopActionSummary.Count kali dilakukan)</span>
@@ -108,8 +108,8 @@
                 <Icon Name="user-check" Size="22" />
             </div>
             <div style="display: flex; flex-direction: column; overflow: hidden;">
-                <span style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">Aktor Teraktif</span>
-                <span style="font-size: 1.1rem; font-weight: 800; color: #0B1E39; margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                <span style="font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">Aktor Teraktif</span>
+                <span style="font-size: 1.1rem; font-weight: 600; color: #0B1E39; margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
                     @TopActorSummary.Name
                 </span>
                 <span style="font-size: 0.75rem; color: #7C3AED; font-weight: 600;">(@TopActorSummary.Count aktivitas)</span>
@@ -130,11 +130,11 @@
                 </colgroup>
                 <thead style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB; position: sticky; top: 0; z-index: 2;">
                     <tr>
-                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">WAKTU</th>
-                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">AKTOR</th>
-                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">AKSI</th>
-                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">TARGET</th>
-                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">DETAIL</th>
+                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">WAKTU</th>
+                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">AKTOR</th>
+                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">AKSI</th>
+                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">TARGET</th>
+                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">DETAIL</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -162,14 +162,14 @@
                                 
                                 @* Kolom 1: WAKTU (2 baris: Tanggal bold + Jam regular tanpa detik) *@
                                 <td style="padding: 14px 20px; vertical-align: middle;">
-                                    <div style="font-size: 13px; font-weight: 700; color: #111827; line-height: 1.2;">@log.Timestamp.ToString("dd MMM yyyy")</div>
+                                    <div style="font-size: 13px; font-weight: 600; color: #111827; line-height: 1.2;">@log.Timestamp.ToString("dd MMM yyyy")</div>
                                     <div style="font-size: 12px; color: #6B7280; margin-top: 3px;">@log.Timestamp.ToString("HH:mm") WIB</div>
                                 </td>
 
                                 @* Kolom 2: AKTOR (Avatar 32px + Nama bold) *@
                                 <td style="padding: 14px 20px; vertical-align: middle;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
-                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: @log.ActorBg; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: @log.ActorBg; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0;">
                                             @log.ActorInitials
                                         </div>
                                         <span style="font-size: 14px; font-weight: 600; color: #111827; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">@log.ActorName</span>
@@ -179,7 +179,7 @@
                                 @* Kolom 3: AKSI (Badge warna final terkunci di 9.4 + margin-right 24px) *@
                                 <td style="padding: 14px 20px; vertical-align: middle;">
                                     <div style="display: inline-block; margin-right: 24px;">
-                                        <span style="display: inline-block; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; white-space: nowrap; background: @GetActionBadgeBg(log.ActionType); color: @GetActionBadgeColor(log.ActionType);">
+                                        <span style="display: inline-block; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; white-space: nowrap; background: @GetActionBadgeBg(log.ActionType); color: @GetActionBadgeColor(log.ActionType);">
                                             @log.ActionType
                                         </span>
                                     </div>
@@ -192,7 +192,7 @@
                                         {
                                             var split = log.TargetName.Split(new[] { "(#" }, StringSplitOptions.None);
                                             <span>@split[0]</span>
-                                            <span style="color: #0284C7; font-size: 13px; font-weight: 700;">(#@split[1]</span>
+                                            <span style="color: #0284C7; font-size: 13px; font-weight: 600;">(#@split[1]</span>
                                         }
                                         else
                                         {
@@ -219,7 +219,7 @@
                                     <div style="width: 56px; height: 56px; border-radius: 50%; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
                                         <Icon Name="inbox" Size="28" />
                                     </div>
-                                    <span style="font-size: 1rem; font-weight: 700; color: #111827; margin-top: 4px;">Tidak ada aktivitas yang ditemukan</span>
+                                    <span style="font-size: 1rem; font-weight: 600; color: #111827; margin-top: 4px;">Tidak ada aktivitas yang ditemukan</span>
                                     <span style="font-size: 0.85rem; color: #6B7280; max-width: 360px;">Coba ubah kata kunci pencarian atau filter yang digunakan.</span>
                                     <button type="button" class="btn-outline-pill" style="margin-top: 8px; font-size: 0.82rem; padding: 6px 16px;" @onclick="ResetAllFilters">
                                         Reset Filter
@@ -268,7 +268,7 @@
                         if (pageNum == 1 || pageNum == TotalPages || (pageNum >= currentPage - 1 && pageNum <= currentPage + 1))
                         {
                             <button type="button"
-                                    style="width: 32px; height: 32px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; border: 1px solid @(currentPage == pageNum ? "#0B1E39" : "#E5E7EB"); background: @(currentPage == pageNum ? "#0B1E39" : "#FFFFFF"); color: @(currentPage == pageNum ? "#FFFFFF" : "#374151"); cursor: pointer; transition: all 0.15s ease;"
+                                    style="width: 32px; height: 32px; border-radius: 6px; font-size: 0.82rem; font-weight: 600; border: 1px solid @(currentPage == pageNum ? "#0B1E39" : "#E5E7EB"); background: @(currentPage == pageNum ? "#0B1E39" : "#FFFFFF"); color: @(currentPage == pageNum ? "#FFFFFF" : "#374151"); cursor: pointer; transition: all 0.15s ease;"
                                     @onclick="() => currentPage = pageNum">
                                 @pageNum
                             </button>
@@ -307,11 +307,11 @@
 
                 @* 2. Card Identitas Aktor (Avatar 48px + Nama bold + Role) *@
                 <div style="display: flex; align-items: center; gap: 14px; background: #F3F4F6; padding: 14px 16px; border-radius: 10px;">
-                    <div style="width: 48px; height: 48px; border-radius: 50%; background: @selectedLogForDetail.ActorBg; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; flex-shrink: 0;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: @selectedLogForDetail.ActorBg; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; flex-shrink: 0;">
                         @selectedLogForDetail.ActorInitials
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 2px;">
-                        <span style="font-size: 15px; font-weight: 700; color: #0B1E39;">@selectedLogForDetail.ActorName</span>
+                        <span style="font-size: 15px; font-weight: 600; color: #0B1E39;">@selectedLogForDetail.ActorName</span>
                         <span style="font-size: 12px; color: #6B7280;">Admin Sistem &middot; Hak Akses Penuh</span>
                     </div>
                 </div>
@@ -319,22 +319,22 @@
                 @* 3. Badge Aksi (Versi lebih besar 13px font) & Target *@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
-                        <span style="font-size: 0.72rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">JENIS AKSI</span>
+                        <span style="font-size: 0.72rem; font-weight: 600; color: #6B7280; text-transform: uppercase;">JENIS AKSI</span>
                         <div>
-                            <span style="display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 700; text-transform: uppercase; background: @GetActionBadgeBg(selectedLogForDetail.ActionType); color: @GetActionBadgeColor(selectedLogForDetail.ActionType);">
+                            <span style="display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; text-transform: uppercase; background: @GetActionBadgeBg(selectedLogForDetail.ActionType); color: @GetActionBadgeColor(selectedLogForDetail.ActionType);">
                                 @selectedLogForDetail.ActionType
                             </span>
                         </div>
                     </div>
                     <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 4px;">
-                        <span style="font-size: 0.72rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">TARGET / ENTITAS</span>
+                        <span style="font-size: 0.72rem; font-weight: 600; color: #6B7280; text-transform: uppercase;">TARGET / ENTITAS</span>
                         <strong style="font-size: 14px; color: #111827; margin-top: 2px;">@selectedLogForDetail.TargetName</strong>
                     </div>
                 </div>
 
                 @* 4. Detail Lengkap (Paragraf penuh) *@
                 <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 6px;">
-                    <span style="font-size: 0.72rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">DETAIL LENGKAP</span>
+                    <span style="font-size: 0.72rem; font-weight: 600; color: #6B7280; text-transform: uppercase;">DETAIL LENGKAP</span>
                     <p style="margin: 0; font-size: 0.88rem; color: #374151; line-height: 1.6;">@selectedLogForDetail.Detail</p>
                 </div>
 
@@ -342,7 +342,7 @@
                 <div style="border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden;">
                     <div style="padding: 10px 14px; background: #F9FAFB; display: flex; align-items: center; justify-content: space-between; cursor: pointer;"
                          @onclick="() => showTechnicalMeta = !showTechnicalMeta">
-                        <span style="font-size: 0.78rem; font-weight: 700; color: #4B5563; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 0.78rem; font-weight: 600; color: #4B5563; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
                             <Icon Name="terminal" Size="14" /> Metadata Teknis
                         </span>
                         <Icon Name="@(showTechnicalMeta ? "chevron-up" : "chevron-down")" Size="14" style="color: #6B7280;" />
@@ -352,7 +352,7 @@
                         <div style="padding: 12px 14px; background: #FFFFFF; font-size: 0.8rem; color: #64748B; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid #E5E7EB;">
                             <div><strong>IP Address:</strong> @selectedLogForDetail.IpAddress</div>
                             <div><strong>Perangkat / User Agent:</strong> @selectedLogForDetail.UserAgent</div>
-                            <div><strong>Status Eksekusi:</strong> <span style="color: #16A34A; font-weight: 700;">200 OK (Berhasil)</span></div>
+                            <div><strong>Status Eksekusi:</strong> <span style="color: #16A34A; font-weight: 600;">200 OK (Berhasil)</span></div>
                         </div>
                     }
                 </div>

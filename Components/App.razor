@@ -7,10 +7,26 @@
     <base href="/" />
     <ResourcePreloader />
     <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
+    <link rel="stylesheet" href="@Assets["css/design-tokens.css"]" />
+    <link rel="stylesheet" href="@Assets["css/typography-tokens.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["booking_room_admin.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="icon_psd.png" />
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('persada-theme') || localStorage.getItem('theme-mode');
+                if (theme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 

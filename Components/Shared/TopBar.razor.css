@@ -58,9 +58,9 @@ body.dark .topbar-glass-nav.scrolled {
 }
 
 .topbar-page-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text-strong, #0B1E39);
+    font-size: var(--font-page-title-size, 1.5rem);
+    font-weight: var(--font-page-title-weight, 600);
+    color: var(--color-text-primary, #0B1E39);
     margin: 0;
     line-height: 1.2;
     letter-spacing: -0.02em;
@@ -187,7 +187,7 @@ body.dark .topbar-glass-nav.scrolled {
     background: var(--color-danger, #DC2626);
     color: #FFFFFF;
     font-size: 0.65rem;
-    font-weight: 700;
+    font-weight: 600;
     width: 16px;
     height: 16px;
     border-radius: 50%;
@@ -221,7 +221,7 @@ body.dark .topbar-glass-nav.scrolled {
 
 .admin-name {
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
     line-height: 1.2;
 }

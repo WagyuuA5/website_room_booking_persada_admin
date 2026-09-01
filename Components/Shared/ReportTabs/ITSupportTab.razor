@@ -30,7 +30,7 @@
                             <span class="tab-breakdown-value">@item.Value%</span>
                         </div>
                         <div class="tab-breakdown-bar">
-                            <div class="tab-breakdown-fill" style="width: @($"{item.Value}%")"></div>
+                            <div class="tab-breakdown-fill" style="width: @($"{item.Value}%"); background: var(--color-accent, #2563EB);"></div>
                         </div>
                     </div>
                 }
@@ -59,12 +59,12 @@
                     @foreach (var row in _tableData)
                     {
                         <tr>
-                            <td><span class="td-primary">@row.Id</span></td>
+                            <td><span class="td-primary" style="font-family: monospace; font-weight: 500;">#@row.Id</span></td>
                             <td><span class="td-primary">@row.Name</span></td>
-                            <td>@row.Department</td>
-                            <td>@row.Category</td>
-                            <td>@row.Assigned</td>
-                            <td><span class="badge @GetStatusClass(row.Status)">@GetStatusLabel(row.Status)</span></td>
+                            <td><span class="td-secondary">@row.Department</span></td>
+                            <td><span class="td-primary">@row.Category</span></td>
+                            <td><span class="td-secondary">@row.Assigned</span></td>
+                            <td><StatusBadge Status="@row.Status" /></td>
                         </tr>
                     }
                 </tbody>
@@ -94,11 +94,11 @@
         _chartOptions = new ApexChartOptions<ChartPoint>
         {
             Chart = new Chart { Type = ChartType.Bar, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false } },
-            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "55%", BorderRadius = 4 } },
-            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } },
-            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } } },
-            Grid = new Grid { BorderColor = "#e5e7eb", StrokeDashArray = 4 },
-            Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 }
+            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "48%", BorderRadius = 6 } },
+            Colors = new List<string> { "#2563EB" },
+            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } } },
+            Grid = new Grid { BorderColor = "rgba(226, 232, 240, 0.6)", StrokeDashArray = 3 }
         };
     }
 
@@ -106,31 +106,15 @@
     {
         new BreakdownItem { Name = "Perangkat Lunak", Value = 42 },
         new BreakdownItem { Name = "Perangkat Keras", Value = 28 },
-        new BreakdownItem { Name = "Jaringan", Value = 18 },
+        new BreakdownItem { Name = "Jaringan & Internet", Value = 18 },
         new BreakdownItem { Name = "Akses Akun", Value = 12 }
     };
 
     private List<TableRow> _tableData = new()
     {
-        new TableRow { Id = "IT-001", Name = "Ahmad Fauzi", Department = "Eksekutif", Category = "Reset Kata Sandi", Assigned = "Dewi Kartika", Status = "in_progress" },
-        new TableRow { Id = "IT-002", Name = "Budi Santoso", Department = "HRD", Category = "Perangkat Keras", Assigned = "Rizky Hidayat", Status = "resolved" },
-        new TableRow { Id = "IT-003", Name = "Maya Putri", Department = "Marketing", Category = "Jaringan", Assigned = "Belum Ditugaskan", Status = "pending" }
-    };
-
-    private string GetStatusClass(string status) => status switch
-    {
-        "in_progress" => "badge-progress",
-        "resolved" => "badge-approved",
-        "pending" => "badge-pending",
-        _ => "badge-pending"
-    };
-
-    private string GetStatusLabel(string status) => status switch
-    {
-        "in_progress" => "Dikerjakan",
-        "resolved" => "Selesai",
-        "pending" => "Menunggu",
-        _ => status
+        new TableRow { Id = "IT-001", Name = "Ahmad Fauzi", Department = "Eksekutif", Category = "Reset Kata Sandi", Assigned = "Dewi Kartika", Status = "dikerjakan" },
+        new TableRow { Id = "IT-002", Name = "Budi Santoso", Department = "Human Resources", Category = "Perangkat Keras", Assigned = "Rizky Hidayat", Status = "selesai" },
+        new TableRow { Id = "IT-003", Name = "Maya Putri", Department = "Marketing", Category = "Jaringan", Assigned = "Belum Ditugaskan", Status = "menunggu" }
     };
 
     public class ChartPoint

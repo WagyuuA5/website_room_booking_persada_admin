@@ -47,21 +47,21 @@
             <table class="tab-table">
                 <thead>
                     <tr>
-                        <th>ID PEMESANAN</th>
-                        <th>PEMOHON</th>
-                        <th>DIVISI</th>
-                        <th>RUANGAN</th>
-                        <th>STATUS</th>
+                        <th>ID Pemesanan</th>
+                        <th>Pemohon</th>
+                        <th>Divisi</th>
+                        <th>Ruangan</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var row in _tableData)
                     {
                         <tr class="tab-table-row">
-                            <td><span class="td-primary" style="font-family: monospace; font-weight: 700;">#@row.Id</span></td>
+                            <td><span class="td-primary" style="font-family: monospace; font-weight: 500;">#@row.Id</span></td>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="width: 28px; height: 28px; border-radius: 50%; background: @row.AvatarBg; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700;">
+                                    <div style="width: 28px; height: 28px; border-radius: 50%; background: @row.AvatarBg; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 500;">
                                         @row.Initials
                                     </div>
                                     <span class="td-primary">@row.Name</span>
@@ -98,18 +98,18 @@
 
     private List<BreakdownItem> _breakdown = new()
     {
-        new BreakdownItem { Name = "Ruang Dirantara", Value = 35, BarColor = "#1E3A8A" },
-        new BreakdownItem { Name = "Ruang Rapat A", Value = 28, BarColor = "#2563EB" },
-        new BreakdownItem { Name = "Ruang Diskusi", Value = 22, BarColor = "#3B82F6" },
-        new BreakdownItem { Name = "Ruang Rapat B", Value = 15, BarColor = "#60A5FA" }
+        new BreakdownItem { Name = "Ruang Dirantara VIP", Value = 35, BarColor = "var(--color-accent, #2563EB)" },
+        new BreakdownItem { Name = "Ruang Rapat Utama", Value = 28, BarColor = "rgba(37, 99, 235, 0.8)" },
+        new BreakdownItem { Name = "Ruang Diskusi B", Value = 22, BarColor = "rgba(37, 99, 235, 0.6)" },
+        new BreakdownItem { Name = "Auditorium Serbaguna", Value = 15, BarColor = "rgba(37, 99, 235, 0.4)" }
     };
 
     private List<TableRow> _tableData = new()
     {
-        new TableRow { Id = "BK-001", Name = "Ahmad Fauzi", Initials = "AF", AvatarBg = "#2563EB", Department = "IT & Digital", Room = "Ruang Dirantara", Status = "approved" },
-        new TableRow { Id = "BK-002", Name = "Siti Nurhaliza", Initials = "SN", AvatarBg = "#7C3AED", Department = "Produk & Desain", Room = "Ruang Rapat A", Status = "pending" },
-        new TableRow { Id = "BK-003", Name = "Budi Santoso", Initials = "BS", AvatarBg = "#16A34A", Department = "Operasional", Room = "Ruang Diskusi", Status = "approved" },
-        new TableRow { Id = "BK-004", Name = "Rani Anggraini", Initials = "RA", AvatarBg = "#D97706", Department = "Keuangan", Room = "Ruang Training", Status = "rejected" }
+        new TableRow { Id = "BK-001", Name = "Ahmad Fauzi", Initials = "AF", AvatarBg = "#2563EB", Department = "IT & Digital", Room = "Ruang Dirantara VIP", Status = "disetujui" },
+        new TableRow { Id = "BK-002", Name = "Siti Nurhaliza", Initials = "SN", AvatarBg = "#7C3AED", Department = "Produk & Desain", Room = "Ruang Rapat Utama", Status = "menunggu" },
+        new TableRow { Id = "BK-003", Name = "Budi Santoso", Initials = "BS", AvatarBg = "#16A34A", Department = "Operasional", Room = "Ruang Diskusi B", Status = "disetujui" },
+        new TableRow { Id = "BK-004", Name = "Rani Anggraini", Initials = "RA", AvatarBg = "#D97706", Department = "Keuangan", Room = "Auditorium Serbaguna", Status = "ditolak" }
     };
 
     protected override void OnInitialized()
@@ -117,12 +117,11 @@
         _chartOptions = new ApexChartOptions<ChartPoint>
         {
             Chart = new Chart { Type = ChartType.Bar, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 600 }, Toolbar = new Toolbar { Show = false } },
-            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "50%", BorderRadius = 6 } },
-            Colors = new List<string> { "#1E3A8A" },
-            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "600", FontSize = "12px" } } },
-            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "600", FontSize = "12px" } } } },
-            Grid = new Grid { BorderColor = "#E5E7EB", StrokeDashArray = 4 },
-            Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 }
+            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "48%", BorderRadius = 6 } },
+            Colors = new List<string> { "#2563EB" },
+            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } } },
+            Grid = new Grid { BorderColor = "rgba(226, 232, 240, 0.6)", StrokeDashArray = 3 }
         };
     }
 
@@ -137,7 +136,7 @@
     {
         public string Name { get; set; } = string.Empty;
         public int Value { get; set; }
-        public string BarColor { get; set; } = "#1E3A8A";
+        public string BarColor { get; set; } = "#2563EB";
     }
 
     private class TableRow

@@ -15,7 +15,7 @@
 
 .au-title {
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #111827;
     margin: 0;
 }
@@ -41,7 +41,7 @@
 
 .au-section-title {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -62,7 +62,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 1.25rem;
     flex-shrink: 0;
 }
@@ -71,7 +71,7 @@
     background: none;
     border: none;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #2563eb;
     cursor: pointer;
     text-transform: uppercase;

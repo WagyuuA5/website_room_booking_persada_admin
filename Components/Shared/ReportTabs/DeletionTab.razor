@@ -14,7 +14,7 @@
                 <ApexPointSeries TItem="ChartPoint"
                                  Items="_chartData"
                                  Name="Permintaan"
-                                 SeriesType="SeriesType.Line"
+                                 SeriesType="SeriesType.Area"
                                  XValue="e => e.Label"
                                  YValue="e => e.Value" />
             </ApexChart>
@@ -30,7 +30,7 @@
                             <span class="tab-breakdown-value">@item.Value</span>
                         </div>
                         <div class="tab-breakdown-bar">
-                            <div class="tab-breakdown-fill" style="width: @($"{item.Percent}%")"></div>
+                            <div class="tab-breakdown-fill" style="width: @($"{item.Percent}%"); background: var(--color-accent, #2563EB);"></div>
                         </div>
                     </div>
                 }
@@ -41,7 +41,7 @@
     <div class="tab-table-section">
         <div class="tab-table-header">
             <h3>Permintaan Penghapusan Akun</h3>
-            <a href="#" class="tab-table-link">Lihat Semua</a>
+            <a href="user-management" class="tab-table-link">Lihat Semua</a>
         </div>
         <div class="tab-table-wrapper">
             <table class="tab-table">
@@ -59,12 +59,12 @@
                     @foreach (var row in _tableData)
                     {
                         <tr>
-                            <td><span class="td-primary">@row.Id</span></td>
+                            <td><span class="td-primary" style="font-family: monospace; font-weight: 500;">#@row.Id</span></td>
                             <td><span class="td-primary">@row.Name</span></td>
-                            <td>@row.Department</td>
-                            <td>@row.Reason</td>
-                            <td>@row.Approver</td>
-                            <td><span class="badge @GetStatusClass(row.Status)">@GetStatusLabel(row.Status)</span></td>
+                            <td><span class="td-secondary">@row.Department</span></td>
+                            <td><span class="td-secondary">@row.Reason</span></td>
+                            <td><span class="td-secondary">@row.Approver</span></td>
+                            <td><StatusBadge Status="@row.Status" /></td>
                         </tr>
                     }
                 </tbody>
@@ -93,44 +93,29 @@
     {
         _chartOptions = new ApexChartOptions<ChartPoint>
         {
-            Chart = new Chart { Type = ChartType.Line, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false } },
-            Stroke = new Stroke { Curve = Curve.Smooth, Width = 3 },
-            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } },
-            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "600" } } } },
-            Grid = new Grid { BorderColor = "#e5e7eb", StrokeDashArray = 4 },
-            Theme = new Theme { Mode = Mode.Light, Palette = PaletteType.Palette1 }
+            Chart = new Chart { Type = ChartType.Area, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false } },
+            Stroke = new Stroke { Curve = Curve.Smooth, Width = 2.5 },
+            Colors = new List<string> { "#2563EB" },
+            Fill = new Fill { Type = new List<FillType> { FillType.Gradient }, Gradient = new FillGradient { ShadeIntensity = 1, OpacityFrom = 0.35, OpacityTo = 0.05, Stops = new List<double> { 0, 90, 100 } } },
+            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } } },
+            Grid = new Grid { BorderColor = "rgba(226, 232, 240, 0.6)", StrokeDashArray = 3 }
         };
     }
 
     private List<BreakdownItem> _breakdown = new()
     {
-        new BreakdownItem { Name = "Divisi IT", Value = 42 },
-        new BreakdownItem { Name = "Divisi HR", Value = 28 },
-        new BreakdownItem { Name = "Keuangan", Value = 15 },
-        new BreakdownItem { Name = "Pemasaran", Value = 12 }
+        new BreakdownItem { Name = "Divisi IT & Digital", Value = 42, Percent = 55 },
+        new BreakdownItem { Name = "Divisi Human Resources", Value = 28, Percent = 36 },
+        new BreakdownItem { Name = "Divisi Finance", Value = 15, Percent = 20 },
+        new BreakdownItem { Name = "Divisi Marketing", Value = 12, Percent = 15 }
     };
 
     private List<TableRow> _tableData = new()
     {
-        new TableRow { Id = "AD-001", Name = "Budi Santoso", Department = "HRD", Reason = "Pengunduran Diri", Approver = "Siti Nurhaliza", Status = "approved" },
-        new TableRow { Id = "AD-002", Name = "Maya Putri", Department = "Marketing", Reason = "Kontrak Berakhir", Approver = "Ahmad Fauzi", Status = "pending" },
-        new TableRow { Id = "AD-003", Name = "Rizky Hidayat", Department = "Pengadaan", Reason = "Akun Duplikat", Approver = "Dewi Kartika", Status = "rejected" }
-    };
-
-    private string GetStatusClass(string status) => status switch
-    {
-        "approved" => "badge-approved",
-        "pending" => "badge-pending",
-        "rejected" => "badge-rejected",
-        _ => "badge-pending"
-    };
-
-    private string GetStatusLabel(string status) => status switch
-    {
-        "approved" => "Disetujui",
-        "pending" => "Menunggu",
-        "rejected" => "Ditolak",
-        _ => status
+        new TableRow { Id = "AD-001", Name = "Budi Santoso", Department = "Human Resources", Reason = "Pengunduran Diri", Approver = "Siti Nurhaliza", Status = "disetujui" },
+        new TableRow { Id = "AD-002", Name = "Maya Putri", Department = "Marketing", Reason = "Kontrak Berakhir", Approver = "Ahmad Fauzi", Status = "menunggu" },
+        new TableRow { Id = "AD-003", Name = "Rizky Hidayat", Department = "Operasional", Reason = "Akun Duplikat", Approver = "Dewi Kartika", Status = "ditolak" }
     };
 
     public class ChartPoint

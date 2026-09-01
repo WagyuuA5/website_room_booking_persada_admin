@@ -1,4 +1,4 @@
-﻿.avatar-uploader-wrapper {
+.avatar-uploader-wrapper {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -24,7 +24,7 @@
     align-items: center;
     justify-content: center;
     color: #ffffff;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.05em;
     user-select: none;
     box-shadow: var(--shadow-sm);

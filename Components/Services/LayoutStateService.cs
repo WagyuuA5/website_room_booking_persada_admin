@@ -35,7 +35,11 @@ public class LayoutStateService
     {
         try
         {
-            var storedTheme = await _js.InvokeAsync<string?>("localStorage.getItem", "theme-mode");
+            var storedTheme = await _js.InvokeAsync<string?>("localStorage.getItem", "persada-theme");
+            if (string.IsNullOrEmpty(storedTheme))
+            {
+                storedTheme = await _js.InvokeAsync<string?>("localStorage.getItem", "theme-mode");
+            }
             IsDarkMode = storedTheme == "dark";
 
             var storedSidebar = await _js.InvokeAsync<string?>("localStorage.getItem", "sidebar-collapsed");
@@ -106,6 +110,7 @@ public class LayoutStateService
         Notify();
         try
         {
+            _js.InvokeVoidAsync("localStorage.setItem", "persada-theme", IsDarkMode ? "dark" : "light");
             _js.InvokeVoidAsync("localStorage.setItem", "theme-mode", IsDarkMode ? "dark" : "light");
             _js.InvokeVoidAsync("applyThemeMode", IsDarkMode);
         }

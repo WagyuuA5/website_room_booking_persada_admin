@@ -1,4 +1,4 @@
-﻿.room-calendar-page {
+.room-calendar-page {
     padding: 1.5rem 2rem;
     max-width: 1440px;
     margin: 0 auto;
@@ -90,7 +90,7 @@
 
 .rc-current-date {
     font-size: 0.92rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-ink-900, #14171F);
     padding: 0 0.5rem;
 }
@@ -194,7 +194,7 @@
 
 .rc-room-title {
     font-size: 0.9rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-ink-900, #14171F);
 }
 
@@ -237,7 +237,7 @@
 
 .rc-event-title {
     font-size: 0.78rem;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -291,7 +291,7 @@
     padding: 0.75rem 0;
     text-align: center;
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-ink-500, #6B7080);
 }
 
@@ -317,7 +317,7 @@
 
 .rc-day-number {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-ink-700, #3D4250);
 }
 
@@ -371,7 +371,7 @@
 
 .summary-value {
     color: var(--color-ink-900, #14171F);
-    font-weight: 700;
+    font-weight: 600;
 }
 
 /* -- Calendar Modal Details -- */
@@ -394,7 +394,7 @@
 
 .cal-modal-title {
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-ink-900, #14171F);
     margin: 0 0 0.25rem 0;
 }
@@ -425,7 +425,7 @@
 
 .cal-label {
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--color-ink-500, #6B7080);
@@ -433,7 +433,7 @@
 
 .cal-val {
     font-size: 0.88rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-ink-900, #14171F);
 }
 

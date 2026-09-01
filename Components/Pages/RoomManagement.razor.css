@@ -21,7 +21,7 @@
 
 .rm-eyebrow {
     font-size: 0.8rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
     letter-spacing: 0.08em;
 }
@@ -95,7 +95,7 @@
     backdrop-filter: blur(4px);
     color: #FFFFFF;
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 600;
     padding: 4px 10px;
     border-radius: var(--radius-pill, 999px);
     display: inline-flex;
@@ -113,7 +113,7 @@
 
 .rm-card-name {
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-ink-900, #14171F);
     margin: 0;
 }
@@ -273,7 +273,7 @@
     border: none;
     color: var(--color-primary, #0B1E39);
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -296,7 +296,7 @@
     background: rgba(22, 163, 74, 0.9);
     color: #FFFFFF;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
     padding: 4px 10px;
     border-radius: 999px;
     backdrop-filter: blur(4px);
@@ -319,7 +319,7 @@
 
 .rm-detail-name {
     font-size: 1.4rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
     margin: 0;
 }
@@ -347,7 +347,7 @@
 
 .rm-section-label {
     font-size: 0.75rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--color-text-muted, #6E6E73);
     letter-spacing: 0.05em;
     margin: 0;
@@ -386,7 +386,7 @@
 
 .rm-label {
     font-size: 0.75rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--color-text-muted, #6E6E73);
     letter-spacing: 0.05em;
 }
@@ -481,7 +481,7 @@ input[type=number] {
     background: #FEF08A;
     border-color: #EAB308;
     color: #713F12;
-    font-weight: 700;
+    font-weight: 600;
     padding-right: 1.65rem;
 }
 
@@ -546,7 +546,7 @@ input[type=number] {
 
 .rm-modal-title {
     font-size: 1.2rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
     margin: 0;
 }
@@ -610,7 +610,7 @@ body.dark .rm-dropzone {
 
 .rm-amenity-icon-badge.more {
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 body.dark .rm-amenity-icon-badge {
@@ -686,7 +686,7 @@ body.dark .rm-delete-custom-amenity {
     padding: 0.35rem 0.65rem;
     border-radius: 20px;
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;

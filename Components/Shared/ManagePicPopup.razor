@@ -23,7 +23,7 @@
                         var activeCount = GetActiveAssignmentCount(pic);
                         <div class="pic-item" style="display: flex; align-items: center; justify-content: space-between; background: #F3F4F6; padding: 10px 12px; border-radius: 8px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #0B1E39; color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #0B1E39; color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px;">
                                     @(string.Join("", pic.Split(' ').Select(n => n[0])).ToUpperInvariant().Substring(0, Math.Min(2, pic.Split(' ').Length)))
                                 </div>
                                 <div style="display: flex; flex-direction: column;">

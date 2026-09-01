@@ -6,7 +6,7 @@
 
 .mb-popup-title {
     font-size: 1.25rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
     margin: 0;
 }
@@ -43,7 +43,7 @@
 
 .mb-label {
     font-size: 0.82rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
 }
 
@@ -117,7 +117,7 @@
 
 .mb-rc-badge {
     font-size: 0.65rem;
-    font-weight: 800;
+    font-weight: 600;
     padding: 2px 6px;
     border-radius: 4px;
 }
@@ -220,7 +220,7 @@
     background: var(--color-primary, #0B1E39);
     color: #fff;
     font-size: 0.68rem;
-    font-weight: 700;
+    font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -272,7 +272,7 @@
     background: var(--color-primary, #0B1E39);
     color: #fff;
     font-size: 0.6rem;
-    font-weight: 700;
+    font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -280,7 +280,7 @@
 
 .att-warn {
     color: var(--color-danger, #DC2626);
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .mb-att-del {

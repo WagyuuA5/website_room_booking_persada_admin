@@ -21,7 +21,7 @@
 
 .bm-eyebrow {
     font-size: 0.8rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
     letter-spacing: 0.08em;
 }
@@ -132,7 +132,7 @@
     font-size: 0.72rem;
     padding: 2px 7px;
     border-radius: 999px;
-    font-weight: 700;
+    font-weight: 600;
     background: var(--color-background, #F7F8FA);
     color: var(--color-text, #1D1D1F);
 }
@@ -168,7 +168,7 @@
 
 .bm-group-title {
     font-size: 0.75rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--color-text-muted, #6E6E73);
     letter-spacing: 0.08em;
     white-space: nowrap;
@@ -236,7 +236,7 @@
 
 .bm-start-time {
     font-size: 1.15rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
     line-height: 1.1;
 }
@@ -249,7 +249,7 @@
 
 .bm-duration-badge {
     font-size: 0.65rem;
-    font-weight: 700;
+    font-weight: 600;
     background: var(--color-background, #F7F8FA);
     border: 1px solid var(--color-border, #E5E7EB);
     color: var(--color-text-muted, #6E6E73);
@@ -269,7 +269,7 @@
 
 .bm-meeting-title {
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
     margin: 0;
     white-space: nowrap;
@@ -297,7 +297,7 @@
     height: 36px;
     border-radius: 50%;
     color: #FFFFFF;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 0.85rem;
     display: flex;
     align-items: center;
@@ -344,7 +344,7 @@
     height: 32px;
     border-radius: 50%;
     border: none;
-    font-weight: 700;
+    font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -396,7 +396,7 @@
 
 .bm-modal-title {
     font-size: 1.2rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--color-text-strong, #0B1E39);
     margin: 0 0 0.25rem 0;
 }
@@ -438,7 +438,7 @@
 
 .bm-section-title {
     font-size: 0.75rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--color-text-muted, #6E6E73);
     letter-spacing: 0.05em;
     margin: 0;
@@ -478,7 +478,7 @@
 
 .bm-box-label {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-muted, #6E6E73);
 }
 
@@ -494,7 +494,7 @@
     border-radius: 50%;
     color: #fff;
     font-size: 0.65rem;
-    font-weight: 700;
+    font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
