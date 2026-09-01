@@ -1,5 +1,5 @@
 # Glosarium Istilah UI Baku — PT PERSADA
-Sistem Manajemen Ruangan & Pemesanan
+### Sistem Manajemen Ruangan & Pemesanan
 
 Dokumen ini menjadi acuan baku penerjemahan dan pelabelan antarmuka pengguna (UI) agar konsisten 100% berbahasa Indonesia di seluruh modul aplikasi.
 
@@ -21,7 +21,8 @@ Dokumen ini menjadi acuan baku penerjemahan dan pelabelan antarmuka pengguna (UI
 | `Active` / `AKTIF` | **Aktif** | `--color-success` (`--color-success-soft`) | Akun, ruangan, atau fasilitas dalam status aktif. |
 | `Inactive` / `TIDAK AKTIF` | **Tidak Aktif** | `--color-danger` (`--color-danger-soft`) | Akun atau entri dinonaktifkan. |
 | `Cancelled` / `DIBATALKAN` | **Dibatalkan** | `--color-danger` (`--color-danger-soft`) | Sesi atau pesanan dibatalkan oleh pemohon. |
-| `Maintenance` / `PERAWATAN` | **Dalam Perawatan** | `--color-warning` (`--color-warning-soft`) | Ruangan atau fasilitas sedang pemeliharaan rutin. |
+| `Maintenance` / `PERAWATAN` | **Dalam Perawatan** / **Atur Pemeliharaan** | `--color-warning` (`--color-warning-soft`) | Ruangan atau fasilitas sedang pemeliharaan rutin. |
+| `Active Now` | **Aktif Sekarang** | `--color-success` (`--color-success-soft`) | Status sesi login perangkat yang sedang digunakan. |
 
 ---
 
@@ -32,13 +33,20 @@ Dokumen ini menjadi acuan baku penerjemahan dan pelabelan antarmuka pengguna (UI
 | `Submit` | **Kirim** | Tombol submit formulir, kirim tiket |
 | `Cancel` | **Batal** | Tombol pembatalan dialog/modal |
 | `Save` / `Save Changes` | **Simpan** / **Simpan Perubahan** | Formulir profil dan konfigurasi |
+| `Save Preferences` | **Simpan Preferensi** | Simpan preferensi notifikasi |
+| `Discard Changes` | **Batalkan Perubahan** | Batal ubah pengaturan |
 | `Edit` | **Ubah** / **Edit** | Tombol ubah data |
 | `Delete` | **Hapus** | Tombol hapus entri/akun |
-| `Search` | **Cari** | Placeholder kotak pencarian |
+| `Search` | **Cari** | Placeholder kotak pencarian ("Cari menu, pemesanan, atau pengguna...") |
 | `Export` / `Export Report` | **Ekspor** / **Ekspor Laporan** | Tombol unduh laporan CSV/Excel |
 | `Filter` / `Reset Filter` | **Filter** / **Reset Filter** (atau **Atur Ulang Filter**) | Kontrol pemfilteran tabel |
 | `Loading` / `Loading...` | **Memuat...** | State tunggu data |
-| `Read-only` | **Hanya-Baca** / **Arsip Permanen** | Label informasi audit log |
+| `READ-ONLY` | **HANYA BACA** | Badge informasi log audit sistem |
+| `ATUR MAINTENANCE` | **ATUR PEMELIHARAAN** | Aksi log audit / pemeliharaan ruangan |
+| `Revoke` | **Cabut Akses** | Tombol cabut sesi perangkat di Pengaturan |
+| `Log Out of All Other Sessions` | **Keluar dari Semua Sesi Lain** | Tombol putus seluruh login aktif lain |
+| `Verify` | **Verifikasi** | Tombol konfirmasi kode 2FA |
+| `Resend Code` | **Kirim Ulang** | Minta ulang kode OTP / 2FA |
 | `View All` | **Lihat Semua** | Tautan navigasi tabel |
 | `Back` | **Kembali** | Tombol kembali ke halaman sebelumnya |
 | `Download` | **Unduh** | Tombol download file/bukti |
@@ -57,10 +65,22 @@ Dokumen ini menjadi acuan baku penerjemahan dan pelabelan antarmuka pengguna (UI
 | `IT Support` | **Dukungan IT** |
 | `Bug Reports` | **Laporan Bug** |
 | `All Reports` | **Semua Aktivitas** |
-| `Audit Log` | **Log Audit Sistem** |
+| `Audit Log` | **Audit Log** / **Log Audit Sistem** |
 | `User Management` | **Manajemen Pengguna** |
 | `Dashboard` | **Dasbor** |
 | `Profile` | **Profil Pengguna** |
+| `Settings` | **Pengaturan** |
+| `Change Password` | **Ubah Kata Sandi** |
+| `2-Step Verification` | **PIN / Verifikasi 2 Langkah** |
+| `Active Sessions & Devices` | **Sesi & Perangkat Aktif** |
+| `Notifications` | **Notifikasi** |
+| `Language & Timezone` | **Bahasa & Zona Waktu** |
+| `Operational Hours & Booking Rules` | **Jam Operasional & Aturan Pemesanan** |
+| `Role Management & Permissions` | **Manajemen Peran & Hak Akses** |
+| `Calendar & Email Integration` | **Integrasi Kalender & Email** |
+| `Brand Logo & Colors` | **Logo & Warna Brand** |
+| `Support` | **Bantuan** |
+| `Logout` | **Keluar** |
 
 ---
 

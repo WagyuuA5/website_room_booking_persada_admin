@@ -1,256 +1,1062 @@
 @page "/settings"
+@page "/pengaturan"
 @layout booking_room_admin.Components.Layout.MainLayout
 @using booking_room_admin.Components.Shared
 @inject booking_room_admin.Components.Services.ToastService Toast
+@inject NavigationManager Navigation
 
-<TopBar Title="Pengaturan Sistem" Subtitle="Konfigurasi preferensi, jam operasional, dan kebijakan aplikasi pemesanan ruangan." />
+<TopBar Title="Pengaturan" Subtitle="Kelola keamanan, preferensi, dan konfigurasi sistem." />
 
-<div class="settings-page">
-    @* -- Segmented Tab Nav -- *@
-    <div class="settings-tabs-row">
-        <button type="button" class="settings-tab-btn @(activeTab == "general" ? "active" : "")" @onclick='() => activeTab = "general"'>
-            <Icon Name="sliders" Size="15" />
-            <span>Sistem & Operasional</span>
-        </button>
-        <button type="button" class="settings-tab-btn @(activeTab == "security" ? "active" : "")" @onclick='() => activeTab = "security"'>
-            <Icon Name="shield" Size="15" />
-            <span>Keamanan & Kata Sandi</span>
-        </button>
-        <button type="button" class="settings-tab-btn @(activeTab == "notifications" ? "active" : "")" @onclick='() => activeTab = "notifications"'>
-            <Icon Name="bell" Size="15" />
-            <span>Preferensi & Notifikasi</span>
-        </button>
-        <button type="button" class="settings-tab-btn @(activeTab == "appearance" ? "active" : "")" @onclick='() => activeTab = "appearance"'>
-            <Icon Name="palette" Size="15" />
-            <span>Tampilan & Brand</span>
-        </button>
-    </div>
-
-    @* -- Tab 1: Sistem & Operasional -- *@
-    @if (activeTab == "general")
+<div class="settings-page-wrapper">
+    @if (isPageLoading)
     {
-        <div class="settings-card">
-            <div class="card-header-clean">
-                <div>
-                    <h3 class="card-title"><Icon Name="clock" Size="18" /> Jam Operasional & Aturan Pemesanan</h3>
-                    <p class="card-desc">Tentukan batas waktu pemesanan ruangan dan durasi maksimal per sesi.</p>
-                </div>
-            </div>
-            <div class="card-form-grid">
-                <div class="form-group">
-                    <label class="form-label">Jam Buka Operasional</label>
-                    <input type="time" class="form-input" @bind="openTime" />
-                    <span class="form-help">Waktu paling awal ruangan dapat mulai dipesan.</span>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Jam Tutup Operasional</label>
-                    <input type="time" class="form-input" @bind="closeTime" />
-                    <span class="form-help">Batas akhir penggunaan ruangan setiap hari kerja.</span>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Durasi Maksimal Per Sesi (Jam)</label>
-                    <input type="number" class="form-input" min="1" max="12" @bind="maxDurationHours" />
-                    <span class="form-help">Mencegah monopoli ruangan oleh satu divisi.</span>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Batas Pemesanan di Muka (Hari)</label>
-                    <input type="number" class="form-input" min="1" max="60" @bind="advanceBookingDays" />
-                    <span class="form-help">Berapa hari sebelumnya user diizinkan reservasi.</span>
-                </div>
-            </div>
-
-            <div class="settings-divider"></div>
-
-            <div class="toggle-group-row">
-                <div class="toggle-text">
-                    <strong>Izinkan Pemesanan di Luar Jam Kerja</strong>
-                    <span>Memerlukan persetujuan khusus dari admin divisi.</span>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" @bind="allowAfterHours" />
-                    <span class="slider round"></span>
-                </label>
-            </div>
-
-            <div class="card-footer-action">
-                <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveSettings">
-                    <Icon Name="check" Size="14" />
-                    <span>Simpan Perubahan</span>
-                </button>
-            </div>
-        </div>
-    }
-    else if (activeTab == "security")
-    {
-        <div class="settings-card">
-            <div class="card-header-clean">
-                <div>
-                    <h3 class="card-title"><Icon Name="lock" Size="18" /> Ubah Kata Sandi Akun</h3>
-                    <p class="card-desc">Perbarui kata sandi secara berkala untuk menjaga keamanan akun Anda.</p>
-                </div>
-            </div>
-            <div class="card-form-grid" style="grid-template-columns: 1fr;">
-                <div class="form-group" style="max-width: 480px;">
-                    <label class="form-label">Kata Sandi Saat Ini</label>
-                    <input type="password" class="form-input" placeholder="Masukkan kata sandi lama" @bind="oldPassword" />
-                </div>
-                <div class="form-group" style="max-width: 480px;">
-                    <label class="form-label">Kata Sandi Baru</label>
-                    <input type="password" class="form-input" placeholder="Minimal 8 karakter dengan kombinasi angka" @bind="newPassword" />
-                </div>
-                <div class="form-group" style="max-width: 480px;">
-                    <label class="form-label">Konfirmasi Kata Sandi Baru</label>
-                    <input type="password" class="form-input" placeholder="Ulangi kata sandi baru" @bind="confirmPassword" />
-                </div>
-            </div>
-
-            <div class="settings-divider"></div>
-
-            <div class="toggle-group-row">
-                <div class="toggle-text">
-                    <strong>Verifikasi 2 Langkah (PIN Keamanan)</strong>
-                    <span>Wajibkan kode otentikasi saat login dari perangkat baru.</span>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" @bind="enable2FA" />
-                    <span class="slider round"></span>
-                </label>
-            </div>
-
-            <div class="card-footer-action">
-                <button type="button" class="btn-primary-pill btn-yellow" @onclick="SavePassword">
-                    <Icon Name="check" Size="14" />
-                    <span>Perbarui Kata Sandi</span>
-                </button>
-            </div>
-        </div>
-    }
-    else if (activeTab == "notifications")
-    {
-        <div class="settings-card">
-            <div class="card-header-clean">
-                <div>
-                    <h3 class="card-title"><Icon Name="bell" Size="18" /> Preferensi Notifikasi & Email</h3>
-                    <p class="card-desc">Atur jenis pemberitahuan yang dikirimkan ke email dan lonceng aplikasi.</p>
-                </div>
-            </div>
-            <div class="notification-options-list">
-                <div class="toggle-group-row">
-                    <div class="toggle-text">
-                        <strong>Notifikasi Persetujuan Pemesanan</strong>
-                        <span>Kirim pemberitahuan instan saat pengajuan disetujui atau ditolak.</span>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" checked />
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <div class="toggle-group-row">
-                    <div class="toggle-text">
-                        <strong>Pengingat Jadwal Rapat</strong>
-                        <span>Kirim pengingat 15 menit sebelum waktu pemesanan ruangan dimulai.</span>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" checked />
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <div class="toggle-group-row">
-                    <div class="toggle-text">
-                        <strong>Laporan Mingguan Otomatis</strong>
-                        <span>Terima rekap penggunaan ruangan mingguan di email admin.</span>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" />
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="card-footer-action">
-                <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveSettings">
-                    <Icon Name="check" Size="14" />
-                    <span>Simpan Preferensi</span>
-                </button>
-            </div>
-        </div>
+        <SkeletonPage Variant="settings" />
     }
     else
     {
-        <div class="settings-card">
-            <div class="card-header-clean">
-                <div>
-                    <h3 class="card-title"><Icon Name="image" Size="18" /> Identitas & Warna Brand</h3>
-                    <p class="card-desc">Sesuaikan logo instansi dan palet warna antarmuka sistem.</p>
+        <div class="settings-layout">
+            @* --- 1. LEFT SIDEBAR NAVIGATION MENU (4 GRUPS + FOOTER) --- *@
+            <aside class="settings-nav-sidebar">
+                @* Group 1: KEAMANAN *@
+                <div class="settings-nav-group">
+                    <span class="settings-nav-group-title">KEAMANAN</span>
+                    <button type="button" class="settings-nav-item" @onclick="OpenPasswordModal">
+                        <Icon Name="lock" Size="16" />
+                        <span>Ubah Kata Sandi</span>
+                    </button>
+                    <button type="button" class="settings-nav-item" @onclick="OpenTwoFactorModal">
+                        <Icon Name="shield" Size="16" />
+                        <span>PIN / Verifikasi 2 Langkah</span>
+                    </button>
+                    <button type="button" class="settings-nav-item" @onclick="OpenSessionsModal">
+                        <Icon Name="smartphone" Size="16" />
+                        <span>Sesi & Perangkat Aktif</span>
+                    </button>
                 </div>
-            </div>
-            <div class="card-form-grid">
-                <div class="form-group">
-                    <label class="form-label">Nama Perusahaan / Organisasi</label>
-                    <input type="text" class="form-input" value="PT PERSADA KARYA UTAMA" />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Format Zona Waktu</label>
-                    <select class="sr-pill-select" style="width:100%;">
-                        <option>Waktu Indonesia Barat (WIB, UTC+7)</option>
-                        <option>Waktu Indonesia Tengah (WITA, UTC+8)</option>
-                        <option>Waktu Indonesia Timur (WIT, UTC+9)</option>
-                    </select>
-                </div>
-            </div>
 
-            <div class="card-footer-action">
-                <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveSettings">
-                    <Icon Name="check" Size="14" />
-                    <span>Simpan Perubahan</span>
-                </button>
-            </div>
+                @* Group 2: PREFERENSI *@
+                <div class="settings-nav-group">
+                    <span class="settings-nav-group-title">PREFERENSI</span>
+                    <button type="button" class="settings-nav-item @(activeSection == "notifications" ? "active" : "")" @onclick='() => SetSection("notifications")'>
+                        <Icon Name="bell" Size="16" />
+                        <span>Notifikasi</span>
+                    </button>
+                    <button type="button" class="settings-nav-item @(activeSection == "language" ? "active" : "")" @onclick='() => SetSection("language")'>
+                        <Icon Name="globe" Size="16" />
+                        <span>Bahasa & Zona Waktu</span>
+                    </button>
+                </div>
+
+                @* Group 3: SISTEM PEMESANAN *@
+                <div class="settings-nav-group">
+                    <span class="settings-nav-group-title">SISTEM PEMESANAN</span>
+                    <button type="button" class="settings-nav-item @(activeSection == "booking-rules" ? "active" : "")" @onclick='() => SetSection("booking-rules")'>
+                        <Icon Name="clock" Size="16" />
+                        <span>Jam Operasional & Aturan Pemesanan</span>
+                    </button>
+                    <button type="button" class="settings-nav-item @(activeSection == "roles" ? "active" : "")" @onclick='() => SetSection("roles")'>
+                        <Icon Name="users" Size="16" />
+                        <span>Manajemen Peran & Hak Akses</span>
+                    </button>
+                    <button type="button" class="settings-nav-item @(activeSection == "integration" ? "active" : "")" @onclick='() => SetSection("integration")'>
+                        <Icon Name="mail" Size="16" />
+                        <span>Integrasi Kalender & Email</span>
+                    </button>
+                </div>
+
+                @* Group 4: TAMPILAN *@
+                <div class="settings-nav-group">
+                    <span class="settings-nav-group-title">TAMPILAN</span>
+                    <button type="button" class="settings-nav-item @(activeSection == "brand" ? "active" : "")" @onclick='() => SetSection("brand")'>
+                        <Icon Name="palette" Size="16" />
+                        <span>Logo & Warna Brand</span>
+                    </button>
+                </div>
+
+                <div class="settings-nav-divider"></div>
+
+                @* Sidebar Footer: Bantuan & Keluar *@
+                <div class="settings-nav-footer">
+                    <button type="button" class="settings-nav-item" @onclick="OpenHelp">
+                        <Icon Name="help-circle" Size="16" />
+                        <span>Bantuan</span>
+                    </button>
+                    <button type="button" class="settings-nav-item nav-item-logout" @onclick="HandleLogout">
+                        <Icon Name="log-out" Size="16" />
+                        <span>Keluar</span>
+                    </button>
+                </div>
+            </aside>
+
+            @* --- 2. RIGHT CONTENT PANEL --- *@
+            <main class="settings-content-panel">
+                @if (activeSection == "notifications")
+                {
+                    <div class="settings-panel-card">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Pengaturan Notifikasi</h2>
+                            <p class="panel-desc">Kelola preferensi komunikasi dan pemberitahuan sistem Anda.</p>
+                        </div>
+
+                        <div class="panel-body-sections">
+                            @* Section 1: Notifikasi Email *@
+                            <div class="settings-subgroup">
+                                <h3 class="subgroup-title">Notifikasi Email</h3>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Konfirmasi Pemesanan</strong>
+                                        <span>Terima email saat pemesanan dikonfirmasi.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="emailBookingConfirm" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Pengingat Jadwal (H-1)</strong>
+                                        <span>Dapatkan pengingat satu hari sebelum jadwal pemesanan.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="emailReminderD1" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Pembatalan / Penolakan</strong>
+                                        <span>Beri tahu saya segera jika pemesanan dibatalkan.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="emailCancellation" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Pembatalan Terlambat / Tidak Hadir</strong>
+                                        <span>Terima pengingat jika Anda belum check-in untuk pemesanan Anda.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="emailNoShow" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-divider"></div>
+
+                            @* Section 2: Notifikasi Dalam Aplikasi *@
+                            <div class="settings-subgroup">
+                                <h3 class="subgroup-title">Notifikasi Dalam Aplikasi</h3>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Pembaruan Pemesanan Real-time</strong>
+                                        <span>Tampilkan notifikasi pop-up atau lencana untuk perubahan pemesanan aktif.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="inAppRealTime" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Perubahan Status Ruangan</strong>
+                                        <span>Peringatan saat ruangan tersedia atau tidak tersedia.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="inAppRoomStatus" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Pemeliharaan Ruangan Selesai</strong>
+                                        <span>Peringatan saat ruangan kembali tersedia setelah pemeliharaan.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="inAppMaintenanceDone" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-divider"></div>
+
+                            @* Section 3: Pemberitahuan Admin *@
+                            <div class="settings-subgroup">
+                                <div class="subgroup-header-badge">
+                                    <h3 class="subgroup-title">Pemberitahuan Admin</h3>
+                                    <span class="admin-badge-pill">Hanya terlihat untuk peran Admin</span>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Pelacakan Pembatalan Terlambat / Tidak Hadir</strong>
+                                        <span>Pantau pola pengguna yang sering membatalkan mendadak atau tidak check-in.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="adminNoShowTrack" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Konflik Pemesanan Terdeteksi</strong>
+                                        <span>Beri tahu saat dua atau lebih pemesanan bertabrakan untuk ruangan yang sama.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="adminConflictDetect" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Pemesanan Baru Menunggu Persetujuan</strong>
+                                        <span>Memerlukan peninjauan manual untuk permintaan ruangan tertentu.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="adminPendingApproval" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Aktivitas Login Tidak Biasa</strong>
+                                        <span>Peringatan keamanan untuk login dari perangkat atau lokasi tak dikenal.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="adminUnusualLogin" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Laporan Mingguan Otomatis</strong>
+                                        <span>Terima ringkasan penggunaan sistem setiap hari Senin.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="adminWeeklyReport" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Pengguna Baru Terdaftar</strong>
+                                        <span>Beri tahu saat akun karyawan baru dibuat dan memerlukan penetapan peran.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="adminNewUser" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Utilisasi Ruangan Rendah</strong>
+                                        <span>Wawasan bulanan untuk ruangan dengan penggunaan di bawah 20% kapasitas.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="adminLowUtilization" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-footer">
+                            <button type="button" class="btn-outline-pill" @onclick="ResetNotificationPreferences">Batal</button>
+                            <button type="button" class="btn-primary-pill btn-navy" @onclick="SaveNotificationPreferences">Simpan Preferensi</button>
+                        </div>
+                    </div>
+                }
+                else if (activeSection == "language")
+                {
+                    <div class="settings-panel-card">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Bahasa & Zona Waktu</h2>
+                            <p class="panel-desc">Kelola bagaimana informasi ditampilkan berdasarkan wilayah dan preferensi Anda.</p>
+                        </div>
+
+                        <div class="panel-body-sections">
+                            <div class="settings-subgroup">
+                                <h3 class="subgroup-title">Pengaturan Bahasa</h3>
+                                <div class="form-grid-2col">
+                                    <div class="form-group">
+                                        <label class="form-label">BAHASA UTAMA</label>
+                                        <select class="form-input" @bind="primaryLanguage">
+                                            <option value="id-ID">Bahasa Indonesia</option>
+                                        </select>
+                                        <span class="form-help">Bahasa sistem tunggal resmi PT PERSADA.</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">FORMAT TANGGAL</label>
+                                        <select class="form-input" @bind="dateFormat">
+                                            <option value="dd/MM/yyyy">DD/MM/YYYY (31/12/2026)</option>
+                                            <option value="yyyy-MM-dd">YYYY-MM-DD (2026-12-31)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="max-width: 480px; margin-top: 1rem;">
+                                    <label class="form-label">FORMAT ANGKA</label>
+                                    <select class="form-input" @bind="numberFormat">
+                                        <option value="id">1.234,56 (Format Standar Indonesia)</option>
+                                        <option value="us">1,234.56 (Format Standar Internasional)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="settings-divider"></div>
+
+                            <div class="settings-subgroup">
+                                <h3 class="subgroup-title">Pengaturan Zona Waktu</h3>
+                                <div class="form-group" style="max-width: 480px;">
+                                    <label class="form-label">ZONA WAKTU SAAT INI</label>
+                                    <select class="form-input" @bind="currentTimeZone">
+                                        <option value="WIB">(GMT+07:00) WIB - Jakarta</option>
+                                        <option value="WITA">(GMT+08:00) WITA - Makassar / Denpasar</option>
+                                        <option value="WIT">(GMT+09:00) WIT - Jayapura</option>
+                                    </select>
+                                </div>
+
+                                <div class="toggle-row" style="margin-top: 1rem;">
+                                    <div class="toggle-info">
+                                        <strong>Atur zona waktu otomatis</strong>
+                                        <span>Gunakan lokasi Anda untuk mengatur zona waktu.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="autoTimeZone" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Format Waktu 24 Jam</strong>
+                                        <span>Tampilkan waktu sebagai 13:00, bukan 1:00 PM.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="is24HourFormat" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+
+                                <div class="form-group" style="max-width: 480px; margin-top: 1rem;">
+                                    <label class="form-label">HARI PERTAMA DALAM SEMINGGU</label>
+                                    <select class="form-input" @bind="firstDayOfWeek">
+                                        <option value="Senin">Senin</option>
+                                        <option value="Minggu">Minggu</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-footer">
+                            <button type="button" class="btn-outline-pill" @onclick="CancelChanges">Batalkan Perubahan</button>
+                            <button type="button" class="btn-primary-pill btn-navy" @onclick="SaveLanguageSettings">Simpan Perubahan</button>
+                        </div>
+                    </div>
+                }
+                else if (activeSection == "booking-rules")
+                {
+                    <div class="settings-panel-card">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Jam Operasional & Aturan Pemesanan</h2>
+                            <p class="panel-desc">Atur waktu ketersediaan ruangan, kebijakan reservasi, dan mekanisme persetujuan bertingkat.</p>
+                        </div>
+
+                        <div class="panel-body-sections">
+                            <div class="settings-subgroup">
+                                <h3 class="subgroup-title">Jam Operasional Ruangan</h3>
+                                <div class="form-grid-2col">
+                                    <div class="form-group">
+                                        <label class="form-label">Jam Buka Operasional</label>
+                                        <input type="time" class="form-input" @bind="openTime" />
+                                        <span class="form-help">Waktu paling awal ruangan dapat mulai dipesan.</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Jam Tutup Operasional</label>
+                                        <input type="time" class="form-input" @bind="closeTime" />
+                                        <span class="form-help">Batas akhir pemakaian ruangan setiap hari kerja.</span>
+                                    </div>
+                                </div>
+                                <div class="form-grid-2col" style="margin-top: 1rem;">
+                                    <div class="form-group">
+                                        <label class="form-label">Durasi Maksimal Per Sesi (Jam)</label>
+                                        <input type="number" min="1" max="12" class="form-input" @bind="maxDurationHours" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Batas Pemesanan di Muka (Hari)</label>
+                                        <input type="number" min="1" max="60" class="form-input" @bind="advanceBookingDays" />
+                                    </div>
+                                </div>
+                                <div class="toggle-row" style="margin-top: 1rem;">
+                                    <div class="toggle-info">
+                                        <strong>Izinkan Pemesanan di Akhir Pekan / Luar Jam Kerja</strong>
+                                        <span>Memerlukan persetujuan khusus dari admin divisi GA.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="allowWeekendBooking" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-divider"></div>
+
+                            <div class="settings-subgroup">
+                                <h3 class="subgroup-title">Konfigurasi Persetujuan Bertingkat</h3>
+                                <div class="toggle-row">
+                                    <div class="toggle-info">
+                                        <strong>Persetujuan Otomatis untuk Ruangan Reguler</strong>
+                                        <span>Setujui otomatis pemesanan ruangan standar berdasarkan ketersediaan kapasitas.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="autoApprovalRegular" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+
+                                <div class="form-group" style="max-width: 480px; margin-top: 1rem;">
+                                    <label class="form-label">Ambang Batas Persetujuan Bertingkat</label>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-secondary);">KAPASITAS &gt;=</span>
+                                        <input type="number" min="5" max="200" class="form-input" style="width: 100px;" @bind="approvalThresholdCapacity" />
+                                        <span style="font-size: 0.85rem; color: var(--color-text-secondary);">Orang</span>
+                                    </div>
+                                    <span class="form-help">Perlukan persetujuan tambahan saat kapasitas ruangan mencapai atau melebihi nilai ini.</span>
+                                </div>
+
+                                <div class="toggle-row" style="margin-top: 1rem;">
+                                    <div class="toggle-info">
+                                        <strong>Persetujuan 2 Tingkat untuk Kategori VIP</strong>
+                                        <span>Selalu perlukan dua tingkat persetujuan administratif untuk pemesanan ruangan VIP.</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" @bind="twoLevelApprovalVIP" />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-footer">
+                            <button type="button" class="btn-outline-pill" @onclick="CancelChanges">Batalkan Perubahan</button>
+                            <button type="button" class="btn-primary-pill btn-navy" @onclick="SaveBookingRules">Simpan Perubahan</button>
+                        </div>
+                    </div>
+                }
+                else if (activeSection == "roles")
+                {
+                    <div class="settings-panel-card">
+                        <div class="panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <h2 class="panel-title">Manajemen Peran & Hak Akses</h2>
+                                <p class="panel-desc">Konfigurasikan matriks hak akses dan wewenang untuk setiap tingkatan pengguna sistem.</p>
+                            </div>
+                            <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddCustomRole">
+                                <Icon Name="plus" Size="14" />
+                                <span>Tambah Role Kustom</span>
+                            </button>
+                        </div>
+
+                        <div class="panel-body-sections">
+                            <div class="role-matrix-table-wrap">
+                                <table class="role-matrix-table">
+                                    <thead>
+                                        <tr>
+                                            <th>HAK AKSES</th>
+                                            <th class="th-center">Admin</th>
+                                            <th class="th-center">Staf</th>
+                                            <th class="th-center">Karyawan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Buat Pemesanan</strong></td>
+                                            <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
+                                            <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
+                                            <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Setujui / Tolak Pemesanan</strong></td>
+                                            <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
+                                            <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
+                                            <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Kelola Ruangan</strong></td>
+                                            <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
+                                            <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                            <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Kelola Pengguna & Peran</strong></td>
+                                            <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
+                                            <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                            <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Lihat Laporan</strong></td>
+                                            <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
+                                            <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
+                                            <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Ubah Pengaturan Sistem</strong></td>
+                                            <td class="td-center"><span class="perm-check checked"><Icon Name="check" Size="16" /></span></td>
+                                            <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                            <td class="td-center"><span class="perm-check unchecked"><Icon Name="x" Size="14" /></span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="panel-footer">
+                            <button type="button" class="btn-outline-pill" @onclick="CancelChanges">Batal</button>
+                            <button type="button" class="btn-primary-pill btn-navy" @onclick="SaveCustomRoles">Simpan Perubahan</button>
+                        </div>
+                    </div>
+                }
+                else if (activeSection == "integration")
+                {
+                    <div class="settings-panel-card">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Integrasi Kalender & Email</h2>
+                            <p class="panel-desc">Hubungkan sistem pemesanan ruangan dengan layanan kalender eksternal dan server email.</p>
+                        </div>
+
+                        <div class="panel-body-sections">
+                            <div class="settings-subgroup">
+                                <h3 class="subgroup-title">Layanan Kalender Eksternal</h3>
+                                <div class="integration-item-card">
+                                    <div class="integration-info">
+                                        <div class="integration-logo-badge" style="background: #EFF6FF; color: #2563EB;">
+                                            <Icon Name="calendar" Size="20" />
+                                        </div>
+                                        <div>
+                                            <strong>Google Calendar</strong>
+                                            <span class="integration-status status-disconnected">Belum terhubung</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-outline-pill" @onclick="ConnectGoogleCalendar">Hubungkan</button>
+                                </div>
+
+                                <div class="integration-item-card" style="margin-top: 10px;">
+                                    <div class="integration-info">
+                                        <div class="integration-logo-badge" style="background: #ECFDF5; color: #16A34A;">
+                                            <Icon Name="check-circle" Size="20" />
+                                        </div>
+                                        <div>
+                                            <strong>Microsoft Outlook</strong>
+                                            <span class="integration-status status-connected">Terhubung &middot; sinkron 2 arah</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-outline-pill" @onclick="ManageOutlookIntegration">Kelola</button>
+                                </div>
+                            </div>
+
+                            <div class="settings-divider"></div>
+
+                            <div class="settings-subgroup">
+                                <h3 class="subgroup-title">EMAIL KELUAR (SMTP)</h3>
+                                <div class="form-grid-2col">
+                                    <div class="form-group">
+                                        <label class="form-label">Alamat Pengirim</label>
+                                        <input type="email" class="form-input" @bind="smtpSender" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">SMTP Host</label>
+                                        <input type="text" class="form-input" @bind="smtpHost" />
+                                    </div>
+                                </div>
+                                <div class="form-grid-2col" style="margin-top: 1rem;">
+                                    <div class="form-group">
+                                        <label class="form-label">Port SMTP</label>
+                                        <input type="number" class="form-input" @bind="smtpPort" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Protokol Keamanan</label>
+                                        <select class="form-input" @bind="smtpSecurity">
+                                            <option value="STARTTLS">STARTTLS (Port 587)</option>
+                                            <option value="SSL/TLS">SSL / TLS (Port 465)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-footer">
+                            <button type="button" class="btn-outline-pill" @onclick="CancelChanges">Batal</button>
+                            <button type="button" class="btn-primary-pill btn-navy" @onclick="SaveIntegration">Simpan Integrasi</button>
+                        </div>
+                    </div>
+                }
+                else if (activeSection == "brand")
+                {
+                    <div class="settings-panel-card">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Logo & Warna Brand</h2>
+                            <p class="panel-desc">Identitas visual yang tampil di seluruh sistem.</p>
+                        </div>
+
+                        <div class="panel-body-sections">
+                            <div class="settings-subgroup">
+                                <h3 class="subgroup-title">LOGO</h3>
+                                <div class="brand-logo-grid">
+                                    <div class="logo-box">
+                                        <span class="logo-box-title">Logo Utama (sidebar)</span>
+                                        <div class="logo-preview-area">
+                                            <img src="images/logo-persada.png" alt="Logo Persada" style="max-height: 44px; object-fit: contain;" />
+                                        </div>
+                                        <button type="button" class="btn-outline-pill btn-sm" @onclick="ChangeLogo">Ganti</button>
+                                    </div>
+                                    <div class="logo-box">
+                                        <span class="logo-box-title">Favicon (tab browser)</span>
+                                        <div class="logo-preview-area">
+                                            <img src="favicon.png" alt="Favicon" style="width: 32px; height: 32px; object-fit: contain;" />
+                                        </div>
+                                        <button type="button" class="btn-outline-pill btn-sm" @onclick="ChangeFavicon">Ganti</button>
+                                    </div>
+                                </div>
+                                <span class="form-help" style="margin-top: 8px; display: block;">Rekomendasi: PNG transparan, min. 256×256px, maks. 2MB</span>
+                            </div>
+
+                            <div class="settings-divider"></div>
+
+                            <div class="settings-subgroup">
+                                <h3 class="subgroup-title">WARNA BRAND</h3>
+                                <div class="form-grid-3col">
+                                    <div class="color-picker-box">
+                                        <label class="form-label">Warna Primer (sidebar)</label>
+                                        <div class="color-input-wrap">
+                                            <div class="color-sample" style="background: #0B1E39;"></div>
+                                            <input type="text" class="form-input" value="#0B1E39" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="color-picker-box">
+                                        <label class="form-label">Warna Aksen (tombol/highlight)</label>
+                                        <div class="color-input-wrap">
+                                            <div class="color-sample" style="background: #2563EB;"></div>
+                                            <input type="text" class="form-input" value="#2563EB" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="color-picker-box">
+                                        <label class="form-label">Warna Latar Konten</label>
+                                        <div class="color-input-wrap">
+                                            <div class="color-sample" style="background: #F8FAFC; border: 1px solid #E2E8F0;"></div>
+                                            <input type="text" class="form-input" value="#F8FAFC" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-divider"></div>
+
+                            <div class="settings-subgroup">
+                                <h3 class="subgroup-title">PRATINJAU LANGSUNG</h3>
+                                <div class="live-preview-box">
+                                    <div class="preview-mini-sidebar">
+                                        <div class="preview-mini-logo">PT PERSADA</div>
+                                        <div class="preview-mini-nav active">Pemesanan</div>
+                                        <div class="preview-mini-nav">Ruangan</div>
+                                    </div>
+                                    <div class="preview-mini-content">
+                                        <div class="preview-mini-header">
+                                            <span>Dashboard</span>
+                                            <button type="button" class="btn-primary-pill btn-yellow" style="padding: 4px 10px; font-size: 11px;">+ Tambah Ruangan</button>
+                                        </div>
+                                        <div class="preview-mini-card">
+                                            <span>Total Ruangan: 18 Ruang Aktif</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-footer">
+                            <button type="button" class="btn-outline-pill" @onclick="ResetBrandSettings">Reset ke Default</button>
+                            <button type="button" class="btn-primary-pill btn-navy" @onclick="SaveBrandSettings">Simpan Perubahan</button>
+                        </div>
+                    </div>
+                }
+            </main>
         </div>
     }
 </div>
 
-@code {
-    private string activeTab = "general";
+@* --- 3. MODAL 1: UBAH KATA SANDI (CASE 3.2.1) --- *@
+<AppModal IsOpen="@showPasswordModal" IsOpenChanged="@((bool v) => showPasswordModal = v)" Title="Ubah Kata Sandi" Size="medium">
+    <ChildContent>
+        <p class="modal-desc-sub">Perbarui keamanan akun Anda dengan memilih kata sandi yang kuat.</p>
+        
+        <div class="um-form" style="margin-top: 1rem;">
+            <div class="form-group">
+                <label class="form-label">KATA SANDI SAAT INI</label>
+                <input type="password" class="form-input" placeholder="Masukkan kata sandi saat ini" @bind="currentPassword" />
+            </div>
 
+            <div class="form-group">
+                <label class="form-label">KATA SANDI BARU</label>
+                <input type="password" class="form-input" placeholder="Masukkan kata sandi baru" @bind="newPassword" @bind:event="oninput" />
+                
+                @if (!string.IsNullOrEmpty(newPassword))
+                {
+                    var strength = GetStrengthScore(newPassword);
+                    <div class="password-strength-box" style="margin-top: 6px;">
+                        <div class="strength-bar-track">
+                            <div class="strength-bar-fill @GetStrengthClass(strength)" style="width: @(strength * 33.3)%;"></div>
+                        </div>
+                        <span class="strength-status-text">Kekuatan kata sandi: <strong>@GetStrengthText(strength)</strong></span>
+                    </div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">KONFIRMASI KATA SANDI BARU</label>
+                <input type="password" class="form-input" placeholder="Konfirmasi kata sandi baru" @bind="confirmNewPassword" />
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showPasswordModal = false">Batal</button>
+        <button type="button" class="btn-primary-pill btn-navy" @onclick="SubmitChangePassword">Perbarui Kata Sandi</button>
+    </FooterContent>
+</AppModal>
+
+@* --- 4. MODAL 2: VERIFIKASI 2 LANGKAH / PIN (CASE 3.2.2) --- *@
+<AppModal IsOpen="@showTwoFactorModal" IsOpenChanged="@((bool v) => showTwoFactorModal = v)" Title="Verifikasi 2 Langkah" Size="small">
+    <ChildContent>
+        <p class="modal-desc-sub">Masukkan 6 digit kode yang dikirim ke email/nomor Anda: <br /><strong style="color: var(--color-text-primary);">w****u@ptpersada.co.id</strong></p>
+
+        <div style="margin: 1.5rem 0; display: flex; justify-content: center; gap: 8px;">
+            <input type="text" maxlength="6" class="form-input" style="width: 200px; text-align: center; font-size: 1.4rem; letter-spacing: 6px; font-weight: 600;" placeholder="000000" @bind="twoFactorCode" />
+        </div>
+
+        <div style="text-align: center; font-size: 0.82rem; color: var(--color-text-secondary);">
+            <span>Belum menerima kode? </span>
+            <button type="button" class="btn-link-action" @onclick="ResendTwoFactorCode">Kirim ulang</button>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showTwoFactorModal = false">Batal</button>
+        <button type="button" class="btn-primary-pill btn-navy" @onclick="SubmitTwoFactorVerify">Verifikasi</button>
+    </FooterContent>
+</AppModal>
+
+@* --- 5. MODAL 3: SESI & PERANGKAT AKTIF (CASE 3.2.3) --- *@
+<AppModal IsOpen="@showSessionsModal" IsOpenChanged="@((bool v) => showSessionsModal = v)" Title="Sesi & Perangkat Aktif" Size="medium">
+    <ChildContent>
+        <p class="modal-desc-sub">Kelola sesi login aktif Anda di berbagai perangkat dan peramban.</p>
+
+        <div class="sessions-list-wrapper" style="margin-top: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+            @* Sesi Saat Ini *@
+            <div class="session-section">
+                <span class="session-section-title">SESI SAAT INI</span>
+                <div class="session-card current-session">
+                    <div class="session-icon-wrap" style="background: var(--color-success-soft); color: var(--color-success);">
+                        <Icon Name="monitor" Size="20" />
+                    </div>
+                    <div class="session-info-wrap">
+                        <div class="session-title-row">
+                            <strong>MacBook Pro – Chrome</strong>
+                            <span class="badge-active-now">Aktif Sekarang</span>
+                        </div>
+                        <span class="session-meta">Jakarta, Indonesia &middot; IP: 192.168.1.10</span>
+                    </div>
+                </div>
+            </div>
+
+            @* Sesi Lainnya *@
+            <div class="session-section">
+                <span class="session-section-title">SESI LAINNYA</span>
+                <div class="session-items-list">
+                    @foreach (var s in activeSessionsList)
+                    {
+                        <div class="session-card">
+                            <div class="session-icon-wrap" style="background: var(--color-surface-alt); color: var(--color-text-secondary);">
+                                <Icon Name="@s.Icon" Size="20" />
+                            </div>
+                            <div class="session-info-wrap">
+                                <strong>@s.DeviceName</strong>
+                                <span class="session-meta">@s.Location &middot; IP: @s.IpAddress &middot; @s.LastActiveText</span>
+                            </div>
+                            <button type="button" class="btn-revoke-session" @onclick="() => RevokeSession(s.Id)">Cabut Akses</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showSessionsModal = false">Batal</button>
+        <button type="button" class="btn-primary-pill btn-danger" @onclick="RevokeAllOtherSessions">Keluar dari Semua Sesi Lain</button>
+    </FooterContent>
+</AppModal>
+
+@code {
+    private bool isPageLoading = true;
+    private string activeSection = "notifications";
+
+    // Modals
+    private bool showPasswordModal = false;
+    private bool showTwoFactorModal = false;
+    private bool showSessionsModal = false;
+
+    // Ubah Kata Sandi
+    private string currentPassword = "";
+    private string newPassword = "";
+    private string confirmNewPassword = "";
+
+    // 2FA
+    private string twoFactorCode = "";
+
+    // Sesi model
+    public class DeviceSession
+    {
+        public int Id { get; set; }
+        public string DeviceName { get; set; } = "";
+        public string Location { get; set; } = "";
+        public string IpAddress { get; set; } = "";
+        public string LastActiveText { get; set; } = "";
+        public string Icon { get; set; } = "smartphone";
+    }
+
+    private List<DeviceSession> activeSessionsList = new()
+    {
+        new() { Id = 1, DeviceName = "iPhone 15 Pro – Safari", Location = "Jakarta, Indonesia", IpAddress = "192.168.1.42", LastActiveText = "Aktif 2 jam lalu", Icon = "smartphone" },
+        new() { Id = 2, DeviceName = "Windows 11 – Edge", Location = "Bandung, Indonesia", IpAddress = "182.253.4.12", LastActiveText = "Aktif 1 hari lalu", Icon = "monitor" },
+        new() { Id = 3, DeviceName = "iPad Air – Safari", Location = "Jakarta, Indonesia", IpAddress = "192.168.1.88", LastActiveText = "Aktif 3 hari lalu", Icon = "tablet" }
+    };
+
+    // Preferensi Notifikasi
+    private bool emailBookingConfirm = true;
+    private bool emailReminderD1 = true;
+    private bool emailCancellation = true;
+    private bool emailNoShow = false;
+
+    private bool inAppRealTime = true;
+    private bool inAppRoomStatus = true;
+    private bool inAppMaintenanceDone = true;
+
+    private bool adminNoShowTrack = true;
+    private bool adminConflictDetect = true;
+    private bool adminPendingApproval = true;
+    private bool adminUnusualLogin = true;
+    private bool adminWeeklyReport = false;
+    private bool adminNewUser = true;
+    private bool adminLowUtilization = false;
+
+    // Bahasa & Zona Waktu
+    private string primaryLanguage = "id-ID";
+    private string dateFormat = "dd/MM/yyyy";
+    private string numberFormat = "id";
+    private string currentTimeZone = "WIB";
+    private bool autoTimeZone = true;
+    private bool is24HourFormat = true;
+    private string firstDayOfWeek = "Senin";
+
+    // Jam Operasional & Booking Rules
     private TimeOnly openTime = new TimeOnly(8, 0);
     private TimeOnly closeTime = new TimeOnly(18, 0);
     private int maxDurationHours = 4;
     private int advanceBookingDays = 14;
-    private bool allowAfterHours = false;
+    private bool allowWeekendBooking = false;
+    private bool autoApprovalRegular = true;
+    private int approvalThresholdCapacity = 20;
+    private bool twoLevelApprovalVIP = true;
 
-    private string oldPassword = "";
-    private string newPassword = "";
-    private string confirmPassword = "";
-    private bool enable2FA = true;
+    // Integrasi
+    private string smtpSender = "noreply-booking@ptpersada.co.id";
+    private string smtpHost = "smtp.office365.com";
+    private int smtpPort = 587;
+    private string smtpSecurity = "STARTTLS";
 
-    private void SaveSettings()
+    protected override async Task OnInitializedAsync()
     {
-        Toast.Success("Pengaturan sistem berhasil disimpan.");
+        // Smooth skeleton loading simulation
+        await Task.Delay(260);
+        isPageLoading = false;
     }
 
-    private void SavePassword()
+    private void SetSection(string section)
     {
-        if (string.IsNullOrWhiteSpace(oldPassword) || string.IsNullOrWhiteSpace(newPassword))
+        activeSection = section;
+    }
+
+    private void OpenPasswordModal()
+    {
+        currentPassword = "";
+        newPassword = "";
+        confirmNewPassword = "";
+        showPasswordModal = true;
+    }
+
+    private void OpenTwoFactorModal()
+    {
+        twoFactorCode = "";
+        showTwoFactorModal = true;
+    }
+
+    private void OpenSessionsModal()
+    {
+        showSessionsModal = true;
+    }
+
+    private void OpenHelp()
+    {
+        Toast.Info("Pusat Bantuan: Hubungi tim IT & Digital PT PERSADA via ext. 1400 atau email support@ptpersada.co.id");
+    }
+
+    private void HandleLogout()
+    {
+        Toast.Info("Anda telah berhasil keluar dari sistem.");
+        Navigation.NavigateTo("/login");
+    }
+
+    private int GetStrengthScore(string pass)
+    {
+        if (string.IsNullOrEmpty(pass)) return 0;
+        int score = 1;
+        if (pass.Length >= 8) score++;
+        if (pass.Any(char.IsDigit) && pass.Any(char.IsLetter)) score++;
+        return score;
+    }
+
+    private string GetStrengthClass(int score) => score switch
+    {
+        1 => "strength-weak",
+        2 => "strength-fair",
+        3 => "strength-strong",
+        _ => "strength-weak"
+    };
+
+    private string GetStrengthText(int score) => score switch
+    {
+        1 => "Lemah",
+        2 => "Cukup",
+        3 => "Kuat",
+        _ => "Lemah"
+    };
+
+    private void SubmitChangePassword()
+    {
+        if (string.IsNullOrWhiteSpace(currentPassword) || string.IsNullOrWhiteSpace(newPassword))
         {
             Toast.Error("Mohon lengkapi seluruh kolom kata sandi.");
             return;
         }
-        if (newPassword != confirmPassword)
+        if (newPassword != confirmNewPassword)
         {
             Toast.Error("Konfirmasi kata sandi baru tidak cocok.");
             return;
         }
+        if (newPassword.Length < 8)
+        {
+            Toast.Error("Kata sandi baru minimal 8 karakter.");
+            return;
+        }
 
-        Toast.Success("Kata sandi akun berhasil diperbarui.");
-        oldPassword = "";
-        newPassword = "";
-        confirmPassword = "";
+        Toast.Success("Kata sandi akun Anda berhasil diperbarui.");
+        showPasswordModal = false;
+    }
+
+    private void SubmitTwoFactorVerify()
+    {
+        if (string.IsNullOrWhiteSpace(twoFactorCode) || twoFactorCode.Length < 6)
+        {
+            Toast.Error("Mohon masukkan 6 digit kode verifikasi yang valid.");
+            return;
+        }
+
+        Toast.Success("Verifikasi 2 Langkah berhasil dikonfirmasi.");
+        showTwoFactorModal = false;
+    }
+
+    private void ResendTwoFactorCode()
+    {
+        Toast.Success("Kode verifikasi baru telah dikirimkan ke email resmi Anda.");
+    }
+
+    private void RevokeSession(int id)
+    {
+        activeSessionsList.RemoveAll(s => s.Id == id);
+        Toast.Success("Akses sesi perangkat berhasil dicabut.");
+    }
+
+    private void RevokeAllOtherSessions()
+    {
+        activeSessionsList.Clear();
+        Toast.Success("Semua sesi perangkat lain telah berhasil dikeluarkan.");
+        showSessionsModal = false;
+    }
+
+    private void SaveNotificationPreferences()
+    {
+        Toast.Success("Preferensi notifikasi berhasil disimpan.");
+    }
+
+    private void ResetNotificationPreferences()
+    {
+        Toast.Info("Perubahan preferensi notifikasi dibatalkan.");
+    }
+
+    private void SaveLanguageSettings()
+    {
+        Toast.Success("Pengaturan bahasa & zona waktu berhasil disimpan.");
+    }
+
+    private void SaveBookingRules()
+    {
+        Toast.Success("Aturan jam operasional dan persetujuan berhasil disimpan.");
+    }
+
+    private void OpenAddCustomRole()
+    {
+        Toast.Info("Formulir penambahan role kustom dibuka.");
+    }
+
+    private void CancelChanges()
+    {
+        Toast.Info("Perubahan dibatalkan.");
+    }
+
+    private void SaveCustomRoles()
+    {
+        Toast.Success("Matriks hak akses berhasil diperbarui.");
+    }
+
+    private void ConnectGoogleCalendar()
+    {
+        Toast.Info("Menghubungkan ke akun Google...");
+    }
+
+    private void ManageOutlookIntegration()
+    {
+        Toast.Info("Membuka konfigurasi Outlook...");
+    }
+
+    private void SaveIntegration()
+    {
+        Toast.Success("Konfigurasi integrasi berhasil disimpan.");
+    }
+
+    private void ChangeLogo()
+    {
+        Toast.Info("Pilih berkas logo baru.");
+    }
+
+    private void ChangeFavicon()
+    {
+        Toast.Info("Pilih berkas favicon baru.");
+    }
+
+    private void ResetBrandSettings()
+    {
+        Toast.Info("Pengaturan identitas brand dikembalikan ke default.");
+    }
+
+    private void SaveBrandSettings()
+    {
+        Toast.Success("Identitas brand berhasil disimpan.");
     }
 }
-
-
-
-
-
-
-

@@ -3,7 +3,18 @@
 @inject NavigationManager Navigation
 
 <header class="topbar-glass-nav">
-    <div class="topbar-nav-left"></div>
+    <div class="topbar-nav-left">
+        @if (ShowGlobalSearch)
+        {
+            <div class="topbar-search">
+                <Icon Name="search" Size="15" CssClass="search-icon" />
+                <input type="text"
+                       placeholder="@(string.IsNullOrWhiteSpace(SearchPlaceholder) ? "Cari menu, pemesanan, atau pengguna..." : SearchPlaceholder)"
+                       @bind="searchQuery"
+                       @bind:event="oninput" />
+            </div>
+        }
+    </div>
     <div class="topbar-controls">
         @if (RightSlot != null)
         {
@@ -116,6 +127,7 @@
     private bool showNotification = false;
     private bool showProfilePopup = false;
     private int unreadCount = 2;
+    private string searchQuery = "";
 
     protected override void OnInitialized()
     {

@@ -3,49 +3,42 @@
 <div class="stats-row">
     @foreach (var stat in Stats)
     {
-        var iconTheme = GetIconTheme(stat);
-        <div class="stat-card">
-            <div class="stat-icon-wrapper @iconTheme.BadgeClass">
-                <Icon Name="@GetIconName(stat.Icon)" Size="20" />
-            </div>
-            <div class="stat-info">
-                <span class="stat-label">@stat.Label</span>
-                <div class="stat-val-row">
-                    <span class="stat-value">@stat.Value</span>
-                    @if (!string.IsNullOrEmpty(stat.Trend))
-                    {
-                        <span class="stat-trend @(stat.IsPositiveTrend == true ? "trend-up" : stat.IsPositiveTrend == false ? "trend-down" : "")">
-                            @(stat.IsPositiveTrend == true ? "↑ " : stat.IsPositiveTrend == false ? "↓ " : "")@stat.Trend
-                        </span>
-                    }
-                </div>
-                @if (!string.IsNullOrEmpty(stat.Subtitle))
-                {
-                    <span class="stat-subtitle">@stat.Subtitle</span>
-                }
-            </div>
-        </div>
+        var variant = GetVariant(stat);
+        <StatCard Label="@stat.Label"
+                  Value="@stat.Value"
+                  Icon="@GetIconName(stat.Icon)"
+                  Variant="@variant"
+                  Trend="@FormatTrend(stat)"
+                  IsPositiveTrend="@stat.IsPositiveTrend"
+                  Subtitle="@stat.Subtitle" />
     }
 </div>
 
 @code {
     [Parameter] public List<StatItem> Stats { get; set; } = new();
 
-    private (string BadgeClass, string IconColor) GetIconTheme(StatItem stat)
+    private string GetVariant(StatItem stat)
     {
         var label = stat.Label.ToLowerInvariant();
         var icon = stat.Icon.ToLowerInvariant();
 
         if (label.Contains("setuju") || label.Contains("selesai") || icon.Contains("check"))
-            return ("icon-badge-success", "var(--color-success)");
+            return "success";
         if (label.Contains("tolak") || label.Contains("kritis") || label.Contains("bug") || label.Contains("belum") || icon.Contains("x.svg") || icon.Contains("alert"))
-            return ("icon-badge-danger", "var(--color-danger)");
+            return "danger";
         if (label.Contains("tunggu") || label.Contains("durasi") || label.Contains("waktu") || icon.Contains("clock"))
-            return ("icon-badge-warning", "var(--color-warning)");
-        if (label.Contains("katering") || icon.Contains("coffee"))
-            return ("icon-badge-info", "var(--color-info)");
+            return "info";
+        if (label.Contains("katering") || label.Contains("terpopuler") || icon.Contains("coffee"))
+            return "warning";
         
-        return ("icon-badge-accent", "var(--color-accent)");
+        return "accent";
+    }
+
+    private string? FormatTrend(StatItem stat)
+    {
+        if (string.IsNullOrWhiteSpace(stat.Trend)) return null;
+        var prefix = stat.IsPositiveTrend == true ? "↑ " : stat.IsPositiveTrend == false ? "↓ " : "";
+        return $"{prefix}{stat.Trend}";
     }
 
     private string GetIconName(string iconPath) => iconPath switch
