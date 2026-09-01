@@ -1,0 +1,127 @@
+@namespace booking_room_admin.Components.Shared
+@inject IJSRuntime JS
+@implements IDisposable
+
+@if (IsOpen)
+{
+    <div class="modal-overlay @(IsOpen ? "open" : "")" @onclick="HandleOverlayClick" @onkeydown="HandleKeyDown" tabindex="-1" @ref="_overlayRef">
+        <div class="modal-container @SizeClass" @onclick:stopPropagation="true">
+            @* Header *@
+            <div class="modal-header">
+                @if (HeaderContent != null)
+                {
+                    @HeaderContent
+                }
+                else
+                {
+                    <h4 class="modal-title">@Title</h4>
+                    <button type="button" class="btn-icon" @onclick="Close" style="background:transparent; border:none; cursor:pointer; color:var(--color-text-secondary, #64748B); display:flex; align-items:center; justify-content:center; padding: 4px; border-radius: 50%;" aria-label="Tutup Modal">
+                        <Icon Name="x" Size="20" />
+                    </button>
+                }
+            </div>
+
+            @* Body *@
+            <div class="modal-body">
+                @ChildContent
+            </div>
+
+            @* Footer *@
+            @if (FooterContent != null)
+            {
+                <div class="modal-footer">
+                    @FooterContent
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter] public string Title { get; set; } = "";
+
+    /// <summary>small (380px), medium (540px), large (720px), xlarge (920px), fullscreen</summary>
+    [Parameter] public string Size { get; set; } = "medium";
+
+    /// <summary>Custom header content (overrides Title)</summary>
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+
+    /// <summary>Modal body content</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Sticky footer content (action buttons)</summary>
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+
+    /// <summary>Close callback</summary>
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    /// <summary>Allow closing by clicking overlay</summary>
+    [Parameter] public bool CloseOnOverlay { get; set; } = true;
+
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private ElementReference _overlayRef;
+    private bool _prevIsOpen = false;
+
+    private string SizeClass => Size.ToLowerInvariant() switch
+    {
+        "small" => "modal-sm",
+        "medium" => "modal-md",
+        "large" => "modal-lg",
+        "xlarge" => "modal-xl",
+        "fullscreen" => "modal-fs",
+        _ => "modal-md"
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (IsOpen != _prevIsOpen)
+        {
+            _prevIsOpen = IsOpen;
+            try
+            {
+                if (IsOpen)
+                {
+                    await JS.InvokeVoidAsync("eval", "document.body.style.overflow = 'hidden'");
+                    await _overlayRef.FocusAsync();
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("eval", "document.body.style.overflow = ''");
+                }
+            }
+            catch { }
+        }
+    }
+
+    private async Task Close()
+    {
+        try { await JS.InvokeVoidAsync("eval", "document.body.style.overflow = ''"); } catch { }
+        await IsOpenChanged.InvokeAsync(false);
+        await OnClose.InvokeAsync();
+    }
+
+    private async Task HandleOverlayClick()
+    {
+        if (CloseOnOverlay)
+        {
+            await Close();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await Close();
+        }
+    }
+
+    public void Dispose()
+    {
+        try { JS.InvokeVoidAsync("eval", "document.body.style.overflow = ''"); } catch { }
+    }
+}

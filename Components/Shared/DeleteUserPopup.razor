@@ -1,0 +1,86 @@
+@using booking_room_admin.Components.Models
+
+<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
+    <div class="popup-card delete-user-card" @onclick:stopPropagation="true">
+        <div class="du-header">
+            <h2 class="du-title">Hapus User Ini?</h2>
+        </div>
+
+        @if (User != null)
+        {
+            <div class="du-body">
+                <div class="du-user-card">
+                    <div class="du-user-avatar">@User.Initials</div>
+                    <div class="du-user-info">
+                        <div class="du-user-name">@User.FullName.ToUpperInvariant()</div>
+                        <div class="du-user-email">@User.Email</div>
+                    </div>
+                </div>
+
+                <div class="du-warning">
+                    <Icon Name="alert-triangle" Size="24" CssClass="text-danger" />
+                    <p>User ini masih memiliki <strong>2 booking aktif</strong>. Booking tersebut akan otomatis dibatalkan jika akun dihapus atau dinonaktifkan.</p>
+                </div>
+
+                <button class="btn-primary-pill du-deactivate-btn" @onclick="Deactivate">
+                    Nonaktifkan Akun (Disarankan)
+                </button>
+                <p class="du-deactivate-desc">Akun akan menjadi tidak aktif. Data dan riwayat booking akan tetap tersimpan dan dapat diaktifkan kembali kapan saja.</p>
+
+                <div class="du-divider">
+                    <span class="du-divider-text">ATAU</span>
+                </div>
+
+                <div class="du-permanent">
+                    <div class="du-permanent-label">KETIK NAMA USER UNTUK KONFIRMASI PENGHAPUSAN PERMANEN</div>
+                    <p class="du-permanent-desc">Ketik <strong>@User.FullName</strong> di bawah untuk konfirmasi.</p>
+                    <input type="text" class="du-input" placeholder="@User.FullName" @bind="confirmName" />
+                    <button class="btn-outline-pill du-delete-btn @(IsDeleteEnabled ? "enabled" : "")" disabled="@(!IsDeleteEnabled)" @onclick="PermanentDelete">
+                        Hapus Permanen
+                    </button>
+                </div>
+            </div>
+        }
+
+        <div class="du-footer">
+            <button class="btn-outline-pill" @onclick="Close">Batal</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public User? User { get; set; }
+    [Parameter] public EventCallback<User> OnUserDeleted { get; set; }
+    [Parameter] public EventCallback<User> OnUserDeactivated { get; set; }
+
+    private string confirmName = string.Empty;
+
+    private bool IsDeleteEnabled => !string.IsNullOrWhiteSpace(User?.FullName) && confirmName == User.FullName;
+
+    private void Deactivate()
+    {
+        if (User != null)
+        {
+            OnUserDeactivated.InvokeAsync(User);
+        }
+        Close();
+    }
+
+    private void PermanentDelete()
+    {
+        if (User != null && IsDeleteEnabled)
+        {
+            OnUserDeleted.InvokeAsync(User);
+        }
+        Close();
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        confirmName = string.Empty;
+    }
+}

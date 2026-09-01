@@ -1,0 +1,142 @@
+﻿@using booking_room_admin.Components.Models
+
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Ubah Ruangan" Size="medium" OnClose="Close">
+    <ChildContent>
+        <div class="er-body">
+            <div class="er-field">
+                <label class="er-label">Nama Ruangan</label>
+                <input type="text" class="er-input" @bind="form.Name" />
+            </div>
+            <div class="er-row">
+                <div class="er-field">
+                    <label class="er-label">Lantai</label>
+                    <select class="er-input" @bind="form.Floor">
+                        <option value="">Pilih Lantai</option>
+                        @foreach (var floor in floors)
+                        {
+                            <option value="@floor">@floor</option>
+                        }
+                    </select>
+                </div>
+                <div class="er-field">
+                    <label class="er-label">Tipe Ruangan</label>
+                    <select class="er-input" @bind="form.Type">
+                        <option value="">Pilih Tipe</option>
+                        @foreach (var type in roomTypes)
+                        {
+                            <option value="@type">@type</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="er-field">
+                <label class="er-label">Kapasitas (Orang)</label>
+                <input type="number" class="er-input" @bind="form.Capacity" />
+            </div>
+            <div class="er-field">
+                <label class="er-label">Deskripsi</label>
+                <textarea class="er-input er-textarea" @bind="form.Description"></textarea>
+            </div>
+            <div class="er-field">
+                <label class="er-label">Fasilitas</label>
+                <div class="er-facilities">
+                    @foreach (var facility in allFacilities)
+                    {
+                        <label class="er-facility-label @(form.Facilities.Contains(facility) ? "active" : "")">
+                            <input type="checkbox" checked="@form.Facilities.Contains(facility)" @onchange="@((ChangeEventArgs e) => ToggleFacility(facility, e.Value))" />
+                            <span>@facility</span>
+                        </label>
+                    }
+                </div>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn-outline-pill" @onclick="Close">Batal</button>
+        <button class="btn-primary-pill btn-yellow" disabled="@(!IsValid())" @onclick="SaveChanges">
+            <Icon Name="check" Size="14" />
+            Simpan Perubahan
+        </button>
+    </FooterContent>
+</AppModal>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<Room> OnRoomUpdated { get; set; }
+    [Parameter] public Room? Room { get; set; }
+
+    private List<string> floors = new() { "Lantai 1", "Lantai 2", "Lantai 3", "Lantai 4", "Lantai 14" };
+    private List<string> roomTypes = new() { "Rapat", "Diskusi", "Presentasi", "Eksekutif" };
+    private List<string> allFacilities = new() { "WiFi", "Proyektor", "Video Konferensi", "AC", "Whiteboard", "Sound System", "Katering", "Display" };
+
+    private EditRoomForm form = new();
+
+    protected override void OnParametersSet()
+    {
+        if (Room != null)
+        {
+            form = new EditRoomForm
+            {
+                Name = Room.Name,
+                Floor = Room.Floor,
+                Type = Room.Type,
+                Capacity = Room.Capacity,
+                Description = Room.Description,
+                Facilities = Room.Facilities != null ? new List<string>(Room.Facilities) : new List<string>()
+            };
+        }
+    }
+
+    private bool IsValid()
+    {
+        return !string.IsNullOrWhiteSpace(form.Name) &&
+               !string.IsNullOrWhiteSpace(form.Floor) &&
+               !string.IsNullOrWhiteSpace(form.Type) &&
+               form.Capacity > 0;
+    }
+
+    private void ToggleFacility(string facility, object? value)
+    {
+        bool isChecked = (bool)(value ?? false);
+        if (isChecked && !form.Facilities.Contains(facility))
+        {
+            form.Facilities.Add(facility);
+        }
+        else if (!isChecked && form.Facilities.Contains(facility))
+        {
+            form.Facilities.Remove(facility);
+        }
+    }
+
+    private void SaveChanges()
+    {
+        if (Room == null || !IsValid()) return;
+
+        Room.Name = form.Name;
+        Room.Floor = form.Floor;
+        Room.Type = form.Type;
+        Room.Capacity = form.Capacity;
+        Room.Description = form.Description;
+        Room.Facilities = new List<string>(form.Facilities);
+
+        OnRoomUpdated.InvokeAsync(Room);
+        Close();
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+    }
+
+    private class EditRoomForm
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Floor { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public int Capacity { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public List<string> Facilities { get; set; } = new();
+    }
+}

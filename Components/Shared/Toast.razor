@@ -1,0 +1,64 @@
+@namespace booking_room_admin.Components.Shared
+@implements IDisposable
+@inject booking_room_admin.Components.Services.ToastService ToastSvc
+
+<div class="toast-stack">
+    @foreach (var t in _toasts)
+    {
+        <div class="toast @t.Type">
+            <span class="toast-icon">
+                @if (t.Type == "success") { <Icon Name="check-circle" Size="16" /> }
+                else if (t.Type == "error") { <Icon Name="x-circle" Size="16" /> }
+                else { <Icon Name="bell" Size="16" /> }
+            </span>
+            <span class="toast-message">@t.Message</span>
+            <button type="button" class="toast-close" @onclick="() => DismissToast(t)" title="Tutup notifikasi">
+                <Icon Name="x" Size="14" />
+            </button>
+            <div class="toast-progress"></div>
+        </div>
+    }
+</div>
+
+@code {
+    private class ToastItem
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string Message { get; set; } = "";
+        public string Type { get; set; } = "info";
+    }
+
+    private List<ToastItem> _toasts = new();
+
+    protected override void OnInitialized()
+    {
+        ToastSvc.OnToast += HandleToast;
+    }
+
+    private async void HandleToast(string message, string type)
+    {
+        var toast = new ToastItem { Message = message, Type = type };
+        _toasts.Add(toast);
+        if (_toasts.Count > 5) _toasts.RemoveAt(0);
+        await InvokeAsync(StateHasChanged);
+
+        await Task.Delay(4000); // 4 seconds auto-dismiss duration
+
+        if (_toasts.Contains(toast)) 
+        {
+            _toasts.Remove(toast);
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void DismissToast(ToastItem t)
+    {
+        _toasts.Remove(t);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ToastSvc.OnToast -= HandleToast;
+    }
+}

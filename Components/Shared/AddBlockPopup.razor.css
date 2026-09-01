@@ -1,0 +1,12 @@
+.ab-form { display: flex; flex-direction: column; gap: 16px; padding: 8px 0; }
+.ab-row { display: flex; gap: 16px; }
+.ab-row .ab-field { flex: 1; }
+.ab-field { display: flex; flex-direction: column; gap: 8px; }
+.ab-field label { font-size: 14px; font-weight: 500; color: #334155; }
+.ab-input { padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; outline: none; font-size: 14px; }
+.ab-input:focus { border-color: #2563EB; box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+.ab-time-range { display: flex; align-items: center; gap: 8px; }
+.ab-textarea { padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; outline: none; font-size: 14px; resize: vertical; }
+.ab-textarea:focus { border-color: #2563EB; }
+.btn-outline { padding: 8px 16px; border: 1px solid #CBD5E1; background: white; border-radius: 8px; cursor: pointer; font-weight: 500; color: #475569; }
+.btn-primary { padding: 8px 16px; border: none; background: #2563EB; color: white; border-radius: 8px; cursor: pointer; font-weight: 500; }

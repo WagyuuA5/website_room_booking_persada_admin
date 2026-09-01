@@ -1,0 +1,74 @@
+.status-badge {
+    font-size: var(--font-badge-size, 12px);
+    font-weight: var(--font-badge-weight, 500);
+    letter-spacing: 0.01em;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-pill, 999px);
+    display: inline-block;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.badge-success {
+    background: var(--color-success-soft, #ECFDF5);
+    color: var(--color-success, #16A34A);
+}
+
+.badge-warning {
+    background: var(--color-warning-soft, #FFFBEB);
+    color: var(--color-warning, #D97706);
+}
+
+.badge-danger {
+    background: var(--color-danger-soft, #FEF2F2);
+    color: var(--color-danger, #DC2626);
+}
+
+.badge-info {
+    background: var(--color-info-soft, #F0F9FF);
+    color: var(--color-info, #0284C7);
+}
+
+.badge-accent,
+.badge-primary {
+    background: var(--color-accent-soft, #EFF6FF);
+    color: var(--color-accent, #2563EB);
+}
+
+.badge-neutral {
+    background: var(--color-surface-alt, #F1F5F9);
+    color: var(--color-text-secondary, #64748B);
+}
+
+/* Legacy class compatibility */
+.badge-pending {
+    background: var(--color-warning-soft, #FFFBEB);
+    color: var(--color-warning, #D97706);
+}
+
+.badge-confirmed,
+.badge-approved {
+    background: var(--color-success-soft, #ECFDF5);
+    color: var(--color-success, #16A34A);
+}
+
+.badge-rejected {
+    background: var(--color-danger-soft, #FEF2F2);
+    color: var(--color-danger, #DC2626);
+}
+
+.badge-progress {
+    background: var(--color-info-soft, #F0F9FF);
+    color: var(--color-info, #0284C7);
+}
+
+.badge-forwarded {
+    background: var(--color-accent-soft, #EFF6FF);
+    color: var(--color-accent, #2563EB);
+}
+
+.badge-maintenance {
+    background: var(--color-warning-soft, #FFFBEB);
+    color: var(--color-warning, #D97706);
+}
+

@@ -1,0 +1,377 @@
+@page "/my-bookings"
+@layout booking_room_admin.Components.Layout.MainLayout
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Services
+@inject ToastService Toast
+@implements IDisposable
+
+<TopBar Title="Status Booking Saya" Subtitle="Pantau status seluruh pengajuan booking ruangan yang telah Anda buat." />
+
+<div class="my-bookings-page">
+    @* -- Baris Aksi: CTA -- *@
+    <div class="action-row" style="justify-content: flex-end;">
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenNewBooking">
+            <Icon Name="plus" Size="14" />
+            <span>Buat Booking Baru</span>
+        </button>
+    </div>
+
+    @* -- Status Filter Pills -- *@
+    <div class="mb-status-toolbar">
+        <div class="mb-pills-list">
+            <button type="button" class="mb-pill @(selectedTab == "all" ? "active" : "")" @onclick='() => SelectTab("all")'>
+                <span>Semua</span>
+                <span class="mb-count count-all">@myBookings.Count</span>
+            </button>
+            <button type="button" class="mb-pill @(selectedTab == "pending" ? "active" : "")" @onclick='() => SelectTab("pending")'>
+                <span>Menunggu</span>
+                <span class="mb-count count-pending">@GetCount("pending")</span>
+            </button>
+            <button type="button" class="mb-pill @(selectedTab == "approved" ? "active" : "")" @onclick='() => SelectTab("approved")'>
+                <span>Disetujui</span>
+                <span class="mb-count count-approved">@GetCount("approved")</span>
+            </button>
+            <button type="button" class="mb-pill @(selectedTab == "rejected" ? "active" : "")" @onclick='() => SelectTab("rejected")'>
+                <span>Ditolak</span>
+                <span class="mb-count count-rejected">@GetCount("rejected")</span>
+            </button>
+            <button type="button" class="mb-pill @(selectedTab == "completed" ? "active" : "")" @onclick='() => SelectTab("completed")'>
+                <span>Selesai</span>
+                <span class="mb-count count-completed">@GetCount("completed")</span>
+            </button>
+        </div>
+    </div>
+
+    @* -- Booking Cards Grid / List -- *@
+    <div class="mb-cards-grid">
+        @if (!FilteredBookings.Any())
+        {
+            <EmptyState Title="Anda belum memiliki riwayat booking" Description="Belum ada pengajuan pemesanan ruangan untuk status ini. Ajukan pemesanan baru sekarang." ActionLabel="Buat Booking Pertama Anda" OnAction="OpenNewBooking" />
+        }
+        else
+        {
+            @foreach (var b in FilteredBookings)
+            {
+                <div class="my-booking-card" @onclick="() => OpenDetail(b)">
+                    <div class="card-top-row">
+                        <div class="room-identity">
+                            <span class="room-icon-badge"><Icon Name="building" Size="18" /></span>
+                            <div>
+                                <h4 class="room-title">@b.RoomName</h4>
+                                <span class="room-loc">@b.Location</span>
+                            </div>
+                        </div>
+                        <StatusBadge Status="@b.Status" CustomLabel="@GetStatusLabel(b.Status)" />
+                    </div>
+
+                    <div class="card-schedule-box">
+                        <div class="sched-item">
+                            <span class="sched-icon"><Icon Name="calendar" Size="14" /></span>
+                            <span>@b.Date.ToString("dd MMM yyyy")</span>
+                        </div>
+                        <div class="sched-item">
+                            <span class="sched-icon"><Icon Name="clock" Size="14" /></span>
+                            <span>@b.StartTime - @b.EndTime (@b.Duration)</span>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(b.Purpose))
+                    {
+                        <p class="card-purpose">@b.Purpose</p>
+                    }
+
+                    <div class="card-bottom-row" @onclick:stopPropagation="true">
+                        <span class="participants-badge"><Icon Name="users" Size="12" /> @b.ParticipantsCount Peserta</span>
+                        @if (b.Status == "pending")
+                        {
+                            <button type="button" class="btn-cancel-req" @onclick="() => ConfirmCancel(b)">
+                                Batalkan Pengajuan
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@* -- Detail Modal -- *@
+@if (selectedBooking != null)
+{
+    <AppModal IsOpen="@showDetailModal" IsOpenChanged="@((bool v) => showDetailModal = v)" Size="medium">
+        <HeaderContent>
+            <div class="mb-modal-header">
+                <h3 class="mb-modal-title">@selectedBooking.RoomName</h3>
+                <StatusBadge Status="@selectedBooking.Status" CustomLabel="@GetStatusLabel(selectedBooking.Status)" />
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <div class="mb-modal-body">
+                <div class="mb-detail-specs">
+                    <div class="spec-row">
+                        <span class="spec-label">Lokasi:</span>
+                        <strong class="spec-val">@selectedBooking.Location</strong>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Jadwal:</span>
+                        <strong class="spec-val">@selectedBooking.Date.ToString("dd MMMM yyyy"), @selectedBooking.StartTime - @selectedBooking.EndTime</strong>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Durasi:</span>
+                        <strong class="spec-val">@selectedBooking.Duration</strong>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Jumlah Peserta:</span>
+                        <strong class="spec-val">@selectedBooking.ParticipantsCount Orang</strong>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Keperluan:</span>
+                        <strong class="spec-val">@selectedBooking.Purpose</strong>
+                    </div>
+                </div>
+
+                @* Rejection Reason if Rejected *@
+                @if (selectedBooking.Status == "rejected" && !string.IsNullOrWhiteSpace(selectedBooking.RejectReason))
+                {
+                    <div class="rejection-box">
+                        <span class="rejection-title"><Icon Name="alert-triangle" Size="14" /> Alasan Penolakan:</span>
+                        <p class="rejection-desc">@selectedBooking.RejectReason</p>
+                    </div>
+                }
+
+                @* Timeline Status *@
+                <div class="timeline-section">
+                    <h5 class="timeline-heading">Status Pengajuan</h5>
+                    <div class="status-timeline">
+                        <div class="tl-step step-done">
+                            <div class="tl-bullet"><Icon Name="check" Size="10" /></div>
+                            <div class="tl-content">
+                                <strong>Diajukan</strong>
+                                <span>@selectedBooking.SubmittedAt.ToString("dd MMM yyyy, HH:mm")</span>
+                            </div>
+                        </div>
+                        <div class="tl-connector @(selectedBooking.Status != "pending" ? "conn-active" : "")"></div>
+                        <div class="tl-step @(selectedBooking.Status != "pending" ? "step-done" : "step-active")">
+                            <div class="tl-bullet">@if (selectedBooking.Status != "pending") { <Icon Name="check" Size="10" /> } else { <span class="tl-dot"></span> }</div>
+                            <div class="tl-content">
+                                <strong>Sedang Ditinjau Admin</strong>
+                                <span>Verifikasi ketersediaan jadwal</span>
+                            </div>
+                        </div>
+                        <div class="tl-connector @(selectedBooking.Status == "approved" || selectedBooking.Status == "completed" || selectedBooking.Status == "rejected" ? "conn-active" : "")"></div>
+                        <div class="tl-step @(selectedBooking.Status == "approved" || selectedBooking.Status == "completed" ? "step-done" : selectedBooking.Status == "rejected" ? "step-rejected" : "step-pending")">
+                            <div class="tl-bullet">@if (selectedBooking.Status == "rejected") { <Icon Name="x" Size="10" /> } else if (selectedBooking.Status == "approved" || selectedBooking.Status == "completed") { <Icon Name="check" Size="10" /> } else { <span class="tl-dot"></span> }</div>
+                            <div class="tl-content">
+                                <strong>@(selectedBooking.Status == "rejected" ? "Ditolak oleh Admin" : selectedBooking.Status == "completed" ? "Selesai" : "Disetujui")</strong>
+                                <span>@(string.IsNullOrEmpty(selectedBooking.ApprovedBy) ? "Menunggu persetujuan" : $"Oleh {selectedBooking.ApprovedBy}")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Tutup</button>
+            @if (selectedBooking.Status == "pending")
+            {
+                <button type="button" class="btn-outline-pill btn-reject" @onclick="() => CancelBooking(selectedBooking)">Batalkan Pengajuan</button>
+            }
+        </FooterContent>
+    </AppModal>
+}
+
+<ManualBookingPopup @bind-IsOpen="showManualBookingModal" OnBookingCreated="HandleBookingCreated" />
+<BookingSuccessModal @bind-IsOpen="showSuccessModal" Booking="justCreatedBooking" OnCreateAnother="OpenNewBooking" OnViewMyBookings="HandleViewCreatedBooking" />
+
+@code {
+    private string selectedTab = "all";
+    private bool showDetailModal = false;
+    private bool showManualBookingModal = false;
+    private bool showSuccessModal = false;
+    private Booking? justCreatedBooking;
+    private UserBookingItem? selectedBooking;
+    private System.Threading.Timer? _pollTimer;
+
+    public class UserBookingItem
+    {
+        public int Id { get; set; }
+        public string RoomName { get; set; } = "";
+        public string Location { get; set; } = "";
+        public DateTime Date { get; set; }
+        public string StartTime { get; set; } = "";
+        public string EndTime { get; set; } = "";
+        public string Duration { get; set; } = "";
+        public string Purpose { get; set; } = "";
+        public int ParticipantsCount { get; set; }
+        public string Status { get; set; } = "pending";
+        public string ApprovedBy { get; set; } = "";
+        public string RejectReason { get; set; } = "";
+        public DateTime SubmittedAt { get; set; }
+    }
+
+    private List<UserBookingItem> myBookings = new();
+
+    protected override void OnInitialized()
+    {
+        InitMyBookings();
+        // Safe dedup polling simulation
+        _pollTimer = new System.Threading.Timer(_ =>
+        {
+            // Background check without leak
+        }, null, 15000, 15000);
+    }
+
+    private void InitMyBookings()
+    {
+        myBookings = new List<UserBookingItem>
+        {
+            new()
+            {
+                Id = 1,
+                RoomName = "Ruang Rapat Utama",
+                Location = "Gedung A, Lantai 2",
+                Date = DateTime.Today.AddDays(1),
+                StartTime = "09:00",
+                EndTime = "11:00",
+                Duration = "2 Jam",
+                Purpose = "Koordinasi Sprint Review Q4 dengan Tim Engineering & QA",
+                ParticipantsCount = 10,
+                Status = "pending",
+                SubmittedAt = DateTime.Now.AddHours(-1)
+            },
+            new()
+            {
+                Id = 2,
+                RoomName = "Ruang Dirantara VIP",
+                Location = "Gedung B, Lantai 3",
+                Date = DateTime.Today.AddDays(2),
+                StartTime = "13:30",
+                EndTime = "15:00",
+                Duration = "1.5 Jam",
+                Purpose = "Pertemuan Evaluasi Anggaran Tahunan bersama Direksi",
+                ParticipantsCount = 6,
+                Status = "approved",
+                ApprovedBy = "Admin Wahyu",
+                SubmittedAt = DateTime.Now.AddDays(-1)
+            },
+            new()
+            {
+                Id = 3,
+                RoomName = "Auditorium Serbaguna",
+                Location = "Gedung Utama, Lantai 1",
+                Date = DateTime.Today.AddDays(-3),
+                StartTime = "10:00",
+                EndTime = "12:00",
+                Duration = "2 Jam",
+                Purpose = "Workshop Onboarding Karyawan Baru",
+                ParticipantsCount = 35,
+                Status = "completed",
+                ApprovedBy = "Sarah Jenkins",
+                SubmittedAt = DateTime.Now.AddDays(-5)
+            },
+            new()
+            {
+                Id = 4,
+                RoomName = "Ruang Diskusi B",
+                Location = "Gedung A, Lantai 1",
+                Date = DateTime.Today.AddDays(-1),
+                StartTime = "14:00",
+                EndTime = "16:00",
+                Duration = "2 Jam",
+                Purpose = "Sesi Brainstorming Desain Produk Baru",
+                ParticipantsCount = 5,
+                Status = "rejected",
+                ApprovedBy = "Admin Wahyu",
+                RejectReason = "Ruangan sedang dalam jadwal pemeliharaan berkala (Maintenance).",
+                SubmittedAt = DateTime.Now.AddDays(-2)
+            }
+        };
+    }
+
+    private IEnumerable<UserBookingItem> FilteredBookings =>
+        selectedTab == "all"
+            ? myBookings
+            : myBookings.Where(b => b.Status.Equals(selectedTab, StringComparison.OrdinalIgnoreCase));
+
+    private int GetCount(string status) =>
+        myBookings.Count(b => b.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
+
+    private void SelectTab(string tab)
+    {
+        selectedTab = tab;
+    }
+
+    private void OpenNewBooking()
+    {
+        showManualBookingModal = true;
+    }
+
+    private void HandleBookingCreated(Booking b)
+    {
+        justCreatedBooking = b;
+        var newItem = new UserBookingItem
+        {
+            Id = b.Id,
+            RoomName = b.Room,
+            Location = "Gedung Utama, Lantai 2",
+            Date = b.Date,
+            StartTime = b.StartTime,
+            EndTime = b.EndTime,
+            Duration = b.Duration,
+            Purpose = b.Title,
+            ParticipantsCount = b.ParticipantsCount,
+            Status = "pending",
+            SubmittedAt = DateTime.Now
+        };
+        myBookings.Insert(0, newItem);
+        showSuccessModal = true;
+        StateHasChanged();
+    }
+
+    private void HandleViewCreatedBooking()
+    {
+        showSuccessModal = false;
+        if (justCreatedBooking != null)
+        {
+            selectedBooking = myBookings.FirstOrDefault(x => x.Id == justCreatedBooking.Id);
+            if (selectedBooking != null)
+            {
+                showDetailModal = true;
+            }
+        }
+    }
+
+    private void OpenDetail(UserBookingItem b)
+    {
+        selectedBooking = b;
+        showDetailModal = true;
+    }
+
+    private void ConfirmCancel(UserBookingItem b)
+    {
+        CancelBooking(b);
+    }
+
+    private void CancelBooking(UserBookingItem b)
+    {
+        b.Status = "rejected";
+        b.RejectReason = "Dibatalkan sendiri oleh pengguna.";
+        Toast.Info($"Pengajuan booking {b.RoomName} telah dibatalkan.");
+        showDetailModal = false;
+    }
+
+    private string GetStatusLabel(string status) => status switch
+    {
+        "pending" => "Menunggu",
+        "approved" => "Disetujui",
+        "rejected" => "Ditolak",
+        "completed" => "Selesai",
+        _ => status
+    };
+
+    public void Dispose()
+    {
+        _pollTimer?.Dispose();
+    }
+}

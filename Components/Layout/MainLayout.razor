@@ -1,71 +1,94 @@
-﻿@inherits LayoutComponentBase
-@inject NavigationManager Navigation
+@inherits LayoutComponentBase
+@inject booking_room_admin.Components.Services.LayoutStateService LayoutState
+@inject booking_room_admin.Components.Services.AuthService AuthService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 @using booking_room_admin.Components.Shared
+@implements IDisposable
 
-<div class="admin-layout">
-    <aside class="admin-sidebar">
-        <NavMenu />
+<div class="admin-layout @(LayoutState.IsSidebarCollapsed ? "sidebar-collapsed" : "")">
+    <aside class="admin-sidebar scroll-area">
+        <button type="button" class="sr-only" @onclick="LayoutState.ToggleSidebar">Toggle Navigasi Sidebar</button>
+        <NavMenu IsCollapsed="@LayoutState.IsSidebarCollapsed" />
+        <div class="sidebar-drag-handle" title="Tarik atau klik dua kali untuk mengecilkan/membesarkan sidebar"></div>
     </aside>
 
     <div class="admin-main">
-        <header class="admin-topbar">
-            <div class="topbar-left">
-                <h1 class="page-title">Dashboard Admin</h1>
-                <p class="page-subtitle">Ringkasan performa sistem pemesanan ruangan perusahaan.</p>
-            </div>
-            <div class="topbar-right">
-                <div class="date-filter" @onclick="ToggleDatePicker">
-                    <img src="icon/icon_6_admin.png" alt="Kalender" class="icon-sm" />
-                    <span>@dateRangeLabel</span>
-                </div>
-                <div class="topbar-icon-btn notification-btn" @onclick="ToggleNotification">
-                    <img src="icon/icon_7_admin.png" alt="Notifikasi" class="icon-md" />
-                    <span class="notification-badge">@unreadCount</span>
-                </div>
-                <div class="admin-avatar">
-                    <span>WA</span>
-                </div>
-            </div>
-        </header>
-
         <article class="admin-content">
-            @Body
+            <ErrorBoundary>
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent Context="ex">
+                    <div class="error-fallback" style="padding: 2rem; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 12px; margin: 1.5rem; color: #991B1B;">
+                        <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Terjadi kesalahan saat menampilkan halaman ini.</h3>
+                        <p style="font-size: 0.88rem; color: #B91C1C; margin-bottom: 1rem;">@ex.Message</p>
+                        <button type="button" class="btn-primary-pill btn-danger" onclick="location.reload()" style="padding: 0.4rem 1rem; font-size: 0.82rem;">
+                            Muat Ulang Halaman
+                        </button>
+                    </div>
+                </ErrorContent>
+            </ErrorBoundary>
         </article>
     </div>
-</div>
 
-<DatePickerPopup IsOpen="@showDatePicker" IsOpenChanged="@((bool v) => showDatePicker = v)" OnDateSelected="OnDateSelected" />
-<NotificationPopup IsOpen="@showNotification" IsOpenChanged="@((bool v) => showNotification = v)" />
+    <Toast />
+</div>
 
 <div id="blazor-error-ui" data-nosnippet>
     Terjadi kesalahan tak terduga.
     <a href="." class="reload">Muat Ulang</a>
-    <span class="dismiss">🗙</span>
+    <span class="dismiss">&times;</span>
 </div>
 
 @code {
-    private bool showDatePicker = false;
-    private bool showNotification = false;
-    private string dateRangeLabel = "20 Ags 2026 — 20 Sep 2026";
-    private int unreadCount = 3;
+    private DotNetObjectReference<MainLayout>? _objRef;
 
-    private void ToggleDatePicker()
+    protected override async Task OnInitializedAsync()
     {
-        showDatePicker = !showDatePicker;
-        if (showDatePicker) showNotification = false;
-    }
-
-    private void ToggleNotification()
-    {
-        showNotification = !showNotification;
-        if (showNotification) showDatePicker = false;
-    }
-
-    private void OnDateSelected(DateTime? date)
-    {
-        if (date.HasValue)
+        if (!AuthService.IsAuthenticated)
         {
-            dateRangeLabel = date.Value.ToString("dd MMM yyyy");
+            NavigationManager.NavigateTo("/login");
+            return;
         }
+
+        LayoutState.OnChange += StateHasChanged;
+        await LayoutState.InitStateAsync();
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("applyThemeMode", LayoutState.IsDarkMode);
+        }
+        catch { }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("applyThemeMode", LayoutState.IsDarkMode);
+            }
+            catch { }
+
+            _objRef = DotNetObjectReference.Create(this);
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("initSidebarDrag", _objRef);
+            }
+            catch { }
+        }
+    }
+
+    [JSInvokable]
+    public void ToggleSidebarFromJs()
+    {
+        LayoutState.ToggleSidebar();
+    }
+
+    public void Dispose()
+    {
+        LayoutState.OnChange -= StateHasChanged;
+        _objRef?.Dispose();
     }
 }

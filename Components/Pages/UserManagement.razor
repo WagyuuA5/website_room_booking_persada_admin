@@ -1,0 +1,957 @@
+@page "/users"
+@layout booking_room_admin.Components.Layout.MainLayout
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Services
+@inject IUserService UserService
+@inject ToastService Toast
+@inject IJSRuntime JS
+
+<TopBar Title="Manajemen Pengguna" Subtitle="Kelola akses, profil, dan hak pengguna sistem pemesanan ruangan." />
+
+<div class="user-management-page">
+
+    @* -- Baris Aksi: search + filter + ekspor + import + CTA -- *@
+    <div class="um-toolbar">
+        <div class="um-search-box">
+            <Icon Name="search" Size="16" CssClass="um-search-icon" />
+            <input type="text" placeholder="Cari berdasarkan nama, email, atau ID pengguna..." @bind="searchQuery" @bind:event="oninput" @onkeyup="HandleSearchKey" />
+        </div>
+        <FilterDropdown 
+            DefaultLabel="Semua Divisi"
+            Options="@persadaDepartments"
+            Value="@departmentFilter"
+            ValueChanged="@((string val) => { departmentFilter = val; _ = LoadUsers(); })" />
+        <button type="button" class="btn-export-um" @onclick="OpenExportModal">
+            <Icon Name="download" Size="14" />
+            <span>Ekspor</span>
+        </button>
+        <button type="button" class="btn-outline-pill" @onclick="() => showImportModal = true">
+            <Icon Name="upload" Size="14" />
+            <span>Impor CSV</span>
+        </button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
+            <Icon Name="plus" Size="14" />
+            <span>Tambah Pengguna</span>
+        </button>
+    </div>
+
+    @if (hasError)
+    {
+        <div class="error-state">
+            <div class="error-icon"><Icon Name="alert-triangle" Size="36" CssClass="text-danger" /></div>
+            <h3 class="error-title">Tidak dapat memuat data user</h3>
+            <p class="error-desc">Terjadi kendala saat menghubungkan ke database pengguna. Silakan coba kembali.</p>
+            <button class="btn-primary-pill btn-yellow" @onclick="LoadUsers">Coba Lagi</button>
+        </div>
+    }
+    else if (isLoading)
+    {
+        <div class="skeleton-loader">
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+        </div>
+    }
+    else if (!users.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon"><Icon Name="users" Size="36" CssClass="text-muted" /></div>
+            <h3 class="empty-title">Tidak ada user ditemukan</h3>
+            <p class="empty-desc">Tidak ada akun pengguna yang cocok dengan kriteria pencarian atau filter yang dipilih.</p>
+            <button class="btn-primary-pill btn-yellow" @onclick="ResetFilters">Reset Filter</button>
+        </div>
+    }
+    else
+    {
+        <div class="um-table-container">
+            <DataTable TItem="User"
+                       Items="users"
+                       Columns="columns"
+                       TotalCount="totalCount"
+                       PageSize="pageSize"
+                       CurrentPage="currentPage"
+                       OnPageChanged="HandlePageChange"
+                       OnRowClick="OpenDetailModal"
+                       ShowCheckbox="false">
+                <RowTemplate Context="u">
+                    <td class="col-user">
+                        <div class="user-row-cell">
+                            <div class="user-avatar-circle" style="background: @GetAvatarColor(u.FullName)">
+                                @u.Initials
+                            </div>
+                            <div class="user-name-box">
+                                <span class="user-full-name">@u.FullName</span>
+                                <span class="user-email-text">@u.Email</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="col-dept">
+                        <span class="um-dept-text" title="@u.Department">@u.Department</span>
+                    </td>
+                    <td class="col-bookings">
+                        <span class="um-bookings-text">@u.TotalBookings Booking</span>
+                    </td>
+                    <td class="col-status">
+                        <span class="um-status-pill @(u.Status.ToLower() == "active" ? "status-active" : "status-inactive")">
+                            <span class="status-dot"></span>
+                            @(u.Status.ToLower() == "active" ? "Aktif" : "Tidak Aktif")
+                        </span>
+                    </td>
+                    <td class="col-actions">
+                        <div class="um-actions" @onclick:stopPropagation="true">
+                            <button type="button" class="btn-action-edit" title="Edit Pengguna" @onclick="() => OpenEditModal(u)">
+                                <Icon Name="pencil" Size="15" />
+                            </button>
+                            <button type="button" class="btn-action-delete" title="Hapus User" @onclick="() => OpenDeleteModal(u)">
+                                <Icon Name="trash-2" Size="15" />
+                            </button>
+                        </div>
+                    </td>
+                </RowTemplate>
+            </DataTable>
+        </div>
+    }
+</div>
+
+@* -- Modal 1: Tambah User -- *@
+<AppModal IsOpen="showAddModal" IsOpenChanged="v => showAddModal = v" Title="Tambah User" Size="medium">
+    <ChildContent>
+        <p class="modal-subtitle-text">Tambahkan pengguna baru ke sistem booking ruangan.</p>
+        
+        <div class="um-form">
+            <div class="form-group">
+                <label class="form-label">Nama Lengkap <span class="req">*</span></label>
+                <input type="text" class="form-input @(hasAddSubmitted && string.IsNullOrWhiteSpace(formModel.FullName) ? "is-invalid" : "")" placeholder="Contoh: Budi Santoso" @bind="formModel.FullName" />
+                @if (hasAddSubmitted && string.IsNullOrWhiteSpace(formModel.FullName))
+                {
+                    <span class="field-error">Nama lengkap wajib diisi.</span>
+                }
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email Perusahaan <span class="req">*</span></label>
+                <input type="email" class="form-input @(hasAddSubmitted && !IsValidEmail(formModel.Email) ? "is-invalid" : "")" placeholder="Contoh: budi.santoso@ptpersada.co.id" @bind="formModel.Email" />
+                @if (hasAddSubmitted)
+                {
+                    if (string.IsNullOrWhiteSpace(formModel.Email))
+                    {
+                        <span class="field-error">Email wajib diisi.</span>
+                    }
+                    else if (!IsValidEmail(formModel.Email))
+                    {
+                        <span class="field-error">Format email tidak valid.</span>
+                    }
+                }
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">Departemen / Divisi <span class="req">*</span></label>
+                    <select class="form-input" @bind="formModel.Department">
+                        @foreach (var dept in persadaDepartments)
+                        {
+                            <option value="@dept">@dept</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role <span class="req">*</span></label>
+                    <select class="form-input" @bind="formModel.Role">
+                        <option value="Admin">Admin</option>
+                        <option value="Pengguna">Pengguna</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">ID Karyawan (NIK) <span class="req">*</span></label>
+                    <input type="text" class="form-input @(hasAddSubmitted && string.IsNullOrWhiteSpace(formModel.EmployeeId) ? "is-invalid" : "")" placeholder="Contoh: PSD-8492" @bind="formModel.EmployeeId" />
+                    @if (hasAddSubmitted && string.IsNullOrWhiteSpace(formModel.EmployeeId))
+                    {
+                        <span class="field-error">NIK wajib diisi.</span>
+                    }
+                </div>
+                <div class="form-group">
+                    <label class="form-label">No. Telepon / WhatsApp</label>
+                    <input type="tel" class="form-input" placeholder="081234567890" @bind="formModel.Phone" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password Akun <span class="req">*</span></label>
+                <div class="um-password-input-group">
+                    <div class="password-wrapper">
+                        <input type="@(showPassword ? "text" : "password")" class="form-input" placeholder="Buat password sementara..." @bind="newPasswordInput" @bind:event="oninput" />
+                        <button type="button" class="btn-password-toggle" @onclick="() => showPassword = !showPassword" title="Lihat/Sembunyikan">
+                            <Icon Name="@(showPassword ? "eye-off" : "eye")" Size="18" />
+                        </button>
+                    </div>
+                    <button type="button" class="btn-sq-action" @onclick="GeneratePassword" title="Buat Password Otomatis Kuat">
+                        <Icon Name="refresh-cw" Size="18" />
+                    </button>
+                    <button type="button" class="btn-sq-action" @onclick="CopyPassword" title="Salin Password">
+                        <Icon Name="copy" Size="18" />
+                    </button>
+                </div>
+
+                @if (!string.IsNullOrEmpty(newPasswordInput))
+                {
+                    var strength = GetPasswordStrength(newPasswordInput);
+                    <div class="password-strength-bar">
+                        <div class="strength-segments">
+                            <div class="strength-seg @(strength >= 1 ? (strength == 1 ? "weak" : strength == 2 ? "medium" : "strong") : "")"></div>
+                            <div class="strength-seg @(strength >= 2 ? (strength == 2 ? "medium" : "strong") : "")"></div>
+                            <div class="strength-seg @(strength >= 3 ? "strong" : "")"></div>
+                        </div>
+                        <span class="strength-label strength-@strength">Kekuatan Password: @GetPasswordStrengthLabel(strength)</span>
+                    </div>
+                }
+
+                <label class="um-checkbox-label">
+                    <input type="checkbox" @bind="forceChangePassword" />
+                    <span>User wajib mengganti password saat login pertama</span>
+                </label>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showAddModal = false" disabled="@isFormSubmitting">Batal</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveNewUser" disabled="@(isFormSubmitting || (!string.IsNullOrEmpty(newPasswordInput) && GetPasswordStrength(newPasswordInput) < 3))">
+            @if (isFormSubmitting)
+            {
+                <span class="spinner-sm"></span>
+                <span>Menyimpan...</span>
+            }
+            else
+            {
+                <span>Tambah Pengguna</span>
+            }
+        </button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal 2: Edit User -- *@
+<AppModal IsOpen="showEditModal" IsOpenChanged="v => showEditModal = v" Title="Edit Profil Pengguna" Size="medium">
+    <ChildContent>
+        @if (editModel != null)
+        {
+            <div class="um-form">
+                <div class="um-detail-header-edit">
+                    <ProfileAvatarUploader Initials="@editModel.Initials" BgColor="@GetAvatarColor(editModel.FullName)" Size="64px" CameraIconSize="14" />
+                    <div class="um-edit-user-summary">
+                        <strong class="um-edit-name">@editModel.FullName</strong>
+                        <span class="um-edit-email">@editModel.Email</span>
+                        <button type="button" class="btn-outline-pill btn-sm" style="margin-top: 4px; align-self: flex-start;" @onclick="OpenResetPasswordModal">
+                            <Icon Name="key" Size="13" /> Reset Password
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nama Lengkap <span class="req">*</span></label>
+                    <input type="text" class="form-input" @bind="editModel.FullName" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Perusahaan <span class="req">*</span></label>
+                    <input type="email" class="form-input" @bind="editModel.Email" />
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Departemen / Divisi <span class="req">*</span></label>
+                        <select class="form-input" @bind="editModel.Department">
+                            @foreach (var dept in persadaDepartments)
+                            {
+                                <option value="@dept">@dept</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Role <span class="req">*</span></label>
+                        <select class="form-input" @bind="editModel.Role">
+                            <option value="Admin">Admin</option>
+                            <option value="Pengguna">Pengguna</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">ID Karyawan (NIK)</label>
+                        <input type="text" class="form-input" @bind="editModel.EmployeeId" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status Akun</label>
+                        <select class="form-input" @bind="editModel.Status">
+                            <option value="Active">Aktif</option>
+                            <option value="Inactive">Tidak Aktif</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        }
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showEditModal = false" disabled="@isFormSubmitting">Batal</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveEditUser" disabled="@isFormSubmitting">
+            @if (isFormSubmitting)
+            {
+                <span class="spinner-sm"></span>
+                <span>Menyimpan...</span>
+            }
+            else
+            {
+                <span>Simpan Perubahan</span>
+            }
+        </button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal 3: Hapus Pengguna (CASE 4 Redesign) -- *@
+<AppModal IsOpen="showDeleteModal" IsOpenChanged="v => showDeleteModal = v" Title="Hapus Pengguna" Size="medium">
+    <ChildContent>
+        @if (userToDelete != null)
+        {
+            <div class="delete-modal-content" style="display: flex; flex-direction: column; gap: 1rem;">
+                
+                @* Info Pengguna Target *@
+                <div style="background: var(--color-surface-alt, #F3F4F6); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: @GetAvatarColor(userToDelete.FullName); color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;">
+                        @userToDelete.Initials
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--color-text-primary, #111827); font-size: 14px;">@userToDelete.FullName</div>
+                        <div style="color: var(--color-text-secondary, #6B7280); font-size: 13px;">@userToDelete.Email</div>
+                    </div>
+                </div>
+
+                @* Kotak Peringatan Kuning *@
+                <div style="background: var(--color-warning-soft, #FEF3C7); border-left: 4px solid var(--color-warning, #F59E0B); border-radius: 4px; padding: 12px; font-size: 13px; color: var(--color-warning, #92400E); display: flex; align-items: flex-start; gap: 8px;">
+                    <Icon Name="alert-triangle" Size="16" style="margin-top: 2px; color: var(--color-warning, #F59E0B);" />
+                    <div style="line-height: 1.4;">
+                        Tindakan ini tidak dapat dibatalkan. Pengguna ini memiliki <strong>@userToDelete.TotalBookings pemesanan aktif</strong>.
+                    </div>
+                </div>
+
+                @* Opsi 1: Nonaktifkan (Biru) *@
+                <div style="background: var(--color-accent-soft, #EFF6FF); border: 1px solid var(--color-border, #BFDBFE); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-weight: 600; color: var(--color-accent, #1E40AF); font-size: 14px;">(Direkomendasikan) Nonaktifkan Akun</div>
+                    <div style="color: var(--color-text-secondary, #3B82F6); font-size: 13px; line-height: 1.4;">Pengguna tidak bisa login, namun data dan riwayat pemesanan tetap tersimpan di sistem.</div>
+                    <button type="button" class="btn-primary-pill btn-navy" style="width: 100%; justify-content: center; margin-top: 4px;" @onclick="DeactivateUser">Nonaktifkan Akun</button>
+                </div>
+
+                <div style="display: flex; align-items: center; text-align: center; color: var(--color-text-muted, #9CA3AF); font-size: 12px; font-weight: 600; letter-spacing: 1px;">
+                    <div style="flex: 1; border-bottom: 1px solid var(--color-border, #E5E7EB);"></div>
+                    <span style="padding: 0 10px;">ATAU</span>
+                    <div style="flex: 1; border-bottom: 1px solid var(--color-border, #E5E7EB);"></div>
+                </div>
+
+                @* Opsi 2: Hapus Permanen (Merah) *@
+                <div style="background: var(--color-danger-soft, #FEF2F2); border: 1px solid var(--color-danger-soft, #FECACA); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-weight: 600; color: var(--color-danger, #991B1B); font-size: 14px;">Hapus Permanen</div>
+                    <div style="color: var(--color-danger, #EF4444); font-size: 13px; line-height: 1.4;">Data pengguna dan riwayat terkait akan dihapus secara permanen.</div>
+                    
+                    <div style="margin-top: 4px;">
+                        <label style="font-size: 11px; font-weight: 600; color: var(--color-danger, #7F1D1D); text-transform: uppercase; margin-bottom: 4px; display: block;">Ketik nama "<span style="color: var(--color-danger, #B91C1C);">@userToDelete.FullName</span>" untuk konfirmasi:</label>
+                        <input type="text"
+                               class="form-input @(!string.IsNullOrEmpty(confirmDeleteName) && !string.Equals(confirmDeleteName, userToDelete.FullName, StringComparison.OrdinalIgnoreCase) ? "is-invalid" : "")"
+                               style="width: 100%; border-color: var(--color-danger, #FCA5A5); background: var(--color-surface, #FFF);"
+                               placeholder="@userToDelete.FullName"
+                               @bind="confirmDeleteName"
+                               @bind:event="oninput" />
+                    </div>
+                    <button type="button" class="btn-primary-pill btn-danger" style="width: 100%; justify-content: center; margin-top: 8px;" @onclick="ConfirmDeleteUser" disabled="@(!string.Equals(confirmDeleteName, userToDelete?.FullName, StringComparison.OrdinalIgnoreCase))">Hapus Permanen</button>
+                </div>
+            </div>
+        }
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" style="width: 100%; justify-content: center;" @onclick="() => showDeleteModal = false">Batal</button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal 4: Detail Pengguna (Case G.2) -- *@
+<AppModal IsOpen="showDetailModal" IsOpenChanged="v => showDetailModal = v" Title="Detail Pengguna" Size="medium">
+    <ChildContent>
+        @if (selectedUserForDetail != null)
+        {
+            <div class="um-detail-wrapper">
+                @* Clean Header with Avatar + Name + Email + Status Badge *@
+                <div class="um-detail-header-card">
+                    <ProfileAvatarUploader Initials="@selectedUserForDetail.Initials" BgColor="@GetAvatarColor(selectedUserForDetail.FullName)" Size="64px" CameraIconSize="14" />
+                    <div class="um-dheader-info">
+                        <div class="um-dheader-top">
+                            <h3 class="um-dheader-name">@selectedUserForDetail.FullName</h3>
+                            <span class="um-status-pill @(selectedUserForDetail.Status.ToLower() == "active" ? "status-active" : "status-inactive")">
+                                <span class="status-dot"></span>
+                                @(selectedUserForDetail.Status.ToLower() == "active" ? "Aktif" : "Tidak Aktif")
+                            </span>
+                        </div>
+                        <span class="um-dheader-email">@selectedUserForDetail.Email</span>
+                        <span class="um-dheader-nik">NIK: @(string.IsNullOrWhiteSpace(selectedUserForDetail.EmployeeId) ? "PSD-1029" : selectedUserForDetail.EmployeeId)</span>
+                    </div>
+                </div>
+
+                @* Structured 2-Column Info Grid *@
+                <div class="um-detail-grid">
+                    <div class="um-dgrid-cell">
+                        <span class="um-dgrid-label">DEPARTEMEN</span>
+                        <strong class="um-dgrid-val">@selectedUserForDetail.Department</strong>
+                    </div>
+                    <div class="um-dgrid-cell">
+                        <span class="um-dgrid-label">ROLE</span>
+                        <strong class="um-dgrid-val">@selectedUserForDetail.Role</strong>
+                    </div>
+                    <div class="um-dgrid-cell">
+                        <span class="um-dgrid-label">TOTAL BOOKING</span>
+                        <strong class="um-dgrid-val">@selectedUserForDetail.TotalBookings Booking</strong>
+                    </div>
+                    <div class="um-dgrid-cell">
+                        <span class="um-dgrid-label">BERGABUNG SEJAK</span>
+                        <strong class="um-dgrid-val">12 Jan 2026</strong>
+                    </div>
+                </div>
+
+                @* Timeline Activity Log *@
+                <div class="um-detail-timeline-section">
+                    <span class="um-section-label">Log Aktivitas Terakhir</span>
+                    <div class="um-timeline-list">
+                        <div class="um-timeline-item">
+                            <div class="um-timeline-dot"></div>
+                            <div class="um-timeline-content">
+                                <strong>Booking "Ruang Alpha (VIP)"</strong>
+                                <span>15 Okt 2026, 09:00 - 11:00 WIB &middot; Disetujui</span>
+                            </div>
+                        </div>
+                        <div class="um-timeline-item">
+                            <div class="um-timeline-dot"></div>
+                            <div class="um-timeline-content">
+                                <strong>Permintaan Fasilitas Proyektor & Catering</strong>
+                                <span>12 Okt 2026, 14:30 WIB &middot; Selesai</span>
+                            </div>
+                        </div>
+                        <div class="um-timeline-item">
+                            <div class="um-timeline-dot"></div>
+                            <div class="um-timeline-content">
+                                <strong>Login Terakhir dari Web Portal</strong>
+                                <span>Hari ini, 08:45 WIB &middot; IP: 192.168.1.42</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Tutup</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="() => { showDetailModal = false; OpenEditModal(selectedUserForDetail!); }">Edit Pengguna</button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal 5: Reset Password (Case G.3) -- *@
+<AppModal IsOpen="showResetPasswordModal" IsOpenChanged="v => showResetPasswordModal = v" Title="Reset Password Pengguna" Size="small">
+    <ChildContent>
+        <p class="modal-subtitle-text">Buat kata sandi baru untuk <strong>@userToReset?.FullName</strong>.</p>
+        <div class="um-form" style="margin-top: 1rem;">
+            <div class="form-group">
+                <label class="form-label">Password Baru <span class="req">*</span></label>
+                <div class="um-password-input-group">
+                    <div class="password-wrapper">
+                        <input type="@(showPassword ? "text" : "password")" class="form-input" placeholder="Masukkan password baru..." @bind="newPasswordInput" @bind:event="oninput" />
+                        <button type="button" class="btn-password-toggle" @onclick="() => showPassword = !showPassword" title="Lihat/Sembunyikan">
+                            <Icon Name="@(showPassword ? "eye-off" : "eye")" Size="18" />
+                        </button>
+                    </div>
+                    <button type="button" class="btn-sq-action" @onclick="GeneratePassword" title="Buat Password Otomatis Kuat">
+                        <Icon Name="refresh-cw" Size="18" />
+                    </button>
+                    <button type="button" class="btn-sq-action" @onclick="CopyPassword" title="Salin Password">
+                        <Icon Name="copy" Size="18" />
+                    </button>
+                </div>
+
+                @if (!string.IsNullOrEmpty(newPasswordInput))
+                {
+                    var strength = GetPasswordStrength(newPasswordInput);
+                    <div class="password-strength-bar">
+                        <div class="strength-segments">
+                            <div class="strength-seg @(strength >= 1 ? (strength == 1 ? "weak" : strength == 2 ? "medium" : "strong") : "")"></div>
+                            <div class="strength-seg @(strength >= 2 ? (strength == 2 ? "medium" : "strong") : "")"></div>
+                            <div class="strength-seg @(strength >= 3 ? "strong" : "")"></div>
+                        </div>
+                        <span class="strength-label strength-@strength">Kekuatan Password: @GetPasswordStrengthLabel(strength)</span>
+                    </div>
+                }
+
+                <label class="um-checkbox-label">
+                    <input type="checkbox" @bind="forceChangePassword" />
+                    <span>User wajib mengganti password saat login pertama</span>
+                </label>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showResetPasswordModal = false">Batal</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="SubmitResetPassword" disabled="@(string.IsNullOrWhiteSpace(newPasswordInput) || GetPasswordStrength(newPasswordInput) < 3)">Simpan Password</button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal 6: Import CSV -- *@
+<AppModal IsOpen="showImportModal" IsOpenChanged="v => showImportModal = v" Title="Import Pengguna" Size="large">
+    <ChildContent>
+        <p class="modal-subtitle-text">Upload file CSV untuk menambahkan beberapa user sekaligus.</p>
+
+        <div class="csv-drop-zone">
+            <Icon Name="upload" Size="32" CssClass="csv-upload-icon" />
+            <div class="csv-drop-text">Upload CSV - Drag & Drop atau <label class="csv-browse"><input type="file" style="display:none" @onchange="SimulateCsvLoad" accept=".csv" />pilih file</label></div>
+            <span class="csv-hint">Format kolom: Nama, Email, Department, Role, User ID</span>
+        </div>
+
+        @if (csvPreviewList.Any())
+        {
+            <div class="csv-summary-bar">
+                <span class="csv-valid-badge"><Icon Name="check" Size="14" /> @csvPreviewList.Count data valid siap diimpor</span>
+            </div>
+
+            <div class="csv-preview-table-wrap">
+                <table class="csv-preview-table">
+                    <thead>
+                        <tr>
+                            <th>NAMA</th>
+                            <th>EMAIL</th>
+                            <th>DEPARTEMEN</th>
+                            <th>ROLE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in csvPreviewList)
+                        {
+                            <tr>
+                                <td>@c.FullName</td>
+                                <td>@c.Email</td>
+                                <td>@c.Department</td>
+                                <td>@c.Role</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </ChildContent>
+    <FooterContent>
+        <button type="button" class="btn-outline-pill" @onclick="() => showImportModal = false">Batal</button>
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="ConfirmCsvImport" disabled="@(!csvPreviewList.Any())">Import User</button>
+    </FooterContent>
+</AppModal>
+
+@* -- Modal 7: Export Modal -- *@
+<ExportModal IsOpen="showExportModal"
+             IsOpenChanged="v => showExportModal = v"
+             ExportTitle="Data Pengguna Sistem Booking"
+             Columns="exportColumns"
+             CurrentViewRows="users.Cast<object>()"
+             AllRows="allUsersExport.Cast<object>()" />
+
+@code {
+    private List<User> users = new();
+    private List<User> allUsersExport = new();
+    private int totalCount = 0;
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private bool isLoading = true;
+    private bool hasError = false;
+
+    private string searchQuery = "";
+    private string departmentFilter = "All";
+
+    private bool showAddModal = false;
+    private bool showEditModal = false;
+    private bool showDeleteModal = false;
+    private bool showDetailModal = false;
+    private bool showResetPasswordModal = false;
+    private bool showImportModal = false;
+    private bool showExportModal = false;
+
+    private User formModel = new();
+    private User? editModel;
+    private User? userToDelete;
+    private User? selectedUserForDetail;
+    private User? userToReset;
+
+    private bool hasAddSubmitted = false;
+    private bool isFormSubmitting = false;
+    private string confirmDeleteName = "";
+
+    private List<User> csvPreviewList = new();
+
+    private List<DataTable<User>.DataTableColumn> columns = new()
+    {
+        new() { Header = "PENGGUNA", PropertyName = "FullName" },
+        new() { Header = "DIVISI / DEPARTEMEN", PropertyName = "Department" },
+        new() { Header = "TOTAL BOOKING", PropertyName = "TotalBookings" },
+        new() { Header = "STATUS", PropertyName = "Status" },
+        new() { Header = "AKSI", PropertyName = "" }
+    };
+
+    private List<ExportColumn> exportColumns = new()
+    {
+        new() { Header = "ID User", PropertyName = "EmployeeId" },
+        new() { Header = "Nama Lengkap", PropertyName = "FullName" },
+        new() { Header = "Email", PropertyName = "Email" },
+        new() { Header = "Departemen", PropertyName = "Department" },
+        new() { Header = "Role", PropertyName = "Role" },
+        new() { Header = "Status", PropertyName = "Status" },
+        new() { Header = "Total Booking", PropertyName = "TotalBookings" }
+    };
+
+    private string newPasswordInput = "";
+    private bool showPassword = false;
+    private bool forceChangePassword = true;
+
+    private readonly string[] persadaDepartments = new[]
+    {
+        "IT & Digital",
+        "Operasional",
+        "Sumber Daya Manusia (SDM)",
+        "Keuangan",
+        "Marketing & Komunikasi",
+        "Legal & Kepatuhan",
+        "General Affairs (GA)",
+        "Layanan Keamanan",
+        "Call Center & Layanan Pelanggan",
+        "Layanan Perkantoran",
+        "Teknikal & Pemeliharaan Telekomunikasi"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        isLoading = true;
+        hasError = false;
+        StateHasChanged();
+
+        try
+        {
+            var result = await UserService.GetUsersFilteredAsync(currentPage, pageSize, searchQuery, departmentFilter);
+            users = result.Users.ToList();
+            totalCount = result.TotalCount;
+        }
+        catch
+        {
+            hasError = true;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandlePageChange(int page)
+    {
+        currentPage = page;
+        await LoadUsers();
+    }
+
+    private async Task HandleSearchKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            currentPage = 1;
+            await LoadUsers();
+        }
+    }
+
+    private async Task ResetFilters()
+    {
+        searchQuery = "";
+        departmentFilter = "All";
+        currentPage = 1;
+        await LoadUsers();
+    }
+
+    private void OpenAddModal()
+    {
+        formModel = new User
+        {
+            Department = "IT & Digital",
+            Role = "Pengguna",
+            Status = "active",
+            EmployeeId = $"PSD-{new Random().Next(1050, 9999)}"
+        };
+        hasAddSubmitted = false;
+        isFormSubmitting = false;
+        GeneratePassword(); // Auto-generate high strength password
+        showAddModal = true;
+    }
+
+    private async Task SaveNewUser()
+    {
+        hasAddSubmitted = true;
+        if (string.IsNullOrWhiteSpace(formModel.FullName) || !IsValidEmail(formModel.Email) || string.IsNullOrWhiteSpace(formModel.EmployeeId))
+        {
+            return;
+        }
+
+        if (GetPasswordStrength(newPasswordInput) < 3)
+        {
+            Toast.Error("Password belum memenuhi syarat kekuatan 'Kuat'.");
+            return;
+        }
+
+        isFormSubmitting = true;
+        StateHasChanged();
+
+        var success = await UserService.AddUserAsync(formModel);
+        isFormSubmitting = false;
+        showAddModal = false;
+
+        if (success)
+        {
+            Toast.Success($"Pengguna '{formModel.FullName}' berhasil ditambahkan.");
+            searchQuery = "";
+            departmentFilter = "All";
+            currentPage = 1;
+            await LoadUsers();
+        }
+        else
+        {
+            Toast.Error("Gagal menambahkan pengguna. NIK atau Email sudah terdaftar.");
+        }
+    }
+
+    private void OpenEditModal(User u)
+    {
+        editModel = new User
+        {
+            Id = u.Id,
+            FullName = u.FullName,
+            Email = u.Email,
+            Department = u.Department,
+            EmployeeId = u.EmployeeId,
+            Phone = u.Phone,
+            Role = u.Role,
+            Status = u.Status,
+            TotalBookings = u.TotalBookings
+        };
+        showEditModal = true;
+    }
+
+    private async Task SaveEditUser()
+    {
+        if (editModel == null) return;
+        isFormSubmitting = true;
+        StateHasChanged();
+
+        var success = await UserService.UpdateUserAsync(editModel);
+        isFormSubmitting = false;
+        showEditModal = false;
+
+        if (success)
+        {
+            Toast.Success("Data pengguna berhasil diperbarui.");
+            await LoadUsers();
+        }
+        else
+        {
+            Toast.Error("Gagal memperbarui data pengguna.");
+        }
+    }
+
+    private void OpenDetailModal(User u)
+    {
+        selectedUserForDetail = u;
+        showDetailModal = true;
+    }
+
+    private async Task DeactivateUser()
+    {
+        if (userToDelete != null)
+        {
+            userToDelete.Status = "inactive";
+            Toast.Success($"Pengguna {userToDelete.FullName} berhasil dinonaktifkan.");
+            showDeleteModal = false;
+            await LoadUsers();
+        }
+    }
+
+    private void OpenDeleteModal(User u)
+    {
+        userToDelete = u;
+        confirmDeleteName = "";
+        showDeleteModal = true;
+    }
+
+    private async Task ConfirmDeleteUser()
+    {
+        if (userToDelete != null)
+        {
+            if (!string.Equals(confirmDeleteName, userToDelete.FullName, StringComparison.OrdinalIgnoreCase))
+            {
+                Toast.Error("Nama konfirmasi tidak cocok.");
+                return;
+            }
+            await UserService.DeleteUserAsync(userToDelete.Id);
+            Toast.Success("Pengguna berhasil dihapus.");
+            showDeleteModal = false;
+            searchQuery = "";
+            departmentFilter = "All";
+            currentPage = 1;
+            await LoadUsers();
+        }
+    }
+
+    private async Task OpenExportModal()
+    {
+        allUsersExport = await UserService.GetAllUsersAsync();
+        showExportModal = true;
+    }
+
+    private void SimulateCsvLoad(ChangeEventArgs e)
+    {
+        csvPreviewList = new List<User>
+        {
+            new() { FullName = "Anton Kurniawan", Email = "anton.k@ptpersada.co.id", Department = "Operasional", Role = "Pengguna", EmployeeId = "PSD-2001", Status = "active" },
+            new() { FullName = "Rina Susanti", Email = "rina.s@ptpersada.co.id", Department = "Keuangan", Role = "Pengguna", EmployeeId = "PSD-2002", Status = "active" },
+            new() { FullName = "Doni Ramadhan", Email = "doni.r@ptpersada.co.id", Department = "IT & Digital", Role = "Admin", EmployeeId = "PSD-2003", Status = "active" }
+        };
+    }
+
+    private async Task ConfirmCsvImport()
+    {
+        if (csvPreviewList.Any())
+        {
+            var count = await UserService.ImportUsersAsync(csvPreviewList);
+            Toast.Success($"{count} pengguna baru berhasil diimpor dari CSV.");
+            csvPreviewList.Clear();
+            showImportModal = false;
+            await LoadUsers();
+        }
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return false;
+        return email.Contains('@') && email.Contains('.');
+    }
+
+    private void OpenResetPasswordModal()
+    {
+        userToReset = editModel ?? selectedUserForDetail;
+        GeneratePassword();
+        showResetPasswordModal = true;
+    }
+
+    private void GeneratePassword()
+    {
+        string pwd;
+        do
+        {
+            pwd = GenerateRandomCandidate(14);
+        } while (!IsPasswordStrongEnough(pwd));
+
+        newPasswordInput = pwd;
+        showPassword = true;
+    }
+
+    private static string GenerateRandomCandidate(int length)
+    {
+        const string uppers = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        const string lowers = "abcdefghijkmnopqrstuvwxyz";
+        const string digits = "23456789";
+        const string symbols = "!@#$%^&*";
+        const string all = uppers + lowers + digits + symbols;
+        var random = new Random();
+        
+        var chars = new List<char>
+        {
+            uppers[random.Next(uppers.Length)],
+            uppers[random.Next(uppers.Length)],
+            lowers[random.Next(lowers.Length)],
+            lowers[random.Next(lowers.Length)],
+            digits[random.Next(digits.Length)],
+            digits[random.Next(digits.Length)],
+            symbols[random.Next(symbols.Length)],
+            symbols[random.Next(symbols.Length)]
+        };
+        while (chars.Count < length)
+        {
+            chars.Add(all[random.Next(all.Length)]);
+        }
+        return new string(chars.OrderBy(_ => random.Next()).ToArray());
+    }
+
+    private static bool IsPasswordStrongEnough(string pwd)
+    {
+        if (string.IsNullOrEmpty(pwd) || pwd.Length < 14) return false;
+        bool hasUpper = pwd.Any(char.IsUpper);
+        bool hasLower = pwd.Any(char.IsLower);
+        bool hasDigit = pwd.Any(char.IsDigit);
+        bool hasSymbol = pwd.Any(ch => !char.IsLetterOrDigit(ch));
+        if (!hasUpper || !hasLower || !hasDigit || !hasSymbol) return false;
+
+        // No 3+ sequential (e.g. abc, 123)
+        for (int i = 0; i < pwd.Length - 2; i++)
+        {
+            if (pwd[i+1] == pwd[i] + 1 && pwd[i+2] == pwd[i] + 2) return false;
+            if (pwd[i+1] == pwd[i] - 1 && pwd[i+2] == pwd[i] - 2) return false;
+        }
+        // No 3+ repeated (e.g. aaa, 111)
+        for (int i = 0; i < pwd.Length - 2; i++)
+        {
+            if (pwd[i] == pwd[i+1] && pwd[i] == pwd[i+2]) return false;
+        }
+        return true;
+    }
+
+    private async Task CopyPassword()
+    {
+        if (!string.IsNullOrEmpty(newPasswordInput))
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", newPasswordInput);
+            Toast.Success("Password berhasil disalin ke clipboard.");
+        }
+    }
+
+    private async Task SubmitResetPassword()
+    {
+        if (string.IsNullOrWhiteSpace(newPasswordInput)) return;
+        if (GetPasswordStrength(newPasswordInput) < 3)
+        {
+            Toast.Error("Password belum memenuhi syarat kekuatan 'Kuat'.");
+            return;
+        }
+        
+        Toast.Success($"Password untuk '{(userToReset?.FullName ?? "Pengguna")}' berhasil diperbarui.");
+        showResetPasswordModal = false;
+        newPasswordInput = "";
+        await Task.CompletedTask;
+    }
+
+    private int GetPasswordStrength(string pwd)
+    {
+        if (string.IsNullOrEmpty(pwd)) return 0;
+        if (IsPasswordStrongEnough(pwd)) return 3; // Kuat
+        if (pwd.Length >= 8 && (pwd.Any(char.IsDigit) || pwd.Any(ch => !char.IsLetterOrDigit(ch)))) return 2; // Sedang
+        return 1; // Lemah
+    }
+
+    private string GetPasswordStrengthLabel(int score) => score switch
+    {
+        1 => "Lemah",
+        2 => "Sedang",
+        3 => "Kuat",
+        _ => "Lemah"
+    };
+
+    private string GetAvatarColor(string name) => AvatarHelper.GetColor(name);
+}

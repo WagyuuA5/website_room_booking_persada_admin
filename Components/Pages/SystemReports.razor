@@ -1,0 +1,171 @@
+@page "/reports"
+@layout booking_room_admin.Components.Layout.MainLayout
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Shared.ReportTabs
+@using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Services
+
+<TopBar Title="Laporan Sistem" Subtitle="Wawasan menyeluruh tentang penggunaan ruangan, permintaan fasilitas, dan dukungan IT." />
+
+<div class="system-reports-container">
+    @* -- Baris Aksi: Date Range + Ekspor Laporan -- *@
+    <div class="action-row">
+        <DateFilter OnDateSelectedCallback="HandleDateChanged" />
+        <button type="button" class="btn-outline-pill" @onclick="() => showExportModal = true">
+            <Icon Name="download" Size="14" />
+            <span>Ekspor Laporan</span>
+        </button>
+    </div>
+
+    @* -- Tab Navigation -- *@
+    <div class="sr-tab-nav">
+        <button type="button" class="sr-tab-link @(activeTab == "booking" ? "active" : "")" @onclick='() => SetTab("booking")'>
+            Pemesanan Ruangan
+        </button>
+        <button type="button" class="sr-tab-link @(activeTab == "facility" ? "active" : "")" @onclick='() => SetTab("facility")'>
+            Permintaan Fasilitas
+        </button>
+        <button type="button" class="sr-tab-link @(activeTab == "deletion" ? "active" : "")" @onclick='() => SetTab("deletion")'>
+            Penghapusan Akun
+        </button>
+        <button type="button" class="sr-tab-link @(activeTab == "itsupport" ? "active" : "")" @onclick='() => SetTab("itsupport")'>
+            Dukungan IT
+        </button>
+        <button type="button" class="sr-tab-link @(activeTab == "bug" ? "active" : "")" @onclick='() => SetTab("bug")'>
+            Laporan Bug
+        </button>
+        <button type="button" class="sr-tab-link @(activeTab == "all" ? "active" : "")" @onclick='() => SetTab("all")'>
+            Semua
+        </button>
+    </div>
+
+    @* -- Filter Bar -- *@
+    <div class="sr-filter-bar">
+        <div class="sr-filter-item">
+            <select class="sr-pill-select" @bind="filterRoom" @bind:after="OnFilterChanged">
+                <option value="All">Semua Ruangan</option>
+                <option value="Ruang Rapat Utama">Ruang Rapat Utama</option>
+                <option value="Ruang Dirantara VIP">Ruang Dirantara VIP</option>
+                <option value="Ruang Diskusi B">Ruang Diskusi B</option>
+                <option value="Auditorium Serbaguna">Auditorium Serbaguna</option>
+            </select>
+        </div>
+        <div class="sr-filter-item">
+            <select class="sr-pill-select" @bind="filterDept" @bind:after="OnFilterChanged">
+                <option value="All">Semua Departemen</option>
+                <option value="IT & Digital">IT & Digital</option>
+                <option value="Operasional">Operasional</option>
+                <option value="Human Resources">Human Resources</option>
+                <option value="Finance">Finance</option>
+                <option value="Marketing">Marketing</option>
+            </select>
+        </div>
+        <div class="sr-filter-item">
+            <select class="sr-pill-select" @bind="filterStatus" @bind:after="OnFilterChanged">
+                <option value="All">Semua Status</option>
+                <option value="approved">Disetujui</option>
+                <option value="pending">Menunggu</option>
+                <option value="rejected">Ditolak</option>
+            </select>
+        </div>
+        <button type="button" class="btn-reset-link" style="margin-left:auto;" @onclick="ResetFilters">Reset Filter</button>
+    </div>
+
+    @* -- Multi-Tab Views with Smooth Transition -- *@
+    <div class="tab-content-fade">
+        @if (activeTab == "booking")
+        {
+            <BookingTab />
+        }
+        else if (activeTab == "facility")
+        {
+            <FacilityTab />
+        }
+        else if (activeTab == "deletion")
+        {
+            <DeletionTab />
+        }
+        else if (activeTab == "itsupport")
+        {
+            <ITSupportTab />
+        }
+        else if (activeTab == "bug")
+        {
+            <BugTab />
+        }
+        else
+        {
+            <AllTab />
+        }
+    </div>
+</div>
+
+<ExportModal IsOpen="@showExportModal" IsOpenChanged="@((bool v) => showExportModal = v)" ExportTitle="@($"Laporan Sistem - {GetTabTitle()}")" Columns="exportColumns" CurrentViewRows="GetExportRows()" AllRows="GetExportRows()" />
+
+@code {
+    private string activeTab = "booking";
+    private string dateRangeLabel = "01 Okt - 31 Okt 2026";
+    private bool showExportModal = false;
+
+    private void HandleDateChanged(DateTime? date)
+    {
+        StateHasChanged();
+    }
+
+    private string filterRoom = "All";
+    private string filterDept = "All";
+    private string filterStatus = "All";
+
+    private List<ExportColumn> exportColumns = new()
+    {
+        new() { Header = "ID Transaksi", PropertyName = "Id" },
+        new() { Header = "Kategori", PropertyName = "Category" },
+        new() { Header = "Departemen", PropertyName = "Department" },
+        new() { Header = "Status", PropertyName = "Status" },
+        new() { Header = "Waktu", PropertyName = "DateTime" }
+    };
+
+    private void SetTab(string tab)
+    {
+        activeTab = tab;
+    }
+
+    private void OnFilterChanged()
+    {
+        StateHasChanged();
+    }
+
+    private void ResetFilters()
+    {
+        filterRoom = "All";
+        filterDept = "All";
+        filterStatus = "All";
+        StateHasChanged();
+    }
+
+    private void OnRangeSelected((DateTime Start, DateTime End) range)
+    {
+        dateRangeLabel = $"{range.Start:dd MMM} - {range.End:dd MMM yyyy}";
+        StateHasChanged();
+    }
+
+    private string GetTabTitle() => activeTab switch
+    {
+        "booking" => "Pemesanan Ruangan",
+        "facility" => "Permintaan Fasilitas",
+        "deletion" => "Penghapusan Akun",
+        "itsupport" => "Dukungan IT",
+        "bug" => "Laporan Bug",
+        _ => "Semua Aktivitas"
+    };
+
+    private IEnumerable<object> GetExportRows()
+    {
+        return new List<object>
+        {
+            new { Id = "REP-101", Category = GetTabTitle(), Department = filterDept == "All" ? "IT & Digital" : filterDept, Status = "Completed", DateTime = DateTime.Now.ToString("dd MMM yyyy") },
+            new { Id = "REP-102", Category = GetTabTitle(), Department = "Operasional", Status = "Approved", DateTime = DateTime.Now.ToString("dd MMM yyyy") }
+        };
+    }
+}
+

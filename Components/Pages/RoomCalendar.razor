@@ -1,0 +1,430 @@
+@page "/room-calendar"
+@layout booking_room_admin.Components.Layout.MainLayout
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@inject booking_room_admin.Components.Services.LayoutStateService LayoutState
+
+<TopBar Title="Kalender Ruangan" Subtitle="Tinjauan jadwal dan ketersediaan semua ruangan dalam format kalender interaktif." />
+
+<div class="room-calendar-page">
+    @* -- Baris Aksi: View Segmented Control + Filter Ruangan + CTA -- *@
+    <div class="action-row">
+        <div class="rc-view-segmented">
+            <button type="button" class="rc-segment-btn @(calendarMode == "timeline" ? "active" : "")" @onclick='() => SetCalendarMode("timeline")'>
+                <Icon Name="clock" Size="14" />
+                <span>Linimasa Waktu</span>
+            </button>
+            <button type="button" class="rc-segment-btn @(calendarMode == "month" ? "active" : "")" @onclick='() => SetCalendarMode("month")'>
+                <Icon Name="calendar" Size="14" />
+                <span>Bulanan</span>
+            </button>
+            <button type="button" class="rc-segment-btn @(calendarMode == "week" ? "active" : "")" @onclick='() => SetCalendarMode("week")'>
+                <Icon Name="grid" Size="14" />
+                <span>Mingguan</span>
+            </button>
+        </div>
+
+        <div class="rc-action-right">
+            <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddBlock">
+                <Icon Name="plus" Size="14" />
+                <span>Tambah Blokir Jadwal</span>
+            </button>
+        </div>
+    </div>
+
+    @* -- Toolbar: Room Filter, Date Navigator, Legend -- *@
+    <div class="rc-toolbar-card">
+        <div class="rc-toolbar-left">
+            <FilterDropdown 
+                DefaultLabel="Semua Ruangan"
+                Options="@(new[] { "Ruang Rapat Utama", "Ruang Dirantara VIP", "Ruang Diskusi B", "Auditorium Serbaguna" })"
+                @bind-Value="selectedRoomFilter" />
+
+            <div class="rc-date-nav">
+                <button type="button" class="rc-nav-arrow" @onclick="PrevDate" title="Sebelumnya"><Icon Name="chevron-left" Size="14" /></button>
+                <span class="rc-current-date">@GetRelativeDateLabel(currentDate) &middot; @currentDate.ToString("dd MMMM yyyy")</span>
+                <button type="button" class="rc-nav-arrow" @onclick="NextDate" title="Berikutnya"><Icon Name="chevron-right" Size="14" /></button>
+                <button type="button" class="btn-today-pill" @onclick="GoToday">Hari Ini</button>
+            </div>
+        </div>
+
+        <div class="rc-legend">
+            <div class="legend-item"><span class="legend-dot dot-available"></span> Tersedia</div>
+            <div class="legend-item"><span class="legend-dot dot-approved"></span> Disetujui</div>
+            <div class="legend-item"><span class="legend-dot dot-pending"></span> Menunggu</div>
+            <div class="legend-item"><span class="legend-dot dot-maintenance"></span> Perawatan / Blokir</div>
+        </div>
+    </div>
+
+    @* -- Content: Timeline Grid Mode -- *@
+    @if (calendarMode == "timeline")
+    {
+        <div class="rc-grid-container table-scroll">
+            <table class="rc-grid">
+                <thead>
+                    <tr>
+                        <th class="rc-room-col">Ruangan</th>
+                        @for (int hour = 8; hour <= 18; hour++)
+                        {
+                            <th>@($"{hour:D2}:00")</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var room in DisplayedRooms)
+                    {
+                        <tr>
+                            <td class="rc-room-name-cell">
+                                <div class="rc-room-meta">
+                                    <strong class="rc-room-title">@room.Name</strong>
+                                    <span class="rc-room-sub">@room.Floor • @room.Capacity Kursi</span>
+                                </div>
+                            </td>
+                            @for (int hour = 8; hour <= 18; hour++)
+                            {
+                                var booking = GetBookingForSlot(room.Name, hour);
+                                if (booking != null)
+                                {
+                                    int span = booking.SpanHours;
+                                    <td colspan="@span" class="cell-event @GetCellClass(booking.Status)" @onclick="() => OpenBookingDetail(booking)">
+                                        <div class="rc-event-pill">
+                                            <div style="display: flex; align-items: center; gap: 4px;">
+                                                @if (booking.IsRecurring)
+                                                {
+                                                    <Icon Name="refresh-cw" Size="10" />
+                                                }
+                                                <strong class="rc-event-title">@booking.Title</strong>
+                                            </div>
+                                            <span class="rc-event-user">@booking.RequesterName (@booking.StartTime - @booking.EndTime)</span>
+                                        </div>
+                                    </td>
+                                    hour += (span - 1);
+                                }
+                                else
+                                {
+                                    <td class="cell-free" @onclick="() => QuickBook(room.Name, hour)"></td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else if (calendarMode == "month")
+    {
+        <div class="rc-month-grid">
+            <div class="rc-month-header-row">
+                @for (int i = 0; i < 7; i++)
+                {
+                    var d = GetStartOfWeek(DateTime.Today).AddDays(i);
+                    <span>@d.ToString("dddd")</span>
+                }
+            </div>
+            <div class="rc-month-days-grid">
+                @{
+                    var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+                    var startDate = GetStartOfWeek(firstDayOfMonth);
+                }
+                @for (int i = 0; i < 42; i++)
+                {
+                    var d = startDate.AddDays(i);
+                    bool isToday = (d.Date == DateTime.Today);
+                    bool isCurrentMonth = (d.Month == currentDate.Month);
+                    // Mock data only has "Day", so we limit it to current month for realism
+                    var dayBookings = isCurrentMonth ? calendarEvents.Where(e => e.Day == d.Day).ToList() : new List<CalendarEventItem>();
+                    <div class="rc-month-cell @(isToday ? "today-cell" : "") @(!isCurrentMonth ? "other-month-cell" : "")" style="@(!isCurrentMonth ? "opacity: 0.5;" : "")">
+                        <div class="rc-day-number">@d.Day</div>
+                        <div class="rc-day-events-list">
+                            @foreach (var ev in dayBookings.Take(3))
+                            {
+                                <div class="rc-mini-event @GetCellClass(ev.Status)" @onclick="() => OpenBookingDetail(ev)">
+                                    <span class="mini-time">@ev.StartTime</span>
+                                    <span class="mini-title">@ev.Room: @ev.Title</span>
+                                </div>
+                            }
+                            @if (dayBookings.Count > 3)
+                            {
+                                <span class="rc-more-events">+@(dayBookings.Count - 3) lainnya</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="rc-week-view table-scroll">
+            <table class="rc-grid">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Waktu</th>
+                        @for (int i = 0; i < 7; i++)
+                        {
+                            var d = GetStartOfWeek(currentDate).AddDays(i);
+                            <th class="@(d.Date == DateTime.Today ? "th-today" : "")">@d.ToString("ddd, dd MMM")</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int h = 8; h <= 18; h++)
+                    {
+                        int currentHour = h;
+                        <tr>
+                            <td class="rc-time-label">@($"{currentHour:D2}:00")</td>
+                            @for (int i = 0; i < 7; i++)
+                            {
+                                var d = GetStartOfWeek(currentDate).AddDays(i);
+                                var ev = calendarEvents.FirstOrDefault(e => e.Day == d.Day && e.StartHour == currentHour);
+                                if (ev != null)
+                                {
+                                    <td class="cell-event @GetCellClass(ev.Status)" @onclick="() => OpenBookingDetail(ev)">
+                                        <div class="rc-event-pill">
+                                            <strong>@ev.Title</strong>
+                                            <span>@ev.Room • @ev.RequesterName</span>
+                                        </div>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="cell-free"></td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @* -- Summary Footer Card -- *@
+    <div class="rc-summary-card">
+        <div class="summary-item">
+            <span class="summary-label">Total Ruangan Aktif:</span>
+            <strong class="summary-value">@allRooms.Count</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Pemesanan Hari Ini:</span>
+            <strong class="summary-value">@calendarEvents.Count(e => e.Day == currentDate.Day)</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Sedang Dalam Perawatan:</span>
+            <strong class="summary-value">1 Ruangan</strong>
+        </div>
+    </div>
+</div>
+
+@* -- Booking Detail Modal (No 'X' Button, Structured Form) -- *@
+@if (selectedEvent != null)
+{
+    <AppModal IsOpen="@showDetailModal" IsOpenChanged="@((bool v) => showDetailModal = v)" Title="Detail Jadwal Pemesanan" Size="medium">
+        <ChildContent>
+            <div class="cal-modal-content">
+                <div class="cal-modal-header-box">
+                    <div>
+                        <h4 class="cal-modal-title">@selectedEvent.Title</h4>
+                        <span class="cal-modal-room"><Icon Name="building" Size="14" /> @selectedEvent.Room</span>
+                    </div>
+                    <StatusBadge Status="@selectedEvent.Status" CustomLabel="@GetStatusLabel(selectedEvent.Status)" />
+                </div>
+
+                <div class="cal-details-grid">
+                    <div class="cal-detail-item">
+                        <span class="cal-label">Pemohon</span>
+                        <strong class="cal-val">@selectedEvent.RequesterName</strong>
+                        <span class="cal-sub">@selectedEvent.Department</span>
+                    </div>
+                    <div class="cal-detail-item">
+                        <span class="cal-label">Jadwal</span>
+                        <strong class="cal-val">@currentDate.ToString("dd MMMM yyyy")</strong>
+                        <span class="cal-sub">@selectedEvent.StartTime - @selectedEvent.EndTime (@selectedEvent.SpanHours Jam)</span>
+                    </div>
+                    <div class="cal-detail-item">
+                        <span class="cal-label">Jumlah Peserta</span>
+                        <strong class="cal-val">@selectedEvent.ParticipantsCount Orang</strong>
+                    </div>
+                    <div class="cal-detail-item">
+                        <span class="cal-label">Kebutuhan Fasilitas</span>
+                        <strong class="cal-val">@selectedEvent.FacilitiesNote</strong>
+                    </div>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Tutup</button>
+        </FooterContent>
+    </AppModal>
+}
+
+<AddBlockPopup IsOpen="@showAddBlock" IsOpenChanged="@((v) => showAddBlock = v)" />
+
+@code {
+    private string calendarMode = "timeline";
+    private string selectedRoomFilter = "all";
+    private DateTime currentDate = DateTime.Today;
+    private bool showAddBlock = false;
+    private bool showDetailModal = false;
+    private CalendarEventItem? selectedEvent;
+
+    private DayOfWeek GetFirstDayOfWeek()
+    {
+        return LayoutState.FirstDayOfWeek switch
+        {
+            "Senin" => DayOfWeek.Monday,
+            "Selasa" => DayOfWeek.Tuesday,
+            "Rabu" => DayOfWeek.Wednesday,
+            "Kamis" => DayOfWeek.Thursday,
+            "Jumat" => DayOfWeek.Friday,
+            "Sabtu" => DayOfWeek.Saturday,
+            "Minggu" => DayOfWeek.Sunday,
+            _ => DayOfWeek.Monday
+        };
+    }
+
+    private DateTime GetStartOfWeek(DateTime date)
+    {
+        var firstDay = GetFirstDayOfWeek();
+        int diff = (7 + (date.DayOfWeek - firstDay)) % 7;
+        return date.AddDays(-1 * diff).Date;
+    }
+
+    public class CalendarRoomItem
+    {
+        public string Name { get; set; } = "";
+        public string Floor { get; set; } = "";
+        public int Capacity { get; set; }
+    }
+
+    public class CalendarEventItem
+    {
+        public int Id { get; set; }
+        public string Room { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string RequesterName { get; set; } = "";
+        public string Department { get; set; } = "";
+        public int Day { get; set; }
+        public int StartHour { get; set; }
+        public int SpanHours { get; set; } = 1;
+        public string StartTime { get; set; } = "09:00";
+        public string EndTime { get; set; } = "11:00";
+        public int ParticipantsCount { get; set; } = 8;
+        public string Status { get; set; } = "approved";
+        public bool IsRecurring { get; set; }
+        public string FacilitiesNote { get; set; } = "Proyektor, Mic Wireless, Katering";
+    }
+
+    private List<CalendarRoomItem> allRooms = new()
+    {
+        new() { Name = "Ruang Rapat Utama", Floor = "Lantai 2", Capacity = 20 },
+        new() { Name = "Ruang Dirantara VIP", Floor = "Lantai 3", Capacity = 12 },
+        new() { Name = "Ruang Diskusi B", Floor = "Lantai 1", Capacity = 8 },
+        new() { Name = "Auditorium Serbaguna", Floor = "Lantai 1", Capacity = 100 }
+    };
+
+    private List<CalendarEventItem> calendarEvents = new()
+    {
+        new() { Id = 1, Room = "Ruang Rapat Utama", Title = "Sprint Planning Q4", RequesterName = "Budi Santoso", Department = "IT & Digital", Day = DateTime.Today.Day, StartHour = 9, SpanHours = 2, StartTime = "09:00", EndTime = "11:00", Status = "approved" },
+        new() { Id = 2, Room = "Ruang Dirantara VIP", Title = "Pertemuan Direksi", RequesterName = "Siti Rahma", Department = "Direksi", Day = DateTime.Today.Day, StartHour = 13, SpanHours = 2, StartTime = "13:00", EndTime = "15:00", Status = "approved" },
+        new() { Id = 3, Room = "Ruang Diskusi B", Title = "Wawancara Kandidat QA", RequesterName = "Ahmad Fauzi", Department = "HRD", Day = DateTime.Today.Day, StartHour = 10, SpanHours = 2, StartTime = "10:00", EndTime = "12:00", Status = "pending" },
+        new() { Id = 4, Room = "Ruang Diskusi B", Title = "Pemeliharaan AC", RequesterName = "Tim GA", Department = "General Affairs", Day = DateTime.Today.Day, StartHour = 15, SpanHours = 2, StartTime = "15:00", EndTime = "17:00", Status = "maintenance", FacilitiesNote = "Pemeliharaan berkala unit AC" }
+    };
+
+    private IEnumerable<CalendarRoomItem> DisplayedRooms =>
+        string.IsNullOrEmpty(selectedRoomFilter) || selectedRoomFilter == "all"
+            ? allRooms
+            : allRooms.Where(r => r.Name == selectedRoomFilter);
+
+    private CalendarEventItem? GetBookingForSlot(string roomName, int hour)
+    {
+        return calendarEvents.FirstOrDefault(e => e.Room == roomName && e.Day == currentDate.Day && e.StartHour == hour);
+    }
+
+    private string GetCellClass(string status) => status switch
+    {
+        "approved" => "status-approved",
+        "pending" => "status-pending",
+        "maintenance" => "status-maintenance",
+        "blocked" => "status-blocked",
+        _ => "status-approved"
+    };
+
+    private string GetStatusLabel(string status) => status switch
+    {
+        "approved" => "Disetujui",
+        "pending" => "Menunggu",
+        "maintenance" => "Dalam Perawatan",
+        "blocked" => "Diblokir",
+        _ => status
+    };
+
+    private void SetCalendarMode(string mode)
+    {
+        calendarMode = mode;
+    }
+
+    private void PrevDate()
+    {
+        currentDate = calendarMode == "month" ? currentDate.AddMonths(-1) : currentDate.AddDays(-1);
+    }
+
+    private void NextDate()
+    {
+        currentDate = calendarMode == "month" ? currentDate.AddMonths(1) : currentDate.AddDays(1);
+    }
+
+    private void GoToday()
+    {
+        currentDate = DateTime.Today;
+    }
+
+    private string GetRelativeDateLabel(DateTime date)
+    {
+        if (calendarMode == "month")
+        {
+            var diffMonths = ((date.Year - DateTime.Today.Year) * 12) + date.Month - DateTime.Today.Month;
+            if (diffMonths == 0) return "Bulan Ini";
+            if (diffMonths == 1) return "Bulan Depan";
+            if (diffMonths == -1) return "Bulan Lalu";
+            return "";
+        }
+        else if (calendarMode == "week")
+        {
+            var diffWeekDays = (date.Date - DateTime.Today).TotalDays;
+            if (diffWeekDays >= 0 && diffWeekDays <= 6) return "Minggu Ini";
+            if (diffWeekDays > 6) return "Minggu Depan";
+            if (diffWeekDays < 0 && diffWeekDays >= -6) return "Minggu Lalu";
+            return "";
+        }
+        
+        // PENTING: JANGAN gunakan Math.Abs() untuk logic — tanda (+/-) menentukan arah waktu
+        var diff = (int)(date.Date - DateTime.Today).TotalDays;
+        if (diff == 0) return "Hari Ini";
+        if (diff == -1) return "Kemarin";
+        if (diff == 1) return "Besok";
+        if (diff < -1 && diff >= -7) return "Minggu Lalu";
+        if (diff > 1 && diff <= 7) return "Minggu Depan";
+        // Math.Abs HANYA untuk tampilan angka, bukan untuk logic pengecekan
+        if (diff < -7) return $"{Math.Abs(diff)} Hari Lalu";
+        if (diff > 7) return $"{diff} Hari Lagi";
+        
+        return "";
+    }
+
+    private void OpenBookingDetail(CalendarEventItem ev)
+    {
+        selectedEvent = ev;
+        showDetailModal = true;
+    }
+
+    private void QuickBook(string roomName, int hour)
+    {
+        // quick reservation
+    }
+
+    private void OpenAddBlock()
+    {
+        showAddBlock = true;
+    }
+}
+

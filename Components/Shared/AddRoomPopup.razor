@@ -1,0 +1,146 @@
+﻿@using booking_room_admin.Components.Models
+
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Tambah Ruangan" Size="medium" OnClose="Close">
+    <ChildContent>
+        <div class="ar-body">
+            <div class="ar-section">
+                <div class="ar-section-title">Informasi Ruangan</div>
+                <div class="ar-field">
+                    <label class="ar-label">Nama Ruangan</label>
+                    <input type="text" class="ar-input" placeholder="cth. Ruang Rapat A" @bind="form.Name" />
+                </div>
+                <div class="ar-row">
+                    <div class="ar-field">
+                        <label class="ar-label">Lantai</label>
+                        <select class="ar-input" @bind="form.Floor">
+                            <option value="">Pilih Lantai</option>
+                            @foreach (var floor in floors)
+                            {
+                                <option value="@floor">@floor</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="ar-field">
+                        <label class="ar-label">Tipe Ruangan</label>
+                        <select class="ar-input" @bind="form.Type">
+                            <option value="">Pilih Tipe</option>
+                            @foreach (var type in roomTypes)
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="ar-field">
+                    <label class="ar-label">Kapasitas (Orang)</label>
+                    <input type="number" class="ar-input" placeholder="cth. 10" @bind="form.Capacity" />
+                </div>
+                <div class="ar-field">
+                    <label class="ar-label">Deskripsi</label>
+                    <textarea class="ar-input ar-textarea" placeholder="Deskripsi singkat ruangan..." @bind="form.Description"></textarea>
+                </div>
+                
+                <div class="ar-field">
+                    <label class="ar-label">Foto Ruangan (Seret & Lepas)</label>
+                    <div class="ar-file-upload">
+                        <div class="ar-file-upload-inner">
+                            <Icon Name="image" Size="24" />
+                            <p>Seret dan lepas file di sini, atau <span>pilih file</span></p>
+                            <span class="ar-file-upload-hint">Maks. 5MB (SVG, PNG, JPG)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ar-section">
+                <div class="ar-section-title">Fasilitas</div>
+                <div class="ar-facilities">
+                    @foreach (var facility in allFacilities)
+                    {
+                        <label class="ar-facility-label @(form.Facilities.Contains(facility) ? "active" : "")">
+                            <input type="checkbox" checked="@form.Facilities.Contains(facility)" @onchange="@((ChangeEventArgs e) => ToggleFacility(facility, e.Value))" />
+                            <span>@facility</span>
+                        </label>
+                    }
+                </div>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn-outline-pill" @onclick="Close">Batal</button>
+        <button class="btn-primary-pill btn-yellow" disabled="@(!IsValid())" @onclick="CreateRoom">
+            <Icon Name="plus" Size="14" />
+            Tambah Ruangan
+        </button>
+    </FooterContent>
+</AppModal>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<Room> OnRoomCreated { get; set; }
+
+    private List<string> floors = new() { "Lantai 1", "Lantai 2", "Lantai 3", "Lantai 4", "Lantai 14" };
+    private List<string> roomTypes = new() { "Rapat", "Diskusi", "Presentasi", "Eksekutif" };
+    private List<string> allFacilities = new() { "WiFi", "Proyektor", "Video Konferensi", "AC", "Whiteboard", "Sound System", "Katering", "Display" };
+
+    private AddRoomForm form = new();
+
+    private bool IsValid()
+    {
+        return !string.IsNullOrWhiteSpace(form.Name) &&
+               !string.IsNullOrWhiteSpace(form.Floor) &&
+               !string.IsNullOrWhiteSpace(form.Type) &&
+               form.Capacity > 0;
+    }
+
+    private void CreateRoom()
+    {
+        if (!IsValid()) return;
+
+        var room = new Room
+        {
+            Name = form.Name,
+            Floor = form.Floor,
+            Type = form.Type,
+            Capacity = form.Capacity,
+            Description = form.Description,
+            Status = "active",
+            TotalBookings = 0,
+            Facilities = form.Facilities.Where(f => !string.IsNullOrWhiteSpace(f)).ToList()
+        };
+
+        OnRoomCreated.InvokeAsync(room);
+        Close();
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        form = new AddRoomForm();
+    }
+
+    private void ToggleFacility(string facility, object? value)
+    {
+        bool isChecked = (bool)(value ?? false);
+        if (isChecked && !form.Facilities.Contains(facility))
+        {
+            form.Facilities.Add(facility);
+        }
+        else if (!isChecked && form.Facilities.Contains(facility))
+        {
+            form.Facilities.Remove(facility);
+        }
+    }
+
+    private class AddRoomForm
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Floor { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public int Capacity { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public List<string> Facilities { get; set; } = new();
+    }
+}

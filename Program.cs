@@ -1,5 +1,6 @@
 using ApexCharts;
 using booking_room_admin.Components;
+using booking_room_admin.Components.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,12 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddApexCharts();
+builder.Services.AddScoped<booking_room_admin.Components.Services.LayoutStateService>();
+builder.Services.AddScoped<booking_room_admin.Components.Services.ToastService>();
+builder.Services.AddScoped<booking_room_admin.Components.Services.IUserService, booking_room_admin.Components.Services.UserService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 
@@ -28,3 +35,4 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+

@@ -1,0 +1,230 @@
+.popup-overlay.detail-room-card {
+    backdrop-filter: blur(10px);
+}
+
+.popup-card.detail-room-card {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 1.25rem;
+    background: #ffffff;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    transform-origin: top center;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.dr-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem 0;
+}
+
+.dr-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+}
+
+.dr-subtitle {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin: 0.25rem 0 0;
+}
+
+.dr-body {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+}
+
+.dr-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.dr-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+}
+
+.badge-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-maintenance {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dr-capacity {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dr-meta-icon {
+    width: 1rem;
+    height: 1rem;
+    object-fit: contain;
+}
+
+.dr-desc {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #4b5563;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.dr-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dr-section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.dr-tags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.dr-tag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    background: #f3f4f6;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+}
+
+.dr-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.dr-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    background: #f9fafb;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    flex: 1;
+}
+
+.dr-stat-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.dr-stat-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.dr-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.dr-header-photo-container {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    background: #f3f4f6;
+    margin: -1.25rem -1.25rem 0 -1.25rem;
+    width: calc(100% + 2.5rem);
+    border-radius: 0.75rem 0.75rem 0 0;
+    overflow: hidden;
+}
+
+.dr-header-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.dr-header-photo-placeholder img {
+    width: 5rem;
+    height: 5rem;
+    opacity: 0.5;
+}
+.dr-header-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    padding: 2rem 1.25rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.dr-title-overlay {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+.dr-subtitle-overlay {
+    color: #e5e7eb;
+    font-size: 0.9rem;
+    margin: 0;
+}
+.dr-header-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+.dr-facilities-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+.dr-facility-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #374151;
+    background: #f9fafb;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #f3f4f6;
+}

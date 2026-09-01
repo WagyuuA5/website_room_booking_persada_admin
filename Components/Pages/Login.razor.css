@@ -1,0 +1,673 @@
+/* --- LOGIN PAGE STYLES (V20 SPEC) --- */
+
+.login-wrapper {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--color-bg, #0F172A);
+    font-family: var(--font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif);
+}
+
+/* --- 1. BACKGROUND FOTO DENGAN SUBTLE KEN BURNS --- */
+.login-bg-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+    transition: opacity 400ms ease-out;
+}
+
+.login-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transform: scale(1.0);
+    animation: kenBurns 20s ease-in-out infinite alternate;
+}
+
+@keyframes kenBurns {
+    0% {
+        transform: scale(1.0);
+    }
+    100% {
+        transform: scale(1.04);
+    }
+}
+
+.bg-zoom-out .login-bg-img {
+    animation: none;
+    transform: scale(1.0);
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.login-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.75) 100%);
+    z-index: 2;
+}
+
+/* --- 2. TOPBAR: LOGO PERSADA RESMI --- */
+.login-topbar {
+    position: relative;
+    z-index: 10;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.persada-logo {
+    height: 56px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+@media (max-width: 480px) {
+    .persada-logo {
+        height: 44px;
+    }
+}
+
+/* --- 3. MAIN AREA & CARD LOGIN (V20: MAX-WIDTH 400PX, PADDING 32PX) --- */
+.login-main {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: var(--radius-lg, 20px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+    padding: 32px;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    animation: cardEntrance 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: transform 350ms ease-in, opacity 350ms ease-in;
+}
+
+@keyframes cardEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-card.card-exit {
+    opacity: 0;
+    transform: scale(0.96);
+}
+
+.login-card.card-shake {
+    animation: shakeCard 300ms ease-in-out;
+}
+
+@keyframes shakeCard {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+}
+
+/* --- 4. STAGGERED REVEAL ELEMEN DALAM CARD --- */
+.stagger-item {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: staggerFadeUp 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-1 { animation-delay: 60ms; }
+.stagger-2 { animation-delay: 120ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }
+.stagger-5 { animation-delay: 300ms; }
+.stagger-6 { animation-delay: 360ms; }
+
+@keyframes staggerFadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Card Header */
+.card-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0 0 0.3rem 0;
+    letter-spacing: -0.01em;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.35);
+}
+
+.card-subtitle {
+    font-size: 0.88rem;
+    color: #FFFFFF;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.35);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* --- 5. FORM CONTROLS & OVERLINE LABELS (V20: GAP 16PX, HEIGHT 44PX) --- */
+.login-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 16px;
+}
+
+.form-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+::deep .input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+    transition: color 150ms ease;
+}
+
+.form-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 44px 0 44px;
+    font-size: 0.92rem;
+    border-radius: var(--radius-md, 12px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.18);
+    color: #FFFFFF;
+    box-sizing: border-box;
+    transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.form-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.form-input:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.form-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.26);
+    border-color: var(--color-accent, #2563EB);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+}
+
+.form-input:focus + .btn-toggle-visibility ~ ::deep .input-icon,
+.input-wrap:focus-within ::deep .input-icon {
+    color: #FFFFFF;
+}
+
+.form-input.input-error {
+    border-color: var(--color-danger, #DC2626) !important;
+    background: rgba(220, 38, 38, 0.18) !important;
+}
+
+.form-input.shake-field {
+    animation: shakeField 300ms ease-in-out;
+}
+
+@keyframes shakeField {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.field-error-text {
+    font-size: 12px;
+    color: #FCA5A5;
+    font-weight: 500;
+    margin-top: 0.2rem;
+    display: block;
+    animation: fadeInDown 200ms ease-out;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-toggle-visibility {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.65);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    transition: color 150ms ease;
+}
+
+.btn-toggle-visibility:hover {
+    color: #FFFFFF;
+}
+
+/* --- 6. OPTIONS: CUSTOM CHECKBOX & LUPA KATA SANDI --- */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.15rem 0 1.25rem 0;
+    font-size: 0.85rem;
+}
+
+.remember-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #FFFFFF;
+    font-weight: 500;
+    min-height: 24px;
+    padding: 0;
+    user-select: none;
+}
+
+.custom-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.checkbox-box {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 4px;
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 150ms ease;
+    box-sizing: border-box;
+}
+
+.custom-checkbox:checked + .checkbox-box {
+    background: var(--color-accent, #2563EB);
+    border-color: var(--color-accent, #2563EB);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+}
+
+.custom-checkbox:checked + .checkbox-box::after {
+    content: "";
+    width: 4px;
+    height: 8px;
+    border: solid #FFFFFF;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-0.5px, -0.5px);
+}
+
+.custom-checkbox:focus-visible + .checkbox-box {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
+}
+
+.checkbox-label {
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.forgot-link-btn {
+    background: transparent;
+    border: none;
+    color: #FFFFFF;
+    text-decoration: underline;
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: opacity 150ms ease;
+}
+
+.forgot-link-btn:hover {
+    opacity: 0.8;
+}
+
+/* --- 7. SUBMIT BUTTON (V20: IDENTICAL ACCENT VARIABLE & HEIGHT 44PX) --- */
+.btn-submit {
+    width: 100%;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-md, 12px);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--color-accent, #2563EB);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    transition: background-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+
+.btn-submit:hover:not(:disabled) {
+    background: var(--color-accent-hover, #1D4ED8);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+}
+
+.btn-submit:active:not(:disabled) {
+    background: var(--color-accent-active, #1E40AF);
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+.btn-submit:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.btn-submit.is-success {
+    background: var(--color-accent, #2563EB);
+}
+
+.spinner-sm {
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #FFFFFF;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* --- 8. SERVER ERROR BANNER --- */
+.server-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md, 12px);
+    background: rgba(220, 38, 38, 0.25);
+    border: 1px solid rgba(220, 38, 38, 0.5);
+    color: #FFFFFF;
+    font-size: 0.88rem;
+    font-weight: 500;
+    animation: fadeInDown 200ms ease-out;
+}
+
+/* --- 9. CARD FOOTER COPYRIGHT (V20: 12PX, RGBA(255,255,255,0.7)) --- */
+.card-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.card-footer p {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* --- 10. MODAL LUPA KATA SANDI STYLES --- */
+.forgot-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.forgot-modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-ink-900, #14171F);
+    margin: 0;
+}
+
+.btn-close-modal {
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary, #64748B);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 150ms ease, color 150ms ease;
+}
+
+.btn-close-modal:hover {
+    background: var(--color-surface-2, #F1F5F9);
+    color: var(--color-ink-900, #14171F);
+}
+
+.forgot-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.forgot-instructions {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary, #64748B);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.forgot-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md, 12px);
+    background: var(--color-danger-soft, #FEF2F2);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    color: var(--color-danger, #DC2626);
+    font-size: 0.88rem;
+    font-weight: 500;
+    animation: fadeInDown 200ms ease-out;
+}
+
+/* --- 11. FORGOT MODAL FORM CONTROLS (solid bg context) --- */
+.forgot-form-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-ink-900, #14171F);
+}
+
+::deep .forgot-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--color-text-secondary, #64748B);
+    pointer-events: none;
+    transition: color 150ms ease;
+}
+
+.forgot-form-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px 0 44px;
+    font-size: 0.95rem;
+    border-radius: var(--radius-md, 12px);
+    border: 1px solid var(--color-border, #E3E6EC);
+    background: var(--color-surface-1, #F7F8FA);
+    color: var(--color-ink-900, #14171F);
+    box-sizing: border-box;
+    transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.forgot-form-input::placeholder {
+    color: var(--color-text-muted, #9CA3AF);
+}
+
+.forgot-form-input:hover {
+    border-color: var(--color-accent, #2563EB);
+    background: var(--color-surface-0, #FFFFFF);
+}
+
+.forgot-form-input:focus {
+    outline: none;
+    background: var(--color-surface-0, #FFFFFF);
+    border-color: var(--color-accent, #2563EB);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.forgot-form-input.input-error {
+    border-color: var(--color-danger, #DC2626) !important;
+    background: var(--color-danger-soft, #FEF2F2) !important;
+}
+
+.input-wrap:focus-within ::deep .forgot-input-icon {
+    color: var(--color-accent, #2563EB);
+}
+
+.forgot-field-error {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.82rem;
+    color: var(--color-danger, #DC2626);
+    font-weight: 500;
+}
+
+.forgot-modal-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+/* V20: Tombol Kirim Tautan Reset indentik persis dengan tombol Masuk */
+.btn-forgot-submit {
+    width: 100%;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-md, 12px);
+    background: var(--color-accent, #2563EB);
+    color: #FFFFFF;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    transition: background-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+
+.btn-forgot-submit:hover:not(:disabled) {
+    background: var(--color-accent-hover, #1D4ED8);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+}
+
+.btn-forgot-submit:active:not(:disabled) {
+    background: var(--color-accent-active, #1E40AF);
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+.btn-forgot-submit:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+}
+
+.btn-forgot-cancel {
+    width: 100%;
+    padding: 0.6rem;
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary, #64748B);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 150ms ease;
+}
+
+.btn-forgot-cancel:hover {
+    color: var(--color-ink-900, #14171F);
+}
+
+/* --- 12. REDUCED MOTION --- */
+@media (prefers-reduced-motion: reduce) {
+    .login-bg-img,
+    .login-card,
+    .stagger-item,
+    .btn-submit,
+    .btn-forgot-submit,
+    .server-error-banner,
+    .field-error-text {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+}

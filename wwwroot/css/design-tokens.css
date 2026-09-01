@@ -1,0 +1,142 @@
+/* ==========================================================================
+   DESIGN TOKENS - SISTEM MANAJEMEN RUANGAN & PEMESANAN PT PERSADA
+   Sumber tunggal warna, bayangan, radius, dan mode tema (Light / Dark)
+   ========================================================================== */
+
+:root {
+  /* Permukaan (Surface) */
+  --color-bg: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F1F5F9;
+  --color-border: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+
+  /* Teks (Text) */
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #64748B;
+  --color-text-muted: #94A3B8;
+
+  /* Aksen (Brand PERSADA Navy & Blue) */
+  --color-accent: #2563EB;
+  --color-accent-hover: #1D4ED8;
+  --color-accent-soft: #EFF6FF;
+  --color-brand-navy: #0B1E39;
+  --color-brand-yellow: #F5A623;
+  --color-brand-yellow-hover: #E0941A;
+  --color-brand-yellow-soft: #FFF4DE;
+
+  /* Status Semantik */
+  --color-success: #16A34A;
+  --color-success-hover: #15803D;
+  --color-success-soft: #ECFDF5;
+  
+  --color-warning: #D97706;
+  --color-warning-hover: #B45309;
+  --color-warning-soft: #FFFBEB;
+  
+  --color-danger: #DC2626;
+  --color-danger-hover: #B91C1C;
+  --color-danger-soft: #FEF2F2;
+  
+  --color-info: #0284C7;
+  --color-info-hover: #0369A1;
+  --color-info-soft: #F0F9FF;
+
+  /* Palet Warna Avatar (CASE 2 - V20) */
+  --avatar-color-1: #2563EB; /* biru (identik --color-accent) */
+  --avatar-color-2: #0D9488; /* teal kalem */
+  --avatar-color-3: #7C3AED; /* ungu kalem */
+  --avatar-color-4: #B45309; /* amber tua kalem */
+  --avatar-color-5: #BE185D; /* rose kalem */
+  --avatar-color-6: #475569; /* slate netral */
+
+  /* Bayangan & Radius */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+
+  /* Legacy Aliases Mapping */
+  --color-primary: var(--color-brand-yellow);
+  --color-primary-hover: var(--color-brand-yellow-hover);
+  --color-primary-soft: var(--color-brand-yellow-soft);
+  --color-navy: var(--color-brand-navy);
+  --color-navy-soft: #E8EDF5;
+  --color-background: var(--color-bg);
+  --color-text: var(--color-text-primary);
+  --color-text-strong: var(--color-text-primary);
+  --color-text-subtle: var(--color-text-muted);
+  --app-bg: var(--color-bg);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-surface-alt);
+  --card-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================================
+   MODE GELAP (DARK MODE)
+   ========================================================================== */
+[data-theme="dark"],
+body.dark,
+.dark {
+  /* Permukaan (Surface) */
+  --color-bg: #0B1120;
+  --color-surface: #131B2E;
+  --color-surface-alt: #1B2338;
+  --color-border: #263049;
+  --color-border-strong: #334155;
+
+  /* Teks (Text) */
+  --color-text-primary: #E5E9F0;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  /* Aksen (Identitas PERSADA) */
+  --color-accent: #3B82F6;
+  --color-accent-hover: #60A5FA;
+  --color-accent-soft: rgba(59, 130, 246, 0.14);
+  --color-brand-navy: #0B1E39;
+  --color-brand-yellow: #F5A623;
+  --color-brand-yellow-hover: #E0941A;
+  --color-brand-yellow-soft: rgba(245, 166, 35, 0.16);
+
+  /* Status Semantik */
+  --color-success: #22C55E;
+  --color-success-hover: #4ADE80;
+  --color-success-soft: rgba(34, 197, 94, 0.14);
+
+  --color-warning: #F59E0B;
+  --color-warning-hover: #FBBF24;
+  --color-warning-soft: rgba(245, 158, 11, 0.14);
+
+  --color-danger: #EF4444;
+  --color-danger-hover: #F87171;
+  --color-danger-soft: rgba(239, 68, 68, 0.14);
+
+  --color-info: #38BDF8;
+  --color-info-hover: #7DD3FC;
+  --color-info-soft: rgba(56, 189, 248, 0.14);
+
+  /* Bayangan */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.55);
+
+  /* Legacy Aliases Mapping */
+  --color-primary: var(--color-brand-yellow);
+  --color-primary-hover: var(--color-brand-yellow-hover);
+  --color-primary-soft: var(--color-brand-yellow-soft);
+  --color-navy: #101726;
+  --color-navy-soft: #1B2338;
+  --color-background: var(--color-bg);
+  --color-text: var(--color-text-primary);
+  --color-text-strong: var(--color-text-primary);
+  --color-text-subtle: var(--color-text-muted);
+  --app-bg: var(--color-bg);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-surface-alt);
+  --card-shadow: var(--shadow-sm);
+}

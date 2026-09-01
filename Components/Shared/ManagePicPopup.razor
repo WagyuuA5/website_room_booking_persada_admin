@@ -1,0 +1,149 @@
+@namespace booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Services
+@inject ToastService Toast
+
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Title="Kelola Daftar PIC" Size="medium">
+    <ChildContent>
+        <div class="pic-manager" style="display: flex; flex-direction: column; gap: 1rem;">
+            <p style="color: #6B7280; font-size: 0.9rem; margin: 0; margin-bottom: 4px;">Atur tim penanggung jawab lapangan untuk menangani permintaan fasilitas.</p>
+
+            <div class="pic-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
+                @if (PicList == null || !PicList.Any())
+                {
+                    <div class="pic-empty" style="padding: 24px; text-align: center; background: #F9FAFB; border-radius: 8px; border: 1px dashed #D1D5DB;">
+                        <Icon Name="users" Size="32" CssClass="text-muted" style="margin-bottom: 8px;" />
+                        <div style="font-size: 0.9rem; color: #4B5563; font-weight: 600;">Belum ada PIC terdaftar di sistem.</div>
+                        <div style="font-size: 0.8rem; color: #6B7280;">Silakan tambah PIC baru di bawah.</div>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var pic in PicList)
+                    {
+                        var activeCount = GetActiveAssignmentCount(pic);
+                        <div class="pic-item" style="display: flex; align-items: center; justify-content: space-between; background: #F3F4F6; padding: 10px 12px; border-radius: 8px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #0B1E39; color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px;">
+                                    @(string.Join("", pic.Split(' ').Select(n => n[0])).ToUpperInvariant().Substring(0, Math.Min(2, pic.Split(' ').Length)))
+                                </div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="font-weight: 600; color: #111827; font-size: 14px;">@pic</span>
+                                        <span style="background: #E5E7EB; color: #4B5563; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Divisi GA</span>
+                                    </div>
+                                    @if (activeCount > 0)
+                                    {
+                                        <span style="font-size: 12px; color: #D97706; font-weight: 500; margin-top: 2px;">@activeCount tugas aktif</span>
+                                    }
+                                </div>
+                            </div>
+                            <button type="button" class="btn-delete-pic" style="color: #9CA3AF; border: none; background: transparent; cursor: pointer; transition: color 0.2s;" @onclick="() => TryDelete(pic)" onmouseover="this.style.color='#DC2626'" onmouseout="this.style.color='#9CA3AF'">
+                                <Icon Name="trash-2" Size="16" />
+                            </button>
+                        </div>
+                    }
+                }
+            </div>
+
+            @if (showDeleteConfirm)
+            {
+                <div class="pic-delete-warning" style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 12px; margin-top: 4px;">
+                    <p style="font-size: 0.85rem; color: #DC2626; font-weight: 600; margin: 0 0 8px 0; display: flex; gap: 6px; align-items: center;">
+                        <Icon Name="alert-triangle" Size="16" /> 
+                        <span>PIC "@pendingDeletePic" masih memiliki @GetActiveAssignmentCount(pendingDeletePic) tugas aktif. Yakin ingin menghapus?</span>
+                    </p>
+                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                        <button type="button" class="btn-outline-pill" style="font-size: 0.8rem; padding: 4px 12px;" @onclick="CancelDelete">Batal</button>
+                        <button type="button" class="btn-primary-pill" style="font-size: 0.8rem; padding: 4px 12px; background: #DC2626; border-color: #DC2626; color: #FFF;" @onclick="ForceDelete">Hapus Paksa</button>
+                    </div>
+                </div>
+            }
+
+            <div style="border-top: 1px solid #E5E7EB; margin-top: 8px; padding-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+                <span style="font-size: 13px; font-weight: 600; color: #111827;">Tambah PIC Baru</span>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" class="form-input" style="flex: 1;" placeholder="Nama Lengkap PIC..." @bind="newPicName" @bind:event="oninput" @onkeyup="HandleKeyUp" />
+                    <select class="form-input" style="width: 140px;" @bind="newPicDiv">
+                        <option value="General Affairs">General Affairs</option>
+                        <option value="Teknisi IT">Teknisi IT</option>
+                        <option value="Cleaning Service">Cleaning Service</option>
+                    </select>
+                </div>
+                <button type="button" class="btn-primary-pill btn-yellow" style="width: 100%; justify-content: center;" @onclick="AddPic" disabled="@string.IsNullOrWhiteSpace(newPicName)">
+                    Tambah PIC
+                </button>
+            </div>
+        </div>
+    </ChildContent>
+</AppModal>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public List<string> PicList { get; set; } = new();
+    [Parameter] public EventCallback<List<string>> PicListChanged { get; set; }
+    [Parameter] public EventCallback<string> OnPicDeleted { get; set; }
+    [Parameter] public List<string> ActiveAssignees { get; set; } = new();
+
+    private string newPicName = "";
+    private string newPicDiv = "General Affairs";
+    private bool showDeleteConfirm = false;
+    private string pendingDeletePic = "";
+
+    private int GetActiveAssignmentCount(string pic)
+    {
+        return ActiveAssignees.Count(a => a.Equals(pic, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task AddPic()
+    {
+        if (string.IsNullOrWhiteSpace(newPicName)) return;
+        var trimmed = newPicName.Trim();
+        if (!PicList.Contains(trimmed, StringComparer.OrdinalIgnoreCase))
+        {
+            PicList.Add(trimmed);
+            await PicListChanged.InvokeAsync(PicList);
+        }
+        newPicName = "";
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await AddPic();
+    }
+
+    private void TryDelete(string pic)
+    {
+        var activeCount = GetActiveAssignmentCount(pic);
+        if (activeCount > 0)
+        {
+            pendingDeletePic = pic;
+            showDeleteConfirm = true;
+        }
+        else
+        {
+            _ = DoDelete(pic);
+        }
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirm = false;
+        pendingDeletePic = "";
+    }
+
+    private async Task ForceDelete()
+    {
+        showDeleteConfirm = false;
+        await DoDelete(pendingDeletePic);
+        pendingDeletePic = "";
+    }
+
+    private async Task DoDelete(string pic)
+    {
+        PicList.Remove(pic);
+        await PicListChanged.InvokeAsync(PicList);
+        await OnPicDeleted.InvokeAsync(pic);
+        Toast.Success($"PIC \"{pic}\" berhasil dihapus.");
+    }
+}

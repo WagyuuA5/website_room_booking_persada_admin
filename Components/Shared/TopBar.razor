@@ -1,0 +1,167 @@
+@namespace booking_room_admin.Components.Shared
+@inject booking_room_admin.Components.Services.LayoutStateService LayoutState
+@inject NavigationManager Navigation
+
+<header class="topbar-glass-nav">
+    <div class="topbar-nav-left">
+        @if (ShowGlobalSearch)
+        {
+            <div class="topbar-search">
+                <Icon Name="search" Size="15" CssClass="search-icon" />
+                <input type="text"
+                       placeholder="@(string.IsNullOrWhiteSpace(SearchPlaceholder) ? "Cari menu, pemesanan, atau pengguna..." : SearchPlaceholder)"
+                       @bind="searchQuery"
+                       @bind:event="oninput" />
+            </div>
+        }
+    </div>
+    <div class="topbar-controls">
+        @if (RightSlot != null)
+        {
+            <div class="topbar-right-slot">
+                @RightSlot
+            </div>
+        }
+
+        <div class="topbar-utility-group">
+            <button type="button" class="topbar-icon-btn theme-toggle" @onclick="ToggleTheme" title="@(LayoutState.IsDarkMode ? "Ganti ke Mode Terang" : "Ganti ke Mode Gelap")">
+                @if (LayoutState.IsDarkMode)
+                {
+                    <Icon Name="sun" Size="18" />
+                }
+                else
+                {
+                    <Icon Name="moon" Size="18" />
+                }
+            </button>
+
+            <button type="button" class="topbar-icon-btn notification-btn" @onclick="ToggleNotification" title="@($"Notifikasi ({unreadCount} belum dibaca)")">
+                <Icon Name="bell" Size="18" />
+                @if (unreadCount > 0)
+                {
+                    <span class="notification-badge">@unreadCount</span>
+                }
+            </button>
+
+            <button type="button" class="admin-profile-btn" @onclick="ToggleProfilePopup" title="Buka menu akun">
+                <UserAvatar Initials="WA" BgColor="@AvatarHelper.GetColor(LayoutState.AdminFullName)" Size="36px" PhotoUrl="@LayoutState.AdminAvatarUrl" />
+                <div class="admin-info">
+                    <span class="admin-name">@LayoutState.AdminFullName</span>
+                    <span class="admin-role">PENGONTROL SISTEM</span>
+                </div>
+            </button>
+        </div>
+    </div>
+</header>
+
+@if (!string.IsNullOrWhiteSpace(Title))
+{
+    <div class="topbar-page-header">
+        <h1 class="topbar-page-title">@Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Subtitle))
+        {
+            <p class="topbar-page-subtitle">@Subtitle</p>
+        }
+    </div>
+}
+
+<NotificationPopup IsOpen="@showNotification" IsOpenChanged="@((bool v) => { showNotification = v; StateHasChanged(); })" />
+
+@if (showProfilePopup)
+{
+    <div class="profile-popup-overlay" @onclick="() => showProfilePopup = false">
+        <div class="profile-popup" @onclick:stopPropagation="true">
+            <button type="button" class="profile-popup-close-btn" @onclick="() => showProfilePopup = false" title="Tutup">
+                <Icon Name="x" Size="16" />
+            </button>
+            <div class="profile-header-redesign">
+                <ProfileAvatarUploader Initials="WA" BgColor="@AvatarHelper.GetColor(LayoutState.AdminFullName)" Size="64px" CameraIconSize="14" @bind-AvatarUrl="LayoutState.AdminAvatarUrl" />
+            </div>
+            
+            <div class="profile-body-2col">
+                <div class="pbr-info-group">
+                    <label>Nama Lengkap</label>
+                    <strong>@LayoutState.AdminFullName</strong>
+                </div>
+                <div class="pbr-info-group">
+                    <label>Jabatan</label>
+                    <strong>Pengontrol Sistem</strong>
+                </div>
+                <div class="pbr-info-group">
+                    <label>Divisi</label>
+                    <strong>IT & Digital</strong>
+                </div>
+                <div class="pbr-info-group">
+                    <label>Email</label>
+                    <strong title="wahyu.admin@ptpersada.co.id">wahyu.admin@ptpersada.co.id</strong>
+                </div>
+                <div class="pbr-info-group">
+                    <label>Lokasi Kantor</label>
+                    <strong>Kantor Pusat, Lt. 14</strong>
+                </div>
+                <div class="pbr-info-group">
+                    <label>Terakhir Login</label>
+                    <strong>Hari ini, 08:30 WIB</strong>
+                </div>
+            </div>
+
+            <div class="profile-footer-redesign">
+                <button type="button" class="btn-primary-pill btn-yellow" style="width: 100%; justify-content: center;" @onclick="GoToProfile">Edit Profil</button>
+            </div>
+        </div>
+    </div>
+}
+
+@implements IDisposable
+
+@code {
+    [Parameter] public string Title { get; set; } = "Dashboard";
+    [Parameter] public string Subtitle { get; set; } = string.Empty;
+    [Parameter] public bool ShowGlobalSearch { get; set; } = false;
+    [Parameter] public bool ShowDateFilter { get; set; } = false;
+    [Parameter] public string SearchPlaceholder { get; set; } = string.Empty;
+    [Parameter] public EventCallback<DateTime?> OnDateSelectedCallback { get; set; }
+    [Parameter] public RenderFragment? RightSlot { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private bool showNotification = false;
+    private bool showProfilePopup = false;
+    private int unreadCount = 2;
+    private string searchQuery = "";
+
+    protected override void OnInitialized()
+    {
+        LayoutState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        LayoutState.OnChange -= StateHasChanged;
+    }
+
+    private void ToggleTheme()
+    {
+        LayoutState.ToggleTheme();
+        StateHasChanged();
+    }
+
+    private void ToggleNotification()
+    {
+        showNotification = !showNotification;
+        if (showNotification) { showProfilePopup = false; }
+    }
+
+    private void ToggleProfilePopup()
+    {
+        showProfilePopup = !showProfilePopup;
+        if (showProfilePopup) { showNotification = false; }
+    }
+
+    private void GoToProfile()
+    {
+        showProfilePopup = false;
+        var uri = new Uri(Navigation.Uri);
+        var path = uri.PathAndQuery;
+        Navigation.NavigateTo($"/profile?returnUrl={Uri.EscapeDataString(path)}");
+    }
+}

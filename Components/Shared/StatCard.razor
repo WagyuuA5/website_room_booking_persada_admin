@@ -1,0 +1,79 @@
+@namespace booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+
+<div class="stat-card @CssClass" @attributes="AdditionalAttributes">
+    <div class="stat-icon-badge @GetBadgeVariantClass()">
+        <Icon Name="@ResolvedIcon" Size="20" />
+    </div>
+    <div class="stat-body">
+        <span class="stat-label">@Label</span>
+        <div class="stat-value-row">
+            <span class="stat-value @(IsLongText ? "stat-value-sm" : "")" title="@Value">@Value</span>
+            @if (!string.IsNullOrWhiteSpace(Trend))
+            {
+                <span class="stat-trend-pill @GetTrendClass()">
+                    @Trend
+                </span>
+            }
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Subtitle))
+        {
+            <span class="stat-subtitle" title="@Subtitle">@Subtitle</span>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public StatCardType? Type { get; set; }
+    [Parameter] public string Icon { get; set; } = "";
+    [Parameter] public string Variant { get; set; } = "";
+    [Parameter] public string? Trend { get; set; }
+    [Parameter] public bool? IsPositiveTrend { get; set; }
+    [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public string CssClass { get; set; } = "";
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string ResolvedIcon
+    {
+        get
+        {
+            if (Type.HasValue)
+                return StatCardIconMap.Get(Type.Value).Icon;
+            if (!string.IsNullOrWhiteSpace(Icon))
+                return Icon;
+            return "bar-chart-2";
+        }
+    }
+
+    private string ResolvedVariant
+    {
+        get
+        {
+            if (Type.HasValue)
+                return StatCardIconMap.Get(Type.Value).Variant;
+            if (!string.IsNullOrWhiteSpace(Variant))
+                return Variant;
+            return "accent";
+        }
+    }
+
+    private bool IsLongText => Value.Length > 12 && !char.IsDigit(Value[0]);
+
+    private string GetBadgeVariantClass() => ResolvedVariant.ToLowerInvariant() switch
+    {
+        "success" => "badge-variant-success",
+        "warning" => "badge-variant-warning",
+        "danger" => "badge-variant-danger",
+        "info" => "badge-variant-info",
+        _ => "badge-variant-accent"
+    };
+
+    private string GetTrendClass()
+    {
+        if (IsPositiveTrend == true) return "trend-pill-positive";
+        if (IsPositiveTrend == false) return "trend-pill-negative";
+        return "trend-pill-neutral";
+    }
+}

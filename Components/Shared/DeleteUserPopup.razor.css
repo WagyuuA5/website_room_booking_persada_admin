@@ -1,0 +1,212 @@
+.delete-user-card {
+    max-width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.du-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.du-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+}
+
+.du-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.du-user-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f3f4f6;
+    border-radius: 0.75rem;
+}
+
+.du-user-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: #3730a3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.du-user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.du-user-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.du-user-email {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.du-warning {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-radius: 0.75rem;
+    font-size: 0.8rem;
+    color: #92400e;
+    line-height: 1.5;
+}
+
+.du-warning-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    color: #f59e0b;
+}
+
+.du-warning strong {
+    font-weight: 600;
+}
+
+.du-deactivate-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2);
+}
+
+.du-deactivate-btn:hover {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.3);
+}
+
+.du-deactivate-desc {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-align: center;
+    margin: -0.5rem 0 0;
+}
+
+.du-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+}
+
+.du-divider-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.du-divider::before,
+.du-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.du-permanent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.du-permanent-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #ef4444;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.du-permanent-desc {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.du-permanent-desc strong {
+    font-weight: 600;
+    color: #111827;
+}
+
+.du-input {
+    padding: 0.65rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+    outline: none;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.du-input:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.du-delete-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.65rem 1rem;
+    border-radius: 999px;
+    border: 1px solid #fecaca;
+    background: #ffffff;
+    color: #ef4444;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.du-delete-btn.enabled {
+    background: #fef2f2;
+    border-color: #ef4444;
+}
+
+.du-delete-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.du-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}

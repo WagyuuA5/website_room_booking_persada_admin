@@ -1,0 +1,68 @@
+@namespace booking_room_admin.Components.Shared
+
+<div class="action-card" style="border-left-color: @BorderColor">
+    <div class="action-card-icon" style="background-color: @IconBgColor">
+        @if (IconContent != null)
+        {
+            @IconContent
+        }
+        else
+        {
+            <span class="action-card-icon-text">@((MarkupString)IconFallback)</span>
+        }
+    </div>
+    <div class="action-card-content">
+        <div class="action-card-title">
+            @Title
+            @if (!string.IsNullOrEmpty(ReferenceId))
+            {
+                <span class="action-card-id">#@ReferenceId</span>
+            }
+        </div>
+        <div class="action-card-subtitle" style="color: @SubtitleColor">@Subtitle</div>
+    </div>
+    <div class="action-card-right">
+        @if (!string.IsNullOrEmpty(ActionLabel))
+        {
+            <button class="action-card-button" style="background-color: @ButtonBgColor; color: @ButtonTextColor" @onclick="OnActionClick">@ActionLabel</button>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>Border kiri 4px: merah (#EF4444), kuning (#F59E0B), hijau (#10B981), biru (#2563EB)</summary>
+    [Parameter] public string BorderColor { get; set; } = "#F59E0B";
+
+    /// <summary>Background warna pastel ikon bulat</summary>
+    [Parameter] public string IconBgColor { get; set; } = "#FEF3C7";
+
+    /// <summary>Custom icon markup (RenderFragment)</summary>
+    [Parameter] public RenderFragment? IconContent { get; set; }
+
+    /// <summary>Fallback text/emoji jika tidak ada IconContent</summary>
+    [Parameter] public string IconFallback { get; set; } = "<Icon Name=\"clipboard\" Size=\"20\" />";
+
+    /// <summary>Judul tebal (contoh: "IT Support")</summary>
+    [Parameter] public string Title { get; set; } = "";
+
+    /// <summary>ID referensi (contoh: "IT-4421")</summary>
+    [Parameter] public string ReferenceId { get; set; } = "";
+
+    /// <summary>Subtitle/status di bawah judul</summary>
+    [Parameter] public string Subtitle { get; set; } = "";
+
+    /// <summary>Warna subtitle (contoh: merah untuk urgent, abu-abu untuk netral)</summary>
+    [Parameter] public string SubtitleColor { get; set; } = "#6B7280";
+
+    /// <summary>Label tombol aksi (contoh: "Perbaiki", "Tugaskan")</summary>
+    [Parameter] public string ActionLabel { get; set; } = "";
+
+    /// <summary>Background tombol aksi</summary>
+    [Parameter] public string ButtonBgColor { get; set; } = "#2563EB";
+
+    /// <summary>Warna teks tombol aksi</summary>
+    [Parameter] public string ButtonTextColor { get; set; } = "#ffffff";
+
+    /// <summary>Callback klik tombol aksi</summary>
+    [Parameter] public EventCallback OnActionClick { get; set; }
+}

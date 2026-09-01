@@ -1,0 +1,28 @@
+@namespace booking_room_admin.Components.Shared
+
+<TopBar Title="@Title"
+        Subtitle="@Subtitle"
+        ShowGlobalSearch="@ShowGlobalSearch"
+        ShowDateFilter="@ShowGlobalDate"
+        SearchPlaceholder="@SearchPlaceholder"
+        RightSlot="@RightSlot"
+        OnDateSelectedCallback="@OnDateSelectedCallback" />
+
+@code {
+    [Parameter] public string Title { get; set; } = "Dashboard";
+    [Parameter] public string Subtitle { get; set; } = string.Empty;
+    [Parameter] public bool ShowGlobalSearch { get; set; } = true;
+    [Parameter] public bool ShowGlobalDate { get; set; } = true;
+    [Parameter] public string SearchPlaceholder { get; set; } = "Cari menu, ruangan, user...";
+    [Parameter] public RenderFragment? RightSlot { get; set; }
+    [Parameter] public RenderFragment? HeaderActions { get; set; }
+    [Parameter] public EventCallback<DateTime?> OnDateSelectedCallback { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (RightSlot == null && HeaderActions != null)
+        {
+            RightSlot = HeaderActions;
+        }
+    }
+}

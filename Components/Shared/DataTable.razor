@@ -1,0 +1,185 @@
+@namespace booking_room_admin.Components.Shared
+@typeparam TItem
+
+<div class="data-table-wrapper">
+    @* Bulk action bar *@
+    @if (ShowCheckbox && selectedItems.Count > 0)
+    {
+        <div class="bulk-action-bar">
+            <span class="bulk-count">@selectedItems.Count item dipilih</span>
+            @if (BulkActions != null)
+            {
+                @BulkActions
+            }
+        </div>
+    }
+
+    @* Table *@
+    <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    @if (ShowCheckbox)
+                    {
+                        <th class="col-checkbox">
+                            <input type="checkbox" checked="@isAllSelected" @onchange="ToggleSelectAll" />
+                        </th>
+                    }
+                    @foreach (var col in Columns)
+                    {
+                        <th class="@(col.Sortable ? "sortable" : "")" @onclick="() => HandleSort(col)">
+                            <span>@col.Header</span>
+                            @if (col.Sortable && sortColumn == col.PropertyName)
+                            {
+                                <span class="sort-icon">
+                                    @if (sortAscending) { <Icon Name="arrow-up" Size="12" /> } else { <Icon Name="arrow-down" Size="12" /> }
+                                </span>
+                            }
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (Items == null || !Items.Any())
+                {
+                    <tr>
+                        <td colspan="@(Columns.Count + (ShowCheckbox ? 1 : 0))" class="empty-cell">
+                            <div class="empty-table-state">
+                                <span class="empty-icon"><Icon Name="clipboard" Size="32" CssClass="text-muted" /></span>
+                                <span class="empty-text">@EmptyMessage</span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Items)
+                    {
+                        <tr class="@(selectedItems.Contains(item) ? "selected" : "") @(OnRowClick.HasDelegate ? "clickable" : "")"
+                            @onclick="() => HandleRowClick(item)">
+                            @if (ShowCheckbox)
+                            {
+                                <td class="col-checkbox" @onclick:stopPropagation="true">
+                                    <input type="checkbox" checked="@selectedItems.Contains(item)"
+                                           @onchange="() => ToggleItem(item)" />
+                                </td>
+                            }
+                            @RowTemplate(item)
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @* Pagination *@
+    @if (TotalCount > 0)
+    {
+        <PaginationBar CurrentPage="@CurrentPage" CurrentPageChanged="GoToPage" TotalData="@TotalCount" PageSize="@PageSize" />
+    }
+</div>
+
+@code {
+    [Parameter] public IEnumerable<TItem>? Items { get; set; }
+    [Parameter] public List<DataTableColumn> Columns { get; set; } = new();
+    [Parameter] public RenderFragment<TItem> RowTemplate { get; set; } = default!;
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public int PageSize { get; set; } = 10;
+    [Parameter] public int CurrentPage { get; set; } = 1;
+    [Parameter] public EventCallback<int> OnPageChanged { get; set; }
+    [Parameter] public EventCallback<(string Column, bool Ascending)> OnSortChanged { get; set; }
+    [Parameter] public EventCallback<TItem> OnRowClick { get; set; }
+    [Parameter] public bool ShowCheckbox { get; set; }
+    [Parameter] public string EmptyMessage { get; set; } = "Tidak ada data untuk ditampilkan.";
+
+    /// <summary>Bulk action buttons rendered when items are selected</summary>
+    [Parameter] public RenderFragment? BulkActions { get; set; }
+
+    /// <summary>Callback when selection changes</summary>
+    [Parameter] public EventCallback<List<TItem>> OnSelectionChanged { get; set; }
+
+    private HashSet<TItem> selectedItems = new();
+    private string? sortColumn;
+    private bool sortAscending = true;
+
+    private bool isAllSelected => Items != null && Items.Any() && Items.All(i => selectedItems.Contains(i));
+
+    private int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= TotalPages)
+        {
+            await OnPageChanged.InvokeAsync(page);
+        }
+    }
+
+    private async Task HandleSort(DataTableColumn col)
+    {
+        if (!col.Sortable) return;
+
+        if (sortColumn == col.PropertyName)
+        {
+            sortAscending = !sortAscending;
+        }
+        else
+        {
+            sortColumn = col.PropertyName;
+            sortAscending = true;
+        }
+
+        await OnSortChanged.InvokeAsync((sortColumn, sortAscending));
+    }
+
+    private async Task HandleRowClick(TItem item)
+    {
+        if (OnRowClick.HasDelegate)
+        {
+            await OnRowClick.InvokeAsync(item);
+        }
+    }
+
+    private async Task ToggleItem(TItem item)
+    {
+        if (!selectedItems.Remove(item))
+        {
+            selectedItems.Add(item);
+        }
+        await OnSelectionChanged.InvokeAsync(selectedItems.ToList());
+    }
+
+    private async Task ToggleSelectAll(ChangeEventArgs e)
+    {
+        if (Items == null) return;
+
+        if ((bool)(e.Value ?? false))
+        {
+            foreach (var item in Items) selectedItems.Add(item);
+        }
+        else
+        {
+            selectedItems.Clear();
+        }
+        await OnSelectionChanged.InvokeAsync(selectedItems.ToList());
+    }
+
+    private List<int> GetPageNumbers()
+    {
+        var pages = new List<int>();
+        var start = Math.Max(1, CurrentPage - 2);
+        var end = Math.Min(TotalPages, CurrentPage + 2);
+
+        for (int i = start; i <= end; i++)
+        {
+            pages.Add(i);
+        }
+        return pages;
+    }
+
+    public class DataTableColumn
+    {
+        public string Header { get; set; } = "";
+        public string PropertyName { get; set; } = "";
+        public bool Sortable { get; set; }
+    }
+}

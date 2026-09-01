@@ -1,0 +1,61 @@
+@namespace booking_room_admin.Components.Shared
+
+<div class="user-avatar avatar-circle @CssClass" style="@StyleString" @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrEmpty(PhotoUrl))
+    {
+        <img src="@PhotoUrl" alt="Avatar" />
+    }
+    else
+    {
+        <span>@ComputedInitials</span>
+    }
+</div>
+
+@code {
+    [Parameter] public string Initials { get; set; } = "";
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public string? PhotoUrl { get; set; }
+    [Parameter] public string BgColor { get; set; } = "";
+    [Parameter] public string CssClass { get; set; } = "";
+    [Parameter] public string Size { get; set; } = "32px";
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string ComputedInitials
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(Initials)) return Initials;
+            return AvatarHelper.GetInitials(Name);
+        }
+    }
+
+    private string ComputedBgColor
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(BgColor)) return BgColor;
+            var source = Name ?? Initials ?? "U";
+            return AvatarHelper.GetColor(source);
+        }
+    }
+
+    private string StyleString
+    {
+        get
+        {
+            var fontSize = $"font-size: {GetFontSize()}px;";
+            if (!string.IsNullOrEmpty(PhotoUrl))
+                return $"width: {Size}; height: {Size}; {fontSize}";
+            return $"width: {Size}; height: {Size}; background-color: {ComputedBgColor}; color: #FFFFFF; font-weight: 500; {fontSize}";
+        }
+    }
+
+    private int GetFontSize()
+    {
+        if (int.TryParse(Size.Replace("px", ""), out int px))
+            return Math.Max(10, (int)(px * 0.4));
+        return 13;
+    }
+}

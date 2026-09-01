@@ -1,0 +1,92 @@
+@namespace booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Services
+@inject IJSRuntime JS
+
+<AppModal IsOpen="@IsOpen" IsOpenChanged="@IsOpenChanged" Title="@($"Ekspor Data — {ExportTitle}")" Size="small">
+    <div class="export-modal">
+        <div class="export-format">
+            <span class="export-format-label">Format:</span>
+            <div class="export-segment">
+                <button class="export-seg-btn @(_format == "csv" ? "active" : "")" @onclick="@(() => SetFormat("csv"))">CSV</button>
+                <button class="export-seg-btn @(_format == "xlsx" ? "active" : "")" @onclick="@(() => SetFormat("xlsx"))">Excel (.xlsx)</button>
+            </div>
+        </div>
+
+        <div class="export-options">
+            <button class="export-opt" @onclick="@(() => DoExport(ExportScope.Current))">
+                <span class="export-opt-title">Unduh Tampilan Saat Ini</span>
+                <span class="export-opt-sub">@CurrentViewRows.Count() baris</span>
+            </button>
+            <button class="export-opt @(_noSelection ? "disabled" : "")" disabled="@_noSelection" @onclick="@(() => DoExport(ExportScope.Selected))">
+                <span class="export-opt-title">Unduh Data Terpilih</span>
+                <span class="export-opt-sub">@(SelectedRows?.Count() ?? 0) baris</span>
+            </button>
+            <button class="export-opt" @onclick="@(() => DoExport(ExportScope.All))">
+                <span class="export-opt-title">Unduh Semua Data</span>
+                <span class="export-opt-sub">@AllRows.Count() baris</span>
+            </button>
+        </div>
+    </div>
+</AppModal>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public string ExportTitle { get; set; } = "";
+    [Parameter] public List<ExportColumn> Columns { get; set; } = new();
+    [Parameter] public IEnumerable<object> CurrentViewRows { get; set; } = new List<object>();
+    [Parameter] public IEnumerable<object>? SelectedRows { get; set; }
+    [Parameter] public IEnumerable<object> AllRows { get; set; } = new List<object>();
+
+    private string _format = "csv";
+    private bool _noSelection => SelectedRows == null || !SelectedRows.Any();
+
+    private void SetFormat(string format)
+    {
+        _format = format;
+        StateHasChanged();
+    }
+
+    private async Task DoExport(ExportScope scope)
+    {
+        var rows = scope switch
+        {
+            ExportScope.Selected => SelectedRows ?? new List<object>(),
+            ExportScope.All => AllRows,
+            _ => CurrentViewRows
+        };
+
+        if (rows == null || !rows.Any())
+        {
+            await IsOpenChanged.InvokeAsync(false);
+            return;
+        }
+
+        byte[] bytes;
+        string mime;
+        string ext;
+        if (_format == "xlsx")
+        {
+            bytes = ExcelExporter.ToXlsx(Columns, rows);
+            mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            ext = "xlsx";
+        }
+        else
+        {
+            bytes = ExcelExporter.ToCsv(Columns, rows);
+            mime = "text/csv";
+            ext = "csv";
+        }
+
+        var safeName = string.IsNullOrWhiteSpace(ExportTitle)
+            ? "export"
+            : new string(ExportTitle.Where(c => char.IsLetterOrDigit(c) || c == '-' || c == '_' || c == ' ').ToArray()).Replace(' ', '_');
+        var fileName = $"{safeName}.{ext}";
+        var base64 = Convert.ToBase64String(bytes);
+
+        await JS.InvokeVoidAsync("downloadBase64File", fileName, base64, mime);
+        await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private enum ExportScope { Current, Selected, All }
+}

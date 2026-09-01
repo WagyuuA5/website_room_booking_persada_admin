@@ -1,0 +1,106 @@
+@page "/profile"
+@layout booking_room_admin.Components.Layout.MainLayout
+@using booking_room_admin.Components.Shared
+@inject booking_room_admin.Components.Services.ToastService Toast
+@inject NavigationManager Navigation
+@inject booking_room_admin.Components.Services.LayoutStateService LayoutState
+
+<TopBar Title="Profil Saya" Subtitle="Kelola informasi akun dan foto profil Anda." />
+
+<div class="profile-page">
+    <div class="profile-card">
+        <div class="profile-header-banner"></div>
+        <div class="profile-content">
+            <div class="profile-avatar-container">
+                <ProfileAvatarUploader Initials="WA" BgColor="#0B1E39" Size="84px" CameraIconSize="16" @bind-AvatarUrl="adminAvatarUrl" />
+            </div>
+            
+            <div class="profile-info-grid">
+                <div class="info-group">
+                    <label class="info-label">Nama Lengkap</label>
+                    <input type="text" class="info-input" @bind="fullName" />
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Email</label>
+                    <input type="email" class="info-input" value="wahyu.admin@persada.co.id" disabled />
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Peran (Role)</label>
+                    <input type="text" class="info-input" value="Admin" disabled />
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Divisi</label>
+                    <input type="text" class="info-input" @bind="division" />
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Nomor Telepon</label>
+                    <input type="tel" class="info-input" @bind="phoneNumber" />
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Zona Waktu</label>
+                    <select class="info-input" @bind="timeZone">
+                        <option value="wib">Asia/Jakarta (WIB, UTC+7)</option>
+                        <option value="wita">Asia/Makassar (WITA, UTC+8)</option>
+                        <option value="wit">Asia/Jayapura (WIT, UTC+9)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button type="button" class="btn-outline-pill" style="margin-right: 8px;" @onclick="CancelEdit">Batal</button>
+                <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveChanges">
+                    <Icon Name="check" Size="14" />
+                    <span>Simpan Perubahan</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? returnUrl { get; set; }
+
+    private string adminAvatarUrl = "";
+    private string fullName = "Admin Wahyu";
+    private string division = "IT & Digital";
+    private string phoneNumber = "+62 812-3456-7890";
+    private string timeZone = "wib";
+
+    protected override void OnInitialized()
+    {
+        adminAvatarUrl = LayoutState.AdminAvatarUrl;
+        fullName = LayoutState.AdminFullName;
+    }
+
+    private void CancelEdit()
+    {
+        NavigateBack();
+    }
+
+    private void SaveChanges()
+    {
+        LayoutState.SetAdminAvatarUrl(adminAvatarUrl);
+        LayoutState.SetAdminFullName(fullName);
+        Toast.Success("Profil akun berhasil diperbarui.");
+        NavigateBack();
+    }
+
+    private void NavigateBack()
+    {
+        if (!string.IsNullOrWhiteSpace(returnUrl))
+        {
+            Navigation.NavigateTo(returnUrl);
+        }
+        else
+        {
+            Navigation.NavigateTo("/dashboard");
+        }
+    }
+}
+
+
+
+
+
+

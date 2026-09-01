@@ -1,0 +1,193 @@
+.data-table-wrapper {
+    background: var(--color-surface-0, #ffffff);
+    border-radius: var(--radius-md, 16px);
+    border: 1px solid var(--color-border, #E3E6EC);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+/* Bulk action bar */
+.bulk-action-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: var(--color-info-soft, #E8F0FE);
+    border-bottom: 1px solid var(--color-border, #E3E6EC);
+}
+
+.bulk-count {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-info, #2F6FE0);
+}
+
+/* Table scroll */
+.table-scroll {
+    overflow-x: auto;
+}
+
+/* Table */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.data-table thead th {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-ink-500, #6B7080);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.85rem 1rem;
+    background: var(--color-surface-1, #F7F8FA);
+    border-bottom: 1px solid var(--color-border, #E3E6EC);
+    text-align: left;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.data-table thead th.sortable {
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.data-table thead th.sortable:hover {
+    color: var(--color-primary, #F5A623);
+}
+
+.sort-icon {
+    font-size: 0.65rem;
+    margin-left: 0.25rem;
+    color: var(--color-primary, #F5A623);
+}
+
+.col-checkbox {
+    width: 2.5rem;
+    text-align: center;
+}
+
+.col-checkbox input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--color-primary, #F5A623);
+    cursor: pointer;
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--color-border, #E3E6EC);
+    transition: background 0.15s ease;
+}
+
+.data-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+    background: var(--color-surface-2, #EFF1F5);
+}
+
+.data-table tbody tr.selected {
+    background: var(--color-primary-soft, #FFF4DE);
+}
+
+.data-table tbody tr.clickable {
+    cursor: pointer;
+}
+
+.data-table tbody td {
+    padding: 0.85rem 1rem;
+    color: var(--color-ink-700, #3D4250);
+    vertical-align: middle;
+}
+
+/* Empty state */
+.empty-cell {
+    padding: 2.5rem 1rem !important;
+}
+
+.empty-table-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-ink-500, #6B7080);
+}
+
+.empty-icon {
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+.empty-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Pagination */
+.table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--color-border, #E3E6EC);
+    background: var(--color-surface-1, #F7F8FA);
+}
+
+.pagination-info {
+    font-size: 0.75rem;
+    color: var(--color-ink-500, #6B7080);
+    font-weight: 500;
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.page-btn {
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--color-border, #E3E6EC);
+    background: var(--color-surface-0, #ffffff);
+    border-radius: var(--radius-xs, 6px);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-ink-700, #3D4250);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: var(--color-surface-2, #EFF1F5);
+    border-color: var(--color-border-strong, #D1D5DB);
+}
+
+.page-btn.active {
+    background: var(--color-navy, #0B1E39);
+    color: #ffffff;
+    border-color: var(--color-navy, #0B1E39);
+}
+
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.data-table-container { border-radius: var(--radius-md, 16px); overflow: hidden; border: 1px solid var(--color-border, #E3E6EC); }
+
+.data-table tr.clickable {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.data-table tr.clickable:hover {
+    background-color: var(--color-surface-2, #F8FAFC);
+}
+body.dark .data-table tr.clickable:hover {
+    background-color: #1E293B;
+}
+

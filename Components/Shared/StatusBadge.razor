@@ -1,0 +1,68 @@
+@namespace booking_room_admin.Components.Shared
+
+<span class="status-badge @GetBadgeClass()" @attributes="AdditionalAttributes">@GetLabel()</span>
+
+@code {
+    /// <summary>Status key: pending, approved, confirmed, rejected, preparing, fulfilled, ready, active, inactive, baru, diproses, selesai, cancelled, declined, maintenance</summary>
+    [Parameter] public string Status { get; set; } = "";
+
+    /// <summary>Override label teks (jika null, pakai default mapping)</summary>
+    [Parameter] public string? CustomLabel { get; set; }
+
+    /// <summary>Alias untuk CustomLabel / Status</summary>
+    [Parameter] public string? Text { get; set; }
+
+    /// <summary>Alias untuk Status / Type</summary>
+    [Parameter] public string? Type { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string EffectiveStatus => !string.IsNullOrEmpty(Status) ? Status : (!string.IsNullOrEmpty(Type) ? Type : (!string.IsNullOrEmpty(Text) ? Text : ""));
+
+    private string GetLabel()
+    {
+        if (!string.IsNullOrEmpty(CustomLabel)) return CustomLabel;
+        if (!string.IsNullOrEmpty(Text)) return Text;
+
+        return EffectiveStatus.ToLowerInvariant().Trim() switch
+        {
+            "pending" or "menunggu" => "Menunggu",
+            "approved" or "disetujui" => "Disetujui",
+            "confirmed" or "dikonfirmasi" => "Dikonfirmasi",
+            "rejected" or "rejected_admin" or "ditolak" => "Ditolak",
+            "rejected_system" => "Ditolak Sistem",
+            "declined" => "Ditolak",
+            "processing" or "preparing" or "diproses" => "Diproses",
+            "completed" or "fulfilled" or "resolved" or "selesai" => "Selesai",
+            "ready" or "siap" => "Siap",
+            "active" or "aktif" => "Aktif",
+            "inactive" or "tidak aktif" => "Tidak Aktif",
+            "baru" or "new" => "Baru",
+            "cancelled" or "dibatalkan" => "Dibatalkan",
+            "maintenance" or "perawatan" => "Dalam Perawatan",
+            "overdue" or "terlambat" => "Terlambat",
+            "tersedia" or "available" => "Tersedia",
+            "diblokir" or "blocked" => "Diblokir",
+            "open" or "terbuka" => "Terbuka",
+            "in_progress" or "dikerjakan" => "Dikerjakan",
+            "forwarded" or "diteruskan" => "Diteruskan",
+            "critical" or "kritis" => "Kritis",
+            "high" or "tinggi" => "Tinggi",
+            "medium" or "sedang" => "Sedang",
+            _ => EffectiveStatus
+        };
+    }
+
+    private string GetBadgeClass()
+    {
+        return EffectiveStatus.ToLowerInvariant().Trim() switch
+        {
+            "baru" or "new" => "badge-accent",
+            "processing" or "preparing" or "diproses" or "info" or "forwarded" or "diteruskan" or "medium" or "sedang" => "badge-info",
+            "pending" or "menunggu" or "in_progress" or "dikerjakan" or "maintenance" or "perawatan" or "draft" or "high" or "tinggi" => "badge-warning",
+            "approved" or "disetujui" or "confirmed" or "dikonfirmasi" or "active" or "aktif" or "completed" or "fulfilled" or "resolved" or "selesai" or "ready" or "siap" or "tersedia" or "available" => "badge-success",
+            "rejected" or "rejected_admin" or "rejected_system" or "declined" or "ditolak" or "cancelled" or "dibatalkan" or "overdue" or "terlambat" or "inactive" or "tidak aktif" or "diblokir" or "blocked" or "open" or "terbuka" or "critical" or "kritis" => "badge-danger",
+            _ => "badge-neutral"
+        };
+    }
+}

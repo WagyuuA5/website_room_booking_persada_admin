@@ -1,0 +1,150 @@
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@using ApexCharts
+
+<div class="tab-content">
+    <StatsRow Stats="_stats" />
+
+    <div class="tab-charts">
+        <div class="tab-chart-card">
+            <div class="tab-chart-header">
+                <h3>Volume Pemesanan Mingguan</h3>
+            </div>
+            <ApexChart TItem="ChartPoint" Options="_chartOptions" Height="280">
+                <ApexPointSeries TItem="ChartPoint"
+                                 Items="_chartData"
+                                 Name="Pemesanan"
+                                 SeriesType="SeriesType.Bar"
+                                 XValue="e => e.Label"
+                                 YValue="e => e.Value" />
+            </ApexChart>
+        </div>
+        <div class="tab-breakdown">
+            <h3 class="tab-breakdown-title">Ruangan Paling Sering Dipesan</h3>
+            <div class="tab-breakdown-list">
+                @foreach (var item in _breakdown)
+                {
+                    <div class="tab-breakdown-item">
+                        <div class="tab-breakdown-info">
+                            <span class="tab-breakdown-name">@item.Name</span>
+                            <span class="tab-breakdown-value">@item.Value%</span>
+                        </div>
+                        <div class="tab-breakdown-bar">
+                            <div class="tab-breakdown-fill" style="width: @($"{item.Value}%"); background: @item.BarColor;"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-table-section">
+        <div class="tab-table-header">
+            <h3>Pemesanan Terbaru</h3>
+            <a href="booking-management" class="tab-table-link">Lihat Semua</a>
+        </div>
+        <div class="tab-table-wrapper">
+            <table class="tab-table">
+                <thead>
+                    <tr>
+                        <th>ID Pemesanan</th>
+                        <th>Pemohon</th>
+                        <th>Divisi</th>
+                        <th>Ruangan</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in _tableData)
+                    {
+                        <tr class="tab-table-row">
+                            <td><span class="td-primary" style="font-family: monospace; font-weight: 500;">#@row.Id</span></td>
+                            <td>
+                                <div class="user-cell">
+                                    <UserAvatar Name="@row.Name" Initials="@row.Initials" BgColor="@AvatarHelper.GetColor(row.Name)" Size="32px" />
+                                    <span class="td-primary">@row.Name</span>
+                                </div>
+                            </td>
+                            <td><span class="td-secondary">@row.Department</span></td>
+                            <td><span class="td-primary">@row.Room</span></td>
+                            <td>
+                                <StatusBadge Status="@row.Status" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<StatItem> _stats = new()
+    {
+        new StatItem { Label = "Total Pemesanan", Value = "1.248", Type = StatCardType.TotalBooking, Trend = "12%", IsPositiveTrend = true },
+        new StatItem { Label = "Tingkat Persetujuan", Value = "87%", Type = StatCardType.ApprovalRate, Trend = "5%", IsPositiveTrend = true },
+        new StatItem { Label = "Rata-rata Durasi", Value = "1.4j", Type = StatCardType.AverageDuration, Trend = "0.2j", IsPositiveTrend = false },
+        new StatItem { Label = "Ruangan Terpopuler", Value = "Ruang Dirantara", Type = StatCardType.PopularRoom, Subtitle = "124 Pemesanan" }
+    };
+
+    private List<ChartPoint> _chartData = new()
+    {
+        new("Sen", 45), new("Sel", 52), new("Rab", 38), new("Kam", 65), new("Jum", 72), new("Sab", 28), new("Min", 18)
+    };
+
+    private ApexChartOptions<ChartPoint> _chartOptions = new();
+
+    private List<BreakdownItem> _breakdown = new()
+    {
+        new BreakdownItem { Name = "Ruang Dirantara VIP", Value = 35, BarColor = "var(--color-accent, #2563EB)" },
+        new BreakdownItem { Name = "Ruang Rapat Utama", Value = 28, BarColor = "rgba(37, 99, 235, 0.8)" },
+        new BreakdownItem { Name = "Ruang Diskusi B", Value = 22, BarColor = "rgba(37, 99, 235, 0.6)" },
+        new BreakdownItem { Name = "Auditorium Serbaguna", Value = 15, BarColor = "rgba(37, 99, 235, 0.4)" }
+    };
+
+    private List<TableRow> _tableData = new()
+    {
+        new TableRow { Id = "BK-001", Name = "Ahmad Fauzi", Initials = AvatarHelper.GetInitials("Ahmad Fauzi"), AvatarBg = AvatarHelper.GetColor("Ahmad Fauzi"), Department = "IT & Digital", Room = "Ruang Dirantara VIP", Status = "disetujui" },
+        new TableRow { Id = "BK-002", Name = "Siti Nurhaliza", Initials = AvatarHelper.GetInitials("Siti Nurhaliza"), AvatarBg = AvatarHelper.GetColor("Siti Nurhaliza"), Department = "Produk & Desain", Room = "Ruang Rapat Utama", Status = "menunggu" },
+        new TableRow { Id = "BK-003", Name = "Budi Santoso", Initials = AvatarHelper.GetInitials("Budi Santoso"), AvatarBg = AvatarHelper.GetColor("Budi Santoso"), Department = "Operasional", Room = "Ruang Diskusi B", Status = "disetujui" },
+        new TableRow { Id = "BK-004", Name = "Rani Anggraini", Initials = AvatarHelper.GetInitials("Rani Anggraini"), AvatarBg = AvatarHelper.GetColor("Rani Anggraini"), Department = "Keuangan", Room = "Auditorium Serbaguna", Status = "ditolak" }
+    };
+
+    protected override void OnInitialized()
+    {
+        _chartOptions = new ApexChartOptions<ChartPoint>
+        {
+            Chart = new Chart { Type = ChartType.Bar, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 600 }, Toolbar = new Toolbar { Show = false } },
+            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "48%", BorderRadius = 6 } },
+            Colors = new List<string> { "#2563EB" },
+            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } } },
+            Grid = new Grid { BorderColor = "rgba(226, 232, 240, 0.6)", StrokeDashArray = 3 }
+        };
+    }
+
+    public class ChartPoint
+    {
+        public string Label { get; set; } = string.Empty;
+        public int Value { get; set; }
+        public ChartPoint(string label, int value) => (Label, Value) = (label, value);
+    }
+
+    private class BreakdownItem
+    {
+        public string Name { get; set; } = string.Empty;
+        public int Value { get; set; }
+        public string BarColor { get; set; } = "#2563EB";
+    }
+
+    private class TableRow
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Initials { get; set; } = "U";
+        public string AvatarBg { get; set; } = "#2563EB";
+        public string Department { get; set; } = string.Empty;
+        public string Room { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    }
+}

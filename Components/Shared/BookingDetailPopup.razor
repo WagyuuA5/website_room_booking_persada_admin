@@ -1,0 +1,131 @@
+﻿@using booking_room_admin.Components.Models
+
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Size="large">
+    <HeaderContent>
+        <span class="bd-status-pill @GetStatusPillClass(Booking?.Status ?? string.Empty)">
+            @GetStatusPillLabel(Booking?.Status ?? string.Empty)
+        </span>
+    </HeaderContent>
+    <ChildContent>
+        <div class="bd-bg-preview"></div>
+        <div class="bd-room-info">
+            <h2 class="bd-room-title">@Booking?.Room</h2>
+            <p class="bd-room-desc">@GetRoomDescription(Booking?.Room)</p>
+            <div class="bd-room-pills">
+                <span class="bd-pill">
+                    <Icon Name="users" Size="14" />
+                    @Booking?.ParticipantsCount Peserta
+                </span>
+                <span class="bd-pill">
+                    <Icon Name="clock" Size="14" />
+                    Sayap Eksekutif, Lt. 14
+                </span>
+            </div>
+        </div>
+
+        <div class="bd-facilities">
+            <div class="bd-fac-title">Fasilitas Ruangan</div>
+            <div class="bd-fac-list">
+                <span class="bd-fac-item">
+                    <Icon Name="video" Size="14" />
+                    Video Conf
+                </span>
+                <span class="bd-fac-item">
+                    <Icon Name="wifi" Size="14" />
+                    WiFi
+                </span>
+                <span class="bd-fac-item">
+                    <Icon Name="coffee" Size="14" />
+                    Katering
+                </span>
+            </div>
+        </div>
+
+        <div class="bd-booking-details">
+            <h3 class="bd-details-title">Detail Pemesanan</h3>
+            <div class="bd-details-grid">
+                <div class="bd-detail-item">
+                    <span class="bd-detail-label">Pemohon</span>
+                    <div class="bd-detail-user">
+                        <div class="bd-user-avatar">@Booking?.RequesterInitials</div>
+                        <div>
+                            <div class="bd-user-name">@Booking?.RequesterName</div>
+                            <div class="bd-user-div">@Booking?.RequesterDivision</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bd-detail-item">
+                    <span class="bd-detail-label">Jadwal</span>
+                    <div class="bd-detail-value">@Booking?.Date.ToString("dd MMM yyyy")</div>
+                    <div class="bd-detail-sub">@Booking?.StartTime - @Booking?.EndTime</div>
+                </div>
+                <div class="bd-detail-item">
+                    <span class="bd-detail-label">Judul Rapat</span>
+                    <div class="bd-detail-value">@Booking?.Title</div>
+                </div>
+                <div class="bd-detail-item">
+                    <span class="bd-detail-label">Jumlah Peserta</span>
+                    <div class="bd-detail-value">@Booking?.ParticipantsCount</div>
+                </div>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn-outline-pill" @onclick="HandleReject">Tolak</button>
+        <button class="btn-primary-pill" @onclick="HandleApprove">Setujui</button>
+    </FooterContent>
+</AppModal>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public Booking? Booking { get; set; }
+    [Parameter] public EventCallback<Booking?> OnApprove { get; set; }
+    [Parameter] public EventCallback<Booking?> OnReject { get; set; }
+
+    private string GetRoomDescription(string? room) => room switch
+    {
+        "Ruang Dirantara" => "Ruang rapat eksekutif premium yang dirancang untuk sesi strategi dan presentasi tingkat tinggi.",
+        _ => "Ruang rapat modern dengan fasilitas lengkap untuk mendukung produktivitas pertemuan Anda."
+    };
+
+    private string GetStatusPillClass(string status) => status switch
+    {
+        "pending" => "pill-warning",
+        "approved" => "pill-success",
+        "rejected_system" => "pill-danger",
+        "rejected_admin" => "pill-danger",
+        _ => "pill-warning"
+    };
+
+    private string GetStatusPillLabel(string status) => status switch
+    {
+        "pending" => "Menunggu Persetujuan",
+        "approved" => "Disetujui",
+        "rejected_system" => "Ditolak Sistem",
+        "rejected_admin" => "Ditolak Admin",
+        _ => status
+    };
+
+    private async Task HandleApprove()
+    {
+        if (Booking != null)
+        {
+            await OnApprove.InvokeAsync(Booking);
+        }
+    }
+
+    private async Task HandleReject()
+    {
+        if (Booking != null)
+        {
+            await OnReject.InvokeAsync(Booking);
+        }
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+    }
+}

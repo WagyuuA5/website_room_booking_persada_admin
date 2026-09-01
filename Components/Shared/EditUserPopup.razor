@@ -1,0 +1,166 @@
+@using booking_room_admin.Components.Models
+
+<div class="popup-overlay @(IsOpen ? "open" : "")" @onclick="Close">
+    <div class="popup-card edit-user-card" @onclick:stopPropagation="true">
+        <div class="eu-header">
+            <div>
+                <h2 class="eu-title">Ubah Profil User</h2>
+                <p class="eu-subtitle">Perbarui detail akun dan tingkat akses.</p>
+            </div>
+        </div>
+
+        @if (User != null)
+        {
+            <div class="eu-body">
+                <div class="eu-identity">
+                    <div class="eu-avatar">@User.Initials</div>
+                    <div class="eu-identity-info">
+                        <div class="eu-identity-name">@User.FullName</div>
+                        <div class="eu-identity-meta">
+                            <span class="eu-employee-pill">@User.EmployeeId</span>
+                            <span class="eu-role-badge">@User.Role</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="eu-section">
+                    <div class="eu-section-title">Informasi Pribadi</div>
+                    <div class="eu-row">
+                        <div class="eu-field">
+                            <label class="eu-label">Nama Depan</label>
+                            <input type="text" class="eu-input" value="@firstName" @onchange="OnFirstNameChanged" />
+                        </div>
+                        <div class="eu-field">
+                            <label class="eu-label">Nama Belakang</label>
+                            <input type="text" class="eu-input" value="@lastName" @onchange="OnLastNameChanged" />
+                        </div>
+                    </div>
+                    <div class="eu-field">
+                        <label class="eu-label">Alamat Email</label>
+                        <input type="email" class="eu-input" value="@User.Email" @onchange="(e) => User.Email = GetString(e)" />
+                    </div>
+                    <div class="eu-field">
+                        <label class="eu-label">Nomor Telepon</label>
+                        <input type="tel" class="eu-input" value="@User.Phone" @onchange="(e) => User.Phone = GetString(e)" />
+                    </div>
+                </div>
+
+                <div class="eu-section">
+                    <div class="eu-section-title">Detail Organisasi</div>
+                    <div class="eu-field">
+                        <label class="eu-label">Departemen</label>
+                        <button class="eu-input eu-dept-btn" @onclick="() => OnSelectDepartment.InvokeAsync()">
+                            @User.Department
+                            <Icon Name="calendar" Size="14" />
+                        </button>
+                    </div>
+                </div>
+
+                <div class="eu-section">
+                    <div class="eu-section-header">
+                        <span class="eu-section-title">Status Akun</span>
+                        <span class="eu-status-indicator">Aktif Saat Ini</span>
+                    </div>
+                    <div class="eu-status-options">
+                        <button class="eu-status-btn @(User.Status == "active" ? "active" : "")" @onclick='() => User.Status = "active"'>
+                            Aktif
+                        </button>
+                        <button class="eu-status-btn @(User.Status == "inactive" ? "active" : "")" @onclick='() => User.Status = "inactive"'>
+                            Tidak Aktif / Dinonaktifkan
+                        </button>
+                    </div>
+                </div>
+
+                <div class="eu-section">
+                    <div class="eu-section-title">Keamanan</div>
+                    <button class="btn-outline-pill" @onclick="() => OnResetPassword.InvokeAsync(User)">
+                        Reset Kata Sandi
+                    </button>
+                    <label class="eu-checkbox-label">
+                        <input type="checkbox" @bind="forcePasswordChange" />
+                        <span class="eu-checkbox-text">Wajibkan ganti kata sandi di login berikutnya</span>
+                    </label>
+                </div>
+            </div>
+        }
+
+        <div class="eu-footer">
+            <button class="btn-outline-pill" @onclick="Close">Batal</button>
+            <button class="btn-primary-pill btn-yellow" @onclick="SaveChanges">Simpan Perubahan</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public User? User { get; set; }
+    [Parameter] public EventCallback<User> OnUserUpdated { get; set; }
+    [Parameter] public EventCallback<User> OnResetPassword { get; set; }
+    [Parameter] public EventCallback OnSelectDepartment { get; set; }
+
+    private bool forcePasswordChange;
+    private string firstName = string.Empty;
+    private string lastName = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (User != null)
+        {
+            firstName = GetFirstName(User.FullName);
+            lastName = GetLastName(User.FullName);
+        }
+    }
+
+    private string GetFirstName(string fullName)
+    {
+        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length > 0 ? parts[0] : string.Empty;
+    }
+
+    private string GetLastName(string fullName)
+    {
+        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length > 1 ? string.Join(" ", parts.Skip(1)) : string.Empty;
+    }
+
+    private string GetString(ChangeEventArgs e) => e.Value?.ToString() ?? string.Empty;
+
+    private void OnFirstNameChanged(ChangeEventArgs e)
+    {
+        if (User == null) return;
+        firstName = GetString(e);
+        User.FullName = $"{firstName} {lastName}".Trim();
+        User.Initials = GetInitials(User.FullName);
+    }
+
+    private void OnLastNameChanged(ChangeEventArgs e)
+    {
+        if (User == null) return;
+        lastName = GetString(e);
+        User.FullName = $"{firstName} {lastName}".Trim();
+        User.Initials = GetInitials(User.FullName);
+    }
+
+    private string GetInitials(string name)
+    {
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) return (parts[0][0].ToString() + parts[1][0].ToString()).ToUpperInvariant();
+        return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant();
+    }
+
+    private void SaveChanges()
+    {
+        if (User != null)
+        {
+            OnUserUpdated.InvokeAsync(User);
+        }
+        Close();
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+    }
+}

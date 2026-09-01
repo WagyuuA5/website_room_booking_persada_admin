@@ -1,0 +1,338 @@
+/* ── Top bar shell (transparent, hosts the floating glass island) ── */
+.admin-topbar {
+    background: transparent;
+    border-bottom: none;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: stretch;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    gap: 0.75rem;
+}
+
+.topbar-dynamic-island {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.topbar-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+    margin-right: auto;
+}
+
+.topbar-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #1E293B;
+    margin: 0;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+}
+
+.topbar-subtitle {
+    font-size: 0.72rem;
+    color: #64748B;
+    margin: 0;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.topbar-right-slot {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+/* ── Search ── */
+.topbar-search {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    width: 220px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.topbar-search:focus-within {
+    border-color: #2563EB;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.search-icon {
+    width: 0.85rem;
+    height: 0.85rem;
+    opacity: 0.55;
+    flex-shrink: 0;
+}
+
+.topbar-search input {
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 0.75rem;
+    color: #1E293B;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+}
+
+.topbar-search input::placeholder {
+    color: #475569;
+}
+
+/* ── Date filter ── */
+.date-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #1E293B;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.date-filter:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Icon buttons ── */
+.topbar-icon-btn {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #1E293B;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
+}
+
+.topbar-icon-btn:hover {
+    transform: scale(1.08);
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.12);
+}
+
+.theme-toggle {
+    margin: 0 2px;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    background: #EF4444;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 600;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse-badge 2s infinite;
+}
+
+/* ── Profile ── */
+.admin-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem 0.2rem 0.2rem;
+    border-radius: 999px;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.admin-profile-btn:hover {
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.admin-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.admin-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #1E293B;
+    white-space: nowrap;
+}
+
+.admin-role {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+/* ── Profile popup (glass + animation) ── */
+.profile-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+}
+
+.profile-popup {
+    position: absolute;
+    top: 64px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    width: 290px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    animation: profilePopupIn 0.2s ease-out;
+}
+
+@keyframes profilePopupIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.profile-header strong {
+    color: #1E293B;
+    font-size: 0.9rem;
+}
+
+.text-sm { font-size: 0.78rem; }
+.text-gray { color: #64748B; }
+
+hr {
+    border: none;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    margin: 0.4rem 0;
+}
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    font-size: 0.78rem;
+}
+
+.pd-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.pd-row span { color: #64748B; }
+.pd-row strong { color: #1E293B; text-align: right; }
+
+/* ── Dark mode overrides ── */
+body.dark .topbar-search {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(148, 163, 184, 0.22);
+}
+body.dark .topbar-search:focus-within { background: rgba(255, 255, 255, 0.12); }
+body.dark .topbar-search input,
+body.dark .date-filter,
+body.dark .topbar-icon-btn,
+body.dark .admin-name { color: #E2E8F0; }
+body.dark .topbar-search input::placeholder { color: #94A3B8; }
+body.dark .date-filter {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(148, 163, 184, 0.22);
+}
+body.dark .topbar-icon-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(148, 163, 184, 0.22);
+}
+body.dark .topbar-icon-btn:hover { background: rgba(255, 255, 255, 0.16); }
+body.dark .admin-profile-btn:hover { background: rgba(255, 255, 255, 0.1); }
+body.dark .admin-role { color: #94A3B8; }
+body.dark .profile-popup {
+    background: rgba(17, 25, 40, 0.8);
+    border-color: rgba(148, 163, 184, 0.22);
+}
+body.dark .profile-header strong,
+body.dark .pd-row strong { color: #F1F5F9; }
+body.dark .pd-row span { color: #94A3B8; }
+body.dark .text-gray { color: #94A3B8; }
+body.dark hr { border-top-color: rgba(148, 163, 184, 0.18); }
+
+/* ── Icon sizes ── */
+.icon-sm { width: 0.9rem; height: 0.9rem; object-fit: contain; }
+.icon-md { width: 1.1rem; height: 1.1rem; object-fit: contain; }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+    .admin-info { display: none; }
+    .topbar-search { width: 160px; }
+}
+
+@media (max-width: 768px) {
+    .admin-topbar { padding: 0.5rem 0.75rem; justify-content: center; }
+    .topbar-dynamic-island { padding: 6px 10px; gap: 10px; flex-wrap: wrap; }
+    .topbar-search { display: none; }
+    .topbar-title { font-size: 1rem; }
+    .topbar-subtitle { display: none; }
+    .admin-info { display: none; }
+    .profile-popup { right: 10px; left: 10px; width: auto; }
+}
+
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}

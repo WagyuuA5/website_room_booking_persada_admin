@@ -1,73 +1,137 @@
-﻿<div class="sidebar-header">
-    <img src="icon/logoo_psd-removebg-preview 2.svg" alt="PERSADA" class="sidebar-logo" />
-    <span class="sidebar-brand">PERSADA</span>
+@inject NavigationManager Navigation
+@inject booking_room_admin.Components.Services.AuthService AuthService
+@using booking_room_admin.Components.Shared
+
+<div class="sidebar-header">
+    <img src="logo-persada.svg" alt="Logo PT PERSADA" class="sidebar-logo @(IsCollapsed ? "logo-collapsed" : "logo-expanded")" title="PT PERSADA" />
 </div>
 
-<div class="sidebar-section-title">Menu Utama</div>
+<div class="sidebar-nav-container">
+    @if (!IsCollapsed)
+    {
+        <div class="sidebar-section-title">Menu Utama</div>
+    }
 
-<nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin" Match="NavLinkMatch.All">
-                <img src="icon/dshb.png" alt="Dashboard" class="nav-icon" />
-                <span>Beranda</span>
+    <nav class="nav flex-column">
+        <div class="nav-item">
+            <NavLink class="nav-link" href="dashboard" Match="NavLinkMatch.All" title="Dashboard">
+                <Icon Name="layout-grid" Size="24" CssClass="nav-icon" />
+                @if (!IsCollapsed)
+                {
+                    <span>Dashboard</span>
+                }
             </NavLink>
         </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="booking-management" Match="NavLinkMatch.All" title="Manajemen Pemesanan">
+                <Icon Name="calendar" Size="24" CssClass="nav-icon" />
+                @if (!IsCollapsed)
+                {
+                    <span>Manajemen Pemesanan</span>
+                }
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="rooms" Match="NavLinkMatch.All" title="Ruangan">
+                <Icon Name="building" Size="24" CssClass="nav-icon" />
+                @if (!IsCollapsed)
+                {
+                    <span>Ruangan</span>
+                }
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="rooms/status" Match="NavLinkMatch.All" title="Status">
+                <Icon Name="activity" Size="24" CssClass="nav-icon" />
+                @if (!IsCollapsed)
+                {
+                    <span>Status</span>
+                }
+            </NavLink>
+        </div>
+    </nav>
 
-    <div class="nav-item px-3">
-        <NavLink class="nav-link" href="booking">
-            <img src="icon/book.png" alt="Pemesanan" class="nav-icon" />
-            <span>Pemesanan</span>
-        </NavLink>
+    @if (!IsCollapsed)
+    {
+        <div class="sidebar-section-title">Administrasi</div>
+    }
+
+    <nav class="nav flex-column">
+        <div class="nav-item">
+            <NavLink class="nav-link" href="users" Match="NavLinkMatch.All" title="Manajemen Pengguna">
+                <Icon Name="users" Size="24" CssClass="nav-icon" />
+                @if (!IsCollapsed)
+                {
+                    <span>Manajemen Pengguna</span>
+                }
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="reports" Match="NavLinkMatch.All" title="Laporan Sistem">
+                <Icon Name="file-text" Size="24" CssClass="nav-icon" />
+                @if (!IsCollapsed)
+                {
+                    <span>Laporan Sistem</span>
+                }
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="audit-log" Match="NavLinkMatch.All" title="Audit Log">
+                <Icon Name="shield" Size="24" CssClass="nav-icon" />
+                @if (!IsCollapsed)
+                {
+                    <span>Audit Log</span>
+                }
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="facility-requests" Match="NavLinkMatch.All" title="Permintaan Fasilitas">
+                <Icon Name="package" Size="24" CssClass="nav-icon" />
+                @if (!IsCollapsed)
+                {
+                    <span>Permintaan Fasilitas</span>
+                }
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="room-calendar" Match="NavLinkMatch.All" title="Kalender Ruangan">
+                <Icon Name="calendar" Size="24" CssClass="nav-icon" />
+                @if (!IsCollapsed)
+                {
+                    <span>Kalender Ruangan</span>
+                }
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="settings" Match="NavLinkMatch.All" title="Pengaturan">
+                <Icon Name="settings" Size="24" CssClass="nav-icon" />
+                @if (!IsCollapsed)
+                {
+                    <span>Pengaturan</span>
+                }
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+<div class="sidebar-footer">
+    <div class="nav-item">
+        <a class="nav-link footer-link logout-link" href="#" @onclick="HandleLogout" @onclick:preventDefault title="Keluar">
+            <Icon Name="log-out" Size="20" CssClass="nav-icon logout-icon" />
+            @if (!IsCollapsed)
+            {
+                <span>Keluar</span>
+            }
+        </a>
     </div>
+</div>
 
-    <div class="nav-item px-3">
-        <NavLink class="nav-link" href="rooms">
-            <img src="icon/room.png" alt="Ruangan" class="nav-icon" />
-            <span>Ruangan</span>
-        </NavLink>
-    </div>
+@code {
+    [Parameter] public bool IsCollapsed { get; set; }
 
-    <div class="nav-item px-3">
-        <NavLink class="nav-link" href="status">
-            <span class="nav-icon-placeholder"></span>
-            <span>Status</span>
-        </NavLink>
-    </div>
-
-    <div class="nav-item px-3">
-        <NavLink class="nav-link" href="users">
-            <img src="icon/icon_13_admin.png" alt="Pengguna" class="nav-icon" />
-            <span>Pengguna</span>
-        </NavLink>
-    </div>
-
-    <div class="nav-item px-3">
-        <NavLink class="nav-link" href="reports">
-            <span class="nav-icon-placeholder"></span>
-            <span>Laporan</span>
-        </NavLink>
-    </div>
-
-    <div class="nav-item px-3">
-        <NavLink class="nav-link" href="settings">
-            <span class="nav-icon-placeholder"></span>
-            <span>Pengaturan</span>
-        </NavLink>
-    </div>
-
-    <div class="sidebar-section-title">Administrasi</div>
-
-    <div class="nav-item px-3">
-        <NavLink class="nav-link" href="support">
-            <span class="nav-icon-placeholder"></span>
-            <span>Bantuan</span>
-        </NavLink>
-    </div>
-
-    <div class="nav-item px-3">
-        <NavLink class="nav-link" href="logout">
-            <span class="nav-icon-placeholder"></span>
-            <span>Keluar</span>
-        </NavLink>
-    </div>
-</nav>
+    private void HandleLogout()
+    {
+        AuthService.Logout();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

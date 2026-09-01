@@ -1,0 +1,90 @@
+@namespace booking_room_admin.Components.Shared
+
+<div class="skeleton-container @CssClass">
+    @if (Variant == "stats" || Variant == "full")
+    {
+        <div class="skeleton-stats-grid">
+            @for (int i = 0; i < CardCount; i++)
+            {
+                <div class="skeleton-stat-card">
+                    <SkeletonBlock Width="44px" Height="44px" Radius="50%" />
+                    <div class="skeleton-stat-lines">
+                        <SkeletonBlock Width="80px" Height="12px" Radius="4px" />
+                        <SkeletonBlock Width="120px" Height="24px" Radius="6px" />
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (Variant == "chart" || Variant == "full")
+    {
+        <div class="skeleton-chart-wrap">
+            <div class="skeleton-chart-header">
+                <SkeletonBlock Width="180px" Height="16px" Radius="4px" />
+                <SkeletonBlock Width="100px" Height="28px" Radius="14px" />
+            </div>
+            <SkeletonBlock Width="100%" Height="240px" Radius="8px" />
+        </div>
+    }
+
+    @if (Variant == "table" || Variant == "full")
+    {
+        <div class="skeleton-table-wrap">
+            <div class="skeleton-table-header-row">
+                @for (int c = 0; c < ColumnCount; c++)
+                {
+                    <SkeletonBlock Width="@(c == 0 ? "30%" : "15%")" Height="14px" Radius="4px" />
+                }
+            </div>
+            @for (int r = 0; r < RowCount; r++)
+            {
+                <div class="skeleton-table-row">
+                    <div class="skeleton-cell-user">
+                        <SkeletonBlock Width="36px" Height="36px" Radius="50%" />
+                        <div class="skeleton-cell-lines">
+                            <SkeletonBlock Width="120px" Height="14px" Radius="4px" />
+                            <SkeletonBlock Width="80px" Height="10px" Radius="3px" />
+                        </div>
+                    </div>
+                    @for (int c = 1; c < ColumnCount; c++)
+                    {
+                        <SkeletonBlock Width="70%" Height="14px" Radius="4px" />
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    @if (Variant == "settings")
+    {
+        <div class="skeleton-settings-wrap">
+            <div class="skeleton-settings-nav">
+                <SkeletonBlock Width="120px" Height="16px" Radius="4px" />
+                <SkeletonBlock Width="100%" Height="36px" Radius="8px" />
+                <SkeletonBlock Width="100%" Height="36px" Radius="8px" />
+                <SkeletonBlock Width="100%" Height="36px" Radius="8px" />
+                <SkeletonBlock Width="120px" Height="16px" Radius="4px" />
+                <SkeletonBlock Width="100%" Height="36px" Radius="8px" />
+                <SkeletonBlock Width="100%" Height="36px" Radius="8px" />
+            </div>
+            <div class="skeleton-settings-panel">
+                <SkeletonBlock Width="220px" Height="22px" Radius="6px" />
+                <SkeletonBlock Width="360px" Height="14px" Radius="4px" />
+                <div style="height: 12px;"></div>
+                <SkeletonBlock Width="100%" Height="48px" Radius="8px" />
+                <SkeletonBlock Width="100%" Height="48px" Radius="8px" />
+                <SkeletonBlock Width="100%" Height="48px" Radius="8px" />
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>stats, table, chart, settings, full</summary>
+    [Parameter] public string Variant { get; set; } = "stats";
+    [Parameter] public int CardCount { get; set; } = 4;
+    [Parameter] public int RowCount { get; set; } = 5;
+    [Parameter] public int ColumnCount { get; set; } = 5;
+    [Parameter] public string CssClass { get; set; } = "";
+}

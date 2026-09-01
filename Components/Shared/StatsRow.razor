@@ -1,0 +1,58 @@
+@namespace booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+
+<div class="stats-row">
+    @foreach (var stat in Stats)
+    {
+        @if (stat.Type.HasValue)
+        {
+            <StatCard Label="@stat.Label"
+                      Value="@stat.Value"
+                      Type="@stat.Type.Value"
+                      Trend="@FormatTrend(stat)"
+                      IsPositiveTrend="@stat.IsPositiveTrend"
+                      Subtitle="@stat.Subtitle" />
+        }
+        else
+        {
+            var fallbackType = ResolveFallbackType(stat);
+            <StatCard Label="@stat.Label"
+                      Value="@stat.Value"
+                      Type="@fallbackType"
+                      Trend="@FormatTrend(stat)"
+                      IsPositiveTrend="@stat.IsPositiveTrend"
+                      Subtitle="@stat.Subtitle" />
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public List<StatItem> Stats { get; set; } = new();
+
+    private StatCardType ResolveFallbackType(StatItem stat)
+    {
+        var label = stat.Label.ToLowerInvariant();
+        if (label.Contains("populer")) return StatCardType.PopularRoom;
+        if (label.Contains("pemesanan")) return StatCardType.TotalBooking;
+        if (label.Contains("tiket terbuka")) return StatCardType.OpenTicket;
+        if (label.Contains("tiket")) return StatCardType.TotalTicket;
+        if (label.Contains("penghapusan")) return StatCardType.TotalAccountDeletionRequest;
+        if (label.Contains("fasilitas")) return StatCardType.TotalFacilityRequest;
+        if (label.Contains("kritis") || label.Contains("tinggi")) return StatCardType.CriticalSeverity;
+        if (label.Contains("bug") || label.Contains("laporan")) return StatCardType.TotalBugReport;
+        if (label.Contains("belum ditugaskan")) return StatCardType.Unassigned;
+        if (label.Contains("permintaan sistem")) return StatCardType.TotalSystemRequest;
+        if (label.Contains("persetujuan") || label.Contains("penyelesaian") || label.Contains("selesai") || label.Contains("disetujui")) return StatCardType.ApprovalRate;
+        if (label.Contains("durasi") || label.Contains("waktu") || label.Contains("tanggap") || label.Contains("penanganan")) return StatCardType.AverageDuration;
+        if (label.Contains("katering")) return StatCardType.SpecialCatering;
+        if (label.Contains("aktivitas") || label.Contains("hari ini")) return StatCardType.TodayActivity;
+        return StatCardType.TotalBooking;
+    }
+
+    private string? FormatTrend(StatItem stat)
+    {
+        if (string.IsNullOrWhiteSpace(stat.Trend)) return null;
+        var prefix = stat.IsPositiveTrend == true ? "↑ " : stat.IsPositiveTrend == false ? "↓ " : "";
+        return $"{prefix}{stat.Trend}";
+    }
+}

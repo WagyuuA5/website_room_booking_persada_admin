@@ -1,0 +1,197 @@
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@using ApexCharts
+
+<div class="tab-content">
+    <StatsRow Stats="_stats" />
+
+    <div class="tab-charts">
+        <div class="tab-chart-card">
+            <div class="tab-chart-header">
+                <h3>Volume Permintaan Mingguan</h3>
+            </div>
+            <ApexChart TItem="ChartPoint" Options="_chartOptions" Height="280">
+                <ApexPointSeries TItem="ChartPoint"
+                                 Items="_chartData"
+                                 Name="Permintaan"
+                                 SeriesType="SeriesType.Bar"
+                                 XValue="e => e.Label"
+                                 YValue="e => e.Value" />
+            </ApexChart>
+        </div>
+        <div class="tab-breakdown">
+            <h3 class="tab-breakdown-title">Permintaan per Kategori</h3>
+            <div class="tab-breakdown-list">
+                @foreach (var item in _breakdown)
+                {
+                    <div class="tab-breakdown-item">
+                        <div class="tab-breakdown-info">
+                            <span class="tab-breakdown-name">@item.Name</span>
+                            <span class="tab-breakdown-value">@item.Value%</span>
+                        </div>
+                        <div class="tab-breakdown-bar">
+                            <div class="tab-breakdown-fill" style="width: @($"{item.Value}%"); background: var(--color-accent, #2563EB);"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-table-section">
+        <div class="tab-table-header">
+            <h3>Log Permintaan Fasilitas</h3>
+            <a href="facility-requests" class="tab-table-link">Lihat Semua</a>
+        </div>
+        <div class="tab-table-wrapper">
+            <table class="tab-table">
+                <thead>
+                    <tr>
+                        <th>ID Permintaan</th>
+                        <th>Pemohon</th>
+                        <th>Divisi</th>
+                        <th>Jenis Barang</th>
+                        <th>Ditugaskan ke</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in _tableData)
+                    {
+                        <tr class="clickable-row" @onclick="() => OpenDetail(row)">
+                            <td><span class="td-primary" style="font-family: monospace; font-weight: 500;">#@row.Id</span></td>
+                            <td>
+                                <div class="user-cell">
+                                    <UserAvatar Initials="@GetInitials(row.Name)" BgColor="@GetAvatarColor(row.Name)" Size="34px" />
+                                    <div class="user-cell-info">
+                                        <span class="td-primary">@row.Name</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="td-secondary">@row.Department</span></td>
+                            <td><span class="td-primary">@row.Type</span></td>
+                            <td><span class="td-secondary">@row.Assigned</span></td>
+                            <td><StatusBadge Status="@row.Status" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (selectedRow != null)
+{
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => { if (!v) selectedRow = null; })" Title="Detail Permintaan Fasilitas" Size="medium">
+        <ChildContent>
+            <div style="display: flex; flex-direction: column; gap: 16px; padding: 12px 0;">
+                <div style="display: flex; gap: 16px; align-items: center;">
+                    <UserAvatar Initials="@GetInitials(selectedRow.Name)" BgColor="@GetAvatarColor(selectedRow.Name)" Size="56px" />
+                    <div>
+                        <h4 style="margin: 0; font-size: 1.1rem; color: var(--color-ink-900, #14171F);">@selectedRow.Name</h4>
+                        <span style="color: var(--color-text-secondary, #64748B); font-size: 0.9rem;">@selectedRow.Department</span>
+                    </div>
+                </div>
+                <div style="border-top: 1px solid var(--color-border, #E2E8F0); padding-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--color-text-muted, #9CA3AF); text-transform: uppercase;">ID Permintaan</label>
+                        <div style="font-weight: 500; color: var(--color-ink-900, #14171F);">#@selectedRow.Id</div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--color-text-muted, #9CA3AF); text-transform: uppercase;">Status</label>
+                        <div style="margin-top: 4px;"><StatusBadge Status="@selectedRow.Status" /></div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--color-text-muted, #9CA3AF); text-transform: uppercase;">Jenis Barang</label>
+                        <div style="font-weight: 500; color: var(--color-ink-900, #14171F);">@selectedRow.Type</div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--color-text-muted, #9CA3AF); text-transform: uppercase;">Ditugaskan Ke</label>
+                        <div style="font-weight: 500; color: var(--color-ink-900, #14171F);">@selectedRow.Assigned</div>
+                    </div>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => selectedRow = null">Tutup</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@code {
+    private List<StatItem> _stats = new()
+    {
+        new StatItem { Label = "Total Permintaan", Value = "482", Type = StatCardType.TotalFacilityRequest },
+        new StatItem { Label = "Jenis Teratas (Katering)", Value = "45%", Type = StatCardType.SpecialCatering },
+        new StatItem { Label = "Rata-rata Penyelesaian", Value = "1.4j", Type = StatCardType.AverageDuration },
+        new StatItem { Label = "Belum Ditugaskan", Value = "12", Subtitle = "Prioritas Tinggi", Type = StatCardType.Unassigned }
+    };
+
+    private List<ChartPoint> _chartData = new()
+    {
+        new("Sen", 32), new("Sel", 45), new("Rab", 28), new("Kam", 55), new("Jum", 62), new("Sab", 18), new("Min", 12)
+    };
+
+    private ApexChartOptions<ChartPoint> _chartOptions = new();
+
+    protected override void OnInitialized()
+    {
+        _chartOptions = new ApexChartOptions<ChartPoint>
+        {
+            Chart = new Chart { Type = ChartType.Bar, Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }, Toolbar = new Toolbar { Show = false } },
+            PlotOptions = new PlotOptions { Bar = new PlotOptionsBar { ColumnWidth = "48%", BorderRadius = 6 } },
+            Colors = new List<string> { "#2563EB" },
+            Xaxis = new XAxis { Categories = _chartData.Select(d => d.Label).ToList(), Labels = new XAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } },
+            Yaxis = new List<YAxis> { new YAxis { Labels = new YAxisLabels { Style = new AxisLabelStyle { FontWeight = "500", FontSize = "12px" } } } },
+            Grid = new Grid { BorderColor = "rgba(226, 232, 240, 0.6)", StrokeDashArray = 3 }
+        };
+    }
+
+    private List<BreakdownItem> _breakdown = new()
+    {
+        new BreakdownItem { Name = "Katering & Konsumsi", Value = 45 },
+        new BreakdownItem { Name = "Peralatan AV & Proyektor", Value = 28 },
+        new BreakdownItem { Name = "Furnitur & Kursi", Value = 18 },
+        new BreakdownItem { Name = "Lainnya", Value = 9 }
+    };
+
+    private List<TableRow> _tableData = new()
+    {
+        new TableRow { Id = "FR-001", Name = "Ahmad Fauzi", Department = "Eksekutif", Type = "Katering (Kotak Makan Siang)", Assigned = "Budi Santoso", Status = "diproses" },
+        new TableRow { Id = "FR-002", Name = "Siti Nurhaliza", Department = "Produk", Type = "AV (Pemasangan Proyektor)", Assigned = "Dewi Kartika", Status = "baru" },
+        new TableRow { Id = "FR-003", Name = "Rizky Hidayat", Department = "Pengadaan", Type = "Furnitur (Kursi Tambahan)", Assigned = "Belum Ditugaskan", Status = "selesai" }
+    };
+
+    public class ChartPoint
+    {
+        public string Label { get; set; } = string.Empty;
+        public int Value { get; set; }
+        public ChartPoint(string label, int value) => (Label, Value) = (label, value);
+    }
+
+    private class BreakdownItem
+    {
+        public string Name { get; set; } = string.Empty;
+        public int Value { get; set; }
+    }
+
+    private class TableRow
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public string Assigned { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    }
+
+    private TableRow? selectedRow;
+
+    private void OpenDetail(TableRow row)
+    {
+        selectedRow = row;
+    }
+
+    private string GetInitials(string name) => AvatarHelper.GetInitials(name);
+    private string GetAvatarColor(string name) => AvatarHelper.GetColor(name);
+}

@@ -1,0 +1,123 @@
+/* ==========================================================================
+   TYPOGRAPHY TOKENS - SISTEM MANAJEMEN RUANGAN & PEMESANAN PT PERSADA
+   Skala tipografi terpusat (Maksimum bobot font: 600)
+   ========================================================================== */
+
+:root {
+  --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Judul Halaman (H1) — semua halaman: Dashboard, Laporan Sistem, Audit Log, dst */
+  --font-page-title-size: 24px;
+  --font-page-title-weight: 600; /* diturunkan dari 700/800 */
+  --font-page-title-color: var(--color-text-primary);
+
+  /* Subjudul halaman */
+  --font-page-subtitle-size: 14px;
+  --font-page-subtitle-weight: 400;
+  --font-page-subtitle-color: var(--color-text-secondary);
+
+  /* Judul Seksi / Card Header (H2 / H3) */
+  --font-section-title-size: 16px;
+  --font-section-title-weight: 600;
+  --font-section-title-color: var(--color-text-primary);
+
+  /* Label kecil card KPI */
+  --font-card-label-size: 12px;
+  --font-card-label-weight: 500; /* diturunkan dari 600 */
+  --font-card-label-color: var(--color-text-secondary);
+  --font-card-label-transform: none; /* sentence / title case */
+
+  /* Angka besar card KPI */
+  --font-card-value-size: 26px;
+  --font-card-value-weight: 600; /* diturunkan dari 700/800 */
+  --font-card-value-color: var(--color-text-primary);
+
+  /* Header kolom tabel */
+  --font-table-header-size: 12px;
+  --font-table-header-weight: 500;
+  --font-table-header-color: var(--color-text-secondary);
+
+  /* Baris utama tabel */
+  --font-table-primary-size: 14px;
+  --font-table-primary-weight: 500; /* diturunkan dari 600 */
+  --font-table-primary-color: var(--color-text-primary);
+
+  /* Baris sekunder tabel */
+  --font-table-secondary-size: 13px;
+  --font-table-secondary-weight: 400;
+  --font-table-secondary-color: var(--color-text-secondary);
+
+  /* Badge status */
+  --font-badge-size: 12px;
+  --font-badge-weight: 500; /* diturunkan dari 700 */
+
+  /* Tombol */
+  --font-button-size: 14px;
+  --font-button-weight: 500; /* diturunkan dari 600 */
+
+  /* Body default seluruh aplikasi */
+  --font-body-size: 14px;
+  --font-body-weight: 400;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-weight: var(--font-body-weight);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+}
+
+/* Typography Utility Classes */
+.text-page-title {
+  font-size: var(--font-page-title-size);
+  font-weight: var(--font-page-title-weight);
+  color: var(--font-page-title-color);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.text-page-subtitle {
+  font-size: var(--font-page-subtitle-size);
+  font-weight: var(--font-page-subtitle-weight);
+  color: var(--font-page-subtitle-color);
+  margin: 4px 0 0 0;
+}
+
+.text-section-title {
+  font-size: var(--font-section-title-size);
+  font-weight: var(--font-section-title-weight);
+  color: var(--font-section-title-color);
+  margin: 0;
+}
+
+.text-card-label {
+  font-size: var(--font-card-label-size);
+  font-weight: var(--font-card-label-weight);
+  color: var(--font-card-label-color);
+  text-transform: var(--font-card-label-transform);
+}
+
+.text-card-value {
+  font-size: var(--font-card-value-size);
+  font-weight: var(--font-card-value-weight);
+  color: var(--font-card-value-color);
+  line-height: 1.2;
+}
+
+.text-table-header {
+  font-size: var(--font-table-header-size);
+  font-weight: var(--font-table-header-weight);
+  color: var(--font-table-header-color);
+}
+
+.text-table-primary {
+  font-size: var(--font-table-primary-size);
+  font-weight: var(--font-table-primary-weight);
+  color: var(--font-table-primary-color);
+}
+
+.text-table-secondary {
+  font-size: var(--font-table-secondary-size);
+  font-weight: var(--font-table-secondary-weight);
+  color: var(--font-table-secondary-color);
+}

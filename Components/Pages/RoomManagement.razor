@@ -1,0 +1,905 @@
+@page "/rooms"
+@layout booking_room_admin.Components.Layout.MainLayout
+@using booking_room_admin.Components.Shared
+@using booking_room_admin.Components.Models
+@using booking_room_admin.Components.Services
+@inject ToastService Toast
+
+<TopBar Title="Manajemen Ruangan" Subtitle="@($"Kelola informasi, kapasitas, dan fasilitas {rooms.Count} ruang meeting.")" />
+
+<div class="room-management-page">
+    @* -- Baris Aksi: search lokal + CTA -- *@
+    <div class="rm-action-row action-row">
+        <div class="page-search-bar" style="max-width: 400px;">
+            <Icon Name="search" Size="15" CssClass="search-icon" />
+            <input type="text" placeholder="Cari ruangan..." @bind="searchQuery" @bind:event="oninput" />
+        </div>
+        <DateFilter OnDateSelectedCallback="HandleDateChanged" />
+        <button type="button" class="btn-primary-pill btn-yellow" @onclick="OpenAddModal">
+            <Icon Name="plus" Size="14" />
+            <span>Tambah Ruangan</span>
+        </button>
+    </div>
+
+    @* -- Room Cards Grid -- *@
+    <div class="rm-cards-grid">
+        @foreach (var room in PagedRooms)
+        {
+            <div class="rm-card" @onclick="() => OpenDetailModal(room)">
+                @* 16:9 Photo Container *@
+                <div class="rm-photo-wrap">
+                    @if (!room.ImageFailed)
+                    {
+                        <img src="@room.PhotoUrl" alt="@room.Name" class="rm-photo" 
+                             @onerror="() => { room.ImageFailed = true; InvokeAsync(StateHasChanged); }" />
+                    }
+                    else
+                    {
+                        <div class="room-photo-fallback">
+                            <Icon Name="image-off" Size="32" CssClass="text-muted" />
+                            <span>Foto tidak tersedia</span>
+                        </div>
+                    }
+
+                    <div class="rm-cap-badge">
+                        <Icon Name="users" Size="12" />
+                        <span>@room.Capacity Orang</span>
+                    </div>
+
+                    @if (room.IsMaintenance)
+                    {
+                        <div class="rm-photo-maintenance-overlay">
+                            <Icon Name="clock" Size="32" CssClass="maint-icon" />
+                            <span>Sedang Pemeliharaan</span>
+                        </div>
+                        <div class="rm-status-badge maintenance">
+                            <Icon Name="alert-triangle" Size="14" />
+                            <span>Pemeliharaan</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="rm-status-badge active">
+                            <Icon Name="check-circle" Size="14" />
+                            <span>Aktif</span>
+                        </div>
+                    }
+                </div>
+
+                @* Content *@
+                <div class="rm-card-content">
+                    <h3 class="rm-card-name">@room.Name</h3>
+                    <div class="rm-card-location">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rm-pin-icon"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>@room.Location</span>
+                    </div>
+
+                    <div class="rm-amenities-icons">
+                        @foreach (var am in room.Amenities.Take(5))
+                        {
+                            <div class="rm-amenity-icon-badge custom-tooltip" data-tooltip="@am">
+                                <Icon Name="@IconHelper.GetFacilityIcon(am)" Size="14" />
+                            </div>
+                        }
+                        @if (room.Amenities.Count > 5)
+                        {
+                            <div class="rm-amenity-icon-badge more">
+                                +@(room.Amenities.Count - 5)
+                            </div>
+                        }
+                    </div>
+
+                    <p class="rm-card-desc">@room.Description</p>
+
+                    <div class="rm-card-footer" @onclick:stopPropagation="true">
+                        <button type="button" class="btn-delete-room" @onclick="() => ConfirmDelete(room)" title="Hapus Ruangan">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="rm-trash-icon"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <PaginationBar CurrentPage="@currentPage" CurrentPageChanged="HandlePageChanged" TotalData="@FilteredRooms.Count()" PageSize="@pageSize" />
+</div>
+
+@* -- Modal Detail / Edit Ruangan (Split 2-Column) -- *@
+@if (selectedRoom != null)
+{
+    <AppModal IsOpen="@showDetailModal" IsOpenChanged="@((bool v) => showDetailModal = v)" Size="large">
+        <HeaderContent>
+            @if (isEditMode)
+            {
+                <div class="rm-modal-title-group">
+                    <h3 class="rm-modal-title">Ubah Detail Ruangan</h3>
+                    <p class="rm-modal-subtitle">Perbarui konfigurasi ruang kerja ini.</p>
+                </div>
+            }
+        </HeaderContent>
+        <ChildContent>
+            <div class="rm-split-layout">
+                @* Left Column: Photo & Gallery *@
+                <div class="rm-split-photo-col">
+                    @if (isEditMode ? !editForm.ImageFailed : !selectedRoom.ImageFailed)
+                    {
+                        <img src="@(isEditMode ? editForm.PhotoUrl : selectedRoom.PhotoUrl)" alt="Foto Ruangan" class="rm-split-photo" 
+                             @onerror="() => { if (isEditMode) editForm.ImageFailed = true; else selectedRoom.ImageFailed = true; InvokeAsync(StateHasChanged); }" />
+                    }
+                    else
+                    {
+                         <div class="room-photo-fallback rm-split-photo">
+                            <Icon Name="image-off" Size="32" CssClass="text-muted" />
+                            <span>Foto tidak tersedia</span>
+                        </div>
+                    }
+
+                    @* Gallery Thumbnails (Case 14) *@
+                    <div class="rm-gallery-strip">
+                        @foreach (var photo in (isEditMode ? editForm.GalleryPhotos : selectedRoom.GalleryPhotos))
+                        {
+                            <div class="rm-gallery-thumb @((isEditMode ? editForm.PhotoUrl == photo : selectedRoom.PhotoUrl == photo) ? "active" : "")"
+                                 @onclick="() => { if (isEditMode) editForm.PhotoUrl = photo; else selectedRoom.PhotoUrl = photo; }">
+                                <img src="@photo" alt="Thumbnail" />
+                                @if (isEditMode)
+                                {
+                                    <button type="button" class="rm-thumb-del" @onclick="() => RemovePhotoFromEdit(photo)" @onclick:stopPropagation="true" title="Hapus Foto">
+                                        <Icon Name="x" Size="10" />
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    @if (selectedRoom.IsMaintenance)
+                    {
+                        <span class="rm-badge-maint"><Icon Name="wrench" Size="14" /> Dalam Perawatan</span>
+                    }
+                    else
+                    {
+                        <span class="rm-badge-available"><Icon Name="check" Size="14" /> Tersedia Sekarang</span>
+                    }
+                </div>
+
+                @* Right Column: Detail View or Edit Form *@
+                <div class="rm-split-info-col scroll-area">
+                    @if (!isEditMode)
+                    {
+                        @* View Mode *@
+                        <div class="rm-detail-view">
+                            <h2 class="rm-detail-name">@selectedRoom.Name</h2>
+                            <div class="rm-detail-loc">
+                                <Icon Name="map-pin" Size="15" />
+                                <span>@selectedRoom.Location</span>
+                            </div>
+
+                            <p class="rm-detail-long-desc">@selectedRoom.Description</p>
+
+                            <div class="rm-amenities-section">
+                                <h5 class="rm-section-label">FASILITAS TERSEDIA</h5>
+                                <div class="rm-amenities-2col-grid">
+                                    @foreach (var am in selectedRoom.Amenities)
+                                    {
+                                        <div class="rm-amenity-tile">
+                                            <Icon Name="@IconHelper.GetFacilityIcon(am)" Size="16" /> 
+                                            <span>@am.ToUpperInvariant()</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            @* Mini-Map (Case 10b & 13b) *@
+                            <RoomLocationMiniMap RoomName="@selectedRoom.Name"
+                                                 LocationText="@selectedRoom.Location"
+                                                 PinX="@selectedRoom.PinX"
+                                                 PinY="@selectedRoom.PinY" />
+                        </div>
+                    }
+                    else
+                    {
+                        @* Edit Mode Form *@
+                        <div class="rm-edit-form">
+                            <div class="rm-field">
+                                <label class="rm-label">NAMA RUANGAN</label>
+                                <input type="text" class="rm-input" @bind="editForm.Name" />
+                            </div>
+
+                            <div class="rm-row-2col">
+                                <div class="rm-field">
+                                    <label class="rm-label">LOKASI</label>
+                                    <input type="text" class="rm-input text-ellipsis" title="@editForm.Location" placeholder="cth. Lantai 2, Wing A" @bind="editForm.Location" />
+                                </div>
+                                <div class="rm-field">
+                                    <label class="rm-label">KAPASITAS</label>
+                                    <div class="rm-input-suffix">
+                                        <input type="number" class="rm-input" min="1" @bind="editForm.Capacity" />
+                                        <span>Orang</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rm-field" style="margin-top: 0.5rem; margin-bottom: 1rem;">
+                                <label class="rm-label">PIN LOKASI DI DENAH (KLIK UNTUK PIN)</label>
+                                <RoomLocationMiniMap IsEditable="true" 
+                                                     RoomName="@editForm.Name"
+                                                     LocationText="@editForm.Location"
+                                                     PinX="@editForm.PinX" PinXChanged="(x) => editForm.PinX = x"
+                                                     PinY="@editForm.PinY" PinYChanged="(y) => editForm.PinY = y"
+                                                     OnLocationAutoGenerated="(loc) => editForm.Location = loc" />
+                            </div>
+
+                            <div class="rm-field">
+                                <div class="rm-facility-header-row">
+                                    <label class="rm-label">FASILITAS TERMASUK</label>
+                                    <button type="button" class="btn-add-custom-facility" @onclick="() => showAddCustomInput = !showAddCustomInput">
+                                        <Icon Name="plus" Size="12" /> Tambah Fasilitas Kustom
+                                    </button>
+                                </div>
+
+                                @if (showAddCustomInput)
+                                {
+                                    <div class="rm-custom-facility-row" style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+                                        <div style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-md); background: #F3F4F6; color: var(--color-primary); border: 1px solid var(--border-light);">
+                                            <Icon Name="@(string.IsNullOrWhiteSpace(newCustomAmenityText) ? "tag" : IconHelper.GetFacilityIcon(newCustomAmenityText))" Size="18" />
+                                        </div>
+                                        <input type="text" class="rm-input" style="flex: 1; margin: 0;" placeholder="Nama fasilitas baru (cth. PODCAST MIC)" @bind="newCustomAmenityText" @bind:event="oninput" />
+                                        <button type="button" class="btn-primary-pill btn-sm" @onclick="AddCustomAmenityToEdit">Tambah</button>
+                                    </div>
+                                }
+
+                                <div class="rm-chips-select-grid">
+                                    @foreach (var am in editForm.Amenities)
+                                    {
+                                        <div class="rm-select-chip-wrapper">
+                                            <button type="button" class="rm-select-chip selected" @onclick="() => ToggleAmenity(am)">
+                                                <Icon Name="@IconHelper.GetFacilityIcon(am)" Size="14" /> @am.ToUpperInvariant()
+                                            </button>
+                                            <button type="button" class="rm-chip-remove-btn" title="Lepas Fasilitas" @onclick:stopPropagation="true" @onclick="() => RemoveAmenityFromRoom(am)">
+                                                <Icon Name="x" Size="13" />
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="rm-field">
+                                <label class="rm-label">DESKRIPSI RUANGAN</label>
+                                <textarea class="rm-textarea" rows="3" @bind="editForm.Description"></textarea>
+                            </div>
+
+                            <div class="rm-field">
+                                <label class="rm-label">TAMBAH FOTO RUANGAN (GALERI)</label>
+                                <ImageDragDropUploader OnImageUploaded="AddUploadedPhotoToEdit" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            @if (!isEditMode)
+            {
+                <button type="button" class="btn-outline-pill" @onclick="() => showDetailModal = false">Tutup</button>
+                <button type="button" class="btn-primary-pill btn-navy" @onclick="() => isEditMode = true">
+                    <Icon Name="edit" Size="14" /> Ubah Detail Ruangan
+                </button>
+            }
+            else
+            {
+                <button type="button" class="btn-outline-pill" @onclick="() => isEditMode = false">Batal</button>
+                <button type="button" class="btn-outline-pill" @onclick="OpenMaintenanceModal">
+                    <Icon Name="tool" Size="14" /> Mulai Perawatan
+                </button>
+                <button type="button" class="btn-primary-pill btn-yellow" @onclick="SaveEditRoom">Simpan Perubahan</button>
+            }
+        </FooterContent>
+    </AppModal>
+}
+
+@* -- Modal Tambah Ruangan Baru -- *@
+@if (showAddModal)
+{
+    <AppModal IsOpen="@showAddModal" IsOpenChanged="@((bool v) => showAddModal = v)" Size="large">
+        <HeaderContent>
+            <div class="rm-modal-title-group">
+                <h3 class="rm-modal-title">Atur Ruangan Baru</h3>
+                <p class="rm-modal-subtitle">Tambahkan ruang meeting baru ke dalam sistem.</p>
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <div class="rm-split-layout">
+                <div class="rm-split-photo-col">
+                     <div class="room-photo-fallback rm-split-photo">
+                        <Icon Name="image" Size="32" CssClass="text-muted" />
+                        <span>Preview Foto</span>
+                    </div>
+                </div>
+                <div class="rm-split-info-col scroll-area">
+                    <div class="rm-edit-form">
+                        <div class="rm-field">
+                            <label class="rm-label">NAMA RUANGAN <span class="req">*</span></label>
+                            <input type="text" class="rm-input" placeholder="cth. Ruang Alpha" @bind="newRoomForm.Name" />
+                        </div>
+
+                        <div class="rm-row-2col">
+                            <div class="rm-field">
+                                <label class="rm-label">LOKASI <span class="req">*</span></label>
+                                <input type="text" class="rm-input text-ellipsis" title="@newRoomForm.Location" placeholder="cth. Lantai 2, Wing A" @bind="newRoomForm.Location" />
+                            </div>
+                            <div class="rm-field">
+                                <label class="rm-label">KAPASITAS <span class="req">*</span></label>
+                                <div class="rm-input-suffix">
+                                    <input type="number" class="rm-input" min="1" @bind="newRoomForm.Capacity" />
+                                    <span>Orang</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="rm-field" style="margin-top: 0.5rem; margin-bottom: 1rem;">
+                            <label class="rm-label">PIN LOKASI DI DENAH (KLIK UNTUK PIN)</label>
+                            <RoomLocationMiniMap IsEditable="true" 
+                                                 RoomName="@(string.IsNullOrWhiteSpace(newRoomForm.Name) ? "Ruangan Baru" : newRoomForm.Name)"
+                                                 LocationText="@(string.IsNullOrWhiteSpace(newRoomForm.Location) ? "Tentukan Lokasi" : newRoomForm.Location)"
+                                                 PinX="@newRoomForm.PinX" PinXChanged="(x) => newRoomForm.PinX = x"
+                                                 PinY="@newRoomForm.PinY" PinYChanged="(y) => newRoomForm.PinY = y"
+                                                 OnLocationAutoGenerated="(loc) => newRoomForm.Location = loc" />
+                        </div>
+
+                        <div class="rm-field">
+                            <div class="rm-facility-header-row">
+                                <label class="rm-label">FASILITAS TERMASUK</label>
+                                <button type="button" class="btn-add-custom-facility" @onclick="() => showAddCustomInputNew = !showAddCustomInputNew">
+                                    <Icon Name="plus" Size="12" /> Tambah Fasilitas Kustom
+                                </button>
+                            </div>
+
+                            @if (showAddCustomInputNew)
+                            {
+                                <div class="rm-custom-facility-row" style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+                                    <div style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-md); background: #F3F4F6; color: var(--color-primary); border: 1px solid var(--border-light);">
+                                        <Icon Name="@(string.IsNullOrWhiteSpace(newCustomAmenityText) ? "tag" : IconHelper.GetFacilityIcon(newCustomAmenityText))" Size="18" />
+                                    </div>
+                                    <input type="text" class="rm-input" style="flex: 1; margin: 0;" placeholder="Nama fasilitas baru (cth. PODCAST MIC)" @bind="newCustomAmenityText" @bind:event="oninput" />
+                                    <button type="button" class="btn-primary-pill btn-sm" @onclick="AddCustomAmenityToNew">Tambah</button>
+                                </div>
+                            }
+
+                            <div class="rm-chips-select-grid">
+                                @foreach (var am in newRoomForm.Amenities)
+                                {
+                                    <div class="rm-select-chip-wrapper">
+                                        <button type="button" class="rm-select-chip selected" @onclick="() => ToggleNewAmenity(am)">
+                                            <Icon Name="@IconHelper.GetFacilityIcon(am)" Size="14" /> @am.ToUpperInvariant()
+                                        </button>
+                                        <button type="button" class="rm-chip-remove-btn" title="Lepas Fasilitas" @onclick:stopPropagation="true" @onclick="() => ToggleNewAmenity(am)">
+                                            <Icon Name="x" Size="13" />
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="rm-field">
+                            <label class="rm-label">DESKRIPSI RUANGAN</label>
+                            <textarea class="rm-textarea" rows="3" placeholder="Jelaskan secara singkat kegunaan atau fitur utama ruangan..." @bind="newRoomForm.Description"></textarea>
+                        </div>
+
+                        <div class="rm-field">
+                            <label class="rm-label">FOTO RUANGAN</label>
+                            @if (!string.IsNullOrEmpty(newRoomForm.PhotoUrl) && !newRoomForm.PhotoUrl.StartsWith("http"))
+                            {
+                                <div class="rm-photo-preview-wrapper" style="position:relative; width: 100%; padding-top: 56.25%; border-radius: 12px; overflow: hidden; margin-bottom: 0.5rem;">
+                                    <img src="@newRoomForm.PhotoUrl" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" />
+                                    <button type="button" class="btn-primary-pill btn-danger" style="position:absolute; top: 8px; right: 8px; padding: 4px 8px; font-size: 12px;" @onclick="() => newRoomForm.PhotoUrl = string.Empty">Hapus</button>
+                                </div>
+                            }
+                            else
+                            {
+                                <ImageDragDropUploader OnImageUploaded="(url) => newRoomForm.PhotoUrl = url" />
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => showAddModal = false">Batal</button>
+            <button type="button" class="btn-primary-pill btn-yellow" @onclick="CreateNewRoom">Tambah Ruangan</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@* -- Modal Konfirmasi Hapus -- *@
+@if (roomToDelete != null)
+{
+    <AppModal IsOpen="@showDeleteModal" IsOpenChanged="@((bool v) => showDeleteModal = v)" Size="small">
+        <HeaderContent>
+            <h3 class="rm-modal-title text-danger">Hapus Ruangan Ini?</h3>
+        </HeaderContent>
+        <ChildContent>
+            <p>Apakah Anda yakin ingin menghapus <strong>@roomToDelete.Name</strong>? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.</p>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => showDeleteModal = false">Batal</button>
+            <button type="button" class="btn-primary-pill btn-danger" @onclick="ExecuteDelete">Hapus</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@* Delete Custom Amenity Modal *@
+@if (showDeleteCustomAmenityModal)
+{
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => showDeleteCustomAmenityModal = v)" Title="Hapus Fasilitas Kustom?" Size="small">
+        <ChildContent>
+            <div class="rm-delete-confirm">
+                <div class="rm-delete-icon">
+                    <Icon Name="alert-triangle" Size="32" />
+                </div>
+                <p>Apakah Anda yakin ingin menghapus fasilitas kustom <strong>@customAmenityToDelete</strong>? Fasilitas ini akan dihapus dari semua ruangan.</p>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => showDeleteCustomAmenityModal = false">Batal</button>
+            <button type="button" class="btn-primary-pill btn-danger" @onclick="ExecuteDeleteCustomAmenity">Hapus Fasilitas</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@* Maintenance Modal *@
+@if (showMaintenanceModal)
+{
+    <AppModal IsOpen="true" IsOpenChanged="@((bool v) => showMaintenanceModal = v)" Title="Laporkan Perawatan Ruangan" Size="medium">
+        <ChildContent>
+            <div class="rm-form-grid">
+                <div class="rm-row-2col">
+                    <div class="rm-field">
+                        <label class="rm-label">KATEGORI</label>
+                        <select class="rm-input" @bind="maintenanceForm.Category">
+                            <option value="AC">Pendingin Udara (AC)</option>
+                            <option value="Kelistrikan">Kelistrikan</option>
+                            <option value="Kebersihan">Kebersihan</option>
+                            <option value="Fasilitas">Perbaikan Fasilitas</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="rm-field">
+                        <label class="rm-label">PRIORITAS</label>
+                        <select class="rm-input" @bind="maintenanceForm.Priority">
+                            <option value="Tinggi">Tinggi</option>
+                            <option value="Sedang">Sedang</option>
+                            <option value="Rendah">Rendah</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="rm-field">
+                    <label class="rm-label">FASILITAS TERDAMPAK</label>
+                    <div class="rm-chips-select-grid">
+                        @foreach (var am in editForm.Amenities)
+                        {
+                            <button type="button" class="rm-select-chip @(maintenanceForm.AffectedFacilities.Contains(am) ? "selected" : "")"
+                                    @onclick="() => ToggleMaintenanceFacility(am)">
+                                <Icon Name="@IconHelper.GetFacilityIcon(am)" Size="14" /> @am.ToUpperInvariant()
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <div class="rm-field">
+                    <label class="rm-label">UNGGAH FOTO KERUSAKAN</label>
+                    @if (!string.IsNullOrEmpty(maintenanceForm.PhotoUrl))
+                    {
+                        <div class="rm-photo-preview-wrapper" style="position:relative; width: 100%; padding-top: 56.25%; border-radius: 12px; overflow: hidden; margin-bottom: 0.5rem;">
+                            <img src="@maintenanceForm.PhotoUrl" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" />
+                            <button type="button" class="btn-primary-pill btn-danger" style="position:absolute; top: 8px; right: 8px; padding: 4px 8px; font-size: 12px;" @onclick="() => maintenanceForm.PhotoUrl = string.Empty">Hapus</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <ImageDragDropUploader OnImageUploaded="(url) => maintenanceForm.PhotoUrl = url" />
+                    }
+                </div>
+
+                <div class="rm-field">
+                    <label class="rm-label">CATATAN PERAWATAN</label>
+                    <textarea class="rm-textarea" rows="3" placeholder="Tuliskan detail kerusakan atau masalah..." @bind="maintenanceForm.Notes"></textarea>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn-outline-pill" @onclick="() => showMaintenanceModal = false">Batal</button>
+            <button type="button" class="btn-primary-pill btn-yellow" @onclick="SubmitMaintenance">Kirim Laporan</button>
+        </FooterContent>
+    </AppModal>
+}
+
+@code {
+    public class MaintenanceFormModel
+    {
+        public string Category { get; set; } = "AC";
+        public string Priority { get; set; } = "Sedang";
+        public List<string> AffectedFacilities { get; set; } = new();
+        public string PhotoUrl { get; set; } = "";
+        public string Notes { get; set; } = "";
+    }
+
+    private bool showMaintenanceModal = false;
+    private MaintenanceFormModel maintenanceForm = new();
+
+    private void OpenMaintenanceModal()
+    {
+        maintenanceForm = new MaintenanceFormModel();
+        showMaintenanceModal = true;
+    }
+
+    private void ToggleMaintenanceFacility(string am)
+    {
+        if (maintenanceForm.AffectedFacilities.Contains(am)) maintenanceForm.AffectedFacilities.Remove(am);
+        else maintenanceForm.AffectedFacilities.Add(am);
+    }
+
+    private void SubmitMaintenance()
+    {
+        if (selectedRoom != null)
+        {
+            selectedRoom.IsMaintenance = true;
+            var roomInList = rooms.FirstOrDefault(r => r.Id == selectedRoom.Id);
+            if (roomInList != null) roomInList.IsMaintenance = true;
+            
+            Toast.Success($"Laporan perawatan untuk {selectedRoom.Name} berhasil dikirim.");
+            showMaintenanceModal = false;
+            showDetailModal = false;
+        }
+    }
+
+    public class RoomMaster
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Location { get; set; } = "";
+        public int Capacity { get; set; }
+        public List<string> Amenities { get; set; } = new();
+        public string Description { get; set; } = "";
+        public string PhotoUrl { get; set; } = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800&auto=format&fit=crop&q=80";
+        public List<string> GalleryPhotos { get; set; } = new();
+        public double PinX { get; set; } = 50.0;
+        public double PinY { get; set; } = 50.0;
+        public bool IsMaintenance { get; set; }
+        public bool ImageFailed { get; set; }
+    }
+
+    private string searchQuery = "";
+    private List<RoomMaster> rooms = new();
+    private RoomMaster? selectedRoom;
+    private RoomMaster? roomToDelete;
+    private RoomMaster editForm = new();
+    private RoomMaster newRoomForm = new();
+
+    private bool showDetailModal = false;
+    private bool isEditMode = false;
+    private bool showAddModal = false;
+    private bool showDeleteModal = false;
+
+    private bool showAddCustomInput = false;
+    private bool showAddCustomInputNew = false;
+    private string newCustomAmenityText = "";
+    
+
+    private List<string> allAvailableAmenities = new()
+    {
+        "WIFI", "TV", "AC", "VIDEO CALL", "PROYEKTOR", "SOUND SYSTEM", "PAPAN TULIS", "MEJA", "KURSI"
+    };
+
+    private static readonly List<string> defaultAmenities = new()
+    {
+        "WIFI", "TV", "AC", "VIDEO CALL", "PROYEKTOR", "SOUND SYSTEM", "PAPAN TULIS", "MEJA", "KURSI"
+    };
+
+    private int currentPage = 1;
+    private int pageSize = 6;
+
+    private IEnumerable<RoomMaster> FilteredRooms
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery)) return rooms;
+            var q = searchQuery.ToLowerInvariant();
+            return rooms.Where(r => r.Name.ToLowerInvariant().Contains(q) ||
+                                    r.Location.ToLowerInvariant().Contains(q) ||
+                                    r.Description.ToLowerInvariant().Contains(q));
+        }
+    }
+
+    private IEnumerable<RoomMaster> PagedRooms =>
+        FilteredRooms.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+    private void HandlePageChanged(int page)
+    {
+        currentPage = page;
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        InitRooms();
+    }
+
+    private void InitRooms()
+    {
+        rooms = new List<RoomMaster>
+        {
+            new()
+            {
+                Id = 1,
+                Name = "Ruang Alpha",
+                Location = "Lantai 2, Sayap A — dekat lift utama",
+                Capacity = 12,
+                Amenities = new List<string> { "PROYEKTOR", "AC", "PAPAN TULIS", "VIDEO CALL", "WIFI" },
+                Description = "Ruang meeting eksekutif dirancang untuk presentasi penting dan rapat koordinasi strategis.",
+                PhotoUrl = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800&auto=format&fit=crop&q=80",
+                GalleryPhotos = new List<string> { 
+                    "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800&auto=format&fit=crop&q=80", 
+                    "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80" 
+                },
+                PinX = 35.0,
+                PinY = 40.0,
+                IsMaintenance = false
+            },
+            new()
+            {
+                Id = 2,
+                Name = "Ruang Beta",
+                Location = "Lantai 2, Sayap B — area pantry",
+                Capacity = 8,
+                Amenities = new List<string> { "TV", "AC", "PAPAN TULIS", "WIFI" },
+                Description = "Ruang rapat tim semi-formal dengan pencahayaan alami dan fasilitas meeting modern.",
+                PhotoUrl = "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80",
+                GalleryPhotos = new List<string> { 
+                    "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80" 
+                },
+                PinX = 65.0,
+                PinY = 30.0,
+                IsMaintenance = false
+            },
+            new()
+            {
+                Id = 3,
+                Name = "Ruang Gamma",
+                Location = "Lantai 3, Sayap VIP — akses khusus",
+                Capacity = 20,
+                Amenities = new List<string> { "PROYEKTOR", "PAPAN TULIS", "VIDEO CALL", "SOUND SYSTEM", "AC", "WIFI" },
+                Description = "Ruang Rapat Besar dilengkapi konferensi audio video berstandar enterprise.",
+                PhotoUrl = "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&auto=format&fit=crop&q=80",
+                GalleryPhotos = new List<string> { 
+                    "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&auto=format&fit=crop&q=80",
+                    "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80"
+                },
+                PinX = 50.0,
+                PinY = 55.0,
+                IsMaintenance = true
+            },
+            new()
+            {
+                Id = 4,
+                Name = "Ruang Delta",
+                Location = "Lantai 3, Sayap A — depan ruang server",
+                Capacity = 15,
+                Amenities = new List<string> { "TV", "VIDEO CALL", "AC", "MEJA", "KURSI" },
+                Description = "Ruang kolaborasi dinamis untuk lokakarya, sesi brainstorming, dan diskusi antar divisi.",
+                PhotoUrl = "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80",
+                GalleryPhotos = new List<string> { 
+                    "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80" 
+                },
+                PinX = 25.0,
+                PinY = 70.0,
+                IsMaintenance = false
+            },
+            new()
+            {
+                Id = 5,
+                Name = "Ruang Epsilon",
+                Location = "Lantai 4, Sayap SDM — koridor timur",
+                Capacity = 4,
+                Amenities = new List<string> { "TV", "AC", "WIFI" },
+                Description = "Ruang pertemuan privat ideal untuk sesi wawancara, konsultasi, dan evaluasi 1-on-1.",
+                PhotoUrl = "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80",
+                GalleryPhotos = new List<string> { 
+                    "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80" 
+                },
+                PinX = 75.0,
+                PinY = 60.0,
+                IsMaintenance = false
+            }
+        };
+    }
+
+    private void HandleDateChanged(DateTime? date)
+    {
+        StateHasChanged();
+    }
+
+    private void OpenDetailModal(RoomMaster room)
+    {
+        selectedRoom = room;
+        isEditMode = false;
+        showAddCustomInput = false;
+        editForm = new RoomMaster
+        {
+            Id = room.Id,
+            Name = room.Name,
+            Location = room.Location,
+            Capacity = room.Capacity,
+            Amenities = new List<string>(room.Amenities),
+            Description = room.Description,
+            PhotoUrl = room.PhotoUrl,
+            GalleryPhotos = new List<string>(room.GalleryPhotos),
+            PinX = room.PinX,
+            PinY = room.PinY,
+            IsMaintenance = room.IsMaintenance
+        };
+        showDetailModal = true;
+    }
+
+    private void OpenAddModal()
+    {
+        newRoomForm = new RoomMaster
+        {
+            Capacity = 10,
+            PhotoUrl = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800&auto=format&fit=crop&q=80",
+            GalleryPhotos = new List<string> { "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800&auto=format&fit=crop&q=80" },
+            Amenities = new List<string> { "WIFI", "VIDEO CALL", "AC" },
+            PinX = 50.0,
+            PinY = 50.0
+        };
+        showAddCustomInputNew = false;
+        showAddModal = true;
+    }
+
+    private void ToggleAmenity(string am)
+    {
+        if (editForm.Amenities.Contains(am)) editForm.Amenities.Remove(am);
+        else editForm.Amenities.Add(am);
+    }
+
+    private void ToggleNewAmenity(string am)
+    {
+        if (newRoomForm.Amenities.Contains(am)) newRoomForm.Amenities.Remove(am);
+        else newRoomForm.Amenities.Add(am);
+    }
+
+    private void AddCustomAmenityToEdit()
+    {
+        if (!string.IsNullOrWhiteSpace(newCustomAmenityText))
+        {
+            var tag = newCustomAmenityText.Trim().ToUpperInvariant();
+            if (!allAvailableAmenities.Contains(tag)) allAvailableAmenities.Add(tag);
+            if (!editForm.Amenities.Contains(tag)) editForm.Amenities.Add(tag);
+            newCustomAmenityText = "";
+            showAddCustomInput = false;
+            Toast.Success($"Fasilitas '{tag}' berhasil ditambahkan.");
+        }
+    }
+
+    private void AddCustomAmenityToNew()
+    {
+        if (!string.IsNullOrWhiteSpace(newCustomAmenityText))
+        {
+            var tag = newCustomAmenityText.Trim().ToUpperInvariant();
+            if (!allAvailableAmenities.Contains(tag)) allAvailableAmenities.Add(tag);
+            if (!newRoomForm.Amenities.Contains(tag)) newRoomForm.Amenities.Add(tag);
+            newCustomAmenityText = "";
+            showAddCustomInputNew = false;
+            Toast.Success($"Fasilitas '{tag}' berhasil ditambahkan.");
+        }
+    }
+
+    private string customAmenityToDelete = "";
+    private bool showDeleteCustomAmenityModal = false;
+
+    private void ConfirmDeleteCustomAmenity(string am)
+    {
+        customAmenityToDelete = am;
+        showDeleteCustomAmenityModal = true;
+    }
+
+    private void ExecuteDeleteCustomAmenity()
+    {
+        if (!string.IsNullOrWhiteSpace(customAmenityToDelete))
+        {
+            allAvailableAmenities.Remove(customAmenityToDelete);
+            editForm.Amenities.Remove(customAmenityToDelete);
+            newRoomForm.Amenities.Remove(customAmenityToDelete);
+            foreach (var r in rooms)
+            {
+                r.Amenities.Remove(customAmenityToDelete);
+            }
+            Toast.Success($"Fasilitas kustom '{customAmenityToDelete}' dihapus.");
+            showDeleteCustomAmenityModal = false;
+            customAmenityToDelete = "";
+        }
+    }
+
+    private void AddUploadedPhotoToEdit(string url)
+    {
+        editForm.GalleryPhotos.Add(url);
+        editForm.PhotoUrl = url;
+        Toast.Success("Foto berhasil ditambahkan ke galeri.");
+    }
+
+    private void RemoveAmenityFromRoom(string am)
+    {
+        if (editForm.Amenities.Contains(am))
+        {
+            editForm.Amenities = editForm.Amenities.Where(a => a != am).ToList();
+            Toast.Success($"Fasilitas '{am}' dilepas dari ruangan.");
+            StateHasChanged();
+        }
+    }
+
+    private void RemovePhotoFromEdit(string photo)
+    {
+        editForm.GalleryPhotos.Remove(photo);
+        if (editForm.PhotoUrl == photo && editForm.GalleryPhotos.Any())
+        {
+            editForm.PhotoUrl = editForm.GalleryPhotos.First();
+        }
+    }
+
+    private void SaveEditRoom()
+    {
+        if (selectedRoom != null)
+        {
+            selectedRoom.Name = editForm.Name;
+            selectedRoom.Location = editForm.Location;
+            selectedRoom.Capacity = editForm.Capacity;
+            selectedRoom.Amenities = new List<string>(editForm.Amenities);
+            selectedRoom.Description = editForm.Description;
+            selectedRoom.PhotoUrl = editForm.PhotoUrl;
+            selectedRoom.GalleryPhotos = new List<string>(editForm.GalleryPhotos);
+            Toast.Success("Detail ruangan berhasil diperbarui.");
+            showDetailModal = false;
+        }
+    }
+
+    private void CreateNewRoom()
+    {
+        if (string.IsNullOrWhiteSpace(newRoomForm.Name))
+        {
+            Toast.Error("Nama ruangan wajib diisi.");
+            return;
+        }
+
+        rooms.Add(new RoomMaster
+        {
+            Id = rooms.Count + 1,
+            Name = newRoomForm.Name,
+            Location = string.IsNullOrWhiteSpace(newRoomForm.Location) ? "Lantai 1, Wing Utama" : newRoomForm.Location,
+            Capacity = newRoomForm.Capacity,
+            Amenities = new List<string>(newRoomForm.Amenities),
+            Description = newRoomForm.Description,
+            PhotoUrl = string.IsNullOrWhiteSpace(newRoomForm.PhotoUrl) ? "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800&auto=format&fit=crop&q=80" : newRoomForm.PhotoUrl,
+            GalleryPhotos = new List<string> { string.IsNullOrWhiteSpace(newRoomForm.PhotoUrl) ? "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800&auto=format&fit=crop&q=80" : newRoomForm.PhotoUrl },
+            PinX = 50.0,
+            PinY = 50.0
+        });
+
+        Toast.Success($"Ruangan '{newRoomForm.Name}' berhasil ditambahkan.");
+        showAddModal = false;
+    }
+
+    private void ConfirmDelete(RoomMaster r)
+    {
+        roomToDelete = r;
+        showDeleteModal = true;
+    }
+
+    private void ExecuteDelete()
+    {
+        if (roomToDelete != null)
+        {
+            rooms.Remove(roomToDelete);
+            Toast.Success($"Ruangan '{roomToDelete.Name}' telah dihapus.");
+            showDeleteModal = false;
+        }
+    }
+}

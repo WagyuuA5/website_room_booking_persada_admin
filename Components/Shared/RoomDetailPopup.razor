@@ -1,0 +1,89 @@
+@using booking_room_admin.Components.Models
+
+<AppModal IsOpen="@IsOpen" IsOpenChanged="IsOpenChanged" Size="large" OnClose="Close">
+    <HeaderContent>
+        <div class="dr-header-photo-container">
+            <div class="dr-header-photo-placeholder">
+                <Icon Name="building" Size="32" />
+            </div>
+            <div class="dr-header-overlay">
+                <h2 class="dr-title-overlay">@Room?.Name</h2>
+                <p class="dr-subtitle-overlay">@Room?.Floor - @Room?.Type</p>
+                <div class="dr-header-badges">
+                    @if (Room?.Status == "maintenance")
+                    {
+                        <StatusBadge Status="maintenance" CustomLabel="Perawatan" />
+                    }
+                    else
+                    {
+                        <StatusBadge Status="active" CustomLabel="Aktif" />
+                    }
+                    <StatusBadge Status="info" CustomLabel="@($"{Room?.Capacity} Orang")" />
+                </div>
+            </div>
+        </div>
+    </HeaderContent>
+    <ChildContent>
+        <div class="dr-body" style="margin-top: 1rem;">
+            <div class="dr-section">
+                <div class="dr-section-title">Deskripsi Ruangan</div>
+                <p class="dr-desc" style="font-size: 0.95rem; line-height: 1.6; color: #4b5563;">@Room?.Description</p>
+            </div>
+
+            <div class="dr-section">
+                <div class="dr-section-title">Fasilitas</div>
+                <div class="dr-facilities-grid">
+                    @foreach (var tag in Room?.Facilities ?? new())
+                    {
+                        <div class="dr-facility-item">
+                            <Icon Name="check" Size="14" />
+                            <span>@tag</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="dr-section">
+                <div class="dr-section-title">Statistik</div>
+                <div class="dr-stats">
+                    <div class="dr-stat">
+                        <span class="dr-stat-value">@Room?.TotalBookings</span>
+                        <span class="dr-stat-label">Total Booking</span>
+                    </div>
+                    <div class="dr-stat">
+                        <span class="dr-stat-value">4.8</span>
+                        <span class="dr-stat-label">Rating</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn-outline-pill" @onclick="Close">Tutup</button>
+        <button class="btn-primary-pill btn-yellow" @onclick="EditRoom">
+            <Icon Name="edit" Size="14" />
+            Ubah Ruangan
+        </button>
+    </FooterContent>
+</AppModal>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<Room> OnEdit { get; set; }
+    [Parameter] public Room? Room { get; set; }
+
+    private void EditRoom()
+    {
+        if (Room != null)
+        {
+            OnEdit.InvokeAsync(Room);
+        }
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+    }
+}
