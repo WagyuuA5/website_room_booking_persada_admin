@@ -37,7 +37,14 @@ namespace booking_room_admin.Components.Services
         // Seeded accounts for Development/Staging environment
         private readonly List<UserAccount> _seedUsers = new()
         {
-            // Akun Uji Coba V14.2: itdevv@persada.id / 12345678
+            // Akun Uji Coba V20 (Standar Domain Perusahaan): itdevv@ptpersada.co.id / 12345678
+            new UserAccount
+            {
+                Email = "itdevv@ptpersada.co.id",
+                PasswordHash = HashPassword("12345678"),
+                Role = "Admin",
+                IsActive = true
+            },
             new UserAccount
             {
                 Email = "itdevv@persada.id",

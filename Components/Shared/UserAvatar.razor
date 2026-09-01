@@ -17,7 +17,7 @@
     [Parameter] public string? PhotoUrl { get; set; }
     [Parameter] public string BgColor { get; set; } = "";
     [Parameter] public string CssClass { get; set; } = "";
-    [Parameter] public string Size { get; set; } = "36px";
+    [Parameter] public string Size { get; set; } = "32px";
 
     [Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object>? AdditionalAttributes { get; set; }
@@ -27,11 +27,7 @@
         get
         {
             if (!string.IsNullOrEmpty(Initials)) return Initials;
-            if (string.IsNullOrEmpty(Name)) return "U";
-            var parts = Name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length >= 2)
-                return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
-            return parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant();
+            return AvatarHelper.GetInitials(Name);
         }
     }
 
@@ -41,20 +37,8 @@
         {
             if (!string.IsNullOrEmpty(BgColor)) return BgColor;
             var source = Name ?? Initials ?? "U";
-            return GetColorFromName(source);
+            return AvatarHelper.GetColor(source);
         }
-    }
-
-    private static readonly string[] AvatarColors = {
-        "#0B1E39", "#2563EB", "#16A34A", "#F59E0B", "#9333EA",
-        "#EC4899", "#EF4444", "#14B8A6", "#F97316", "#6366F1"
-    };
-
-    private static string GetColorFromName(string name)
-    {
-        int hash = 0;
-        foreach (char c in name) hash = hash * 31 + c;
-        return AvatarColors[Math.Abs(hash) % AvatarColors.Length];
     }
 
     private string StyleString
@@ -64,14 +48,14 @@
             var fontSize = $"font-size: {GetFontSize()}px;";
             if (!string.IsNullOrEmpty(PhotoUrl))
                 return $"width: {Size}; height: {Size}; {fontSize}";
-            return $"width: {Size}; height: {Size}; background-color: {ComputedBgColor}; color: white; {fontSize}";
+            return $"width: {Size}; height: {Size}; background-color: {ComputedBgColor}; color: #FFFFFF; font-weight: 500; {fontSize}";
         }
     }
 
     private int GetFontSize()
     {
         if (int.TryParse(Size.Replace("px", ""), out int px))
-            return Math.Max(10, px / 3);
+            return Math.Max(10, (int)(px * 0.4));
         return 13;
     }
 }

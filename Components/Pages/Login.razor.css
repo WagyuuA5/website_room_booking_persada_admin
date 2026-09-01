@@ -1,4 +1,4 @@
-/* --- LOGIN PAGE STYLES (V14.2 SPEC) --- */
+﻿/* --- LOGIN PAGE STYLES (V20 SPEC) --- */
 
 .login-wrapper {
     position: relative;
@@ -49,8 +49,7 @@
 .login-bg-overlay {
     position: absolute;
     inset: 0;
-    /* CASE 13: Warm color fallback via rgba overlay (no filter) */
-    background: linear-gradient(180deg, rgba(253, 245, 230, 0.1) 0%, rgba(15, 23, 42, 0.45) 100%);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.75) 100%);
     z-index: 2;
 }
 
@@ -58,19 +57,19 @@
 .login-topbar {
     position: relative;
     z-index: 10;
-    padding: 2rem 2.5rem;
+    padding: 1.75rem 2rem;
     display: flex;
     align-items: center;
 }
 
 .persada-logo {
-    height: 60px;
-    max-height: 64px;
+    height: 52px;
+    max-height: 56px;
     object-fit: contain;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
 }
 
-/* --- 3. MAIN AREA & CARD LOGIN --- */
+/* --- 3. MAIN AREA & CARD LOGIN (V20: MAX-WIDTH 400PX, PADDING 32PX) --- */
 .login-main {
     position: relative;
     z-index: 10;
@@ -78,19 +77,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem;
+    padding: 1rem;
 }
 
 .login-card {
     width: 100%;
-    max-width: 440px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: var(--radius-lg, 24px);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
-    padding: 2.75rem;
+    max-width: 400px;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-lg, 20px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+    padding: 32px;
+    box-sizing: border-box;
     color: #FFFFFF;
     animation: cardEntrance 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
     transition: transform 350ms ease-in, opacity 350ms ease-in;
@@ -150,27 +150,25 @@
 /* Card Header */
 .card-header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .card-title {
-    font-size: 1.85rem;
+    font-size: 1.65rem;
     font-weight: 700;
     color: #FFFFFF;
-    margin: 0 0 0.4rem 0;
+    margin: 0 0 0.3rem 0;
     letter-spacing: -0.01em;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .card-subtitle {
-    font-size: 0.92rem;
-    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.75);
     margin: 0;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
     line-height: 1.4;
 }
 
-/* --- 5. FORM CONTROLS & OVERLINE LABELS --- */
+/* --- 5. FORM CONTROLS & OVERLINE LABELS (V20: GAP 16PX, HEIGHT 44PX) --- */
 .login-form {
     display: flex;
     flex-direction: column;
@@ -180,7 +178,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 16px;
 }
 
 .form-label {
@@ -188,8 +186,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: rgba(255, 255, 255, 0.92);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .input-wrap {
@@ -201,38 +198,42 @@
 
 .input-icon {
     position: absolute;
-    left: 1rem;
+    left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.65);
+    width: 18px;
+    height: 18px;
+    color: rgba(255, 255, 255, 0.6);
     pointer-events: none;
     transition: color 150ms ease;
 }
 
 .form-input {
     width: 100%;
-    padding: 0.825rem 3rem 0.825rem 3.1rem;
-    font-size: 0.95rem;
+    height: 44px;
+    padding: 0 44px 0 44px;
+    font-size: 0.92rem;
     border-radius: var(--radius-md, 12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.07);
     color: #FFFFFF;
+    box-sizing: border-box;
     transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
 }
 
 .form-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .form-input:hover {
-    background: rgba(255, 255, 255, 0.22);
-    border-color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .form-input:focus {
     outline: none;
-    background: rgba(255, 255, 255, 0.28);
-    border-color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.14);
+    border-color: var(--color-accent, #2563EB);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
 }
 
@@ -243,7 +244,7 @@
 
 .form-input.input-error {
     border-color: var(--color-danger, #DC2626) !important;
-    background: rgba(220, 38, 38, 0.22) !important;
+    background: rgba(220, 38, 38, 0.18) !important;
 }
 
 .form-input.shake-field {
@@ -257,12 +258,11 @@
 }
 
 .field-error-text {
-    font-size: var(--font-table-secondary-size, 13px);
-    color: #FF8080;
+    font-size: 12px;
+    color: #FCA5A5;
     font-weight: 500;
-    margin-top: 0.25rem;
+    margin-top: 0.2rem;
     display: block;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     animation: fadeInDown 200ms ease-out;
 }
 
@@ -273,26 +273,24 @@
 
 .btn-toggle-visibility {
     position: absolute;
-    right: 0.75rem;
+    right: 16px;
     top: 50%;
     transform: translateY(-50%);
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.65);
     cursor: pointer;
-    padding: 6px;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    min-width: 34px;
-    min-height: 34px;
-    transition: color 150ms ease, background-color 150ms ease;
+    width: 18px;
+    height: 18px;
+    transition: color 150ms ease;
 }
 
 .btn-toggle-visibility:hover {
     color: #FFFFFF;
-    background: rgba(255, 255, 255, 0.2);
 }
 
 /* --- 6. OPTIONS: CUSTOM CHECKBOX & LUPA KATA SANDI --- */
@@ -300,21 +298,20 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0.35rem 0 1.6rem 0;
-    font-size: 0.88rem;
+    margin: 0.15rem 0 1.25rem 0;
+    font-size: 0.85rem;
 }
 
 .remember-option {
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 8px;
     cursor: pointer;
     color: #FFFFFF;
     font-weight: 500;
-    min-height: 44px;
-    padding: 4px 0;
+    min-height: 24px;
+    padding: 0;
     user-select: none;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .custom-checkbox {
@@ -325,16 +322,17 @@
 }
 
 .checkbox-box {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    border-radius: 6px;
-    border: 1.5px solid rgba(255, 255, 255, 0.55);
-    background: rgba(255, 255, 255, 0.15);
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 4px;
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 150ms ease;
+    box-sizing: border-box;
 }
 
 .custom-checkbox:checked + .checkbox-box {
@@ -345,8 +343,8 @@
 
 .custom-checkbox:checked + .checkbox-box::after {
     content: "";
-    width: 5px;
-    height: 9px;
+    width: 4px;
+    height: 8px;
     border: solid #FFFFFF;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg) translate(-0.5px, -0.5px);
@@ -357,7 +355,8 @@
 }
 
 .checkbox-label {
-    font-size: 0.88rem;
+    font-size: 0.85rem;
+    line-height: 1;
 }
 
 .forgot-link-btn {
@@ -365,28 +364,27 @@
     border: none;
     color: #FFFFFF;
     text-decoration: underline;
-    font-weight: 600;
-    font-size: 0.88rem;
-    min-height: 44px;
-    padding: 0 4px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     transition: opacity 150ms ease;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .forgot-link-btn:hover {
-    opacity: 0.85;
+    opacity: 0.8;
 }
 
-/* --- 7. SUBMIT BUTTON (NO GREEN, SOLID/GRADIENT ACCENT) --- */
+/* --- 7. SUBMIT BUTTON (V20: IDENTICAL ACCENT VARIABLE & HEIGHT 44PX) --- */
 .btn-submit {
     width: 100%;
-    padding: 0.875rem;
+    height: 44px;
+    padding: 0;
     border: none;
     border-radius: var(--radius-md, 12px);
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #FFFFFF;
     cursor: pointer;
@@ -394,24 +392,25 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, var(--color-accent, #2563EB) 0%, var(--color-accent-hover, #1D4ED8) 100%);
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
-    transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+    background: var(--color-accent, #2563EB);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    transition: background-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
 }
 
 .btn-submit:hover:not(:disabled) {
-    transform: scale(1.015);
-    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
-    filter: brightness(1.05);
+    background: var(--color-accent-hover, #1D4ED8);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
 }
 
 .btn-submit:active:not(:disabled) {
-    transform: scale(0.985);
+    background: var(--color-accent-active, #1E40AF);
+    transform: translateY(0);
     box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
 }
 
 .btn-submit:disabled {
-    opacity: 0.85;
+    opacity: 0.8;
     cursor: not-allowed;
 }
 
@@ -438,24 +437,28 @@
     align-items: center;
     gap: 0.65rem;
     padding: 0.75rem 1rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
     border-radius: var(--radius-md, 12px);
-    background: rgba(220, 38, 38, 0.3);
-    border: 1px solid rgba(220, 38, 38, 0.6);
+    background: rgba(220, 38, 38, 0.25);
+    border: 1px solid rgba(220, 38, 38, 0.5);
     color: #FFFFFF;
     font-size: 0.88rem;
     font-weight: 500;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     animation: fadeInDown 200ms ease-out;
 }
 
-/* --- 9. CARD FOOTER COPYRIGHT --- */
+/* --- 9. CARD FOOTER COPYRIGHT (V20: 12PX, RGBA(255,255,255,0.7)) --- */
 .card-footer {
-    margin-top: 2.25rem;
+    margin-top: 1.5rem;
     text-align: center;
-    font-size: var(--font-caption-size, 0.8rem);
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.7);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.card-footer p {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 /* --- 10. MODAL LUPA KATA SANDI STYLES --- */
@@ -529,9 +532,11 @@
 
 .forgot-input-icon {
     position: absolute;
-    left: 1rem;
+    left: 16px;
     top: 50%;
     transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
     color: var(--color-text-secondary, #64748B);
     pointer-events: none;
     transition: color 150ms ease;
@@ -539,12 +544,14 @@
 
 .forgot-form-input {
     width: 100%;
-    padding: 0.825rem 1rem 0.825rem 3.1rem;
+    height: 44px;
+    padding: 0 16px 0 44px;
     font-size: 0.95rem;
     border-radius: var(--radius-md, 12px);
     border: 1px solid var(--color-border, #E3E6EC);
     background: var(--color-surface-1, #F7F8FA);
     color: var(--color-ink-900, #14171F);
+    box-sizing: border-box;
     transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
 }
 
@@ -588,9 +595,11 @@
     width: 100%;
 }
 
+/* V20: Tombol Kirim Tautan Reset indentik persis dengan tombol Masuk */
 .btn-forgot-submit {
     width: 100%;
-    padding: 0.85rem;
+    height: 44px;
+    padding: 0;
     border: none;
     border-radius: var(--radius-md, 12px);
     background: var(--color-accent, #2563EB);
@@ -602,12 +611,20 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    transition: background-color 150ms ease, transform 150ms ease;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    transition: background-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
 }
 
 .btn-forgot-submit:hover:not(:disabled) {
     background: var(--color-accent-hover, #1D4ED8);
     transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+}
+
+.btn-forgot-submit:active:not(:disabled) {
+    background: var(--color-accent-active, #1E40AF);
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
 }
 
 .btn-forgot-submit:disabled {
@@ -631,7 +648,7 @@
     color: var(--color-ink-900, #14171F);
 }
 
-/* --- 11. REDUCED MOTION --- */
+/* --- 12. REDUCED MOTION --- */
 @media (prefers-reduced-motion: reduce) {
     .login-bg-img,
     .login-card,

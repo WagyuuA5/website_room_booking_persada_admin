@@ -44,7 +44,7 @@
             </button>
 
             <button type="button" class="admin-profile-btn" @onclick="ToggleProfilePopup" title="Buka menu akun">
-                <UserAvatar Initials="WA" BgColor="#0B1E39" Size="36px" PhotoUrl="@LayoutState.AdminAvatarUrl" />
+                <UserAvatar Initials="WA" BgColor="@AvatarHelper.GetColor(LayoutState.AdminFullName)" Size="36px" PhotoUrl="@LayoutState.AdminAvatarUrl" />
                 <div class="admin-info">
                     <span class="admin-name">@LayoutState.AdminFullName</span>
                     <span class="admin-role">PENGONTROL SISTEM</span>
@@ -75,7 +75,7 @@
                 <Icon Name="x" Size="16" />
             </button>
             <div class="profile-header-redesign">
-                <ProfileAvatarUploader Initials="WA" BgColor="#0B1E39" Size="64px" CameraIconSize="14" @bind-AvatarUrl="LayoutState.AdminAvatarUrl" />
+                <ProfileAvatarUploader Initials="WA" BgColor="@AvatarHelper.GetColor(LayoutState.AdminFullName)" Size="64px" CameraIconSize="14" @bind-AvatarUrl="LayoutState.AdminAvatarUrl" />
             </div>
             
             <div class="profile-body-2col">
@@ -93,7 +93,7 @@
                 </div>
                 <div class="pbr-info-group">
                     <label>Email</label>
-                    <strong title="wahyu.admin@persada.co.id">wahyu.admin@persada.co.id</strong>
+                    <strong title="wahyu.admin@ptpersada.co.id">wahyu.admin@ptpersada.co.id</strong>
                 </div>
                 <div class="pbr-info-group">
                     <label>Lokasi Kantor</label>

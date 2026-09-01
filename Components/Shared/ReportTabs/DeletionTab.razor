@@ -195,20 +195,6 @@
         selectedRow = row;
     }
 
-    private string GetInitials(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return "U";
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length == 1) return parts[0].Substring(0, 1).ToUpper();
-        return (parts[0].Substring(0, 1) + parts[1].Substring(0, 1)).ToUpper();
-    }
-
-    private string GetAvatarColor(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return "#94A3B8";
-        var colors = new[] { "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6", "#F97316" };
-        int sum = 0;
-        foreach (char c in name) sum += c;
-        return colors[sum % colors.Length];
-    }
+    private string GetInitials(string name) => AvatarHelper.GetInitials(name);
+    private string GetAvatarColor(string name) => AvatarHelper.GetColor(name);
 }

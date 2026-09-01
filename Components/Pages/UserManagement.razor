@@ -953,11 +953,5 @@
         _ => "Lemah"
     };
 
-    private string GetAvatarColor(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return "#2563EB";
-        var hash = name.GetHashCode();
-        var colors = new[] { "#1E3A8A", "#0D9488", "#0284C7", "#7C3AED", "#D97706", "#DC2626" };
-        return colors[Math.Abs(hash) % colors.Length];
-    }
+    private string GetAvatarColor(string name) => AvatarHelper.GetColor(name);
 }

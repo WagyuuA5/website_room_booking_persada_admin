@@ -60,10 +60,8 @@
                         <tr class="tab-table-row">
                             <td><span class="td-primary" style="font-family: monospace; font-weight: 500;">#@row.Id</span></td>
                             <td>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="width: 28px; height: 28px; border-radius: 50%; background: @row.AvatarBg; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 500;">
-                                        @row.Initials
-                                    </div>
+                                <div class="user-cell">
+                                    <UserAvatar Name="@row.Name" Initials="@row.Initials" BgColor="@AvatarHelper.GetColor(row.Name)" Size="32px" />
                                     <span class="td-primary">@row.Name</span>
                                 </div>
                             </td>
@@ -106,10 +104,10 @@
 
     private List<TableRow> _tableData = new()
     {
-        new TableRow { Id = "BK-001", Name = "Ahmad Fauzi", Initials = "AF", AvatarBg = "#2563EB", Department = "IT & Digital", Room = "Ruang Dirantara VIP", Status = "disetujui" },
-        new TableRow { Id = "BK-002", Name = "Siti Nurhaliza", Initials = "SN", AvatarBg = "#7C3AED", Department = "Produk & Desain", Room = "Ruang Rapat Utama", Status = "menunggu" },
-        new TableRow { Id = "BK-003", Name = "Budi Santoso", Initials = "BS", AvatarBg = "#16A34A", Department = "Operasional", Room = "Ruang Diskusi B", Status = "disetujui" },
-        new TableRow { Id = "BK-004", Name = "Rani Anggraini", Initials = "RA", AvatarBg = "#D97706", Department = "Keuangan", Room = "Auditorium Serbaguna", Status = "ditolak" }
+        new TableRow { Id = "BK-001", Name = "Ahmad Fauzi", Initials = AvatarHelper.GetInitials("Ahmad Fauzi"), AvatarBg = AvatarHelper.GetColor("Ahmad Fauzi"), Department = "IT & Digital", Room = "Ruang Dirantara VIP", Status = "disetujui" },
+        new TableRow { Id = "BK-002", Name = "Siti Nurhaliza", Initials = AvatarHelper.GetInitials("Siti Nurhaliza"), AvatarBg = AvatarHelper.GetColor("Siti Nurhaliza"), Department = "Produk & Desain", Room = "Ruang Rapat Utama", Status = "menunggu" },
+        new TableRow { Id = "BK-003", Name = "Budi Santoso", Initials = AvatarHelper.GetInitials("Budi Santoso"), AvatarBg = AvatarHelper.GetColor("Budi Santoso"), Department = "Operasional", Room = "Ruang Diskusi B", Status = "disetujui" },
+        new TableRow { Id = "BK-004", Name = "Rani Anggraini", Initials = AvatarHelper.GetInitials("Rani Anggraini"), AvatarBg = AvatarHelper.GetColor("Rani Anggraini"), Department = "Keuangan", Room = "Auditorium Serbaguna", Status = "ditolak" }
     };
 
     protected override void OnInitialized()

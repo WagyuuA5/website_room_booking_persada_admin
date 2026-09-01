@@ -42,6 +42,14 @@
   --color-info-hover: #0369A1;
   --color-info-soft: #F0F9FF;
 
+  /* Palet Warna Avatar (CASE 2 - V20) */
+  --avatar-color-1: #2563EB; /* biru (identik --color-accent) */
+  --avatar-color-2: #0D9488; /* teal kalem */
+  --avatar-color-3: #7C3AED; /* ungu kalem */
+  --avatar-color-4: #B45309; /* amber tua kalem */
+  --avatar-color-5: #BE185D; /* rose kalem */
+  --avatar-color-6: #475569; /* slate netral */
+
   /* Bayangan & Radius */
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
   --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);

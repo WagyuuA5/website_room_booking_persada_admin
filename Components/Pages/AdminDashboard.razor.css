@@ -296,26 +296,26 @@
 }
 
 .mini-table-container {
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    border: 1px solid var(--color-border, #E2E8F0);
+    border-radius: var(--radius-md, 12px);
     overflow: hidden;
-    background: var(--surface);
+    background: var(--color-surface, #FFFFFF);
 }
 
 .mini-table-header {
     display: grid;
     padding: 10px 16px;
-    background: var(--surface-alt, #F9FAFB);
-    border-bottom: 1px solid var(--border);
+    background: var(--color-surface-alt, #F8FAFC);
+    border-bottom: 1px solid var(--color-border, #E2E8F0);
     align-items: center;
     gap: 10px;
 }
 
 .mini-table-header-cell {
-    font-size: 0.72rem;
-    font-weight: 600;
+    font-size: var(--font-table-header-size, 12px);
+    font-weight: var(--font-table-header-weight, 500);
     letter-spacing: 0.04em;
-    color: var(--text-subtle, #6B7280);
+    color: var(--font-table-header-color, var(--color-text-secondary, #64748B));
     text-transform: uppercase;
 }
 
@@ -334,9 +334,9 @@
     display: grid;
     align-items: center;
     padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--color-border, #E2E8F0);
     gap: 10px;
-    transition: background 0.15s ease, transform 0.15s ease;
+    transition: background 0.15s ease;
 }
 
 .mini-table-row:last-child {
@@ -347,12 +347,9 @@
     cursor: pointer;
 }
 
-.mini-table-row:hover {
-    background: var(--surface-alt, #F9FAFB);
-}
-
+.mini-table-row:hover,
 .clickable-row:hover {
-    background: rgba(37, 99, 235, 0.04);
+    background: var(--color-surface-alt, #F1F5F9);
 }
 
 .req-type-cell {
