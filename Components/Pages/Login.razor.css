@@ -1,4 +1,4 @@
-/* --- LOGIN PAGE STYLES (V17 SPEC) --- */
+/* --- LOGIN PAGE STYLES (V14.2 SPEC) --- */
 
 .login-wrapper {
     position: relative;
@@ -11,7 +11,7 @@
     font-family: var(--font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif);
 }
 
-/* Background Image & Gradient Overlay */
+/* --- 1. BACKGROUND FOTO DENGAN SUBTLE KEN BURNS --- */
 .login-bg-container {
     position: absolute;
     inset: 0;
@@ -27,12 +27,23 @@
     height: 100%;
     object-fit: cover;
     object-position: center;
-    transform: scale(1.05);
-    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    transform: scale(1.0);
+    animation: kenBurns 20s ease-in-out infinite alternate;
+}
+
+@keyframes kenBurns {
+    0% {
+        transform: scale(1.0);
+    }
+    100% {
+        transform: scale(1.04);
+    }
 }
 
 .bg-zoom-out .login-bg-img {
+    animation: none;
     transform: scale(1.0);
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .login-bg-overlay {
@@ -42,7 +53,7 @@
     z-index: 2;
 }
 
-/* Topbar: Logo PERSADA */
+/* --- 2. TOPBAR: LOGO PERSADA RESMI --- */
 .login-topbar {
     position: relative;
     z-index: 10;
@@ -52,13 +63,13 @@
 }
 
 .persada-logo {
-    height: 48px;
+    height: 44px;
     max-height: 48px;
     object-fit: contain;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
 }
 
-/* Main Area */
+/* --- 3. MAIN AREA & CARD LOGIN --- */
 .login-main {
     position: relative;
     z-index: 10;
@@ -69,7 +80,6 @@
     padding: 1.5rem;
 }
 
-/* Login Card (Glassmorphism / Frosted) */
 .login-card {
     width: 100%;
     max-width: 440px;
@@ -79,9 +89,21 @@
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: var(--radius-lg, 24px);
     box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
-    padding: 2.5rem;
+    padding: 2.75rem;
     color: #FFFFFF;
+    animation: cardEntrance 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
     transition: transform 250ms ease-in, opacity 250ms ease-in;
+}
+
+@keyframes cardEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .login-card.card-exit {
@@ -99,6 +121,31 @@
     40%, 80% { transform: translateX(8px); }
 }
 
+/* --- 4. STAGGERED REVEAL ELEMEN DALAM CARD --- */
+.stagger-item {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: staggerFadeUp 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-1 { animation-delay: 60ms; }
+.stagger-2 { animation-delay: 120ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }
+.stagger-5 { animation-delay: 300ms; }
+.stagger-6 { animation-delay: 360ms; }
+
+@keyframes staggerFadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Card Header */
 .card-header {
     text-align: center;
@@ -106,22 +153,23 @@
 }
 
 .card-title {
-    font-size: 1.75rem;
+    font-size: 1.85rem;
     font-weight: 700;
     color: #FFFFFF;
-    margin: 0 0 0.35rem 0;
+    margin: 0 0 0.4rem 0;
     letter-spacing: -0.01em;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .card-subtitle {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.9);
     margin: 0;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    line-height: 1.4;
 }
 
-/* Form Styles */
+/* --- 5. FORM CONTROLS & OVERLINE LABELS --- */
 .login-form {
     display: flex;
     flex-direction: column;
@@ -130,14 +178,16 @@
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    margin-bottom: 1.15rem;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
 }
 
 .form-label {
-    font-size: 0.88rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    color: #FFFFFF;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.92);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -151,41 +201,48 @@
 .input-icon {
     position: absolute;
     left: 1rem;
-    color: rgba(255, 255, 255, 0.7);
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.65);
     pointer-events: none;
-    transition: color 0.2s ease;
+    transition: color 150ms ease;
 }
 
 .form-input {
     width: 100%;
-    padding: 0.8rem 1rem 0.8rem 2.85rem;
+    padding: 0.825rem 1rem 0.825rem 2.85rem;
     font-size: 0.95rem;
     border-radius: var(--radius-md, 12px);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.18);
     color: #FFFFFF;
-    transition: all 0.2s ease;
+    transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
 }
 
 .form-input::placeholder {
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .form-input:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.22);
     border-color: rgba(255, 255, 255, 0.45);
 }
 
 .form-input:focus {
     outline: none;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.28);
     border-color: #FFFFFF;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+}
+
+.form-input:focus + .btn-toggle-visibility ~ .input-icon,
+.input-wrap:focus-within .input-icon {
+    color: #FFFFFF;
 }
 
 .form-input.input-error {
     border-color: var(--color-danger, #DC2626) !important;
-    background: rgba(220, 38, 38, 0.2) !important;
+    background: rgba(220, 38, 38, 0.22) !important;
 }
 
 .form-input.shake-field {
@@ -205,7 +262,7 @@
     margin-top: 0.25rem;
     display: block;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    animation: fadeInDown 0.2s ease-out;
+    animation: fadeInDown 200ms ease-out;
 }
 
 @keyframes fadeInDown {
@@ -216,18 +273,20 @@
 .btn-toggle-visibility {
     position: absolute;
     right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
     background: transparent;
     border: none;
     color: rgba(255, 255, 255, 0.75);
     cursor: pointer;
-    padding: 4px;
+    padding: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    min-width: 32px;
-    min-height: 32px;
-    transition: color 0.2s ease, background 0.2s ease;
+    min-width: 34px;
+    min-height: 34px;
+    transition: color 150ms ease, background-color 150ms ease;
 }
 
 .btn-toggle-visibility:hover {
@@ -235,50 +294,92 @@
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Options Row (Ingat Saya & Lupa Kata Sandi) */
+/* --- 6. OPTIONS: CUSTOM CHECKBOX & LUPA KATA SANDI --- */
 .form-options {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0.25rem 0 1.5rem 0;
+    margin: 0.35rem 0 1.6rem 0;
     font-size: 0.88rem;
 }
 
 .remember-option {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
     cursor: pointer;
     color: #FFFFFF;
     font-weight: 500;
     min-height: 44px;
+    padding: 4px 0;
     user-select: none;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.remember-option input[type="checkbox"] {
-    width: 1.1rem;
-    height: 1.1rem;
-    cursor: pointer;
-    accent-color: var(--color-accent, #2563EB);
+.custom-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
-.forgot-link {
+.checkbox-box {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 150ms ease;
+}
+
+.custom-checkbox:checked + .checkbox-box {
+    background: var(--color-accent, #2563EB);
+    border-color: var(--color-accent, #2563EB);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+}
+
+.custom-checkbox:checked + .checkbox-box::after {
+    content: "";
+    width: 5px;
+    height: 9px;
+    border: solid #FFFFFF;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-0.5px, -0.5px);
+}
+
+.custom-checkbox:focus-visible + .checkbox-box {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
+}
+
+.checkbox-label {
+    font-size: 0.88rem;
+}
+
+.forgot-link-btn {
+    background: transparent;
+    border: none;
     color: #FFFFFF;
     text-decoration: underline;
     font-weight: 600;
+    font-size: 0.88rem;
     min-height: 44px;
+    padding: 0 4px;
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
-    transition: opacity 0.2s ease;
+    transition: opacity 150ms ease;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.forgot-link:hover {
+.forgot-link-btn:hover {
     opacity: 0.85;
 }
 
-/* Submit Button - NO GREEN IN ANY FORM */
+/* --- 7. SUBMIT BUTTON (NO GREEN, SOLID/GRADIENT ACCENT) --- */
 .btn-submit {
     width: 100%;
     padding: 0.875rem;
@@ -294,16 +395,17 @@
     gap: 0.5rem;
     background: linear-gradient(135deg, var(--color-accent, #2563EB) 0%, var(--color-accent-hover, #1D4ED8) 100%);
     box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
 }
 
 .btn-submit:hover:not(:disabled) {
-    transform: translateY(-1px);
+    transform: scale(1.015);
     box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+    filter: brightness(1.05);
 }
 
 .btn-submit:active:not(:disabled) {
-    transform: translateY(1px);
+    transform: scale(0.985);
     box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
 }
 
@@ -329,7 +431,7 @@
     to { transform: rotate(360deg); }
 }
 
-/* Server Error Banner */
+/* --- 8. SERVER ERROR BANNER --- */
 .server-error-banner {
     display: flex;
     align-items: center;
@@ -343,27 +445,140 @@
     font-size: 0.88rem;
     font-weight: 500;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-    animation: fadeInDown 0.3s ease-out;
+    animation: fadeInDown 200ms ease-out;
 }
 
-/* Card Footer */
+/* --- 9. CARD FOOTER COPYRIGHT --- */
 .card-footer {
-    margin-top: 2rem;
+    margin-top: 2.25rem;
     text-align: center;
-    font-size: 0.82rem;
-    color: rgba(255, 255, 255, 0.75);
+    font-size: var(--font-caption-size, 0.8rem);
+    color: rgba(255, 255, 255, 0.7);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Reduced Motion */
+/* --- 10. MODAL LUPA KATA SANDI STYLES --- */
+.forgot-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.forgot-modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-ink-900, #14171F);
+    margin: 0;
+}
+
+.btn-close-modal {
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary, #64748B);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 150ms ease, color 150ms ease;
+}
+
+.btn-close-modal:hover {
+    background: var(--color-surface-2, #F1F5F9);
+    color: var(--color-ink-900, #14171F);
+}
+
+.forgot-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.forgot-instructions {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary, #64748B);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.forgot-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md, 12px);
+    background: var(--color-danger-soft, #FEF2F2);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    color: var(--color-danger, #DC2626);
+    font-size: 0.88rem;
+    font-weight: 500;
+    animation: fadeInDown 200ms ease-out;
+}
+
+.forgot-modal-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.btn-forgot-submit {
+    width: 100%;
+    padding: 0.85rem;
+    border: none;
+    border-radius: var(--radius-md, 12px);
+    background: var(--color-accent, #2563EB);
+    color: #FFFFFF;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.btn-forgot-submit:hover:not(:disabled) {
+    background: var(--color-accent-hover, #1D4ED8);
+    transform: translateY(-1px);
+}
+
+.btn-forgot-submit:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+}
+
+.btn-forgot-cancel {
+    width: 100%;
+    padding: 0.6rem;
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary, #64748B);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 150ms ease;
+}
+
+.btn-forgot-cancel:hover {
+    color: var(--color-ink-900, #14171F);
+}
+
+/* --- 11. REDUCED MOTION --- */
 @media (prefers-reduced-motion: reduce) {
     .login-bg-img,
     .login-card,
+    .stagger-item,
     .btn-submit,
+    .btn-forgot-submit,
     .server-error-banner,
     .field-error-text {
-        transition: none !important;
         animation: none !important;
+        transition: none !important;
         transform: none !important;
+        opacity: 1 !important;
     }
 }

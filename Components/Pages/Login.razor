@@ -8,21 +8,22 @@
 @using booking_room_admin.Components.Services
 
 <div class="login-wrapper @(isSuccess ? "transition-to-dashboard" : "")">
-    @* Background Image & Overlay *@
+    @* Background Foto Gedung dengan Animasi Subtle Ken Burns *@
     <div class="login-bg-container @(isSuccess ? "bg-zoom-out" : "")">
         <img src="FOTO GEDEUNG PERSADA.png" alt="Gedung PT PERSADA" class="login-bg-img" />
         <div class="login-bg-overlay"></div>
     </div>
 
-    @* Header: Logo PERSADA (Kiri Atas) *@
+    @* Header: Logo PERSADA Resmi (Kiri Atas) *@
     <header class="login-topbar">
-        <img src="logo-persada.png" alt="Logo PT PERSADA" class="persada-logo" />
+        <img src="logo-persada.svg" alt="Logo PT PERSADA" class="persada-logo" />
     </header>
 
-    @* Center Content: Login Card *@
+    @* Main Content: Card Login *@
     <main class="login-main">
         <div class="login-card @(cardShake ? "card-shake" : "") @(isSuccess ? "card-exit" : "")">
-            <div class="card-header">
+            @* Stagger 1: Header *@
+            <div class="card-header stagger-item stagger-1">
                 <h1 class="card-title">Masuk</h1>
                 <p class="card-subtitle">Sistem Manajemen Ruangan & Pemesanan</p>
             </div>
@@ -37,9 +38,9 @@
                     </div>
                 }
 
-                @* Field 1: Email *@
-                <div class="form-group">
-                    <label for="email" class="form-label">Email</label>
+                @* Stagger 2: Field Email *@
+                <div class="form-group stagger-item stagger-2">
+                    <label for="email" class="form-label">EMAIL</label>
                     <div class="input-wrap">
                         <Icon Name="mail" Size="18" class="input-icon" />
                         <input type="email"
@@ -57,9 +58,9 @@
                     }
                 </div>
 
-                @* Field 2: Kata Sandi *@
-                <div class="form-group">
-                    <label for="password" class="form-label">Kata Sandi</label>
+                @* Stagger 3: Field Kata Sandi *@
+                <div class="form-group stagger-item stagger-3">
+                    <label for="password" class="form-label">KATA SANDI</label>
                     <div class="input-wrap">
                         <Icon Name="lock" Size="18" class="input-icon" />
                         <input type="@(showPassword ? "text" : "password")"
@@ -84,39 +85,115 @@
                     }
                 </div>
 
-                @* Options: Ingat Saya & Lupa Kata Sandi *@
-                <div class="form-options">
-                    <label class="remember-option">
-                        <input type="checkbox" @bind="rememberMe" />
-                        <span>Ingat saya</span>
+                @* Stagger 4: Options (Ingat Saya & Lupa Kata Sandi) *@
+                <div class="form-options stagger-item stagger-4">
+                    <label class="remember-option" for="rememberMeCheckbox">
+                        <input type="checkbox" id="rememberMeCheckbox" @bind="rememberMe" class="custom-checkbox" />
+                        <span class="checkbox-box"></span>
+                        <span class="checkbox-label">Ingat saya</span>
                     </label>
-                    <a href="javascript:void(0)" @onclick="HandleForgotPassword" class="forgot-link">Lupa Kata Sandi?</a>
+                    <button type="button" class="forgot-link-btn" @onclick="OpenForgotPasswordModal">
+                        Lupa Kata Sandi?
+                    </button>
                 </div>
 
-                @* Submit Button *@
-                <button type="submit" class="btn-submit @(isLoading ? "is-loading" : "") @(showSuccessCheck ? "is-success" : "")" disabled="@(isLoading || isSuccess)">
-                    @if (showSuccessCheck)
-                    {
-                        <Icon Name="check" Size="18" />
-                        <span>Berhasil</span>
-                    }
-                    else if (isLoading)
-                    {
-                        <span class="spinner-sm"></span>
-                        <span>Memproses...</span>
-                    }
-                    else
-                    {
-                        <span>Masuk</span>
-                    }
-                </button>
+                @* Stagger 5: Tombol Masuk *@
+                <div class="stagger-item stagger-5">
+                    <button type="submit" class="btn-submit @(isLoading ? "is-loading" : "") @(showSuccessCheck ? "is-success" : "")" disabled="@(isLoading || isSuccess)">
+                        @if (showSuccessCheck)
+                        {
+                            <Icon Name="check" Size="18" />
+                            <span>Masuk</span>
+                        }
+                        else if (isLoading)
+                        {
+                            <span class="spinner-sm"></span>
+                            <span>Memproses...</span>
+                        }
+                        else
+                        {
+                            <span>Masuk</span>
+                        }
+                    </button>
+                </div>
             </form>
 
-            <div class="card-footer">
+            @* Stagger 6: Footer Copyright *@
+            <div class="card-footer stagger-item stagger-6">
                 <p>2026 &copy; PT PERSADA. Seluruh hak cipta dilindungi.</p>
             </div>
         </div>
     </main>
+
+    @* ==========================================
+       MODAL LUPA KATA SANDI (V14.2)
+       ========================================== *@
+    <AppModal IsOpen="@showForgotPasswordModal"
+              IsOpenChanged="@((bool v) => { showForgotPasswordModal = v; if (!v) ResetForgotPasswordForm(); })"
+              Size="medium">
+        <HeaderContent>
+            <div class="forgot-modal-header">
+                <h3 class="forgot-modal-title">Lupa Kata Sandi?</h3>
+                <button type="button" class="btn-close-modal" @onclick="CloseForgotPasswordModal" aria-label="Tutup">
+                    <Icon Name="x" Size="20" />
+                </button>
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <div class="forgot-modal-body">
+                <p class="forgot-instructions">
+                    Masukkan email Anda yang terdaftar. Kami akan mengirimkan tautan untuk mengatur ulang kata sandi Anda.
+                </p>
+
+                @if (!string.IsNullOrEmpty(forgotModalError))
+                {
+                    <div class="forgot-error-banner" role="alert">
+                        <Icon Name="alert-circle" Size="16" />
+                        <span>@forgotModalError</span>
+                    </div>
+                }
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="forgotEmail" class="form-label">Email</label>
+                    <div class="input-wrap">
+                        <Icon Name="mail" Size="18" class="input-icon" />
+                        <input type="email"
+                               id="forgotEmail"
+                               class="form-input @(forgotEmailError != null ? "input-error" : "")"
+                               placeholder="nama@ptpersada.co.id"
+                               @bind="forgotEmail"
+                               @bind:event="oninput"
+                               autocomplete="email" />
+                    </div>
+                    @if (forgotEmailError != null)
+                    {
+                        <span class="field-error-text">@forgotEmailError</span>
+                    }
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <div class="forgot-modal-footer">
+                <button type="button"
+                        class="btn-forgot-submit"
+                        @onclick="HandleSubmitForgotPassword"
+                        disabled="@isForgotSubmitting">
+                    @if (isForgotSubmitting)
+                    {
+                        <span class="spinner-sm"></span>
+                        <span>Mengirim...</span>
+                    }
+                    else
+                    {
+                        <span>Kirim Tautan Reset</span>
+                    }
+                </button>
+                <button type="button" class="btn-forgot-cancel" @onclick="CloseForgotPasswordModal">
+                    Kembali ke Masuk
+                </button>
+            </div>
+        </FooterContent>
+    </AppModal>
 </div>
 
 @code {
@@ -133,6 +210,13 @@
     private bool showSuccessCheck = false;
     private bool isSuccess = false;
     private bool cardShake = false;
+
+    // --- State Modal Lupa Kata Sandi ---
+    private bool showForgotPasswordModal = false;
+    private string forgotEmail = "";
+    private string? forgotEmailError = null;
+    private string? forgotModalError = null;
+    private bool isForgotSubmitting = false;
 
     protected override void OnInitialized()
     {
@@ -171,7 +255,6 @@
             return false;
         }
 
-        // Standard email regex format validation
         var emailRegex = new System.Text.RegularExpressions.Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
         if (!emailRegex.IsMatch(email.Trim()))
         {
@@ -211,7 +294,6 @@
 
         if (!isEmailValid || !isPasswordValid)
         {
-            // Trigger quick card shake on validation failure
             TriggerCardShake();
             return;
         }
@@ -221,7 +303,7 @@
 
         try
         {
-            // 2. Server-side Authentication (Bagian 2.2)
+            // 2. Server-side Authentication (Bagian 2.2 & 4.2)
             var result = await AuthService.AuthenticateAsync(email.Trim(), password);
 
             if (result.Type == AuthResultType.Success)
@@ -230,29 +312,33 @@
                 showSuccessCheck = true;
                 StateHasChanged();
 
-                // Show checkmark briefly (~300ms)
+                // Ikon centang singkat (~300ms)
                 await Task.Delay(300);
 
-                // Start transition animation (card fade-out + bg zoom-out)
+                // Animasi transisi sukses (card fade-out + scale-down, bg zoom-out)
                 isSuccess = true;
                 StateHasChanged();
 
-                // Allow 350ms for transition animation before navigating (total ~650ms)
+                // Durasi transisi ~350ms (total login selesai -> skeleton ~650ms)
                 await Task.Delay(350);
                 NavigationManager.NavigateTo("/dashboard");
             }
             else if (result.Type == AuthResultType.ConnectionFailed)
             {
                 isLoading = false;
-                // Connection failure goes to InfoToast / Toast as per requirement
                 Toast.Error(result.ErrorMessage ?? "Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+                TriggerCardShake();
+            }
+            else if (result.Type == AuthResultType.AccountInactive)
+            {
+                isLoading = false;
+                serverErrorMessage = result.ErrorMessage ?? "Akun Anda tidak aktif. Hubungi administrator sistem.";
                 TriggerCardShake();
             }
             else
             {
                 isLoading = false;
-                // Invalid credentials or Inactive account banner
-                serverErrorMessage = result.ErrorMessage ?? "Email atau kata sandi salah.";
+                serverErrorMessage = "Email atau kata sandi salah.";
                 TriggerCardShake();
             }
         }
@@ -278,8 +364,73 @@
         });
     }
 
-    private void HandleForgotPassword()
+    // --- Handlers Modal Lupa Kata Sandi ---
+    private void OpenForgotPasswordModal()
     {
-        Toast.Info("Tautan pengaturan ulang kata sandi dapat diminta melalui administrator IT PT PERSADA.");
+        ResetForgotPasswordForm();
+        showForgotPasswordModal = true;
+    }
+
+    private void CloseForgotPasswordModal()
+    {
+        showForgotPasswordModal = false;
+        ResetForgotPasswordForm();
+    }
+
+    private void ResetForgotPasswordForm()
+    {
+        forgotEmail = "";
+        forgotEmailError = null;
+        forgotModalError = null;
+        isForgotSubmitting = false;
+    }
+
+    private async Task HandleSubmitForgotPassword()
+    {
+        forgotEmailError = null;
+        forgotModalError = null;
+
+        if (string.IsNullOrWhiteSpace(forgotEmail))
+        {
+            forgotEmailError = "Email wajib diisi.";
+            return;
+        }
+
+        var emailRegex = new System.Text.RegularExpressions.Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+        if (!emailRegex.IsMatch(forgotEmail.Trim()))
+        {
+            forgotEmailError = "Format email tidak valid.";
+            return;
+        }
+
+        isForgotSubmitting = true;
+        StateHasChanged();
+
+        try
+        {
+            var result = await AuthService.RequestPasswordResetAsync(forgotEmail.Trim());
+
+            isForgotSubmitting = false;
+
+            if (result.Type == AuthResultType.Success)
+            {
+                showForgotPasswordModal = false;
+                ResetForgotPasswordForm();
+                Toast.Success("Tautan reset kata sandi telah dikirim ke email Anda.");
+            }
+            else if (result.Type == AuthResultType.ConnectionFailed)
+            {
+                Toast.Error("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+            }
+            else
+            {
+                forgotModalError = "Email tidak ditemukan dalam sistem.";
+            }
+        }
+        catch
+        {
+            isForgotSubmitting = false;
+            Toast.Error("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+        }
     }
 }
